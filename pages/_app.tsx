@@ -25,7 +25,7 @@ export default class HomePage extends React.Component<Props, State> {
 
     return (
       <div>
-        <h1>Develop. Preview. Ship. 🚀</h1>
+        <h1>Develop. Preview. Ship. Sleep! 🚀</h1>
         <ul>
           {names.map((name) => (
             <li key={name}>{name}</li>
