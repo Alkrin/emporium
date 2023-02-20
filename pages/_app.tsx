@@ -1,46 +1,16 @@
-import React from "react";
+import * as React from "react";
+import { Provider } from "react-redux";
+import store from "../redux/store";
+import type { AppProps } from "next/app";
 
-import "../emporium-styles.css";
+import "../emporium-styles.scss";
 
-interface State {
-  likes: number;
-}
-
-interface InjectedProps {}
-interface ReactProps {}
-
-type Props = ReactProps & InjectedProps;
-
-export default class HomePage extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      likes: 0,
-    };
-  }
-
-  render(): React.ReactNode {
-    const names = ["Ada Lovelace", "Grace Hopper", "Margaret Hamilton"];
-
-    return (
-      <div>
-        <h1>Develop. Preview. Ship. Sleep! 🚀</h1>
-        <ul>
-          {names.map((name) => (
-            <li key={name}>{name}</li>
-          ))}
-        </ul>
-        <img src={"/images/Initials.png"} />
-
-        <button onClick={this.handleClick.bind(this)}>
-          Like ({this.state.likes})
-        </button>
-      </div>
-    );
-  }
-
-  private handleClick(): void {
-    this.setState({ likes: this.state.likes + 1 });
-  }
+// Use of the <SessionProvider> is mandatory to allow components that call
+// `useSession()` anywhere in your application to access the `session` object.
+export default function App({ Component, pageProps }: AppProps<{}>) {
+  return (
+    <Provider store={store}>
+      <Component {...pageProps} />
+    </Provider>
+  );
 }

@@ -1,0 +1,152 @@
+.acksBanner {
+  margin: 5vmin auto 0 auto;
+}
+
+.root {
+  position: relative;
+  margin: 5vmin auto 0 auto;
+  width: 40vh;
+  box-shadow: inset 0 0 0 2px orange;
+  display: flex;
+  flex-direction: column;
+}
+
+.inputLabel {
+  margin: 1vmin 0vmin;
+  font-size: 2rem;
+  color: #ccc;
+  text-shadow: 1px 1px 1px orange;
+  text-align: center;
+}
+
+.inputField {
+  margin: 0vmin 3vmin;
+  font-size: 1.5rem;
+  color: black;
+  text-align: center;
+}
+
+.loginButton {
+  margin: 2vh auto;
+  padding: 0.5vmin 3vmin;
+  font-size: 1.4rem;
+  color: #ccc;
+  text-shadow: 1px 1px 1px orange;
+  border: 2px solid lime;
+
+  &:hover {
+    color: red;
+    box-shadow: inset 0 0 0.5vmin 0.5vmin rgb(4, 101, 4);
+  }
+}
+
+.authenticatingRoot {
+  position: absolute;
+  top: 5%;
+  left: 4%;
+  width: 92%;
+  height: 88%;
+  background-color: #222;
+  border: 2px solid #444;
+
+  animation: ARanimate-fade 0.25s forwards;
+  @keyframes ARanimate-fade {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}
+
+.authingAxe {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  height: 50%;
+  transform: translate(-50%, -50%);
+  animation: AAanimate-spin 5s forwards;
+  filter: drop-shadow(2px 2px 2px red);
+
+  @keyframes AAanimate-spin {
+    0% {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(1440deg);
+    }
+  }
+}
+
+.authingLabelContainer {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  color: #bbb;
+  text-shadow: 1px 1px 1px orange;
+}
+
+.authingLabel {
+  font-size: 1.5rem;
+}
+
+.authingEllipsisOne {
+  font-size: 1.5rem;
+
+  animation: AE1animate-fade 1s forwards infinite;
+  @keyframes AE1animate-fade {
+    0% {
+      opacity: 0;
+    }
+    40% {
+      opacity: 0;
+    }
+    60% {
+      opacity: 1;
+    }
+  }
+}
+
+.authingEllipsisTwo {
+  font-size: 1.5rem;
+
+  animation: AE2animate-fade 1s forwards infinite;
+  @keyframes AE2animate-fade {
+    0% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 0;
+    }
+    70% {
+      opacity: 1;
+    }
+  }
+}
+
+.authingEllipsisThree {
+  font-size: 1.5rem;
+
+  animation: AE3animate-fade 1s forwards infinite;
+  @keyframes AE3animate-fade {
+    0% {
+      opacity: 0;
+    }
+    60% {
+      opacity: 0;
+    }
+    80% {
+      opacity: 1;
+    }
+  }
+}
+
+.errorMessage {
+  font-size: 1.2rem;
+  color: red;
+  margin: 1vmin auto 0 auto;
+}
