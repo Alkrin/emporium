@@ -1,0 +1,108 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import React from "react";
+import { Dictionary } from "../lib/dictionary";
+
+interface DragStartParams {
+  draggableID: string;
+  draggingRender: () => JSX.Element;
+}
+
+export interface DropTargetParams {
+  dropTargetID: string;
+  dropType: string;
+  bounds: DOMRect;
+}
+
+export interface RemoveDropTargetParams {
+  dropTargetID: string;
+  dropType: string;
+}
+
+interface DragAndDropState {
+  /** The id of the single Draggable currently being dragged.  Else null. */
+  currentDraggableID: string | null;
+  currentDraggableBounds: DOMRect | null;
+  dragDelta: [number, number];
+  /** First key is a dropType.  Second key is a dropTargetID. */
+  dropTargets: Dictionary<Dictionary<DOMRect>>;
+  currentDraggingRender: (() => React.ReactNode) | null;
+}
+
+function buildDefaultDragAndDropState() {
+  const DefaultDragAndDropState: DragAndDropState = {
+    currentDraggableID: null,
+    currentDraggableBounds: null,
+    currentDraggingRender: null,
+    dragDelta: [0, 0],
+    dropTargets: {},
+  };
+
+  return DefaultDragAndDropState;
+}
+
+export const dragAndDropSlice = createSlice({
+  name: "dragAndDrop",
+  initialState: buildDefaultDragAndDropState(),
+  reducers: {
+    startDrag: (
+      state: DragAndDropState,
+      action: PayloadAction<DragStartParams>
+    ) => {
+      state.currentDraggableID = action.payload.draggableID;
+      state.currentDraggingRender = action.payload.draggingRender;
+    },
+    endDrag: (state: DragAndDropState) => {
+      state.currentDraggableID = null;
+      state.currentDraggableBounds = null;
+      state.currentDraggingRender = null;
+      state.dragDelta = [0, 0];
+    },
+    reportDraggableBounds: (
+      state: DragAndDropState,
+      action: PayloadAction<DOMRect>
+    ) => {
+      state.currentDraggableBounds = action.payload;
+    },
+    reportDropTargetBounds: (
+      state: DragAndDropState,
+      action: PayloadAction<DropTargetParams>
+    ) => {
+      const { dropType, dropTargetID, bounds } = action.payload;
+      // Make sure this
+      if (!state.dropTargets[dropType]) {
+        state.dropTargets[dropType] = {};
+      }
+      state.dropTargets[dropType][dropTargetID] = bounds;
+    },
+    removeDropTarget: (
+      state: DragAndDropState,
+      action: PayloadAction<RemoveDropTargetParams>
+    ) => {
+      const { dropType, dropTargetID } = action.payload;
+      if (state.dropTargets[dropType]?.[dropTargetID]) {
+        delete state.dropTargets[dropType][dropTargetID];
+      }
+    },
+    updateDragDelta: (
+      state: DragAndDropState,
+      action: PayloadAction<[number, number]>
+    ) => {
+      state.dragDelta = action.payload;
+    },
+  },
+});
+
+export const {
+  startDrag,
+  endDrag,
+  reportDraggableBounds,
+  reportDropTargetBounds,
+  removeDropTarget,
+  updateDragDelta,
+} = dragAndDropSlice.actions;

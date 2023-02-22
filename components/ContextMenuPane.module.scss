@@ -1,0 +1,51 @@
+.root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.menuWrapper {
+  position: absolute;
+  min-width: 8vmin;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: magenta;
+  box-shadow: inset 0 0 0.926vmin 0 black;
+  border: 1px solid #4e4e4e;
+  padding: 0.278vmin;
+
+  animation: hcmwFadeIn 0.25s forwards;
+  padding: 0.5vmin;
+
+  @keyframes hcmwFadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}
+
+.menuItem {
+  pointer-events: all;
+  font-weight: bold;
+  border: 1px solid transparent;
+  padding: 0.1vmin 0.4vmin;
+  font-size: 1.4rem;
+  color: #ccc;
+  cursor: pointer;
+  &:hover {
+    color: #ffdbac;
+    border: 1px solid;
+    border-image-source: linear-gradient(to right, #ae8b6f 20%, transparent);
+    border-image-slice: 1;
+    box-shadow: inset 0 0 0.926vmin 0 #000000;
+    background-color: #221d17;
+  }
+}

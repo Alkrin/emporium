@@ -1,0 +1,15 @@
+.root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  &.dragging {
+    // A non-transparent background is necessary in order for the Root
+    // widget to receive mouseUp events to stop a drag!
+    background-color: rgba(0, 0, 0, 0.01);
+    pointer-events: all;
+  }
+}

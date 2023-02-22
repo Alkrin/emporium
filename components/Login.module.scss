@@ -33,6 +33,7 @@
   color: #ccc;
   text-shadow: 1px 1px 1px orange;
   border: 2px solid lime;
+  cursor: pointer;
 
   &:hover {
     color: red;
@@ -66,7 +67,7 @@
   left: 50%;
   height: 50%;
   transform: translate(-50%, -50%);
-  animation: AAanimate-spin 5s forwards;
+  animation: AAanimate-spin 8.5s forwards;
   filter: drop-shadow(2px 2px 2px red);
 
   @keyframes AAanimate-spin {
@@ -74,7 +75,7 @@
       transform: translate(-50%, -50%) rotate(0deg);
     }
     100% {
-      transform: translate(-50%, -50%) rotate(1440deg);
+      transform: translate(-50%, -50%) rotate(3240deg);
     }
   }
 }
