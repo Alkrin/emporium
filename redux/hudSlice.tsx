@@ -4,8 +4,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import * as React from "react";
 import { createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit";
+import { UserRole } from "./userSlice";
 
 export enum HUDVerticalAnchor {
   Top,
@@ -25,6 +25,7 @@ export interface EscapableParams {
 }
 
 interface HUDState {
+  activeRole: UserRole;
   escapables: EscapableParams[];
   hudWidth: number;
   hudHeight: number;
@@ -32,6 +33,7 @@ interface HUDState {
 
 function buildDefaultHUDState() {
   const DefaultHUDState: HUDState = {
+    activeRole: "debug",
     escapables: [],
     hudWidth: 0,
     hudHeight: 0,
@@ -66,8 +68,15 @@ export const hudSlice = createSlice({
       state.hudWidth = action.payload[0];
       state.hudHeight = action.payload[1];
     },
+    setActiveRole: (state: HUDState, action: PayloadAction<UserRole>) => {
+      state.activeRole = action.payload;
+    },
   },
 });
 
-export const { addOrUpdateEscapable, removeEscapable, updateHUDSize } =
-  hudSlice.actions;
+export const {
+  addOrUpdateEscapable,
+  removeEscapable,
+  updateHUDSize,
+  setActiveRole,
+} = hudSlice.actions;

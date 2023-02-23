@@ -50,7 +50,7 @@ class AAuthControl extends React.Component<Props> {
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   return {
     ...props,
-    user: state.user,
+    user: state.user.currentUser,
   };
 }
 

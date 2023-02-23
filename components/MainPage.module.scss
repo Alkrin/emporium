@@ -3,3 +3,12 @@
   width: 100%;
   height: 100%;
 }
+
+.rolePane {
+  position: absolute;
+  top: 2vmin;
+  left: 2vmin;
+  bottom: 2vmin;
+  right: 8vmin;
+  box-shadow: inset 0 0 0 2px red;
+}

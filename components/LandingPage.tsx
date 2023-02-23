@@ -6,6 +6,7 @@ import styles from "./LandingPage.module.scss";
 import Login from "./Login";
 import MainPage from "./MainPage";
 import { EscapableParams, updateHUDSize } from "../redux/hudSlice";
+import { LocalStorageDataSource } from "../dataSources/LocalStorageDataSource";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -32,6 +33,7 @@ class ALandingPage extends React.Component<Props> {
           this.reportCurrentSize();
         }}
       >
+        <LocalStorageDataSource />
         {this.props.currentUserId ? <MainPage /> : <Login />}
       </div>
     );
@@ -72,7 +74,7 @@ class ALandingPage extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const { id: currentUserId } = state.user;
+  const { id: currentUserId } = state.user.currentUser;
   const { escapables } = state.hud;
   return {
     ...props,

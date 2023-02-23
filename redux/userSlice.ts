@@ -2,25 +2,42 @@ import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { UserData } from "../serverAPI";
 
-type UserRole = "admin" | "dm" | "player";
+export type UserRole = "debug" | "admin" | "dm" | "player";
 
-function buildDefaultUserData(): UserData {
-  const defaults: UserData = {
-    id: 0,
-    name: "",
-    role: "player",
+interface UserReduxState {
+  currentUser: UserData;
+  lastAuthedUserName: string;
+}
+
+function buildDefaultUserReduxState(): UserReduxState {
+  const defaults: UserReduxState = {
+    currentUser: {
+      id: 0,
+      name: "",
+      role: "debug",
+    },
+    lastAuthedUserName: "",
   };
   return defaults;
 }
 
 export const userSlice = createSlice({
   name: "user",
-  initialState: buildDefaultUserData(),
+  initialState: buildDefaultUserReduxState(),
   reducers: {
-    setCurrentUser: (state: UserData, action: PayloadAction<UserData>) => {
-      return { ...action.payload };
+    setCurrentUser: (
+      state: UserReduxState,
+      action: PayloadAction<UserData>
+    ) => {
+      state.currentUser = action.payload;
+    },
+    setLastAuthedUserName: (
+      state: UserReduxState,
+      action: PayloadAction<string>
+    ) => {
+      state.lastAuthedUserName = action.payload;
     },
   },
 });
 
-export const { setCurrentUser } = userSlice.actions;
+export const { setCurrentUser, setLastAuthedUserName } = userSlice.actions;
