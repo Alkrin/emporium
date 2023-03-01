@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { UserData } from "../serverAPI";
 
-export type UserRole = "debug" | "admin" | "dm" | "player";
+export type UserRole = "admin" | "dm" | "player";
 
 interface UserReduxState {
   currentUser: UserData;
@@ -14,7 +14,7 @@ function buildDefaultUserReduxState(): UserReduxState {
     currentUser: {
       id: 0,
       name: "",
-      role: "debug",
+      role: "player",
     },
     lastAuthedUserName: "",
   };

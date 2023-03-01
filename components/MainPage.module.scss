@@ -4,11 +4,189 @@
   height: 100%;
 }
 
-.rolePane {
+.consoleRoot {
   position: absolute;
   top: 2vmin;
-  left: 2vmin;
   bottom: 2vmin;
-  right: 8vmin;
-  box-shadow: inset 0 0 0 2px red;
+  left: 2vmin;
+  right: 2vmin;
+}
+
+.consoleTopLeft {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5vmin;
+  height: 5vmin;
+  background-image: url("/images/ConsoleBorderCorner.png");
+  background-size: contain;
+}
+
+.consoleTopRight {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5vmin;
+  height: 5vmin;
+  background-image: url("/images/ConsoleBorderCorner.png");
+  background-size: contain;
+  transform: rotate(90deg);
+}
+
+.consoleBottomRight {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 5vmin;
+  height: 5vmin;
+  background-image: url("/images/ConsoleBorderCorner.png");
+  background-size: contain;
+  transform: rotate(180deg);
+}
+
+.consoleBottomLeft {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 5vmin;
+  height: 5vmin;
+  background-image: url("/images/ConsoleBorderCorner.png");
+  background-size: contain;
+  transform: rotate(270deg);
+}
+
+.consoleLeft {
+  position: absolute;
+  top: 4.9vmin;
+  left: 0;
+  width: 5vmin;
+  height: 86.2vmin;
+  background-size: contain;
+  background-image: url("/images/ConsoleBorderEdgeLeft.png");
+  background-repeat: repeat-y;
+}
+
+.consoleRight {
+  position: absolute;
+  top: 4.9vmin;
+  right: 0;
+  width: 5vmin;
+  height: 86.2vmin;
+  background-size: contain;
+  background-image: url("/images/ConsoleBorderEdgeRight.png");
+  background-repeat: repeat-y;
+}
+
+.consoleTop {
+  position: absolute;
+  top: 0;
+  left: 4.9vmin;
+  right: 4.9vmin;
+  height: 5vmin;
+  background-size: contain;
+  background-image: url("/images/ConsoleBorderEdgeTop.png");
+  background-repeat: repeat-x;
+}
+
+.consoleBottom {
+  position: absolute;
+  bottom: 0;
+  left: 4.9vmin;
+  right: 4.9vmin;
+  height: 5vmin;
+  background-size: contain;
+  background-image: url("/images/ConsoleBorderEdgeBottom.png");
+  background-repeat: repeat-x;
+}
+
+.consoleLeftInner {
+  position: absolute;
+  top: 4.9vmin;
+  left: 4.9vmin;
+  width: 5vmin;
+  height: 86.2vmin;
+  background-size: contain;
+  background-image: url("/images/ConsoleBorderEdgeRight.png");
+  background-repeat: repeat-y;
+}
+
+.consoleRightInner {
+  position: absolute;
+  top: 4.9vmin;
+  right: 1.5vmin;
+  width: 5vmin;
+  height: 86.2vmin;
+  background-size: contain;
+  background-image: url("/images/ConsoleBorderEdgeLeft.png");
+  background-repeat: repeat-y;
+}
+
+.panelSelectorCharacters {
+  position: absolute;
+  top: 7vmin;
+  left: 3.5vmin;
+  width: 7vmin;
+  height: 7vmin;
+  border-radius: 3.5vmin;
+  opacity: 0.5;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 3px #999;
+  }
+
+  &.selected {
+    opacity: 1;
+    box-shadow: inset 0 0 0 3px red;
+  }
+}
+
+.panelSelectorWorld {
+  position: absolute;
+  top: 25vmin;
+  left: 3.5vmin;
+  width: 7vmin;
+  height: 7vmin;
+  border-radius: 3.5vmin;
+  opacity: 0.5;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 3px #999;
+  }
+
+  &.selected {
+    opacity: 1;
+    box-shadow: inset 0 0 0 3px red;
+  }
+}
+
+.panelSelectorActivities {
+  position: absolute;
+  top: 16vmin;
+  left: 3.5vmin;
+  width: 7vmin;
+  height: 7vmin;
+  border-radius: 3.5vmin;
+  opacity: 0.5;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 3px #999;
+  }
+
+  &.selected {
+    opacity: 1;
+    box-shadow: inset 0 0 0 3px red;
+  }
+}
+
+.panelSelectorImage {
+  position: absolute;
+  top: 5%;
+  left: 6%;
+  width: 89%;
+  height: 89%;
+  border-radius: 45%;
+  overflow: hidden;
 }

@@ -7,13 +7,13 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideContextMenu } from "../redux/contextMenuSlice";
-import { RootState } from "../redux/store";
-import { showToaster } from "../redux/toastersSlice";
-import ContextMenuSource from "./ContextMenuSource";
-import Draggable from "./Draggable";
-import DraggableHandle from "./DraggableHandle";
-import DropTarget from "./DropTarget";
+import { hideContextMenu } from "../../redux/contextMenuSlice";
+import { RootState } from "../../redux/store";
+import { showToaster } from "../../redux/toastersSlice";
+import ContextMenuSource from "../ContextMenuSource";
+import Draggable from "../Draggable";
+import DraggableHandle from "../DraggableHandle";
+import DropTarget from "../DropTarget";
 import styles from "./RolePaneDebug.module.scss";
 
 interface State {

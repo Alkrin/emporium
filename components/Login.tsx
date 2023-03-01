@@ -1,6 +1,7 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { authLocalStore } from "../localStores/authLocalStore";
+import { setActiveRole } from "../redux/hudSlice";
 import { ReduxDispatch, RootState } from "../redux/store";
 import { setCurrentUser } from "../redux/userSlice";
 import ServerAPI from "../serverAPI";
@@ -140,6 +141,7 @@ class ALogin extends React.Component<Props, State> {
       } else if (result.id) {
         // Transition to logged-in page/state.
         this.props.dispatch?.(setCurrentUser(result));
+        this.props.dispatch?.(setActiveRole(result.role));
       }
     }, 5000);
   }

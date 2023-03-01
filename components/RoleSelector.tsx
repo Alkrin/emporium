@@ -19,21 +19,11 @@ type Props = ReactProps & InjectedProps;
 
 class ARoleSelector extends React.Component<Props> {
   render(): React.ReactNode {
-    const showDebug: boolean = true;
     const showAdmin: boolean = this.props.user.role === "admin";
     const showDM: boolean = showAdmin || this.props.user.role === "dm";
     const showPlayer: boolean = true;
     return (
       <div className={styles.root}>
-        {showDebug && (
-          <TooltipSource
-            className={this.styleForRole("debug")}
-            tooltipParams={{ id: "DEBUG Role", content: "DEBUG" }}
-            onClick={this.onClickForRole.bind(this, "debug")}
-          >
-            <img className={styles.roleImage} src={"/images/RoleDebug.png"} />
-          </TooltipSource>
-        )}
         {showAdmin && (
           <TooltipSource
             className={this.styleForRole("admin")}

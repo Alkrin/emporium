@@ -1,22 +1,19 @@
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideContextMenu } from "../redux/contextMenuSlice";
 import { ReduxDispatch, RootState } from "../redux/store";
-import { showToaster } from "../redux/toastersSlice";
 import { UserRole } from "../redux/userSlice";
+import { ActivitiesPanel } from "./activities/ActivitiesPanel";
 import AuthControl from "./AuthControl";
+import { CharactersPanel } from "./characters/CharactersPanel";
 import ContextMenuPane from "./ContextMenuPane";
-import ContextMenuSource from "./ContextMenuSource";
 import DragAndDropPane from "./DragAndDropPane";
-import Draggable from "./Draggable";
-import DraggableHandle from "./DraggableHandle";
-import DropTarget from "./DropTarget";
 import styles from "./MainPage.module.scss";
 import ModalPane from "./ModalPane";
-import RolePaneDebug from "./RolePaneDebug";
 import RoleSelector from "./RoleSelector";
 import ToasterPane from "./ToasterPane";
 import TooltipPane from "./TooltipPane";
+import TooltipSource from "./TooltipSource";
+import { WorldPanel } from "./world/WorldPanel";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -26,23 +23,81 @@ interface InjectedProps {
 
 type Props = ReactProps & InjectedProps;
 
+type MainPanelId = "Characters" | "World" | "Activities";
+
 interface State {
-  draggablePosition: string;
+  activePanel: MainPanelId;
 }
 
 class AMainPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { draggablePosition: "A" };
+    this.state = { activePanel: "Characters" };
   }
 
   render(): React.ReactNode {
     return (
       <div className={styles.root}>
-        <div className={styles.rolePane}>
-          {this.props.activeRole === "debug" && <RolePaneDebug />}
+        {this.state.activePanel === "Characters" && <CharactersPanel />}
+        {this.state.activePanel === "World" && <WorldPanel />}
+        {this.state.activePanel === "Activities" && <ActivitiesPanel />}
+
+        <div className={styles.consoleRoot}>
+          <div className={styles.consoleTopLeft} />
+          <div className={styles.consoleTopRight} />
+          <div className={styles.consoleBottomLeft} />
+          <div className={styles.consoleBottomRight} />
+          <div className={styles.consoleLeft} />
+          <div className={styles.consoleRight} />
+          <div className={styles.consoleTop} />
+          <div className={styles.consoleBottom} />
+          <div className={styles.consoleLeftInner} />
+          <div className={styles.consoleRightInner} />
         </div>
+
+        <TooltipSource
+          className={`${styles.panelSelectorCharacters} ${
+            this.state.activePanel === "Characters" ? styles.selected : ""
+          }`}
+          tooltipParams={{ id: "CharactersPanel", content: "Characters" }}
+          onMouseDown={() => {
+            this.setState({ activePanel: "Characters" });
+          }}
+        >
+          <img
+            className={styles.panelSelectorImage}
+            src={"/images/Characters.png"}
+          />
+        </TooltipSource>
+        <TooltipSource
+          className={`${styles.panelSelectorActivities} ${
+            this.state.activePanel === "Activities" ? styles.selected : ""
+          }`}
+          tooltipParams={{ id: "ActivitiesPanel", content: "Activities" }}
+          onMouseDown={() => {
+            this.setState({ activePanel: "Activities" });
+          }}
+        >
+          <img
+            className={styles.panelSelectorImage}
+            src={"/images/Activities.png"}
+          />
+        </TooltipSource>
+        <TooltipSource
+          className={`${styles.panelSelectorWorld} ${
+            this.state.activePanel === "World" ? styles.selected : ""
+          }`}
+          tooltipParams={{ id: "WorldPanel", content: "World" }}
+          onMouseDown={() => {
+            this.setState({ activePanel: "World" });
+          }}
+        >
+          <img
+            className={styles.panelSelectorImage}
+            src={"/images/World.png"}
+          />
+        </TooltipSource>
 
         <AuthControl />
         <RoleSelector />

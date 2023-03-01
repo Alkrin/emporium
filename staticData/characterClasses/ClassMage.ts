@@ -1,0 +1,131 @@
+import { SharedCreateMagicalConstructs } from "../classAbilities/SharedCreateMagicalConstructs";
+import { SharedCreateMagicalCrossbreeds } from "../classAbilities/SharedCreateMagicalCrossbreeds";
+import { SharedCreateUndead } from "../classAbilities/SharedCreateUndead";
+import { SharedMajorMagicCreation } from "../classAbilities/SharedMajorMagicCreation";
+import { SharedMinorMagicCreation } from "../classAbilities/SharedMinorMagicCreation";
+import { SharedRitualMagic } from "../classAbilities/SharedRitualMagic";
+import { ProficiencyAlchemy } from "../proficiencies/ProficiencyAlchemy";
+import { ProficiencyBattleMagic } from "../proficiencies/ProficiencyBattleMagic";
+import { ProficiencyBeastFriendship } from "../proficiencies/ProficiencyBeastFriendship";
+import { ProficiencyBlackLoreOfZahar } from "../proficiencies/ProficiencyBlackLoreOfZahar";
+import { ProficiencyCollegiateWizardry } from "../proficiencies/ProficiencyCollegiateWizardry";
+import { ProficiencyCraft } from "../proficiencies/ProficiencyCraft";
+import { ProficiencyDiplomacy } from "../proficiencies/ProficiencyDiplomacy";
+import { ProficiencyElementalism } from "../proficiencies/ProficiencyElementalism";
+import { ProficiencyElvenBloodline } from "../proficiencies/ProficiencyElvenBloodline";
+import { ProficiencyEngineering } from "../proficiencies/ProficiencyEngineering";
+import { ProficiencyFamiliar } from "../proficiencies/ProficiencyFamiliar";
+import { ProficiencyHealing } from "../proficiencies/ProficiencyHealing";
+import { ProficiencyKnowledge } from "../proficiencies/ProficiencyKnowledge";
+import { ProficiencyLanguage } from "../proficiencies/ProficiencyLanguage";
+import { ProficiencyLoremastery } from "../proficiencies/ProficiencyLoremastery";
+import { ProficiencyMagicalEngineering } from "../proficiencies/ProficiencyMagicalEngineering";
+import { ProficiencyMapping } from "../proficiencies/ProficiencyMapping";
+import { ProficiencyMysticAura } from "../proficiencies/ProficiencyMysticAura";
+import { ProficiencyNaturalism } from "../proficiencies/ProficiencyNaturalism";
+import { ProficiencyPerformance } from "../proficiencies/ProficiencyPerformance";
+import { ProficiencyPrestidigitation } from "../proficiencies/ProficiencyPrestidigitation";
+import { ProficiencyProfession } from "../proficiencies/ProficiencyProfession";
+import { ProficiencyQuietMagic } from "../proficiencies/ProficiencyQuietMagic";
+import { ProficiencySecondSight } from "../proficiencies/ProficiencySecondSight";
+import { ProficiencySensingPower } from "../proficiencies/ProficiencySensingPower";
+import { ProficiencySoothsaying } from "../proficiencies/ProficiencySoothsaying";
+import { ProficiencyTransmogrification } from "../proficiencies/ProficiencyTransmogrification";
+import { ProficiencyUnflappableCasting } from "../proficiencies/ProficiencyUnflappableCasting";
+import {
+  ArmorStyle,
+  BaseWeaponStyle,
+  CharacterClass,
+  CharacterStat,
+  SavingThrowType,
+} from "../types/characterClasses";
+import { BaseWeaponType } from "../types/items";
+
+export const ClassMage: CharacterClass = {
+  name: "Mage",
+  hitDieSize: 4,
+  hpStep: 1,
+  primeRequisites: [CharacterStat.Intelligence],
+  statRequirements: {},
+  weaponStyles: [BaseWeaponStyle.OneHandOnly, BaseWeaponStyle.TwoHanded],
+  weaponTypePermissions: [
+    BaseWeaponType.Club,
+    BaseWeaponType.Dagger,
+    BaseWeaponType.Dart,
+    BaseWeaponType.Staff,
+  ],
+  armorStyle: ArmorStyle.None,
+  savingThrows: {
+    [SavingThrowType.PetrificationAndParalysis]: [
+      13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9,
+    ],
+    [SavingThrowType.PoisonAndDeath]: [
+      13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9,
+    ],
+    [SavingThrowType.BlastAndBreath]: [
+      15, 15, 15, 14, 14, 14, 13, 13, 13, 12, 12, 12, 11, 11,
+    ],
+    [SavingThrowType.StaffsAndWands]: [
+      11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7,
+    ],
+    [SavingThrowType.Spells]: [
+      12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8,
+    ],
+  },
+  toHitBonus: [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4],
+  classFeatures: [
+    { def: SharedMinorMagicCreation },
+    { def: SharedMajorMagicCreation },
+    { def: SharedRitualMagic },
+    { def: SharedCreateMagicalConstructs },
+    { def: SharedCreateMagicalCrossbreeds },
+    { def: SharedCreateUndead },
+  ],
+  classProficienciesAt: [1, 6, 11],
+  classProficiencies: [
+    { def: ProficiencyAlchemy },
+    { def: ProficiencyBattleMagic },
+    { def: ProficiencyBeastFriendship },
+    { def: ProficiencyBlackLoreOfZahar },
+    { def: ProficiencyCollegiateWizardry },
+    { def: ProficiencyCraft },
+    { def: ProficiencyDiplomacy },
+    { def: ProficiencyElementalism },
+    { def: ProficiencyElvenBloodline },
+    { def: ProficiencyEngineering },
+    { def: ProficiencyFamiliar },
+    { def: ProficiencyHealing },
+    { def: ProficiencySecondSight },
+    { def: ProficiencyKnowledge },
+    { def: ProficiencyLanguage },
+    { def: ProficiencyLoremastery },
+    { def: ProficiencyMagicalEngineering },
+    { def: ProficiencyMapping },
+    { def: ProficiencyMysticAura },
+    { def: ProficiencyNaturalism },
+    { def: ProficiencyQuietMagic },
+    { def: ProficiencyPerformance },
+    { def: ProficiencyPrestidigitation },
+    { def: ProficiencyProfession },
+    { def: ProficiencySensingPower },
+    { def: ProficiencyTransmogrification },
+    { def: ProficiencySoothsaying },
+    { def: ProficiencyUnflappableCasting },
+  ],
+  arcaneSpellSlots: [
+    [1, 0, 0, 0, 0, 0],
+    [2, 0, 0, 0, 0, 0],
+    [2, 1, 0, 0, 0, 0],
+    [2, 2, 0, 0, 0, 0],
+    [2, 2, 1, 0, 0, 0],
+    [2, 2, 2, 0, 0, 0],
+    [3, 2, 2, 1, 0, 0],
+    [3, 3, 2, 2, 0, 0],
+    [3, 3, 3, 2, 1, 0],
+    [3, 3, 3, 3, 2, 0],
+    [4, 3, 3, 3, 2, 1],
+    [4, 4, 3, 3, 3, 2],
+    [4, 4, 4, 3, 3, 2],
+    [4, 4, 4, 4, 3, 3],
+  ],
+};

@@ -1,3 +1,5 @@
+import { UserRole } from "./redux/userSlice";
+
 export interface ServerError {
   error: string;
 }
@@ -5,7 +7,7 @@ export interface ServerError {
 export interface UserData {
   id: number;
   name: string;
-  role: string;
+  role: UserRole;
 }
 
 export type AuthResult = ServerError | UserData;

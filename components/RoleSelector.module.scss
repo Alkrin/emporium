@@ -1,12 +1,7 @@
 .root {
   position: absolute;
-  top: 8vmin;
+  top: 12vmin;
   right: 3vmin;
-  padding-bottom: 0.5vmin;
-  padding-right: 0.5vmin;
-  border-radius: 0.75vmin;
-  box-shadow: inset 0 0 0 2px white;
-  background-color: #222222;
   display: flex;
   flex-direction: column;
 }
@@ -15,14 +10,19 @@
   position: relative;
   margin-top: 0.5vmin;
   margin-left: 0.5vmin;
-  width: 3vmin;
-  height: 3vmin;
+  width: 4.5vmin;
+  height: 4.5vmin;
   box-shadow: inset 0 0 0 3px transparent;
-  border-radius: 1.5vmin;
+  border-radius: 2.25vmin;
   background-color: #333;
   color: white;
   overflow: hidden;
   opacity: 0.5;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 3px #999;
+  }
 
   &.selected {
     opacity: 1;

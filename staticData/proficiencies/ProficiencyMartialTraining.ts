@@ -1,0 +1,40 @@
+import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
+
+export const ProficiencyMartialTraining: AbilityOrProficiency = {
+  name: "Martial Training",
+  description: [
+    "As a crusader of the faith, the character has had weapons training that supersedes " +
+      "the normal religious strictures of his order and can wield an extra weapon type.",
+  ],
+  minLevel: 1,
+  subTypes: [
+    "BattleAxe",
+    "GreatAxe",
+    "HandAxe",
+    "Arbalest",
+    "Crossbow",
+    "CompositeBow",
+    "LongBow",
+    "ShortBow",
+    "Club",
+    "Flail",
+    "Mace",
+    "MorningStar",
+    "WarHammer",
+    "Lance",
+    "Javelin",
+    "PoleArm",
+    "Spear",
+    "Dagger",
+    "ShortSword",
+    "Sword",
+    "TwoHandedSword",
+    "Bola",
+    "Dart",
+    "Net",
+    "Sling",
+    "Sap",
+    "Staff",
+    "Whip",
+  ],
+};

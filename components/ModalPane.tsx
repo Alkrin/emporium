@@ -107,7 +107,7 @@ class ModalPane extends React.Component<Props, State> {
     onClick: () => void
   ): React.ReactNode {
     return (
-      <div className={styles.button} onClick={onClick}>
+      <div key={text} className={styles.button} onClick={onClick}>
         {text}
       </div>
     );

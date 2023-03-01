@@ -5,7 +5,8 @@ import { UserData } from "../serverAPI";
 import styles from "./AuthControl.module.scss";
 import TooltipSource from "./TooltipSource";
 import { Dispatch } from "@reduxjs/toolkit";
-import { showModal } from "../redux/modalsSlice";
+import { hideModal, showModal } from "../redux/modalsSlice";
+import { setCurrentUser } from "../redux/userSlice";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -22,17 +23,31 @@ class AAuthControl extends React.Component<Props> {
         className={styles.root}
         tooltipParams={{
           id: "AuthControl",
-          content: "Click to show a Modal dialog",
+          content: this.props.user.name,
         }}
         onClick={() => {
           this.props.dispatch?.(
             showModal({
-              id: "TESTO",
+              id: "LogOut",
               content: {
-                title: "Modal Dialog",
-                message:
-                  "This dialog blocks all other interactions.  It can be closed by hitting Escape.",
-                buttonText: "Close",
+                title: this.props.user.name,
+                buttonText: "Log Out",
+                onButtonClick: () => {
+                  this.props.dispatch?.(
+                    setCurrentUser({
+                      id: 0,
+                      name: "",
+                      role: "player",
+                    })
+                  );
+                  this.props.dispatch?.(hideModal());
+                },
+                extraButtons: [
+                  {
+                    text: "Stay!",
+                    onClick: () => this.props.dispatch?.(hideModal()),
+                  },
+                ],
               },
               escapable: true,
             })
