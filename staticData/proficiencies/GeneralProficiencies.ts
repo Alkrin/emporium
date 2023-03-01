@@ -19,7 +19,7 @@ import { ProficiencyKnowledge } from "./ProficiencyKnowledge";
 import { ProficiencyLabor } from "./ProficiencyLabor";
 import { ProficiencyLanguage } from "./ProficiencyLanguage";
 import { ProficiencyLeadership } from "./ProficiencyLeadership";
-import { ProficiencyLipReading } from "./ProficiencyLipreading";
+import { ProficiencyLipReading } from "./ProficiencyLipReading";
 import { ProficiencyManualOfArms } from "./ProficiencyManualOfArms";
 import { ProficiencyMapping } from "./ProficiencyMapping";
 import { ProficiencyMilitaryStrategy } from "./ProficiencyMilitaryStrategy";
