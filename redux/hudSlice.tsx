@@ -33,7 +33,7 @@ interface HUDState {
 
 function buildDefaultHUDState() {
   const DefaultHUDState: HUDState = {
-    activeRole: "debug",
+    activeRole: "player",
     escapables: [],
     hudWidth: 0,
     hudHeight: 0,
