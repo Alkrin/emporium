@@ -1,0 +1,69 @@
+.root {
+  position: absolute;
+  left: 3vmin;
+  top: 3vmin;
+  bottom: 3vmin;
+  width: 60vmin;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.headerContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-size: 1rem;
+}
+
+.newCharacterButton {
+  box-shadow: inset 0 0 0 2px orange;
+  font-size: 1.5rem;
+  padding: 1vmin 0.5vmin;
+  color: wheat;
+  align-self: flex-end;
+  cursor: pointer;
+
+  &:hover {
+    color: red;
+  }
+}
+
+.filtersContainer {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  background-color: #222;
+  padding: 0.5vmin;
+}
+
+.filterButton {
+  width: 4vmin;
+  height: 4vmin;
+  box-shadow: inset 0 0 0 2px red;
+  background-color: rebeccapurple;
+}
+
+.filterText {
+  margin-left: 0.5vmin;
+  flex-grow: 1;
+  font-size: 1rem;
+  color: wheat;
+  text-align: left;
+  align-self: center;
+}
+
+.listContainer {
+  position: relative;
+  margin-top: 2vmin;
+  box-shadow: inset 0 0 0 2px lime;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.listRow {
+  box-sizing: border-box;
+  border: 2px solid red;
+  font-size: 1rem;
+}

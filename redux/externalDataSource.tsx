@@ -5,8 +5,8 @@
  */
 import * as React from "react";
 import { RootState } from "./store";
-import { Dispatch } from "redux";
 import { connect } from "react-redux";
+import { Dispatch } from "@reduxjs/toolkit";
 
 interface ReactProps {
   onReduxUpdate(
@@ -60,7 +60,7 @@ export default abstract class ExternalDataSource<
   S = {},
   SS = any
 > extends React.Component<P, S, SS> {
-  protected dispatch: Dispatch<any> | null = null;
+  protected dispatch: Dispatch | null = null;
   protected reduxState: RootState | null = null;
 
   render() {

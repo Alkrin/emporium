@@ -47,6 +47,10 @@ export const ClassMage: CharacterClass = {
   hpStep: 1,
   primeRequisites: [CharacterStat.Intelligence],
   statRequirements: {},
+  xpToLevel: [
+    0, 2500, 5000, 10000, 20000, 40000, 80000, 160000, 310000, 460000, 610000,
+    760000, 910000, 1060000,
+  ],
   weaponStyles: [BaseWeaponStyle.OneHandOnly, BaseWeaponStyle.TwoHanded],
   weaponTypePermissions: [
     BaseWeaponType.Club,

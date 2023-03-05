@@ -124,7 +124,7 @@ class ALogin extends React.Component<Props, State> {
       mostRecentUserName: this.nameField?.value ?? "",
     });
 
-    const result = await ServerAPI.authenticate(
+    const result = await ServerAPI.logIn(
       this.nameField?.value ?? "",
       this.passField?.value ?? ""
     );

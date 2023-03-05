@@ -39,6 +39,10 @@ export const ClassFighter: CharacterClass = {
   hpStep: 2,
   primeRequisites: [CharacterStat.Strength],
   statRequirements: {},
+  xpToLevel: [
+    0, 2000, 4000, 8000, 16000, 32000, 65000, 130000, 250000, 370000, 490000,
+    610000, 730000, 850000,
+  ],
   weaponStyles: [
     BaseWeaponStyle.OneHandOnly,
     BaseWeaponStyle.OneHandAndShield,

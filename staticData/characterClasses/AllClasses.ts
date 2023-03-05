@@ -6,3 +6,9 @@ export const AllClasses: { [name: string]: CharacterClass } = {
   [ClassFighter.name]: ClassFighter,
   [ClassMage.name]: ClassMage,
 };
+
+export const AllClassesArray = Object.values(AllClasses).sort(
+  (classA, classB) => {
+    return classA.name.localeCompare(classB.name);
+  }
+);

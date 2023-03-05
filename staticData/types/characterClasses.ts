@@ -42,6 +42,8 @@ export interface CharacterClass {
   hpStep: number;
   primeRequisites: CharacterStat[];
   statRequirements: { [stat in CharacterStat]?: number };
+  /** XP required to reach each level, starting from level 1. */
+  xpToLevel: number[];
   weaponStyles: BaseWeaponStyle[];
   /** If present, lists permissable weapon categories for this class.  Otherwise, all are assumed permissable. */
   weaponCategoryPermissions?: WeaponCategory[];

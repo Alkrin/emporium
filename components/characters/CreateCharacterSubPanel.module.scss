@@ -1,0 +1,374 @@
+.root {
+  width: 50vmin;
+  height: 45vmin;
+  border-radius: 1vmin;
+  border: 2px solid white;
+  background-color: #222;
+}
+
+.label {
+  color: wheat;
+  font-size: 1.2rem;
+  text-align: right;
+}
+
+.textField {
+  font-size: 1.1rem;
+}
+
+.radioGroup {
+  font-size: 1rem;
+  color: white;
+  display: flex;
+  flex-direction: row;
+}
+
+.radioButton {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #aaa;
+  border-radius: 50%;
+  background-clip: content-box;
+  padding: 3px;
+
+  &:checked {
+    background-color: lime;
+  }
+}
+
+.radioLabel {
+  flex-grow: 1;
+  margin-left: 0.5vmin;
+}
+
+.nameLabel {
+  @extend .label;
+  position: absolute;
+  top: 1.3vmin;
+  left: 1vmin;
+  width: 10vmin;
+}
+
+.nameTextField {
+  @extend .textField;
+  position: absolute;
+  top: 1vmin;
+  left: 12vmin;
+  width: 30vmin;
+}
+
+.genderLabel {
+  @extend .label;
+  position: absolute;
+  top: 4.5vmin;
+  left: 1vmin;
+  width: 10vmin;
+}
+
+.genderRadioGroup {
+  @extend .radioGroup;
+  position: absolute;
+  top: 4.5vmin;
+  left: 12vmin;
+  width: 25vmin;
+}
+
+.classLabel {
+  @extend .label;
+  position: absolute;
+  top: 7.7vmin;
+  left: 1vmin;
+  width: 10vmin;
+}
+
+.classSelector {
+  position: absolute;
+  top: 7.9vmin;
+  left: 12vmin;
+  width: 18vmin;
+}
+
+.levelLabel {
+  @extend .label;
+  position: absolute;
+  top: 7.7vmin;
+  left: 32vmin;
+  width: 5vmin;
+}
+
+.levelTextField {
+  @extend .textField;
+  position: absolute;
+  width: 4vmin;
+  top: 7.6vmin;
+  left: 38vmin;
+}
+
+.xpLabel {
+  @extend .label;
+  position: absolute;
+  top: 11.1vmin;
+  left: 1vmin;
+  width: 10vmin;
+}
+
+.xpRangeLabel {
+  @extend .label;
+  position: absolute;
+  top: 11.1vmin;
+  left: 24vmin;
+}
+
+.xpTextField {
+  @extend .textField;
+  position: absolute;
+  top: 10.9vmin;
+  left: 12vmin;
+  width: 10vmin;
+}
+
+.strengthLabel {
+  @extend .label;
+  position: absolute;
+  top: 15.2vmin;
+  left: 1vmin;
+  width: 10vmin;
+}
+
+.strengthTextField {
+  @extend .textField;
+  position: absolute;
+  width: 4vmin;
+  top: 14.9vmin;
+  left: 12vmin;
+}
+
+.intelligenceLabel {
+  @extend .label;
+  position: absolute;
+  top: 18.4vmin;
+  left: 1vmin;
+  width: 10vmin;
+}
+
+.intelligenceTextField {
+  @extend .textField;
+  position: absolute;
+  width: 4vmin;
+  top: 18.1vmin;
+  left: 12vmin;
+}
+
+.wisdomLabel {
+  @extend .label;
+  position: absolute;
+  top: 21.6vmin;
+  left: 1vmin;
+  width: 10vmin;
+}
+
+.wisdomTextField {
+  @extend .textField;
+  position: absolute;
+  width: 4vmin;
+  top: 21.3vmin;
+  left: 12vmin;
+}
+
+.dexterityLabel {
+  @extend .label;
+  position: absolute;
+  top: 15.2vmin;
+  left: 18vmin;
+  width: 5vmin;
+}
+
+.dexterityTextField {
+  @extend .textField;
+  position: absolute;
+  width: 4vmin;
+  top: 14.9vmin;
+  left: 24vmin;
+}
+
+.constitutionLabel {
+  @extend .label;
+  position: absolute;
+  top: 18.4vmin;
+  left: 18vmin;
+  width: 5vmin;
+}
+
+.constitutionTextField {
+  @extend .textField;
+  position: absolute;
+  width: 4vmin;
+  top: 18.1vmin;
+  left: 24vmin;
+}
+
+.charismaLabel {
+  @extend .label;
+  position: absolute;
+  top: 21.6vmin;
+  left: 18vmin;
+  width: 5vmin;
+}
+
+.charismaTextField {
+  @extend .textField;
+  position: absolute;
+  width: 4vmin;
+  top: 21.3vmin;
+  left: 24vmin;
+}
+
+.primeRequisiteLabel {
+  color: magenta;
+}
+
+.rerollStatsLabel {
+  @extend .label;
+  position: absolute;
+  top: 13.2vmin;
+  left: 38vmin;
+  width: 6vmin;
+  text-align: center;
+}
+
+.rollStatsButton {
+  position: absolute;
+  top: 17.5vmin;
+  left: 38vmin;
+  width: 6vmin;
+  height: 6vmin;
+  border: solid 0.25vmin #aaa;
+  border-radius: 1.5vmin;
+  background-image: url("/images/ThreeDSix.png");
+  background-size: contain;
+  opacity: 0.5;
+  box-sizing: border-box;
+
+  &:hover {
+    opacity: 1;
+    border: solid 0.25vmin yellow;
+  }
+
+  &:active {
+    opacity: 0.8;
+    border: solid 0.25vmin lime;
+  }
+}
+
+.hitDiceLabel {
+  @extend .label;
+  position: absolute;
+  top: 24.7vmin;
+  left: 1vmin;
+  width: 10vmin;
+}
+
+.hitDiceWrapper {
+  position: absolute;
+  top: 24.7vmin;
+  left: 12vmin;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 30vmin;
+}
+
+.hitDieWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin-right: 0.5vmin;
+  align-items: center;
+}
+
+.hitDieLabel {
+  @extend .label;
+  width: 3vmin;
+  font-size: 1rem;
+  color: white;
+}
+
+.hitDieTextField {
+  @extend .textField;
+  width: 3vmin;
+  margin-left: 0.5vmin;
+}
+
+.rerollHitpointsLabel {
+  @extend .label;
+  position: absolute;
+  top: 25.2vmin;
+  left: 37.5vmin;
+  width: 7vmin;
+  text-align: center;
+}
+
+.rollHitpointsButton {
+  position: absolute;
+  top: 29.5vmin;
+  left: 38vmin;
+  width: 6vmin;
+  height: 6vmin;
+  border: solid 0.25vmin #aaa;
+  border-radius: 1.5vmin;
+  background-image: url("/images/ThreeDSix.png");
+  background-size: contain;
+  opacity: 0.5;
+  box-sizing: border-box;
+
+  &:hover {
+    opacity: 1;
+    border: solid 0.25vmin yellow;
+  }
+
+  &:active {
+    opacity: 0.8;
+    border: solid 0.25vmin lime;
+  }
+}
+
+.saveButton {
+  position: absolute;
+  top: 40vmin;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+}
+
+.savingVeil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  pointer-events: all;
+}
+
+.savingLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: wheat;
+  font-size: 3rem;
+}

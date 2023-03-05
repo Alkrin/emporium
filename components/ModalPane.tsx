@@ -12,15 +12,6 @@ import { RootState } from "../redux/store";
 import Escapable from "./Escapable";
 import styles from "./ModalPane.module.scss";
 
-// Styles.
-// const Root = "HUD-ModalPane-Root";
-// const PreviousWrapper = "HUD-ModalPane-PreviousModalWrapper";
-// const CurrentWrapper = "HUD-ModalPane-CurrentModalWrapper";
-// const TitleText = "HUD-ModalPane-TitleText";
-// const MessageText = "HUD-ModalPane-MessageText";
-// const Button = "HUD-ModalPane-Button";
-// const ButtonBorder = "HUD-ModalPane-ButtonBorder";
-
 interface State {
   shouldShow: boolean;
   // Stash the displayed modals so we can animate between modals if multiple are queued.
