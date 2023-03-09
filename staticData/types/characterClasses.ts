@@ -1,7 +1,4 @@
-import {
-  AbilityOrProficiency,
-  AbilityFilter,
-} from "./abilitiesAndProficiencies";
+import { AbilityFilter } from "./abilitiesAndProficiencies";
 import { BaseWeaponType, WeaponCategory } from "./items";
 
 export enum CharacterStat {

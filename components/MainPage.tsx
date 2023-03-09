@@ -37,70 +37,62 @@ class AMainPage extends React.Component<Props, State> {
   }
 
   render(): React.ReactNode {
+    const sizeClass = this.state.activePanel === "World" ? styles.fullSize : "";
     return (
       <div className={styles.root}>
-        {this.state.activePanel === "Characters" && <CharactersPanel />}
-        {this.state.activePanel === "World" && <WorldPanel />}
-        {this.state.activePanel === "Activities" && <ActivitiesPanel />}
+        <div className={`${styles.contentWrapper} ${sizeClass}`}>
+          {this.state.activePanel === "Characters" && <CharactersPanel />}
+          {this.state.activePanel === "World" && <WorldPanel />}
+          {this.state.activePanel === "Activities" && <ActivitiesPanel />}
 
-        <div className={styles.consoleRoot}>
-          <div className={styles.consoleTopLeft} />
-          <div className={styles.consoleTopRight} />
-          <div className={styles.consoleBottomLeft} />
-          <div className={styles.consoleBottomRight} />
-          <div className={styles.consoleLeft} />
-          <div className={styles.consoleRight} />
-          <div className={styles.consoleTop} />
-          <div className={styles.consoleBottom} />
-          <div className={styles.consoleLeftInner} />
-          <div className={styles.consoleRightInner} />
+          <div className={styles.consoleRoot}>
+            <div className={styles.consoleTopLeft} />
+            <div className={styles.consoleTopRight} />
+            <div className={styles.consoleBottomLeft} />
+            <div className={styles.consoleBottomRight} />
+            <div className={styles.consoleLeft} />
+            <div className={styles.consoleRight} />
+            <div className={styles.consoleTop} />
+            <div className={styles.consoleBottom} />
+            <div className={styles.consoleLeftInner} />
+            <div className={styles.consoleRightInner} />
+          </div>
+
+          <TooltipSource
+            className={`${styles.panelSelectorCharacters} ${
+              this.state.activePanel === "Characters" ? styles.selected : ""
+            }`}
+            tooltipParams={{ id: "CharactersPanel", content: "Characters" }}
+            onMouseDown={() => {
+              this.setState({ activePanel: "Characters" });
+            }}
+          >
+            <img className={styles.panelSelectorImage} src={"/images/Characters.png"} />
+          </TooltipSource>
+          <TooltipSource
+            className={`${styles.panelSelectorActivities} ${
+              this.state.activePanel === "Activities" ? styles.selected : ""
+            }`}
+            tooltipParams={{ id: "ActivitiesPanel", content: "Activities" }}
+            onMouseDown={() => {
+              this.setState({ activePanel: "Activities" });
+            }}
+          >
+            <img className={styles.panelSelectorImage} src={"/images/Activities.png"} />
+          </TooltipSource>
+          <TooltipSource
+            className={`${styles.panelSelectorWorld} ${this.state.activePanel === "World" ? styles.selected : ""}`}
+            tooltipParams={{ id: "WorldPanel", content: "World" }}
+            onMouseDown={() => {
+              this.setState({ activePanel: "World" });
+            }}
+          >
+            <img className={styles.panelSelectorImage} src={"/images/World.png"} />
+          </TooltipSource>
+
+          <AuthControl />
+          <RoleSelector />
         </div>
-
-        <TooltipSource
-          className={`${styles.panelSelectorCharacters} ${
-            this.state.activePanel === "Characters" ? styles.selected : ""
-          }`}
-          tooltipParams={{ id: "CharactersPanel", content: "Characters" }}
-          onMouseDown={() => {
-            this.setState({ activePanel: "Characters" });
-          }}
-        >
-          <img
-            className={styles.panelSelectorImage}
-            src={"/images/Characters.png"}
-          />
-        </TooltipSource>
-        <TooltipSource
-          className={`${styles.panelSelectorActivities} ${
-            this.state.activePanel === "Activities" ? styles.selected : ""
-          }`}
-          tooltipParams={{ id: "ActivitiesPanel", content: "Activities" }}
-          onMouseDown={() => {
-            this.setState({ activePanel: "Activities" });
-          }}
-        >
-          <img
-            className={styles.panelSelectorImage}
-            src={"/images/Activities.png"}
-          />
-        </TooltipSource>
-        <TooltipSource
-          className={`${styles.panelSelectorWorld} ${
-            this.state.activePanel === "World" ? styles.selected : ""
-          }`}
-          tooltipParams={{ id: "WorldPanel", content: "World" }}
-          onMouseDown={() => {
-            this.setState({ activePanel: "World" });
-          }}
-        >
-          <img
-            className={styles.panelSelectorImage}
-            src={"/images/World.png"}
-          />
-        </TooltipSource>
-
-        <AuthControl />
-        <RoleSelector />
 
         <ModalPane />
         <ContextMenuPane />

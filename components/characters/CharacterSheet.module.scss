@@ -1,0 +1,103 @@
+.root {
+  position: absolute;
+  top: 3vmin;
+  left: 40vmin;
+  right: 3vmin;
+  bottom: 3vmin;
+  box-sizing: border-box;
+  border-radius: 0.5vmin;
+  border: solid 2px wheat;
+  box-shadow: 0 0 1.5vmin 0px wheat;
+  background-color: black;
+
+  &.exit {
+    animation: hmpcsSlideOut 1s forwards;
+    @keyframes hmpcsSlideOut {
+      0% {
+        opacity: 1;
+        transform: translateX(0vmin);
+      }
+      99% {
+        opacity: 1;
+        transform: translateX(60vmin);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(60vmin);
+      }
+    }
+  }
+
+  &.enter {
+    animation: hmpcsZoomIn 1s forwards;
+    @keyframes hmpcsZoomIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.5) translateX(-10vmin);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  }
+}
+
+.placeholder {
+  position: absolute;
+  top: 1vmin;
+  left: 1vmin;
+  right: 1vmin;
+  bottom: 1vmin;
+  background-image: url("/images/CharacterSheetPlaceholder.png");
+  background-position: center;
+  opacity: 0.1;
+}
+
+.nameLabel {
+  position: absolute;
+  top: 1vmin;
+  left: 1vmin;
+  right: 1vmin;
+  color: wheat;
+  font-size: 2rem;
+  text-align: center;
+}
+
+.statsPanel {
+  position: absolute;
+  top: 5vmin;
+  left: 1.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.statPanel {
+  margin-bottom: 0.5vmin;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.statName {
+  color: wheat;
+  font-size: 1rem;
+  width: 2.5rem;
+}
+
+.statValue {
+  color: yellow;
+  font-size: 1rem;
+  width: 1.3rem;
+  text-align: center;
+}
+
+.statBonus {
+  color: wheat;
+  font-size: 1rem;
+  width: 2rem;
+  text-align: center;
+}

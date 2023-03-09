@@ -19,11 +19,11 @@ export type Gender = "m" | "f" | "o";
 
 export interface CharacterData {
   id: number;
-  userId: number;
+  user_id: number;
   name: string;
   gender: Gender;
-  portraitURL: string;
-  className: string;
+  portrait_url: string;
+  class_name: string;
   level: number;
   strength: number;
   intelligence: number;
@@ -33,11 +33,12 @@ export interface CharacterData {
   charisma: number;
   xp: number;
   hp: number;
-  hitDice: number[];
+  hit_dice: number[];
 }
 
 export type LogInResult = ServerError | UserData;
 export type CharactersResult = ServerError | CharacterData[];
+export type UsersResult = ServerError | UserData[];
 
 class AServerAPI {
   async encryptString(text: string): Promise<string> {
@@ -86,7 +87,7 @@ class AServerAPI {
     const requestBody: RequestBody_CreateCharacter = {
       ...character,
       // Stored on the server as a comma separated string.
-      hitDice: character.hitDice.join(","),
+      hit_dice: character.hit_dice.join(","),
     };
     const res = await fetch("/api/createCharacter", {
       method: "POST",
@@ -94,6 +95,16 @@ class AServerAPI {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async fetchUsers(): Promise<UsersResult> {
+    const res = await fetch("/api/fetchUsers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return await res.json();
   }

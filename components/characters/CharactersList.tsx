@@ -2,11 +2,11 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
+import { setActiveCharacterId } from "../../redux/charactersSlice";
 import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
 import { UserRole } from "../../redux/userSlice";
-import { CharacterData } from "../../serverAPI";
-import TooltipSource from "../TooltipSource";
+import { CharacterData, UserData } from "../../serverAPI";
 import styles from "./CharactersList.module.scss";
 import { CreateCharacterSubPanel } from "./CreateCharacterSubPanel";
 
@@ -21,6 +21,8 @@ interface InjectedProps {
   activeRole: UserRole;
   characters: Dictionary<CharacterData>;
   currentUserId: number;
+  users: Dictionary<UserData>;
+  activeCharacterId: number;
   dispatch?: Dispatch;
 }
 
@@ -38,62 +40,95 @@ class ACharactersList extends React.Component<Props, State> {
 
   render(): React.ReactNode {
     const characters = this.sortPermittedCharacters();
-    const ownerName: string = this.state.filterOwnerId === -1 ? "Any" : "WIP";
-    const locationName: string =
-      this.state.filterLocationId === -1 ? "Any" : "WIP";
 
     return (
       <div className={styles.root}>
         <div className={styles.headerContainer}>
-          <div
-            className={styles.newCharacterButton}
-            onClick={this.onCreateNewClicked.bind(this)}
-          >
+          <div className={styles.newCharacterButton} onClick={this.onCreateNewClicked.bind(this)}>
             Add New Character
           </div>
-          Right-click to set Filters
+          Filters
           <div className={styles.filtersContainer}>
-            <TooltipSource
-              className={styles.filterButton}
-              tooltipParams={{ id: "OwnerFilter", content: "Owner" }}
-            ></TooltipSource>
-            <div className={styles.filterText}>{`Owner: ${ownerName}`}</div>
-            <TooltipSource
-              className={styles.filterButton}
-              tooltipParams={{ id: "LocationFilter", content: "Location" }}
-            ></TooltipSource>
-            <div
-              className={styles.filterText}
-            >{`Location: ${locationName}`}</div>
+            <div className={styles.filterText}>Owner</div>
+            <select
+              className={styles.filterSelector}
+              value={this.state.filterOwnerId}
+              onChange={(e) => {
+                this.setState({ filterOwnerId: +e.target.value });
+              }}
+            >
+              <option value={-1}>Any</option>
+              {this.sortPermittedUsers().map(({ id, name }) => {
+                return (
+                  <option value={id} key={`user${name}`}>
+                    {name}
+                  </option>
+                );
+              })}
+            </select>
+            <div className={styles.filterText}>Location</div>
+            <select
+              className={styles.filterSelector}
+              value={this.state.filterLocationId}
+              onChange={(e) => {
+                this.setState({ filterLocationId: +e.target.value });
+              }}
+            >
+              <option value={-1}>Any</option>
+            </select>
           </div>
         </div>
         <div className={styles.listContainer}>
           {characters.map((character, index) => {
-            return (
-              <div className={styles.listRow} key={`charRow${index}`}>
-                {character.name}
-              </div>
-            );
+            return this.renderCharacterRow(character, index);
           })}
         </div>
       </div>
     );
   }
 
-  private sortPermittedCharacters(): CharacterData[] {
-    const permittedCharacters = Object.values(this.props.characters).filter(
-      (character) => {
-        return (
-          this.props.activeRole !== "player" ||
-          character.userId === this.props.currentUserId
-        );
-      }
+  private renderCharacterRow(character: CharacterData, index: number): React.ReactNode {
+    const selectedClass = character.id === this.props.activeCharacterId ? styles.selected : "";
+    return (
+      <div
+        className={`${styles.listRow} ${selectedClass}`}
+        key={`charRow${index}`}
+        onClick={this.onCharacterRowClick.bind(this, character.id)}
+      >
+        <div className={styles.listName}>{character.name}</div>
+        <div className={styles.listLevel}>L{character.level}</div>
+        <div className={styles.listClass}>{character.class_name}</div>
+      </div>
     );
+  }
+
+  private onCharacterRowClick(characterId: number): void {
+    if (this.props.activeCharacterId !== characterId) {
+      this.props.dispatch?.(setActiveCharacterId(characterId));
+    }
+  }
+
+  private sortPermittedUsers(): UserData[] {
+    const permittedUsers = Object.values(this.props.users)
+      .filter((user) => {
+        if (this.props.activeRole !== "player") {
+          return true;
+        } else {
+          return user.id === this.props.currentUserId;
+        }
+      })
+      .sort();
+
+    return permittedUsers;
+  }
+
+  private sortPermittedCharacters(): CharacterData[] {
+    const permittedCharacters = Object.values(this.props.characters).filter((character) => {
+      return this.props.activeRole !== "player" || character.user_id === this.props.currentUserId;
+    });
 
     const filteredCharacters = permittedCharacters.filter((character) => {
-      const matchesOwner =
-        this.state.filterOwnerId === -1 ||
-        character.userId === this.state.filterOwnerId;
+      const matchesOwner = this.state.filterOwnerId === -1 || character.user_id === this.state.filterOwnerId;
 
       // TODO: Update this once locations are implemented.
       const matchesLocation = this.state.filterLocationId === -1 || true;
@@ -123,11 +158,15 @@ class ACharactersList extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { activeRole } = state.hud;
+  const { users } = state.user;
+  const { activeCharacterId } = state.characters;
   return {
     ...props,
     characters: state.characters.characters,
     activeRole,
     currentUserId: state.user.currentUser.id,
+    users,
+    activeCharacterId,
   };
 }
 

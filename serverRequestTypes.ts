@@ -1,9 +1,9 @@
 export interface RequestBody_CreateCharacter {
-  userId: number;
+  user_id: number;
   name: string;
   gender: string;
-  portraitURL: string;
-  className: string;
+  portrait_url: string;
+  class_name: string;
   level: number;
   strength: number;
   intelligence: number;
@@ -13,7 +13,7 @@ export interface RequestBody_CreateCharacter {
   charisma: number;
   xp: number;
   hp: number;
-  hitDice: string;
+  hit_dice: string;
 }
 
 export interface RequestBody_EncryptString {

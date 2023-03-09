@@ -431,11 +431,11 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 
     const character: CharacterData = {
       id: -1,
-      userId: this.props.currentUserId,
+      user_id: this.props.currentUserId,
       name: this.state.nameText,
       gender: this.state.gender,
-      portraitURL: "",
-      className: this.state.class,
+      portrait_url: "",
+      class_name: this.state.class,
       level: this.state.level,
       strength: this.state.strength,
       intelligence: this.state.intelligence,
@@ -445,7 +445,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       charisma: this.state.charisma,
       xp: this.state.xp,
       hp: this.state.hitDice.reduce((a, b) => a + b, 0),
-      hitDice: this.state.hitDice,
+      hit_dice: this.state.hitDice,
     };
     // Send it to the server!
     const res = await ServerAPI.createCharacter(character);

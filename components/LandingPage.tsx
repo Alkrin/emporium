@@ -8,6 +8,7 @@ import MainPage from "./MainPage";
 import { EscapableParams, updateHUDSize } from "../redux/hudSlice";
 import { LocalStorageDataSource } from "../dataSources/LocalStorageDataSource";
 import { CharactersDataSource } from "../dataSources/CharactersDataSource";
+import { UsersDataSource } from "../dataSources/UsersDataSource";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -36,6 +37,7 @@ class ALandingPage extends React.Component<Props> {
       >
         <LocalStorageDataSource />
         <CharactersDataSource />
+        <UsersDataSource />
         {this.props.currentUserId ? <MainPage /> : <Login />}
       </div>
     );
@@ -57,9 +59,7 @@ class ALandingPage extends React.Component<Props> {
   private onEscape(event: KeyboardEvent): void {
     if (event.key === "Escape") {
       if (this.props.escapables.length > 0 && this.props.dispatch) {
-        this.props.escapables[this.props.escapables.length - 1].onEscape(
-          this.props.dispatch
-        );
+        this.props.escapables[this.props.escapables.length - 1].onEscape(this.props.dispatch);
         event.preventDefault();
       }
     }

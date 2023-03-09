@@ -1,4 +1,5 @@
 import * as React from "react";
+import { KeyboardEvent } from "react";
 import { connect } from "react-redux";
 import { authLocalStore } from "../localStores/authLocalStore";
 import { setActiveRole } from "../redux/hudSlice";
@@ -39,10 +40,7 @@ class ALogin extends React.Component<Props, State> {
 
   render(): React.ReactNode {
     // Pre-populate with the last authed user name to save time.
-    if (
-      this.state.mostRecentUserName === "" &&
-      this.props.lastAuthedUserName !== ""
-    ) {
+    if (this.state.mostRecentUserName === "" && this.props.lastAuthedUserName !== "") {
       // requestAnimationFrame lets us dodge the restrictions against setting State inside of render().
       requestAnimationFrame(() => {
         this.setState({ mostRecentUserName: this.props.lastAuthedUserName });
@@ -86,12 +84,9 @@ class ALogin extends React.Component<Props, State> {
             tabIndex={2}
             spellCheck={false}
             disabled={this.state.isAuthenticating}
+            onKeyDown={this.onPasswordKeyDown.bind(this)}
           />
-          <div
-            className={styles.loginButton}
-            onClick={this.onLoginClick.bind(this)}
-            tabIndex={3}
-          >
+          <div className={styles.loginButton} onClick={this.onLoginClick.bind(this)} tabIndex={3}>
             Log In
           </div>
           {this.state.isAuthenticating && (
@@ -106,11 +101,15 @@ class ALogin extends React.Component<Props, State> {
             </div>
           )}
         </div>
-        {this.state.errorMessage.length > 0 && (
-          <div className={styles.errorMessage}>{this.state.errorMessage}</div>
-        )}
+        {this.state.errorMessage.length > 0 && <div className={styles.errorMessage}>{this.state.errorMessage}</div>}
       </>
     );
+  }
+
+  private onPasswordKeyDown(e: KeyboardEvent): void {
+    if (e.key === "Enter") {
+      this.onLoginClick();
+    }
   }
 
   private async onLoginClick(): Promise<void> {
@@ -124,10 +123,7 @@ class ALogin extends React.Component<Props, State> {
       mostRecentUserName: this.nameField?.value ?? "",
     });
 
-    const result = await ServerAPI.logIn(
-      this.nameField?.value ?? "",
-      this.passField?.value ?? ""
-    );
+    const result = await ServerAPI.logIn(this.nameField?.value ?? "", this.passField?.value ?? "");
 
     setTimeout(() => {
       this.setState({ isAuthenticating: false });

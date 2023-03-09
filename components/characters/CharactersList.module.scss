@@ -3,7 +3,7 @@
   left: 3vmin;
   top: 3vmin;
   bottom: 3vmin;
-  width: 60vmin;
+  width: 35vmin;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -37,33 +37,83 @@
   padding: 0.5vmin;
 }
 
-.filterButton {
-  width: 4vmin;
-  height: 4vmin;
-  box-shadow: inset 0 0 0 2px red;
-  background-color: rebeccapurple;
-}
-
 .filterText {
   margin-left: 0.5vmin;
-  flex-grow: 1;
+  margin-right: 0.5vmin;
   font-size: 1rem;
   color: wheat;
   text-align: left;
   align-self: center;
 }
 
+.filterSelector {
+  width: 11vmin;
+}
+
 .listContainer {
   position: relative;
   margin-top: 2vmin;
-  box-shadow: inset 0 0 0 2px lime;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
 }
 
 .listRow {
-  box-sizing: border-box;
-  border: 2px solid red;
+  margin-bottom: 0.5vmin;
+  padding: 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
   font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+
+  &.selected {
+    box-shadow: inset 0 0 0 2px red;
+  }
+}
+
+.listName {
+  font-size: 1rem;
+  color: wheat;
+  text-align: left;
+  width: 15vmin;
+}
+
+.listLevel {
+  margin-left: 0.5vmin;
+  font-size: 1rem;
+  color: yellow;
+  text-align: left;
+}
+
+.listClass {
+  margin-left: 0.5vmin;
+  font-size: 1rem;
+  color: wheat;
 }
