@@ -24,3 +24,8 @@ export interface RequestBody_LogIn {
   name: string;
   pass: string;
 }
+
+export interface RequestBody_AddXP {
+  characterId: number;
+  xp: number;
+}

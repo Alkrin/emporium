@@ -19,14 +19,14 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  background-color: magenta;
   padding: 1vmin;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 32vmin;
+  border-radius: 1vmin;
   border: 2px solid white;
-  border-radius: 0.5vmin;
+  background-color: #222;
 
   pointer-events: none;
 
@@ -46,14 +46,14 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  background-color: magenta;
   padding: 1vmin;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 32vmin;
+  border-radius: 1vmin;
   border: 2px solid white;
-  border-radius: 0.5vmin;
+  background-color: #222;
 
   animation: hmpcmwFadeIn 0.5s forwards;
   @keyframes hmpcmwFadeIn {

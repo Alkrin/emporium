@@ -8,6 +8,11 @@ interface CharactersReduxState {
   activeCharacterId: number;
 }
 
+export interface SetXPParams {
+  characterId: number;
+  xp: number;
+}
+
 function buildDefaultCharactersReduxState(): CharactersReduxState {
   const defaults: CharactersReduxState = {
     characters: {},
@@ -26,7 +31,12 @@ export const charactersSlice = createSlice({
     setActiveCharacterId: (state: CharactersReduxState, action: PayloadAction<number>) => {
       state.activeCharacterId = action.payload;
     },
+    setCharacterXP: (state: CharactersReduxState, action: PayloadAction<SetXPParams>) => {
+      if (state.characters[action.payload.characterId]) {
+        state.characters[action.payload.characterId].xp = action.payload.xp;
+      }
+    },
   },
 });
 
-export const { updateCharacter, setActiveCharacterId } = charactersSlice.actions;
+export const { updateCharacter, setActiveCharacterId, setCharacterXP } = charactersSlice.actions;

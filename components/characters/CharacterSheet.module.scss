@@ -54,12 +54,38 @@
   opacity: 0.1;
 }
 
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.editIcon {
+  background-image: url("/images/EditIcon.png");
+  background-size: contain;
+}
+
 .nameLabel {
+  @extend .normalText;
   position: absolute;
   top: 1vmin;
   left: 1vmin;
   right: 1vmin;
-  color: wheat;
   font-size: 2rem;
   text-align: center;
 }
@@ -76,28 +102,120 @@
 }
 
 .statPanel {
+  @extend .row;
   margin-bottom: 0.5vmin;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
 }
 
 .statName {
-  color: wheat;
-  font-size: 1rem;
+  @extend .normalText;
   width: 2.5rem;
 }
 
 .statValue {
-  color: yellow;
-  font-size: 1rem;
+  @extend .valueText;
   width: 1.3rem;
   text-align: center;
 }
 
 .statBonus {
-  color: wheat;
-  font-size: 1rem;
+  @extend .normalText;
   width: 2rem;
   text-align: center;
+}
+
+.savingThrowsPanel {
+  position: absolute;
+  top: 5vmin;
+  left: 12.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.savingThrowsText {
+  @extend .normalText;
+  text-align: center;
+}
+
+.savingThrowsName {
+  flex-grow: 1;
+  text-align: right;
+}
+
+.savingThrowsValue {
+  @extend .savingThrowsText;
+  width: 3vmin;
+}
+
+.horizontalLine {
+  background-color: yellow;
+  height: 1px;
+  margin-bottom: 0.5vmin;
+}
+
+.speedPanel {
+  position: absolute;
+  top: 5vmin;
+  left: 22.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.speedTitle {
+  @extend .normalText;
+  width: 10.5vmin;
+}
+
+.speedValue {
+  @extend .valueText;
+}
+
+.speedStone {
+  @extend .normalText;
+  margin-left: 0.3rem;
+}
+
+.xpPanel {
+  @extend .row;
+  position: absolute;
+  top: 20vmin;
+  left: 1.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.xpTitle {
+  @extend .normalText;
+  width: 5vmin;
+}
+
+.xpValue {
+  @extend .valueText;
+  width: 5vmin;
+  text-align: right;
+}
+
+.xpEditButton {
+  @extend .editIcon;
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
 }

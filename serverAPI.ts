@@ -1,5 +1,6 @@
 import { UserRole } from "./redux/userSlice";
 import {
+  RequestBody_AddXP,
   RequestBody_CreateCharacter,
   RequestBody_EncryptString,
   RequestBody_LogIn,
@@ -36,9 +37,14 @@ export interface CharacterData {
   hit_dice: number[];
 }
 
+export interface XPChange {
+  newXPValue: number;
+}
+
 export type LogInResult = ServerError | UserData;
 export type CharactersResult = ServerError | CharacterData[];
 export type UsersResult = ServerError | UserData[];
+export type SetXPResult = ServerError | XPChange;
 
 class AServerAPI {
   async encryptString(text: string): Promise<string> {
@@ -105,6 +111,21 @@ class AServerAPI {
       headers: {
         "Content-Type": "application/json",
       },
+    });
+    return await res.json();
+  }
+
+  async setXP(characterId: number, xp: number): Promise<SetXPResult> {
+    const requestBody: RequestBody_AddXP = {
+      characterId,
+      xp,
+    };
+    const res = await fetch("/api/setXP", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
     });
     return await res.json();
   }
