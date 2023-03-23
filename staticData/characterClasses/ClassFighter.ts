@@ -2,6 +2,7 @@ import { FighterBattlefieldProwess } from "../classAbilities/FighterBattlefieldP
 import { SharedMeleeDamageBonus } from "../classAbilities/SharedMeleeDamageBonus";
 import { SharedRangedDamageBonus } from "../classAbilities/SharedMissileDamageBonus";
 import { ProficiencyAcrobatics } from "../proficiencies/ProficiencyAcrobatics";
+import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyAlertness } from "../proficiencies/ProficiencyAlertness";
 import { ProficiencyBerserkergang } from "../proficiencies/ProficiencyBerserkergang";
 import { ProficiencyBlindFighting } from "../proficiencies/ProficiencyBlindFighting";
@@ -25,13 +26,7 @@ import { ProficiencySurvival } from "../proficiencies/ProficiencySurvival";
 import { ProficiencySwashbuckling } from "../proficiencies/ProficiencySwashbuckling";
 import { ProficiencyWeaponFinesse } from "../proficiencies/ProficiencyWeaponFinesse";
 import { ProficiencyWeaponFocus } from "../proficiencies/ProficiencyWeaponFocus";
-import {
-  ArmorStyle,
-  BaseWeaponStyle,
-  CharacterClass,
-  CharacterStat,
-  SavingThrowType,
-} from "../types/characterClasses";
+import { ArmorStyle, BaseWeaponStyle, CharacterClass, CharacterStat, SavingThrowType } from "../types/characterClasses";
 
 export const ClassFighter: CharacterClass = {
   name: "Fighter",
@@ -39,10 +34,7 @@ export const ClassFighter: CharacterClass = {
   hpStep: 2,
   primeRequisites: [CharacterStat.Strength],
   statRequirements: {},
-  xpToLevel: [
-    0, 2000, 4000, 8000, 16000, 32000, 65000, 130000, 250000, 370000, 490000,
-    610000, 730000, 850000,
-  ],
+  xpToLevel: [0, 2000, 4000, 8000, 16000, 32000, 65000, 130000, 250000, 370000, 490000, 610000, 730000, 850000],
   weaponStyles: [
     BaseWeaponStyle.OneHandOnly,
     BaseWeaponStyle.OneHandAndShield,
@@ -50,25 +42,17 @@ export const ClassFighter: CharacterClass = {
     BaseWeaponStyle.TwoHanded,
   ],
   armorStyle: ArmorStyle.Heavy,
+  cleaveMultiplier: 1,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [
-      15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6,
-    ],
-    [SavingThrowType.PoisonAndDeath]: [
-      14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7, 7, 6, 5,
-    ],
-    [SavingThrowType.BlastAndBreath]: [
-      16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7,
-    ],
-    [SavingThrowType.StaffsAndWands]: [
-      16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7,
-    ],
-    [SavingThrowType.Spells]: [
-      17, 16, 16, 15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8,
-    ],
+    [SavingThrowType.PetrificationAndParalysis]: [15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6],
+    [SavingThrowType.PoisonAndDeath]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7, 7, 6, 5],
+    [SavingThrowType.BlastAndBreath]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7],
+    [SavingThrowType.StaffsAndWands]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7],
+    [SavingThrowType.Spells]: [17, 16, 16, 15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8],
   },
   toHitBonus: [0, 1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7, 8, 9],
   classFeatures: [
+    { def: ProficiencyAdventuring },
     { def: SharedMeleeDamageBonus },
     { def: SharedRangedDamageBonus },
     { def: FighterBattlefieldProwess },
@@ -82,7 +66,7 @@ export const ClassFighter: CharacterClass = {
     { def: ProficiencyCombatReflexes },
     {
       def: ProficiencyCombatTrickery,
-      subTypes: ["Disarm", "Force Back", "Knock Down", "Overrun", "Sunder"],
+      subtypes: ["Disarm", "Force Back", "Knock Down", "Overrun", "Sunder"],
     },
     { def: ProficiencyCommand },
     { def: ProficiencyDungeonBashing },

@@ -6,10 +6,7 @@ import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
 import ServerAPI, { CharacterData, Gender } from "../../serverAPI";
-import {
-  AllClasses,
-  AllClassesArray,
-} from "../../staticData/characterClasses/AllClasses";
+import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { CharacterStat } from "../../staticData/types/characterClasses";
 import styles from "./CreateCharacterSubPanel.module.scss";
 
@@ -81,43 +78,37 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       });
     }
 
-    const minStrength =
-      selectedClass?.statRequirements[CharacterStat.Strength] ?? 3;
+    const minStrength = selectedClass?.statRequirements[CharacterStat.Strength] ?? 3;
     if (this.state.strength < minStrength) {
       requestAnimationFrame(() => {
         this.setState({ strength: minStrength });
       });
     }
-    const minIntelligence =
-      selectedClass?.statRequirements[CharacterStat.Intelligence] ?? 3;
+    const minIntelligence = selectedClass?.statRequirements[CharacterStat.Intelligence] ?? 3;
     if (this.state.intelligence < minIntelligence) {
       requestAnimationFrame(() => {
         this.setState({ intelligence: minIntelligence });
       });
     }
-    const minWisdom =
-      selectedClass?.statRequirements[CharacterStat.Wisdom] ?? 3;
+    const minWisdom = selectedClass?.statRequirements[CharacterStat.Wisdom] ?? 3;
     if (this.state.wisdom < minWisdom) {
       requestAnimationFrame(() => {
         this.setState({ wisdom: minWisdom });
       });
     }
-    const minDexterity =
-      selectedClass?.statRequirements[CharacterStat.Dexterity] ?? 3;
+    const minDexterity = selectedClass?.statRequirements[CharacterStat.Dexterity] ?? 3;
     if (this.state.dexterity < minDexterity) {
       requestAnimationFrame(() => {
         this.setState({ dexterity: minDexterity });
       });
     }
-    const minConstitution =
-      selectedClass?.statRequirements[CharacterStat.Constitution] ?? 3;
+    const minConstitution = selectedClass?.statRequirements[CharacterStat.Constitution] ?? 3;
     if (this.state.constitution < minConstitution) {
       requestAnimationFrame(() => {
         this.setState({ constitution: minConstitution });
       });
     }
-    const minCharisma =
-      selectedClass?.statRequirements[CharacterStat.Charisma] ?? 3;
+    const minCharisma = selectedClass?.statRequirements[CharacterStat.Charisma] ?? 3;
     if (this.state.charisma < minCharisma) {
       requestAnimationFrame(() => {
         this.setState({ charisma: minCharisma });
@@ -233,9 +224,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         <div className={styles.xpRangeLabel}>{`${minXP} - ${maxXP}`}</div>
 
         <div className={styles.strengthLabel}>
-          {primeRequisites.includes(CharacterStat.Strength) && (
-            <span className={styles.primeRequisiteLabel}>*</span>
-          )}
+          {primeRequisites.includes(CharacterStat.Strength) && <span className={styles.primeRequisiteLabel}>*</span>}
           STR
         </div>
         <input
@@ -269,9 +258,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         />
 
         <div className={styles.wisdomLabel}>
-          {primeRequisites.includes(CharacterStat.Wisdom) && (
-            <span className={styles.primeRequisiteLabel}>*</span>
-          )}
+          {primeRequisites.includes(CharacterStat.Wisdom) && <span className={styles.primeRequisiteLabel}>*</span>}
           WIS
         </div>
         <input
@@ -287,9 +274,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         />
 
         <div className={styles.dexterityLabel}>
-          {primeRequisites.includes(CharacterStat.Dexterity) && (
-            <span className={styles.primeRequisiteLabel}>*</span>
-          )}
+          {primeRequisites.includes(CharacterStat.Dexterity) && <span className={styles.primeRequisiteLabel}>*</span>}
           DEX
         </div>
         <input
@@ -323,9 +308,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         />
 
         <div className={styles.charismaLabel}>
-          {primeRequisites.includes(CharacterStat.Charisma) && (
-            <span className={styles.primeRequisiteLabel}>*</span>
-          )}
+          {primeRequisites.includes(CharacterStat.Charisma) && <span className={styles.primeRequisiteLabel}>*</span>}
           CHA
         </div>
         <input
@@ -341,10 +324,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         />
 
         <div className={styles.rerollStatsLabel}>Reroll Stats</div>
-        <div
-          className={styles.rollStatsButton}
-          onClick={this.onRerollClicked.bind(this)}
-        ></div>
+        <div className={styles.rollStatsButton} onClick={this.onRerollClicked.bind(this)}></div>
 
         <div className={styles.hitDiceLabel}>{`Hit Dice (d${hitDieSize})`}</div>
         <div className={styles.hitDiceWrapper}>
@@ -372,15 +352,9 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         </div>
 
         <div className={styles.rerollHitpointsLabel}>Reroll Hitpoints</div>
-        <div
-          className={styles.rollHitpointsButton}
-          onClick={this.onRerollHitpointsClicked.bind(this)}
-        ></div>
+        <div className={styles.rollHitpointsButton} onClick={this.onRerollHitpointsClicked.bind(this)}></div>
 
-        <div
-          className={styles.saveButton}
-          onClick={this.onSaveClicked.bind(this)}
-        >
+        <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
           Save Character
         </div>
 
@@ -450,7 +424,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     // Send it to the server!
     const res = await ServerAPI.createCharacter(character);
     this.setState({ isSaving: false });
-    console.log(res);
     // Refetch characters.
     if (this.props.dispatch) {
       await refetchCharacters(this.props.dispatch);
@@ -460,10 +433,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
   }
 
   private onRerollClicked(): void {
-    const reqs =
-      this.state.class === "---"
-        ? {}
-        : AllClasses[this.state.class].statRequirements;
+    const reqs = this.state.class === "---" ? {} : AllClasses[this.state.class].statRequirements;
 
     this.setState({
       strength: this.rollStat(reqs[CharacterStat.Strength] ?? 0),
@@ -512,6 +482,4 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   };
 }
 
-export const CreateCharacterSubPanel = connect(mapStateToProps)(
-  ACreateCharacterSubPanel
-);
+export const CreateCharacterSubPanel = connect(mapStateToProps)(ACreateCharacterSubPanel);

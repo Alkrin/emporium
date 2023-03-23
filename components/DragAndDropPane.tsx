@@ -25,13 +25,8 @@ type Props = ReactProps & InjectedProps;
 class DragAndDropPane extends React.Component<Props> {
   public render(): React.ReactNode {
     // TODO: Does "dragging" get renamed by the .module. system?
-    const dragClass =
-      (this.props.currentDraggableID?.length ?? 0) > 0 ? styles.dragging : "";
-    return (
-      <div className={`${styles.root} ${dragClass}`}>
-        {this.renderDraggable()}
-      </div>
-    );
+    const dragClass = (this.props.currentDraggableID?.length ?? 0) > 0 ? styles.dragging : "";
+    return <div className={`${styles.root} ${dragClass}`}>{this.renderDraggable()}</div>;
   }
 
   private renderDraggable(): React.ReactNode {
@@ -50,9 +45,7 @@ class DragAndDropPane extends React.Component<Props> {
         width: `${width}px`,
         height: `${height}px`,
       };
-      return (
-        <div style={draggableStyle}>{this.props.currentDraggingRender()}</div>
-      );
+      return <div style={draggableStyle}>{this.props.currentDraggingRender()}</div>;
     } else {
       return null;
     }
@@ -60,12 +53,7 @@ class DragAndDropPane extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
-  const {
-    currentDraggableID,
-    currentDraggableBounds,
-    currentDraggingRender,
-    dragDelta,
-  } = state.dragAndDrop;
+  const { currentDraggableID, currentDraggableBounds, currentDraggingRender, dragDelta } = state.dragAndDrop;
 
   return {
     ...ownProps,

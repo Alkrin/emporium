@@ -19,5 +19,21 @@ export interface AbilityOrProficiency {
 /** If no subType is specified, then ALL subTypes are included. */
 export interface AbilityFilter {
   def: AbilityOrProficiency;
-  subTypes?: string[];
+  rank?: number;
+  subtypes?: string[];
 }
+
+export enum ProficiencySource {
+  Class1 = "Class1",
+  Class2 = "Class2",
+  Class3 = "Class3",
+  Class4 = "Class4",
+  Class5 = "Class5",
+  General1 = "General1",
+  General2 = "General2",
+  General3 = "General3",
+  General4 = "General4",
+  Extra = "Extra",
+}
+
+export const GeneralProficienciesAt = [1, 5, 9, 13];

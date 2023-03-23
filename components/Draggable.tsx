@@ -26,22 +26,14 @@ class Draggable extends React.Component<Props> {
   private ref: HTMLDivElement | null = null;
   public render(): React.ReactNode {
     // We pull out `children` and our custom props so the DOM's `div` doesn't get confused by unknown props.
-    const {
-      children,
-      style,
-      draggableID,
-      currentDraggableID,
-      dispatch,
-      ...otherProps
-    } = this.props;
+    const { children, style, draggableID, currentDraggableID, dispatch, ...otherProps } = this.props;
 
     const finalStyle = {};
     if (style) {
       Object.assign(finalStyle, style);
     }
     // When dragging, we render the dragged item elsewhere, but we retain the original to preserve layout flow.
-    const draggingStyle =
-      draggableID === currentDraggableID ? { opacity: 0.5 } : {};
+    const draggingStyle = draggableID === currentDraggableID ? { opacity: 0.5 } : {};
     Object.assign(finalStyle, draggingStyle);
 
     return (
@@ -58,12 +50,12 @@ class Draggable extends React.Component<Props> {
     );
   }
 
-  componentDidUpdate(
-    prevProps: Readonly<Props>,
-    prevState: Readonly<{}>,
-    snapshot?: any
-  ): void {
-    if (this.ref && this.props.draggableID === this.props.currentDraggableID) {
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
+    if (
+      this.ref && // Can we get the bounds for this Draggable?
+      this.props.draggableID === this.props.currentDraggableID && // Are we dragging this Draggable?
+      prevProps.currentDraggableID !== this.props.currentDraggableID // Is this the first update after we started dragging this Draggable?
+    ) {
       // This Draggable is currently being dragged, so report its bounds. We need its
       // size and position so that the dragRender output will match.
       const bounds = this.ref.getBoundingClientRect();

@@ -8,12 +8,7 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../redux/store";
-import {
-  hideTooltip,
-  showTooltip,
-  TooltipParams,
-  updateTooltip,
-} from "../redux/tooltipSlice";
+import { hideTooltip, showTooltip, TooltipParams, updateTooltip } from "../redux/tooltipSlice";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
   tooltipParams: TooltipParams;
@@ -29,13 +24,7 @@ type Props = ReactProps & InjectedProps;
 class TooltipSource extends React.Component<Props> {
   public render(): React.ReactNode {
     // We pull out `children` and our custom props so the DOM's `div` doesn't get confused by unknown props.
-    const {
-      children,
-      tooltipParams,
-      currentTooltipID,
-      dispatch,
-      ...otherProps
-    } = this.props;
+    const { children, tooltipParams, currentTooltipID, dispatch, ...otherProps } = this.props;
     return (
       <div
         {...otherProps}
@@ -46,17 +35,6 @@ class TooltipSource extends React.Component<Props> {
         {children}
       </div>
     );
-  }
-
-  componentDidUpdate(
-    prevProps: Readonly<Props>,
-    prevState: Readonly<{}>,
-    snapshot?: any
-  ): void {
-    if (this.props.currentTooltipID === this.props.tooltipParams.id) {
-      // If the params changed while the tooltip is visible, we should update the tooltip!
-      this.props.dispatch?.(updateTooltip(this.props.tooltipParams));
-    }
   }
 
   private onMouseEnter(e: React.MouseEvent) {

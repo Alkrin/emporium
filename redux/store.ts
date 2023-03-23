@@ -4,6 +4,7 @@ import { contextMenuSlice } from "./contextMenuSlice";
 import { dragAndDropSlice } from "./dragAndDropSlice";
 import { hudSlice } from "./hudSlice";
 import { modalsSlice } from "./modalsSlice";
+import { proficienciesSlice } from "./proficienciesSlice";
 import { subPanelsSlice } from "./subPanelsSlice";
 import { toastersSlice } from "./toastersSlice";
 import { tooltipSlice } from "./tooltipSlice";
@@ -16,6 +17,7 @@ const store = configureStore({
     dragAndDrop: dragAndDropSlice.reducer,
     hud: hudSlice.reducer,
     modals: modalsSlice.reducer,
+    proficiencies: proficienciesSlice.reducer,
     subPanels: subPanelsSlice.reducer,
     toasters: toastersSlice.reducer,
     tooltip: tooltipSlice.reducer,

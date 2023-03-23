@@ -13,6 +13,11 @@ export interface SetXPParams {
   xp: number;
 }
 
+export interface SetHPParams {
+  characterId: number;
+  hp: number;
+}
+
 function buildDefaultCharactersReduxState(): CharactersReduxState {
   const defaults: CharactersReduxState = {
     characters: {},
@@ -31,6 +36,11 @@ export const charactersSlice = createSlice({
     setActiveCharacterId: (state: CharactersReduxState, action: PayloadAction<number>) => {
       state.activeCharacterId = action.payload;
     },
+    setCharacterHP: (state: CharactersReduxState, action: PayloadAction<SetHPParams>) => {
+      if (state.characters[action.payload.characterId]) {
+        state.characters[action.payload.characterId].hp = action.payload.hp;
+      }
+    },
     setCharacterXP: (state: CharactersReduxState, action: PayloadAction<SetXPParams>) => {
       if (state.characters[action.payload.characterId]) {
         state.characters[action.payload.characterId].xp = action.payload.xp;
@@ -39,4 +49,4 @@ export const charactersSlice = createSlice({
   },
 });
 
-export const { updateCharacter, setActiveCharacterId, setCharacterXP } = charactersSlice.actions;
+export const { updateCharacter, setActiveCharacterId, setCharacterHP, setCharacterXP } = charactersSlice.actions;

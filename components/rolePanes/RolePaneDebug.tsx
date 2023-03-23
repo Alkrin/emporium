@@ -138,8 +138,7 @@ class RolePaneDebug extends React.Component<Props, State> {
             textAlign: "center",
           }}
         >
-          The purple square can be dragged and dropped into any of the four
-          white squares.
+          The purple square can be dragged and dropped into any of the four white squares.
         </div>
         {this.renderDropTarget("A", "35%", "45%")}
         {this.renderDropTarget("B", "35%", "55%")}
@@ -149,15 +148,11 @@ class RolePaneDebug extends React.Component<Props, State> {
     );
   }
 
-  private renderDropTarget(
-    id: string,
-    top: string,
-    left: string
-  ): React.ReactNode {
+  private renderDropTarget(id: string, top: string, left: string): React.ReactNode {
     return (
       <DropTarget
         dropID={id}
-        dropType={"TEST"}
+        dropTypes={"TEST"}
         style={{
           position: "absolute",
           top,
@@ -196,7 +191,7 @@ class RolePaneDebug extends React.Component<Props, State> {
                   }}
                 />
               )}
-              dropType={"TEST"}
+              dropTypes={"TEST"}
               dropHandler={(targetId) => {
                 if (targetId) {
                   // TODO: Chrome doesn't like us using setState here, but it works.

@@ -4,6 +4,7 @@ import { SharedCreateUndead } from "../classAbilities/SharedCreateUndead";
 import { SharedMajorMagicCreation } from "../classAbilities/SharedMajorMagicCreation";
 import { SharedMinorMagicCreation } from "../classAbilities/SharedMinorMagicCreation";
 import { SharedRitualMagic } from "../classAbilities/SharedRitualMagic";
+import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyAlchemy } from "../proficiencies/ProficiencyAlchemy";
 import { ProficiencyBattleMagic } from "../proficiencies/ProficiencyBattleMagic";
 import { ProficiencyBeastFriendship } from "../proficiencies/ProficiencyBeastFriendship";
@@ -32,13 +33,7 @@ import { ProficiencySensingPower } from "../proficiencies/ProficiencySensingPowe
 import { ProficiencySoothsaying } from "../proficiencies/ProficiencySoothsaying";
 import { ProficiencyTransmogrification } from "../proficiencies/ProficiencyTransmogrification";
 import { ProficiencyUnflappableCasting } from "../proficiencies/ProficiencyUnflappableCasting";
-import {
-  ArmorStyle,
-  BaseWeaponStyle,
-  CharacterClass,
-  CharacterStat,
-  SavingThrowType,
-} from "../types/characterClasses";
+import { ArmorStyle, BaseWeaponStyle, CharacterClass, CharacterStat, SavingThrowType } from "../types/characterClasses";
 import { BaseWeaponType } from "../types/items";
 
 export const ClassMage: CharacterClass = {
@@ -47,37 +42,21 @@ export const ClassMage: CharacterClass = {
   hpStep: 1,
   primeRequisites: [CharacterStat.Intelligence],
   statRequirements: {},
-  xpToLevel: [
-    0, 2500, 5000, 10000, 20000, 40000, 80000, 160000, 310000, 460000, 610000,
-    760000, 910000, 1060000,
-  ],
+  xpToLevel: [0, 2500, 5000, 10000, 20000, 40000, 80000, 160000, 310000, 460000, 610000, 760000, 910000, 1060000],
   weaponStyles: [BaseWeaponStyle.OneHandOnly, BaseWeaponStyle.TwoHanded],
-  weaponTypePermissions: [
-    BaseWeaponType.Club,
-    BaseWeaponType.Dagger,
-    BaseWeaponType.Dart,
-    BaseWeaponType.Staff,
-  ],
+  weaponTypePermissions: [BaseWeaponType.Club, BaseWeaponType.Dagger, BaseWeaponType.Dart, BaseWeaponType.Staff],
   armorStyle: ArmorStyle.None,
+  cleaveMultiplier: 0,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [
-      13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9,
-    ],
-    [SavingThrowType.PoisonAndDeath]: [
-      13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9,
-    ],
-    [SavingThrowType.BlastAndBreath]: [
-      15, 15, 15, 14, 14, 14, 13, 13, 13, 12, 12, 12, 11, 11,
-    ],
-    [SavingThrowType.StaffsAndWands]: [
-      11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7,
-    ],
-    [SavingThrowType.Spells]: [
-      12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8,
-    ],
+    [SavingThrowType.PetrificationAndParalysis]: [13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9],
+    [SavingThrowType.PoisonAndDeath]: [13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9],
+    [SavingThrowType.BlastAndBreath]: [15, 15, 15, 14, 14, 14, 13, 13, 13, 12, 12, 12, 11, 11],
+    [SavingThrowType.StaffsAndWands]: [11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7],
+    [SavingThrowType.Spells]: [12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8],
   },
   toHitBonus: [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4],
   classFeatures: [
+    { def: ProficiencyAdventuring },
     { def: SharedMinorMagicCreation },
     { def: SharedMajorMagicCreation },
     { def: SharedRitualMagic },

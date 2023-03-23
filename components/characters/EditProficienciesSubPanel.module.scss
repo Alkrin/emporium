@@ -1,0 +1,313 @@
+.root {
+  width: 90vmin;
+  height: 65vmin;
+  border-radius: 1vmin;
+  border: 2px solid white;
+  background-color: #222;
+}
+
+.saveButton {
+  position: absolute;
+  bottom: 2vmin;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+}
+
+.savingVeil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  pointer-events: all;
+}
+
+.savingLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: wheat;
+  font-size: 3rem;
+}
+
+.classFeaturesRoot {
+  position: absolute;
+  top: 2vmin;
+  left: 2vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  color: wheat;
+  border-bottom: 1px solid yellow;
+  text-align: center;
+}
+
+.classFeaturesList {
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: 44.5vmin;
+  width: 25.5vmin;
+  background-color: #333;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.classFeaturesListRow {
+  margin-bottom: 0.5vmin;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+
+  &.notReady {
+    background-color: rgba(255, 0, 0, 0.3);
+  }
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.listRequiredLevel {
+  width: 5vmin;
+  text-align: center;
+  color: lime;
+
+  &.notReady {
+    color: red;
+  }
+}
+
+.listName {
+  font-size: 1rem;
+  color: white;
+  text-align: left;
+  text-overflow: ellipsis;
+  width: 15vmin;
+}
+
+.tooltipRoot {
+  max-width: 45vmin;
+}
+
+.tooltipTitle {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.tooltipText {
+  font-size: 0.8rem;
+  color: white;
+  margin-top: 0.5vmin;
+  text-align: justify;
+}
+
+.proficiencySlotRow {
+  padding-top: 0.5vmin;
+  display: flex;
+  flex-direction: row;
+  font-size: 1rem;
+  align-items: center;
+}
+
+.proficiencySlotSource {
+  font-size: 1rem;
+  color: wheat;
+  width: 7vmin;
+  text-align: right;
+}
+
+.proficiencySlot {
+  width: 20vmin;
+  height: 2vmin;
+  box-sizing: border-box;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+
+  &.changed {
+    border-color: yellow;
+  }
+}
+
+.assignedProficiencyName {
+  margin-left: 0.5vmin;
+}
+
+.classProficiencySlotsRoot {
+  position: absolute;
+  top: 2vmin;
+  left: 30vmin;
+  display: flex;
+  flex-direction: column;
+  width: 28vmin;
+}
+
+.classProficiencySlotsList {
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  height: 13vmin;
+  width: 28vmin;
+  background-color: #333;
+}
+
+.generalProficiencySlotsRoot {
+  position: absolute;
+  top: 19vmin;
+  left: 30vmin;
+  display: flex;
+  flex-direction: column;
+  width: 28vmin;
+}
+
+.generalProficiencySlotsList {
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  height: 10.5vmin;
+  width: 28vmin;
+  background-color: #333;
+}
+
+.extraProficiencySlotsRoot {
+  position: absolute;
+  top: 33.5vmin;
+  left: 30vmin;
+  display: flex;
+  flex-direction: column;
+  width: 28vmin;
+}
+
+.extraProficiencySlotsList {
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  height: 13vmin;
+  width: 28vmin;
+  background-color: #333;
+}
+
+.classProficienciesListRoot {
+  position: absolute;
+  top: 2vmin;
+  left: 62.5vmin;
+  display: flex;
+  flex-direction: column;
+  width: 25.5vmin;
+}
+
+.classProficienciesList {
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  height: 20vmin;
+  width: 25.5vmin;
+  background-color: #333;
+  overflow-y: auto;
+}
+
+.generalProficienciesListRoot {
+  position: absolute;
+  top: 26.5vmin;
+  left: 62.5vmin;
+  display: flex;
+  flex-direction: column;
+  width: 25.5vmin;
+}
+
+.generalProficienciesList {
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  height: 20vmin;
+  width: 25.5vmin;
+  background-color: #333;
+  overflow-y: auto;
+}
+
+.availableProficiencyRowDraggable {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.availableProficiencyRowContentWrapper {
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+}
+
+.availableProficiencyRowDraggableHandle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.availableProficiencyName {
+  color: white;
+}
+
+.cancelButton {
+  margin-left: 0.5vmin;
+  width: 2vmin;
+  height: 2vmin;
+  background-image: url("/images/CancelIcon.png");
+  background-size: contain;
+  cursor: pointer;
+
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}

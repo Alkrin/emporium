@@ -10,12 +10,29 @@ const db = mysql({
   },
 });
 
-export default async function executeQuery<T>(
-  query: string,
-  values: any[]
-): Promise<T | any> {
+export interface SQLQuery {
+  query: string;
+  values: any[];
+}
+
+export async function executeQuery<T>(query: string, values: any[]): Promise<T | any> {
   try {
     const results = await db.query<T>(query, values);
+    await db.end();
+    return results;
+  } catch (error) {
+    return { error };
+  }
+}
+
+export async function executeTransaction<T>(queries: SQLQuery[]): Promise<T | any> {
+  try {
+    let transaction = db.transaction();
+    queries.forEach((q) => {
+      transaction = transaction.query(q.query, q.values);
+    });
+    const results = await transaction.commit();
+
     await db.end();
     return results;
   } catch (error) {

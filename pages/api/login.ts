@@ -1,19 +1,16 @@
 import { IncomingMessage, ServerResponse } from "http";
-import executeQuery from "../../lib/db";
+import { executeQuery } from "../../lib/db";
 import xorCipher from "../../lib/xorCipher";
 
-export default async function handler(
-  req: IncomingMessage & any,
-  res: ServerResponse & any
-): Promise<void> {
+export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
     if (process.env.CIPHER) {
       const passCrypt = xorCipher.encode(process.env.CIPHER, req.body.pass);
       if (passCrypt.length > 0) {
-        const result = await executeQuery<any>(
-          `SELECT id, name, role FROM user WHERE name=? AND pass=?`,
-          [req.body.name, passCrypt]
-        );
+        const result = await executeQuery<any>(`SELECT id, name, role FROM user WHERE name=? AND pass=?`, [
+          req.body.name,
+          passCrypt,
+        ]);
 
         if (result.length === 1) {
           res.status(200).json(result[0]);

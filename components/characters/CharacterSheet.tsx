@@ -3,19 +3,24 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
+import { showSubPanel } from "../../redux/subPanelsSlice";
 import { CharacterData } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import { SavingThrowType } from "../../staticData/types/characterClasses";
 import TooltipSource from "../TooltipSource";
+import { AbilitiesList } from "./AbilitiesList";
 import styles from "./CharacterSheet.module.scss";
+import { EditHPDialog } from "./EditHPDialog";
+import { EditProficienciesSubPanel } from "./EditProficienciesSubPanel";
 import { EditXPDialog } from "./EditXPDialog";
 
 interface ReactProps {
-  character: CharacterData | null;
+  characterId: number;
   exiting: boolean;
 }
 
 interface InjectedProps {
+  character: CharacterData;
   dispatch?: Dispatch;
 }
 
@@ -27,7 +32,7 @@ class ACharacterSheet extends React.Component<Props> {
 
     return (
       <div className={`${styles.root} ${animationClass}`}>
-        {this.props.character ? (
+        {this.props.characterId > 0 ? (
           <>
             <div
               className={styles.nameLabel}
@@ -36,6 +41,8 @@ class ACharacterSheet extends React.Component<Props> {
             {this.renderSavingThrowsPanel()}
             {this.renderSpeedPanel()}
             {this.renderXPPanel()}
+            {this.renderHPPanel()}
+            {this.renderAbilitiesPanel()}
           </>
         ) : (
           <div className={styles.placeholder} />
@@ -44,20 +51,95 @@ class ACharacterSheet extends React.Component<Props> {
     );
   }
 
+  private renderAbilitiesPanel(): React.ReactNode {
+    return (
+      <div className={styles.abilitiesPanel}>
+        <div className={styles.row}>
+          <div className={styles.abilitiesTitle}>{"Abilities and Proficiencies"}</div>
+          <div className={styles.abilitiesEditButton} onClick={this.onEditAbilitiesClicked.bind(this)} />
+        </div>
+        <div className={styles.horizontalLine} />
+        <AbilitiesList characterId={this.props.character?.id ?? 0} />
+      </div>
+    );
+  }
+
+  private onEditAbilitiesClicked(): void {
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "EditProficiencies",
+        content: () => {
+          return <EditProficienciesSubPanel />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
   private renderXPPanel(): React.ReactNode {
     if (this.props.character) {
+      const characterClass = AllClasses[this.props.character.class_name];
+      const xpCap = characterClass.xpToLevel[this.props.character.level] ?? "∞";
+      const needsLevelUp = this.props.character.xp >= xpCap;
+      const levelUpStyle = needsLevelUp ? styles.levelUp : "";
       return (
-        <div className={styles.xpPanel}>
+        <div className={`${styles.xpPanel} ${levelUpStyle}`}>
           <div className={styles.row}>
             <div className={styles.xpTitle}>XP:</div>
-            <div className={styles.xpValue}>{this.props.character.xp}</div>
+            <div className={styles.xpNumbers}>
+              <div className={`${styles.xpValue} ${levelUpStyle}`}>{this.props.character.xp}</div>
+              <div className={styles.xpCap}>{`/ ${xpCap}`}</div>
+            </div>
             <div className={styles.xpEditButton} onClick={this.onXPEditClicked.bind(this)} />
+          </div>
+          {needsLevelUp && (
+            <div className={styles.levelUpButton} onClick={this.onLevelUpClicked.bind(this)}>
+              Level Up!
+            </div>
+          )}
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  private renderHPPanel(): React.ReactNode {
+    if (this.props.character) {
+      const maxHP = this.props.character.hit_dice.reduce((a, b) => a + b, 0);
+      const isDying = this.props.character.hp <= 0;
+      const healthStyle = isDying ? styles.dying : "";
+      return (
+        <div className={`${styles.hpPanel} ${healthStyle}`}>
+          <div className={styles.row}>
+            <div className={styles.hpTitle}>HP:</div>
+            <div className={styles.hpNumbers}>
+              <div className={`${styles.hpValue} ${healthStyle}`}>{this.props.character.hp}</div>
+              <div className={styles.hpCap}>{`/ ${maxHP}`}</div>
+            </div>
+            <div className={styles.hpEditButton} onClick={this.onHPEditClicked.bind(this)} />
           </div>
         </div>
       );
     } else {
       return null;
     }
+  }
+
+  private onLevelUpClicked(): void {
+    // TODO: Level Up dialog?
+  }
+
+  private onHPEditClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "hpEdit",
+        content: () => {
+          return <EditHPDialog />;
+        },
+        escapable: true,
+      })
+    );
   }
 
   private onXPEditClicked(): void {
@@ -196,11 +278,9 @@ class ACharacterSheet extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const character =
-    state.characters.activeCharacterId === -1 ? null : state.characters.characters[state.characters.activeCharacterId];
   return {
     ...props,
-    character,
+    character: state.characters.characters[props.characterId ?? 1] ?? null,
   };
 }
 

@@ -1,15 +1,9 @@
 import { IncomingMessage, ServerResponse } from "http";
-import executeQuery from "../../lib/db";
+import { executeQuery } from "../../lib/db";
 
-export default async function handler(
-  req: IncomingMessage & any,
-  res: ServerResponse & any
-): Promise<void> {
+export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
-    const results = await executeQuery<any>(
-      `SELECT id,name,role FROM user`,
-      []
-    );
+    const results = await executeQuery<any>(`SELECT id,name,role FROM user`, []);
 
     res.status(200).json(results);
   } catch (error) {

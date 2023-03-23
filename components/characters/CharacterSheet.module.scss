@@ -181,27 +181,183 @@
 }
 
 .xpPanel {
-  @extend .row;
+  @extend .column;
   position: absolute;
   top: 20vmin;
   left: 1.5vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
+
+  &.levelUp {
+    animation: hmpcsLevelUpFlash 0.5s alternate infinite;
+    @keyframes hmpcsLevelUpFlash {
+      0% {
+        box-shadow: inset 0 0 0 2px transparent;
+      }
+      100% {
+        box-shadow: inset 0 0 0 2px lime;
+      }
+    }
+  }
 }
 
 .xpTitle {
   @extend .normalText;
-  width: 5vmin;
+  width: 3vmin;
+}
+
+.xpNumbers {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 13.4vmin;
 }
 
 .xpValue {
   @extend .valueText;
-  width: 5vmin;
-  text-align: right;
+
+  &.levelUp {
+    color: lime;
+  }
+}
+
+.xpCap {
+  @extend .normalText;
+  margin-left: 0.5vmin;
 }
 
 .xpEditButton {
+  @extend .editIcon;
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.levelUpButton {
+  margin-bottom: 0.5vmin;
+  font-size: 1rem;
+  align-self: center;
+  padding: 0.3vmin 3vmin;
+  border-radius: 0.5vmin;
+  box-sizing: border-box;
+  border: 2px solid white;
+  background-color: #49f;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+
+  animation: hmpcsHueRotate 1s alternate infinite;
+  @keyframes hmpcsHueRotate {
+    0% {
+      filter: hue-rotate(180deg);
+    }
+    100% {
+      filter: hue-rotate(360deg);
+    }
+  }
+}
+
+.hpPanel {
+  @extend .column;
+  position: absolute;
+  top: 20vmin;
+  left: 22.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+
+  &.dying {
+    animation: hmpcsDyingFlash 0.5s alternate infinite;
+    @keyframes hmpcsDyingFlash {
+      0% {
+        box-shadow: inset 0 0 0 2px transparent;
+      }
+      100% {
+        box-shadow: inset 0 0 0 2px red;
+      }
+    }
+  }
+}
+
+.hpTitle {
+  @extend .normalText;
+  width: 3vmin;
+}
+
+.hpNumbers {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 5.4vmin;
+}
+
+.hpValue {
+  @extend .valueText;
+
+  &.dying {
+    color: red;
+  }
+}
+
+.hpCap {
+  @extend .normalText;
+  margin-left: 0.5vmin;
+}
+
+.hpEditButton {
+  @extend .editIcon;
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.abilitiesPanel {
+  @extend .column;
+  position: absolute;
+  top: 27vmin;
+  left: 1.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.abilitiesTitle {
+  @extend .normalText;
+}
+
+.abilitiesEditButton {
   @extend .editIcon;
   margin-left: 0.5vmin;
   margin-top: 0vmin;

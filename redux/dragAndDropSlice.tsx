@@ -10,18 +10,18 @@ import { Dictionary } from "../lib/dictionary";
 
 interface DragStartParams {
   draggableID: string;
-  draggingRender: () => JSX.Element;
+  draggingRender: () => React.ReactNode;
 }
 
 export interface DropTargetParams {
   dropTargetID: string;
-  dropType: string;
+  dropTypes: string[];
   bounds: DOMRect;
 }
 
 export interface RemoveDropTargetParams {
   dropTargetID: string;
-  dropType: string;
+  dropTypes: string[];
 }
 
 interface DragAndDropState {
@@ -50,10 +50,7 @@ export const dragAndDropSlice = createSlice({
   name: "dragAndDrop",
   initialState: buildDefaultDragAndDropState(),
   reducers: {
-    startDrag: (
-      state: DragAndDropState,
-      action: PayloadAction<DragStartParams>
-    ) => {
+    startDrag: (state: DragAndDropState, action: PayloadAction<DragStartParams>) => {
       state.currentDraggableID = action.payload.draggableID;
       state.currentDraggingRender = action.payload.draggingRender;
     },
@@ -63,46 +60,32 @@ export const dragAndDropSlice = createSlice({
       state.currentDraggingRender = null;
       state.dragDelta = [0, 0];
     },
-    reportDraggableBounds: (
-      state: DragAndDropState,
-      action: PayloadAction<DOMRect>
-    ) => {
+    reportDraggableBounds: (state: DragAndDropState, action: PayloadAction<DOMRect>) => {
       state.currentDraggableBounds = action.payload;
     },
-    reportDropTargetBounds: (
-      state: DragAndDropState,
-      action: PayloadAction<DropTargetParams>
-    ) => {
-      const { dropType, dropTargetID, bounds } = action.payload;
-      // Make sure this
-      if (!state.dropTargets[dropType]) {
-        state.dropTargets[dropType] = {};
-      }
-      state.dropTargets[dropType][dropTargetID] = bounds;
+    reportDropTargetBounds: (state: DragAndDropState, action: PayloadAction<DropTargetParams>) => {
+      const { dropTypes, dropTargetID, bounds } = action.payload;
+      // Make sure the dropTypes have a home.
+      dropTypes.forEach((dropType) => {
+        if (!state.dropTargets[dropType]) {
+          state.dropTargets[dropType] = {};
+        }
+        state.dropTargets[dropType][dropTargetID] = bounds;
+      });
     },
-    removeDropTarget: (
-      state: DragAndDropState,
-      action: PayloadAction<RemoveDropTargetParams>
-    ) => {
-      const { dropType, dropTargetID } = action.payload;
-      if (state.dropTargets[dropType]?.[dropTargetID]) {
-        delete state.dropTargets[dropType][dropTargetID];
-      }
+    removeDropTarget: (state: DragAndDropState, action: PayloadAction<RemoveDropTargetParams>) => {
+      const { dropTypes, dropTargetID } = action.payload;
+      dropTypes.forEach((dropType) => {
+        if (state.dropTargets[dropType]?.[dropTargetID]) {
+          delete state.dropTargets[dropType][dropTargetID];
+        }
+      });
     },
-    updateDragDelta: (
-      state: DragAndDropState,
-      action: PayloadAction<[number, number]>
-    ) => {
+    updateDragDelta: (state: DragAndDropState, action: PayloadAction<[number, number]>) => {
       state.dragDelta = action.payload;
     },
   },
 });
 
-export const {
-  startDrag,
-  endDrag,
-  reportDraggableBounds,
-  reportDropTargetBounds,
-  removeDropTarget,
-  updateDragDelta,
-} = dragAndDropSlice.actions;
+export const { startDrag, endDrag, reportDraggableBounds, reportDropTargetBounds, removeDropTarget, updateDragDelta } =
+  dragAndDropSlice.actions;

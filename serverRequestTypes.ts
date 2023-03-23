@@ -1,3 +1,5 @@
+import { ProficiencyData } from "./serverAPI";
+
 export interface RequestBody_CreateCharacter {
   user_id: number;
   name: string;
@@ -25,7 +27,17 @@ export interface RequestBody_LogIn {
   pass: string;
 }
 
-export interface RequestBody_AddXP {
+export interface RequestBody_SetXP {
   characterId: number;
   xp: number;
+}
+
+export interface RequestBody_SetHP {
+  characterId: number;
+  hp: number;
+}
+
+export interface RequestBody_UpdateProficiencies {
+  character_id: number;
+  proficiencies: ProficiencyData[];
 }

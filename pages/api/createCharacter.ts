@@ -1,11 +1,8 @@
 import { IncomingMessage, ServerResponse } from "http";
-import executeQuery from "../../lib/db";
+import { executeQuery } from "../../lib/db";
 import { RequestBody_CreateCharacter } from "../../serverRequestTypes";
 
-export default async function handler(
-  req: IncomingMessage & any,
-  res: ServerResponse & any
-): Promise<void> {
+export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
     const b = req.body as RequestBody_CreateCharacter;
     const results = await executeQuery<any>(

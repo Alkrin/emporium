@@ -9,6 +9,7 @@ import { EscapableParams, updateHUDSize } from "../redux/hudSlice";
 import { LocalStorageDataSource } from "../dataSources/LocalStorageDataSource";
 import { CharactersDataSource } from "../dataSources/CharactersDataSource";
 import { UsersDataSource } from "../dataSources/UsersDataSource";
+import { ProficienciesDataSource } from "../dataSources/ProficienciesDataSource";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -38,6 +39,7 @@ class ALandingPage extends React.Component<Props> {
         <LocalStorageDataSource />
         <CharactersDataSource />
         <UsersDataSource />
+        <ProficienciesDataSource />
         {this.props.currentUserId ? <MainPage /> : <Login />}
       </div>
     );

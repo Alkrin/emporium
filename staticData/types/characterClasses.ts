@@ -32,6 +32,8 @@ export enum SavingThrowType {
   Spells = "Spells",
 }
 
+export type CleaveMultiplier = 0 | 0.5 | 1;
+
 export interface CharacterClass {
   name: string;
   hitDieSize: 4 | 6 | 8 | 10;
@@ -47,6 +49,7 @@ export interface CharacterClass {
   /** If present, lists permissable weapon types for this class.  Otherwise, all are assumed permissable. */
   weaponTypePermissions?: BaseWeaponType[];
   armorStyle: ArmorStyle;
+  cleaveMultiplier: CleaveMultiplier;
   /** Array contains saving throw values by level in order, starting from level 1. */
   savingThrows: { [type in SavingThrowType]: number[] };
   /** Array contains to hit bonuses by level in order, starting from level 1. */

@@ -1,11 +1,10 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { setActiveCharacterId, setCharacterXP } from "../../redux/charactersSlice";
+import { setCharacterXP } from "../../redux/charactersSlice";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
-import { showSubPanel } from "../../redux/subPanelsSlice";
-import ServerAPI, { CharacterData, UserData } from "../../serverAPI";
+import ServerAPI, { CharacterData } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import styles from "./EditXPDialog.module.scss";
 

@@ -10,8 +10,8 @@ import { CharactersList } from "./CharactersList";
 import styles from "./CharactersPanel.module.scss";
 
 interface State {
-  currentCharacter: CharacterData | null;
-  prevCharacter: CharacterData | null;
+  currentCharacterId: number;
+  prevCharacterId: number;
 }
 
 interface ReactProps {}
@@ -28,8 +28,8 @@ class ACharactersPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      currentCharacter: null,
-      prevCharacter: null,
+      currentCharacterId: props.activeCharacterId || 0,
+      prevCharacterId: 0,
     };
   }
 
@@ -38,27 +38,27 @@ class ACharactersPanel extends React.Component<Props, State> {
       <div className={styles.root}>
         <CharactersList />
         <CharacterSheet
-          key={this.state.currentCharacter?.id ?? "None"}
-          character={this.state.currentCharacter}
+          key={this.state.currentCharacterId || "None"}
+          characterId={this.state.currentCharacterId}
           exiting={false}
         />
-        {this.state.prevCharacter && (
+        {this.state.prevCharacterId ? (
           <CharacterSheet
-            key={this.state.prevCharacter?.id ?? "None"}
-            character={this.state.prevCharacter}
+            key={this.state.prevCharacterId || "None"}
+            characterId={this.state.prevCharacterId}
             exiting={true}
           />
-        )}
+        ) : null}
         <SubPanelPane />
       </div>
     );
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-    if (this.props.activeCharacterId !== this.state.currentCharacter?.id) {
+    if (this.props.activeCharacterId !== this.state.currentCharacterId) {
       this.setState({
-        currentCharacter: this.props.characters[this.props.activeCharacterId],
-        prevCharacter: this.state.currentCharacter,
+        currentCharacterId: this.props.activeCharacterId,
+        prevCharacterId: this.state.currentCharacterId,
       });
     }
   }

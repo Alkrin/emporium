@@ -15,9 +15,9 @@ interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Must match with the draggableID on a Draggable. */
   draggableID: string;
   /** Used to render the matched Draggable when it is being dragged. */
-  draggingRender: () => JSX.Element;
+  draggingRender: () => React.ReactNode;
   /** Can only trigger drop events on DropTargets with a matching dropType. */
-  dropType?: string;
+  dropTypes: string[];
   /** Fired when a drag ends, whether or not it is over a matching DropTarget. */
   dropHandler?: (dropTargetID: string | null) => void;
 }
@@ -54,7 +54,7 @@ class DraggableHandle extends React.Component<Props> {
       style,
       draggableID,
       draggingRender,
-      dropType,
+      dropTypes: dropType,
       dropHandler,
       currentDraggableID,
       currentDraggableBounds,
@@ -136,25 +136,20 @@ class DraggableHandle extends React.Component<Props> {
 
     // Iterate all matching DropTargets and see if we are over one.
     let targetFound: boolean = false;
-    Object.entries(
-      this.props.dropTargets[this.props.dropType ?? ""] ?? {}
-    ).forEach((entry) => {
-      // Only report to the first valid DropTarget.
-      if (targetFound) {
-        return;
-      }
-      const dropTargetID = entry[0];
-      const bounds = entry[1];
+    this.props.dropTypes.forEach((dropType) => {
+      Object.entries(this.props.dropTargets[dropType] ?? {}).forEach((entry) => {
+        // Only report to the first valid DropTarget.
+        if (targetFound) {
+          return;
+        }
+        const dropTargetID = entry[0];
+        const bounds = entry[1];
 
-      if (
-        dcx >= bounds.x &&
-        dcx <= bounds.right &&
-        dcy >= bounds.y &&
-        dcy <= bounds.bottom
-      ) {
-        targetFound = true;
-        this.props.dropHandler?.(dropTargetID);
-      }
+        if (dcx >= bounds.x && dcx <= bounds.right && dcy >= bounds.y && dcy <= bounds.bottom) {
+          targetFound = true;
+          this.props.dropHandler?.(dropTargetID);
+        }
+      });
     });
 
     // Not all drops require a target.  Sometimes we just care where the item got dragged to.
@@ -165,8 +160,7 @@ class DraggableHandle extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
-  const { currentDraggableID, currentDraggableBounds, dragDelta, dropTargets } =
-    state.dragAndDrop;
+  const { currentDraggableID, currentDraggableBounds, dragDelta, dropTargets } = state.dragAndDrop;
 
   return {
     ...ownProps,
