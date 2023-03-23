@@ -152,7 +152,7 @@ class RolePaneDebug extends React.Component<Props, State> {
     return (
       <DropTarget
         dropID={id}
-        dropTypes={"TEST"}
+        dropTypes={["TEST"]}
         style={{
           position: "absolute",
           top,
@@ -191,7 +191,7 @@ class RolePaneDebug extends React.Component<Props, State> {
                   }}
                 />
               )}
-              dropTypes={"TEST"}
+              dropTypes={["TEST"]}
               dropHandler={(targetId) => {
                 if (targetId) {
                   // TODO: Chrome doesn't like us using setState here, but it works.
