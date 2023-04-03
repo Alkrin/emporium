@@ -18,6 +18,65 @@ export interface RequestBody_CreateCharacter {
   hit_dice: string;
 }
 
+export interface RequestBody_CreateItemDef {
+  name: string;
+  description: string;
+  stones: number;
+  sixth_stones: number;
+  storage_stones: number;
+  storage_sixth_stones: number;
+  storage_filters: string;
+  bundleable: boolean;
+  number_per_stone: number;
+  ac: number;
+  damage_die: number;
+  damage_dice: number;
+  damage_die_2h: number;
+  damage_dice_2h: number;
+  fixed_weight: boolean;
+  magic_bonus: number;
+  conditional_magic_bonus: number;
+  conditional_magic_bonus_type: string;
+  max_cleaves: number;
+  tags: string;
+  purchase_quantity: number;
+  cost_gp: number;
+  cost_sp: number;
+  cost_cp: number;
+}
+
+export interface RequestBody_EditItemDef {
+  id: number;
+  name: string;
+  description: string;
+  stones: number;
+  sixth_stones: number;
+  storage_stones: number;
+  storage_sixth_stones: number;
+  storage_filters: string;
+  bundleable: boolean;
+  number_per_stone: number;
+  ac: number;
+  damage_die: number;
+  damage_dice: number;
+  damage_die_2h: number;
+  damage_dice_2h: number;
+  fixed_weight: boolean;
+  magic_bonus: number;
+  conditional_magic_bonus: number;
+  conditional_magic_bonus_type: string;
+  max_cleaves: number;
+  tags: string;
+  purchase_quantity: number;
+  cost_gp: number;
+  cost_sp: number;
+  cost_cp: number;
+}
+
+export interface RequestBody_DeleteItemDef {
+  itemDefId: number;
+}
+
 export interface RequestBody_EncryptString {
   text: string;
 }

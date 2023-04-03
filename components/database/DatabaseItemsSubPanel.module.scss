@@ -1,0 +1,250 @@
+.root {
+  width: 50vmin;
+  height: 66.2vmin;
+  border-radius: 1vmin;
+  border: 2px solid white;
+  background-color: #222;
+}
+
+.labelText {
+  font-size: 1rem;
+  color: wheat;
+  user-select: none;
+}
+
+.firstLabel {
+  @extend .labelText;
+  margin-top: 0.2vmin;
+}
+
+.secondLabel {
+  @extend .firstLabel;
+  margin-left: 0.5vmin;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.panelTitle {
+  font-size: 3rem;
+  color: wheat;
+  position: absolute;
+  top: 1vmin;
+  left: 2vmin;
+  right: 2vmin;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+  user-select: none;
+}
+
+.itemListRoot {
+  position: absolute;
+  top: 8vmin;
+  left: 2vmin;
+  width: 20vmin;
+  height: 51.2vmin;
+  box-sizing: border-box;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  background-color: black;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.listRow {
+  margin-bottom: 0.5vmin;
+  padding: 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+
+  &.selected {
+    box-shadow: inset 0 0 0 2px red;
+  }
+}
+
+.footerButton {
+  position: absolute;
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  user-select: none;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.3;
+  }
+}
+
+.createNewButton {
+  @extend .footerButton;
+  bottom: 2vmin;
+  left: 2vmin;
+}
+
+.deleteButton {
+  @extend .footerButton;
+  bottom: 2vmin;
+  left: 15.5vmin;
+}
+
+.saveButton {
+  @extend .footerButton;
+  bottom: 2vmin;
+  left: 33.5vmin;
+}
+
+.dataPanelRoot {
+  position: absolute;
+  top: 8vmin;
+  right: 2vmin;
+  width: 25vmin;
+  height: 30vmin;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.textInput {
+  position: relative;
+  resize: none;
+}
+
+.idField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.nameField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  flex-grow: 1;
+}
+
+.descriptionField {
+  @extend .textInput;
+  height: 5vmin;
+}
+
+.trailingCheckbox {
+  margin-left: 0.5vmin;
+}
+
+.sizePanel {
+  @extend .row;
+  justify-content: flex-start;
+}
+
+.sizeStonesField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  width: 4vmin;
+}
+
+.sizeSixthStonesField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  width: 3vmin;
+}
+
+.numberPerStoneField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  width: 3vmin;
+}
+
+.storageStonesField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  width: 4vmin;
+}
+
+.storageSixthStonesField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  width: 3vmin;
+}
+
+.storageFiltersField {
+  @extend .textInput;
+  height: 3.5vmin;
+  resize: none;
+}
+
+.smallInputField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  width: 3vmin;
+}
+
+.tagsField {
+  @extend .textInput;
+  height: 3.5vmin;
+  resize: none;
+}
+
+.savingVeil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  pointer-events: all;
+}
+
+.savingLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: wheat;
+  font-size: 3rem;
+}
