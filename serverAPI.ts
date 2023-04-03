@@ -6,6 +6,9 @@ import {
   RequestBody_LogIn,
   RequestBody_SetHP,
   RequestBody_UpdateProficiencies,
+  RequestBody_CreateItemDef,
+  RequestBody_EditItemDef,
+  RequestBody_DeleteItemDef,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 
@@ -18,6 +21,39 @@ export interface UserData {
   name: string;
   role: UserRole;
 }
+
+export interface ItemDefData {
+  id: number;
+  name: string;
+  description: string;
+  stones: number;
+  sixth_stones: number;
+  storage_stones: number;
+  storage_sixth_stones: number;
+  storage_filters: string[];
+  bundleable: boolean;
+  number_per_stone: number;
+  ac: number;
+  damage_die: number;
+  damage_dice: number;
+  damage_die_2h: number;
+  damage_dice_2h: number;
+  fixed_weight: boolean;
+  magic_bonus: number;
+  conditional_magic_bonus: number;
+  conditional_magic_bonus_type: string;
+  max_cleaves: number;
+  tags: string[];
+  purchase_quantity: number;
+  cost_gp: number;
+  cost_sp: number;
+  cost_cp: number;
+}
+
+type ServerItemDefData = Omit<ItemDefData, "storage_filters" | "tags"> & {
+  storage_filters: string;
+  tags: string;
+};
 
 export type Gender = "m" | "f" | "o";
 
@@ -57,12 +93,28 @@ export interface HPChange {
   newHPValue: number;
 }
 
+export interface RowAdded {
+  insertId: number;
+}
+
+export interface RowEdited {
+  changedRows: number;
+}
+
+export interface RowDeleted {
+  affectedRows: number;
+}
+
 export type LogInResult = ServerError | UserData;
 export type CharactersResult = ServerError | CharacterData[];
+export type ItemDefsResult = ServerError | ItemDefData[];
 export type UsersResult = ServerError | UserData[];
 export type ProficienciesResult = ServerError | ProficiencyData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetXPResult = ServerError | XPChange;
+export type InsertRowResult = ServerError | RowAdded;
+export type EditRowResult = ServerError | RowEdited;
+export type DeleteRowResult = ServerError | RowDeleted;
 export type NoDataResult = ServerError | {};
 
 class AServerAPI {
@@ -126,13 +178,88 @@ class AServerAPI {
     }
   }
 
-  async createCharacter(character: CharacterData): Promise<CharactersResult> {
+  async fetchItemDefs(): Promise<ItemDefsResult> {
+    const res = await fetch("/api/fetchItemDefs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerItemDefData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      // tags and storage_filters are stored in the db as comma separated strings, but in Redux as a number array,
+      // so we have to convert before passing the results along.
+      const itemData: ItemDefData[] = [];
+      data.forEach((sItemData) => {
+        itemData.push({
+          ...sItemData,
+          tags: sItemData.tags.split(","),
+          storage_filters: sItemData.storage_filters.split(","),
+        });
+      });
+
+      return itemData;
+    }
+  }
+
+  async createCharacter(character: CharacterData): Promise<NoDataResult> {
     const requestBody: RequestBody_CreateCharacter = {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
     };
     const res = await fetch("/api/createCharacter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createItemDef(def: ItemDefData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateItemDef = {
+      ...def,
+      // Stored on the server as a comma separated string.
+      storage_filters: def.storage_filters.join(","),
+      tags: def.tags.join(","),
+    };
+    const res = await fetch("/api/createItemDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editItemDef(def: ItemDefData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditItemDef = {
+      ...def,
+      // Stored on the server as a comma separated string.
+      storage_filters: def.storage_filters.join(","),
+      tags: def.tags.join(","),
+    };
+    const res = await fetch("/api/editItemDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteItemDef(itemDefId: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteItemDef = {
+      itemDefId,
+    };
+    const res = await fetch("/api/deleteItemDef", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -10,6 +10,7 @@ import { LocalStorageDataSource } from "../dataSources/LocalStorageDataSource";
 import { CharactersDataSource } from "../dataSources/CharactersDataSource";
 import { UsersDataSource } from "../dataSources/UsersDataSource";
 import { ProficienciesDataSource } from "../dataSources/ProficienciesDataSource";
+import { GameDefsDataSource } from "../dataSources/GameDefsDataSource";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -37,6 +38,7 @@ class ALandingPage extends React.Component<Props> {
         }}
       >
         <LocalStorageDataSource />
+        <GameDefsDataSource />
         <CharactersDataSource />
         <UsersDataSource />
         <ProficienciesDataSource />

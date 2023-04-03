@@ -6,6 +6,7 @@ import { ActivitiesPanel } from "./activities/ActivitiesPanel";
 import AuthControl from "./AuthControl";
 import { CharactersPanel } from "./characters/CharactersPanel";
 import ContextMenuPane from "./ContextMenuPane";
+import { DatabasePanel } from "./database/DatabasePanel";
 import DragAndDropPane from "./DragAndDropPane";
 import styles from "./MainPage.module.scss";
 import ModalPane from "./ModalPane";
@@ -23,7 +24,7 @@ interface InjectedProps {
 
 type Props = ReactProps & InjectedProps;
 
-type MainPanelId = "Characters" | "World" | "Activities";
+type MainPanelId = "Characters" | "World" | "Activities" | "Database";
 
 interface State {
   activePanel: MainPanelId;
@@ -44,6 +45,7 @@ class AMainPage extends React.Component<Props, State> {
           {this.state.activePanel === "Characters" && <CharactersPanel />}
           {this.state.activePanel === "World" && <WorldPanel />}
           {this.state.activePanel === "Activities" && <ActivitiesPanel />}
+          {this.state.activePanel === "Database" && <DatabasePanel />}
 
           <div className={styles.consoleRoot}>
             <div className={styles.consoleTopLeft} />
@@ -89,6 +91,19 @@ class AMainPage extends React.Component<Props, State> {
           >
             <img className={styles.panelSelectorImage} src={"/images/World.png"} />
           </TooltipSource>
+          {this.props.activeRole !== "player" && (
+            <TooltipSource
+              className={`${styles.panelSelectorDatabase} ${
+                this.state.activePanel === "Database" ? styles.selected : ""
+              }`}
+              tooltipParams={{ id: "DatabasePanel", content: "Database" }}
+              onMouseDown={() => {
+                this.setState({ activePanel: "Database" });
+              }}
+            >
+              <img className={styles.panelSelectorImage} src={"/images/Database.png"} />
+            </TooltipSource>
+          )}
 
           <AuthControl />
           <RoleSelector />
@@ -101,6 +116,13 @@ class AMainPage extends React.Component<Props, State> {
         <TooltipPane />
       </div>
     );
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+    // Make sure to get off of the restricted panel if the user doesn't have permissions.
+    if (this.state.activePanel === "Database" && this.props.activeRole === "player") {
+      this.setState({ activePanel: "Characters" });
+    }
   }
 }
 

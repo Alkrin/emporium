@@ -1,0 +1,33 @@
+.root {
+  position: absolute;
+  top: 6.8vmin;
+  left: 11.75vmin;
+  bottom: 6.8vmin;
+  right: 8.4vmin;
+  padding: 2vmin;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.dataButton {
+  position: relative;
+  padding: 0vmin 0.5vmin;
+  font-size: 2rem;
+  color: wheat;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  border: 2px solid wheat;
+  user-select: none;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
