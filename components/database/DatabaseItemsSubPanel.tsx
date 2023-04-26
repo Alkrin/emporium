@@ -110,7 +110,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           }}
         />
         <div className={styles.dataPanelRoot}>
-          {this.renderIDSection()}
+          {this.renderIdSection()}
           {this.renderNameSection()}
           {this.renderDescriptionSection()}
           {this.renderSizeSection()}
@@ -150,7 +150,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private renderIDSection(): React.ReactNode {
+  private renderIdSection(): React.ReactNode {
     return (
       <div className={styles.row}>
         <div className={styles.firstLabel}>ID</div>

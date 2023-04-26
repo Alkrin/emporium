@@ -35,6 +35,7 @@ import {
   isContainerAInContainerB,
 } from "../../lib/itemUtils";
 import { setEquipment } from "../../redux/charactersSlice";
+import { SplitBundleDialog } from "./SplitBundleDialog";
 
 export const DropTypeItem = "DropTypeItem";
 
@@ -66,7 +67,7 @@ interface InjectedProps {
   allStorages: Dictionary<StorageData>;
   allItemDefs: Dictionary<ItemDefData>;
   allItems: Dictionary<ItemData>;
-  currentDraggableID: string;
+  currentDraggableId: string;
   dispatch?: Dispatch;
 }
 
@@ -177,10 +178,10 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     const draggableId = `${slotTag}:${slot_id}`;
 
     // Valid target if dragging from one slot to another valid slot.
-    let isValidDropTarget = this.props.currentDraggableID.startsWith(slotTag);
+    let isValidDropTarget = this.props.currentDraggableId.startsWith(slotTag);
     if (!isValidDropTarget) {
-      if (this.props.currentDraggableID.startsWith("personalPile")) {
-        const itemId: number = +this.props.currentDraggableID.slice(12);
+      if (this.props.currentDraggableId.startsWith("personalPile")) {
+        const itemId: number = +this.props.currentDraggableId.slice(12);
         const draggedItem = this.props.allItems[itemId];
         const draggedItemDef = this.props.allItemDefs[draggedItem.def_id];
         isValidDropTarget = draggedItemDef.tags.includes(slotTag);
@@ -197,10 +198,10 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
           className={`${styles.equipmentSlotRoot} ${validTargetClass}`}
         >
           {equippedItemDef && (
-            <Draggable className={styles.equippedItemRow} draggableID={draggableId}>
+            <Draggable className={styles.equippedItemRow} draggableId={draggableId}>
               <DraggableHandle
                 className={styles.fullDraggableHandle}
-                draggableID={draggableId}
+                draggableId={draggableId}
                 dropTypes={[DropTypeItem]}
                 draggingRender={() => {
                   return this.renderEquipmentSlotContents(equippedItem, equippedItemDef);
@@ -262,13 +263,13 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     } else {
       const draggableId = `personalPile${item.id}`;
       return (
-        <Draggable className={styles.personalPileRowDraggable} draggableID={draggableId} key={draggableId}>
+        <Draggable className={styles.personalPileRowDraggable} draggableId={draggableId} key={draggableId}>
           {def.bundleable && (
             <DropTarget dropId={`Bundle${item.id}`} dropTypes={[DropTypeItem]} className={styles.fullDraggableHandle} />
           )}
           <DraggableHandle
             className={styles.fullDraggableHandle}
-            draggableID={draggableId}
+            draggableId={draggableId}
             dropTypes={[DropTypeItem]}
             draggingRender={() => {
               return this.renderPersonalPileRowContents(item, def);
@@ -298,7 +299,22 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     return (
       <div className={styles.personalPileRowContentWrapper}>
         <div className={styles.personalPileItemName}>{getItemNameText(item, def)}</div>
+        {def.bundleable && item.count > 1 && (
+          <div className={styles.personalPileBundleButton} onClick={this.onBundleButtonClick.bind(this, item, def)} />
+        )}
       </div>
+    );
+  }
+
+  private onBundleButtonClick(item: ItemData, def: ItemDefData): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "splitBundleDialog",
+        content: () => {
+          return <SplitBundleDialog item={item} def={def} />;
+        },
+        escapable: true,
+      })
     );
   }
 
@@ -348,10 +364,13 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
   }
 
   private async handleItemDroppedOnBundle(bundleItemId: number, item: ItemData, def: ItemDefData): Promise<void> {
-    console.log(`HandleItemDroppedOnBundle ${bundleItemId}`);
+    // Moving onto yourself does nothing.
+    if (bundleItemId === item.id) {
+      return;
+    }
+
     const bundleItem = this.props.allItems[bundleItemId];
     if (bundleItem?.def_id === def.id) {
-      console.log("Same Item Def");
       // Same item type.  Merge bundles as much as possible.
       // How many items can fit into the place where the target bundle is contained?
       let countToMove: number = item.count;
@@ -369,7 +388,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         const maxItemsInBundle = getMaxBundleItemsForRoom(def, availableRoom);
         countToMove = Math.min(item.count, maxItemsInBundle - bundleItem.count);
       }
-      console.log(`CountToMove ${countToMove}`);
       // Move as many items as possible into the target bundle.
       let equipSlot = CharacterEquipmentSlots.find((slot) => {
         return this.props.character[slot] === item.id;
@@ -725,20 +743,20 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     const moves: ItemMoveParams[] = [];
     const itemUpdates: ItemData[] = [];
     if (this.props.character[slotId] !== 0) {
-      // Have to swap out the previously worn armor.
+      // Have to swap out the previously worn equipment.
       const destStorageId = this.getPersonalPile()?.id ?? 0;
-      const oldArmor = this.props.allItems[this.props.character[slotId]];
-      const removeOldArmor: ItemMoveParams = {
-        itemId: oldArmor.id,
+      const oldEquipment = this.props.allItems[this.props.character[slotId]];
+      const removeOldEquipment: ItemMoveParams = {
+        itemId: oldEquipment.id,
         // From the character.
         srcCharacterId: this.props.character.id,
         srcEquipmentSlot: slotId,
         // Into the personal pile.
         destStorageId,
       };
-      moves.push(removeOldArmor);
+      moves.push(removeOldEquipment);
       const itemUpdate: ItemData = {
-        ...oldArmor,
+        ...oldEquipment,
         storage_id: destStorageId,
       };
       itemUpdates.push(itemUpdate);
@@ -878,7 +896,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allStorages } = state.storages;
   const allItemDefs = state.gameDefs.items;
   const { allItems } = state.items;
-  const { currentDraggableID } = state.dragAndDrop;
+  const { currentDraggableId } = state.dragAndDrop;
 
   return {
     ...props,
@@ -886,7 +904,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     allStorages,
     allItemDefs,
     allItems,
-    currentDraggableID: currentDraggableID ?? "",
+    currentDraggableId: currentDraggableId ?? "",
   };
 }
 

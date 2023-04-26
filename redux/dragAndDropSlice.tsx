@@ -9,34 +9,34 @@ import React from "react";
 import { Dictionary } from "../lib/dictionary";
 
 interface DragStartParams {
-  draggableID: string;
+  draggableId: string;
   draggingRender: () => React.ReactNode;
 }
 
 export interface DropTargetParams {
-  dropTargetID: string;
+  dropTargetId: string;
   dropTypes: string[];
   bounds: DOMRect;
 }
 
 export interface RemoveDropTargetParams {
-  dropTargetID: string;
+  dropTargetId: string;
   dropTypes: string[];
 }
 
 interface DragAndDropState {
   /** The id of the single Draggable currently being dragged.  Else null. */
-  currentDraggableID: string | null;
+  currentDraggableId: string | null;
   currentDraggableBounds: DOMRect | null;
   dragDelta: [number, number];
-  /** First key is a dropType.  Second key is a dropTargetID. */
+  /** First key is a dropType.  Second key is a dropTargetId. */
   dropTargets: Dictionary<Dictionary<DOMRect>>;
   currentDraggingRender: (() => React.ReactNode) | null;
 }
 
 function buildDefaultDragAndDropState() {
   const DefaultDragAndDropState: DragAndDropState = {
-    currentDraggableID: null,
+    currentDraggableId: null,
     currentDraggableBounds: null,
     currentDraggingRender: null,
     dragDelta: [0, 0],
@@ -51,11 +51,11 @@ export const dragAndDropSlice = createSlice({
   initialState: buildDefaultDragAndDropState(),
   reducers: {
     startDrag: (state: DragAndDropState, action: PayloadAction<DragStartParams>) => {
-      state.currentDraggableID = action.payload.draggableID;
+      state.currentDraggableId = action.payload.draggableId;
       state.currentDraggingRender = action.payload.draggingRender;
     },
     endDrag: (state: DragAndDropState) => {
-      state.currentDraggableID = null;
+      state.currentDraggableId = null;
       state.currentDraggableBounds = null;
       state.currentDraggingRender = null;
       state.dragDelta = [0, 0];
@@ -64,20 +64,20 @@ export const dragAndDropSlice = createSlice({
       state.currentDraggableBounds = action.payload;
     },
     reportDropTargetBounds: (state: DragAndDropState, action: PayloadAction<DropTargetParams>) => {
-      const { dropTypes, dropTargetID, bounds } = action.payload;
+      const { dropTypes, dropTargetId, bounds } = action.payload;
       // Make sure the dropTypes have a home.
       dropTypes.forEach((dropType) => {
         if (!state.dropTargets[dropType]) {
           state.dropTargets[dropType] = {};
         }
-        state.dropTargets[dropType][dropTargetID] = bounds;
+        state.dropTargets[dropType][dropTargetId] = bounds;
       });
     },
     removeDropTarget: (state: DragAndDropState, action: PayloadAction<RemoveDropTargetParams>) => {
-      const { dropTypes, dropTargetID } = action.payload;
+      const { dropTypes, dropTargetId } = action.payload;
       dropTypes.forEach((dropType) => {
-        if (state.dropTargets[dropType]?.[dropTargetID]) {
-          delete state.dropTargets[dropType][dropTargetID];
+        if (state.dropTargets[dropType]?.[dropTargetId]) {
+          delete state.dropTargets[dropType][dropTargetId];
         }
       });
     },

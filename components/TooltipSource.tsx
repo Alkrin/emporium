@@ -15,7 +15,7 @@ interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 interface InjectedProps {
-  currentTooltipID: string | null;
+  currentTooltipId: string | null;
   dispatch?: Dispatch;
 }
 
@@ -24,7 +24,7 @@ type Props = ReactProps & InjectedProps;
 class TooltipSource extends React.Component<Props> {
   public render(): React.ReactNode {
     // We pull out `children` and our custom props so the DOM's `div` doesn't get confused by unknown props.
-    const { children, tooltipParams, currentTooltipID, dispatch, ...otherProps } = this.props;
+    const { children, tooltipParams, currentTooltipId, dispatch, ...otherProps } = this.props;
     return (
       <div
         {...otherProps}
@@ -60,17 +60,17 @@ class TooltipSource extends React.Component<Props> {
   }
 
   componentWillUnmount(): void {
-    if (this.props.currentTooltipID === this.props.tooltipParams.id) {
+    if (this.props.currentTooltipId === this.props.tooltipParams.id) {
       this.props.dispatch?.(hideTooltip());
     }
   }
 }
 
 function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
-  const currentTooltipID = state.tooltip.id;
+  const currentTooltipId = state.tooltip.id;
   return {
     ...ownProps,
-    currentTooltipID,
+    currentTooltipId,
   };
 }
 

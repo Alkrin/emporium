@@ -4,10 +4,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import * as React from 'react';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import * as React from "react";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-let nextToasterID: number = 1;
+let nextToasterId: number = 1;
 
 export interface ToasterModel {
   title?: string;
@@ -26,25 +26,25 @@ export interface ToastersState {
 
 function buildDefaultToastersState() {
   const DefaultModalsState: ToastersState = {
-    toasters: []
+    toasters: [],
   };
 
   return DefaultModalsState;
 }
 
 export const toastersSlice = createSlice({
-  name: 'toasters',
+  name: "toasters",
   initialState: buildDefaultToastersState(),
   reducers: {
     showToaster: (state: ToastersState, action: PayloadAction<ToasterParams>) => {
       if (!action.payload.id) {
-        action.payload.id = `${nextToasterID++}`;
+        action.payload.id = `${nextToasterId++}`;
       }
       const oldToaster = state.toasters.find((toast) => {
         return toast.id === action.payload.id;
       });
       if (oldToaster) {
-        // If a toaster with that ID is already in the queue, just update it.
+        // If a toaster with that id is already in the queue, just update it.
         Object.assign(oldToaster, action.payload);
       } else {
         // If the toaster is new, push it.
@@ -56,8 +56,8 @@ export const toastersSlice = createSlice({
         // Removes the first item from the array.
         state.toasters.shift();
       }
-    }
-  }
+    },
+  },
 });
 
 export const { showToaster, hideToaster } = toastersSlice.actions;

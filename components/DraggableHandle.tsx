@@ -12,18 +12,18 @@ import { endDrag, startDrag, updateDragDelta } from "../redux/dragAndDropSlice";
 import { RootState } from "../redux/store";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Must match with the draggableID on a Draggable. */
-  draggableID: string;
+  /** Must match with the draggableId on a Draggable. */
+  draggableId: string;
   /** Used to render the matched Draggable when it is being dragged. */
   draggingRender: () => React.ReactNode;
   /** Can only trigger drop events on DropTargets with a matching dropType. */
   dropTypes: string[];
   /** Fired when a drag ends, whether or not it is over a matching DropTarget. */
-  dropHandler?: (dropTargetID: string[]) => void;
+  dropHandler?: (dropTargetId: string[]) => void;
 }
 
 interface InjectedProps {
-  currentDraggableID: string | null;
+  currentDraggableId: string | null;
   currentDraggableBounds: DOMRect | null;
   dragDelta: [number, number];
   dropTargets: Dictionary<Dictionary<DOMRect>>;
@@ -52,11 +52,11 @@ class DraggableHandle extends React.Component<Props> {
     const {
       children,
       style,
-      draggableID,
+      draggableId,
       draggingRender,
       dropTypes: dropType,
       dropHandler,
-      currentDraggableID,
+      currentDraggableId,
       currentDraggableBounds,
       dragDelta,
       dropTargets,
@@ -66,7 +66,7 @@ class DraggableHandle extends React.Component<Props> {
     return (
       <div
         {...otherProps}
-        id={`DraggableHandle_${draggableID}`}
+        id={`DraggableHandle_${draggableId}`}
         style={{
           // Defaulting to a technically-visible background color ensures that the handle can
           // receive mouse click events.  In Coherent, any pixel that isn't rendered will only
@@ -93,7 +93,7 @@ class DraggableHandle extends React.Component<Props> {
     // Tell Redux what we'll be dragging around.
     this.props.dispatch?.(
       startDrag({
-        draggableID: this.props.draggableID,
+        draggableId: this.props.draggableId,
         draggingRender: this.props.draggingRender,
       })
     );
@@ -151,11 +151,11 @@ class DraggableHandle extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
-  const { currentDraggableID, currentDraggableBounds, dragDelta, dropTargets } = state.dragAndDrop;
+  const { currentDraggableId, currentDraggableBounds, dragDelta, dropTargets } = state.dragAndDrop;
 
   return {
     ...ownProps,
-    currentDraggableID,
+    currentDraggableId,
     currentDraggableBounds,
     dragDelta,
     dropTargets,

@@ -8,7 +8,7 @@ import * as React from "react";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface TooltipParams {
-  // An ID is required so we can close the tooltip if the TooltipSource gets unmounted.
+  // An id is required so we can close the tooltip if the TooltipSource gets unmounted.
   id: string | null;
   content: (() => React.ReactNode) | string | null;
   disableBackground?: boolean;
@@ -31,17 +31,11 @@ export const tooltipSlice = createSlice({
   name: "tooltip",
   initialState: buildDefaultTooltipState(),
   reducers: {
-    showTooltip: (
-      state: TooltipState,
-      action: PayloadAction<TooltipParams>
-    ) => {
+    showTooltip: (state: TooltipState, action: PayloadAction<TooltipParams>) => {
       // Completely replace the existing state when starting a new tooltip.
       return action.payload;
     },
-    updateTooltip: (
-      state: TooltipState,
-      action: PayloadAction<Partial<TooltipParams>>
-    ) => {
+    updateTooltip: (state: TooltipState, action: PayloadAction<Partial<TooltipParams>>) => {
       Object.assign(state, action.payload);
     },
     hideTooltip: (state: TooltipState) => {

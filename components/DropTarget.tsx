@@ -11,7 +11,7 @@ import { removeDropTarget, reportDropTargetBounds } from "../redux/dragAndDropSl
 import { RootState } from "../redux/store";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** The drop handler will receive this dropID. */
+  /** The drop handler will receive this dropId. */
   dropId: string;
   /** Only Draggables with a matching dropType will trigger drop events. */
   dropTypes: string[];
@@ -33,16 +33,7 @@ class DropTarget extends React.Component<Props> {
   public render(): React.ReactNode {
     this.reportBounds();
     // We pull out `children` and our custom props so the DOM's `div` doesn't get confused by unknown props.
-    const {
-      children,
-      dropId: dropID,
-      dropTypes,
-      dispatch,
-      hudWidth,
-      hudHeight,
-      prevBounds,
-      ...otherProps
-    } = this.props;
+    const { children, dropId, dropTypes, dispatch, hudWidth, hudHeight, prevBounds, ...otherProps } = this.props;
     return (
       <div
         {...otherProps}
@@ -75,7 +66,7 @@ class DropTarget extends React.Component<Props> {
       ) {
         this.props.dispatch?.(
           reportDropTargetBounds({
-            dropTargetID: this.props.dropId,
+            dropTargetId: this.props.dropId,
             dropTypes: this.props.dropTypes,
             bounds,
           })
@@ -87,7 +78,7 @@ class DropTarget extends React.Component<Props> {
   componentWillUnmount(): void {
     this.props.dispatch?.(
       removeDropTarget({
-        dropTargetID: this.props.dropId,
+        dropTargetId: this.props.dropId,
         dropTypes: this.props.dropTypes,
       })
     );

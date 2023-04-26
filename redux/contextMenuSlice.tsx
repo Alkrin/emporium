@@ -13,7 +13,7 @@ export interface ContextMenuItem {
 }
 
 export interface ContextMenuParams {
-  // An ID is required so we can close the menu if the ContextMenuSource gets unmounted.
+  // An id is required so we can close the menu if the ContextMenuSource gets unmounted.
   id: string | null;
   content: (() => React.ReactNode) | ContextMenuItem[] | null;
   mouseX?: number;
@@ -35,10 +35,7 @@ export const contextMenuSlice = createSlice({
   name: "contextMenu",
   initialState: buildDefaultContextMenuState(),
   reducers: {
-    showContextMenu: (
-      state: ContextMenuState,
-      action: PayloadAction<ContextMenuParams>
-    ) => {
+    showContextMenu: (state: ContextMenuState, action: PayloadAction<ContextMenuParams>) => {
       // Completely replace the existing state when starting a new ContextMenu.
       return action.payload;
     },

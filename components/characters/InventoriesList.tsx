@@ -12,6 +12,8 @@ import { ItemTooltip } from "../database/ItemTooltip";
 import { DropTypeItem } from "./EditEquipmentSubPanel";
 import DropTarget from "../DropTarget";
 import { getItemNameText } from "../../lib/itemUtils";
+import { showModal } from "../../redux/modalsSlice";
+import { SplitBundleDialog } from "./SplitBundleDialog";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
   containerIds: number[];
@@ -23,7 +25,7 @@ interface InjectedProps {
   allStorages: Dictionary<StorageData>;
   allItemDefs: Dictionary<ItemDefData>;
   allItems: Dictionary<ItemData>;
-  currentDraggableID: string;
+  currentDraggableId: string;
   dispatch?: Dispatch;
 }
 
@@ -38,7 +40,7 @@ class AInventoriesList extends React.Component<Props> {
       allStorages,
       allItemDefs,
       allItems,
-      currentDraggableID,
+      currentDraggableId,
       handleItemDropped,
       dispatch,
       ...otherProps
@@ -82,10 +84,10 @@ class AInventoriesList extends React.Component<Props> {
       return (
         <div key={draggableId}>
           <DropTarget dropId={draggableId} dropTypes={[DropTypeItem]}>
-            <Draggable className={styles.containerRowDraggable} draggableID={draggableId}>
+            <Draggable className={styles.containerRowDraggable} draggableId={draggableId}>
               <DraggableHandle
                 className={styles.fullDraggableHandle}
-                draggableID={draggableId}
+                draggableId={draggableId}
                 dropTypes={[DropTypeItem]}
                 draggingRender={() => {
                   return this.renderContainerRowContents(item, def, depth);
@@ -134,7 +136,7 @@ class AInventoriesList extends React.Component<Props> {
         const draggableId = `contained${item.id}`;
 
         return (
-          <Draggable className={styles.containedItemRowDraggable} draggableID={draggableId} key={draggableId}>
+          <Draggable className={styles.containedItemRowDraggable} draggableId={draggableId} key={draggableId}>
             {def.bundleable && (
               <DropTarget
                 dropId={`Bundle${item.id}`}
@@ -144,7 +146,7 @@ class AInventoriesList extends React.Component<Props> {
             )}
             <DraggableHandle
               className={styles.fullDraggableHandle}
-              draggableID={draggableId}
+              draggableId={draggableId}
               dropTypes={[DropTypeItem]}
               draggingRender={() => {
                 return this.renderContainedItemRowContents(item, def, depth);
@@ -176,7 +178,22 @@ class AInventoriesList extends React.Component<Props> {
     return (
       <div className={styles.containedItemRowContentWrapper} style={{ marginLeft: `${depth}vmin` }}>
         <div className={styles.containedItemName}>{getItemNameText(item, def)}</div>
+        {def.bundleable && item.count > 1 && (
+          <div className={styles.bundleButton} onClick={this.onBundleButtonClick.bind(this, item, def)} />
+        )}
       </div>
+    );
+  }
+
+  private onBundleButtonClick(item: ItemData, def: ItemDefData): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "splitBundleDialog",
+        content: () => {
+          return <SplitBundleDialog item={item} def={def} />;
+        },
+        escapable: true,
+      })
     );
   }
 }
@@ -186,7 +203,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allStorages } = state.storages;
   const allItemDefs = state.gameDefs.items;
   const { allItems } = state.items;
-  const { currentDraggableID } = state.dragAndDrop;
+  const { currentDraggableId } = state.dragAndDrop;
 
   return {
     ...props,
@@ -194,7 +211,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     allStorages,
     allItemDefs,
     allItems,
-    currentDraggableID: currentDraggableID ?? "",
+    currentDraggableId: currentDraggableId ?? "",
   };
 }
 
