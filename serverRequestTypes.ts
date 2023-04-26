@@ -1,4 +1,4 @@
-import { ProficiencyData } from "./serverAPI";
+import { CharacterEquipmentData, ProficiencyData } from "./serverAPI";
 
 export interface RequestBody_CreateCharacter {
   user_id: number;
@@ -43,6 +43,21 @@ export interface RequestBody_CreateItemDef {
   cost_gp: number;
   cost_sp: number;
   cost_cp: number;
+}
+
+export interface RequestBody_CreateItem {
+  def_id: number;
+  count: number;
+  container_id: number;
+  storage_id: number;
+}
+
+export interface RequestBody_CreateStorage {
+  name: string;
+  capacity: number;
+  location_id: number;
+  owner_id: number;
+  group_ids: number[];
 }
 
 export interface RequestBody_EditItemDef {
@@ -99,4 +114,39 @@ export interface RequestBody_SetHP {
 export interface RequestBody_UpdateProficiencies {
   character_id: number;
   proficiencies: ProficiencyData[];
+}
+
+export interface ItemMoveParams {
+  itemId: number;
+  // If the item is coming out of a Container or Storage, we won't set any src params,
+  // as the item itself tracks those.
+  srcCharacterId?: number;
+  srcEquipmentSlot?: string;
+  srcSplit?: boolean;
+  // Whichever dest is correct should be populated.
+  destContainerId?: number;
+  destStorageId?: number;
+  destCharacterId?: number;
+  destEquipmentSlot?: string;
+}
+
+export interface RequestBody_MoveItems {
+  moves: ItemMoveParams[];
+}
+
+export interface RequestBody_MergeBundleItems {
+  srcItemId: number;
+  destItemId: number;
+  count: number;
+  /** Only set if the item was equipped on a character. */
+  srcCharacterId?: number;
+  srcEquipmentSlot?: keyof CharacterEquipmentData;
+}
+
+export interface RequestBody_SplitBundleItems {
+  srcItemId: number;
+  destContainerId: number;
+  destStorageId: number;
+  count: number;
+  itemDefId: number;
 }

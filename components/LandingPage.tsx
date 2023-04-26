@@ -11,6 +11,8 @@ import { CharactersDataSource } from "../dataSources/CharactersDataSource";
 import { UsersDataSource } from "../dataSources/UsersDataSource";
 import { ProficienciesDataSource } from "../dataSources/ProficienciesDataSource";
 import { GameDefsDataSource } from "../dataSources/GameDefsDataSource";
+import { ItemsDataSource } from "../dataSources/ItemsDataSource";
+import { StoragesDataSource } from "../dataSources/StoragesDataSource";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -40,6 +42,8 @@ class ALandingPage extends React.Component<Props> {
         <LocalStorageDataSource />
         <GameDefsDataSource />
         <CharactersDataSource />
+        <ItemsDataSource />
+        <StoragesDataSource />
         <UsersDataSource />
         <ProficienciesDataSource />
         {this.props.currentUserId ? <MainPage /> : <Login />}

@@ -1,0 +1,87 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: wheat;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.rowText {
+  @extend .normalText;
+  width: 15vmin;
+  text-align: right;
+}
+
+.dialogButton {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
+}
+
+.createButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
+
+  &.disabled {
+    opacity: 0.1;
+    pointer-events: none;
+  }
+}
+
+.itemListRoot {
+  width: 30vmin;
+  height: 28vmin;
+}
+
+.asteriskRow {
+  @extend .row;
+  margin-top: 1.5vmin;
+}
+
+.countRow {
+  @extend .row;
+  margin-top: 1.5vmin;
+}
+
+.countLabel {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.countField {
+  margin-left: 0.5vmin;
+  width: 10vmin;
+}

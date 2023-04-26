@@ -1,14 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
+import { Dictionary } from "../lib/dictionary";
 import { ItemDefData } from "../serverAPI";
 
 interface GameDefsReduxState {
-  items: ItemDefData[];
+  items: Dictionary<ItemDefData>;
 }
 
 function buildDefaultGameDefsReduxState(): GameDefsReduxState {
   const defaults: GameDefsReduxState = {
-    items: [],
+    items: {},
   };
   return defaults;
 }
@@ -18,24 +19,16 @@ export const gameDefsSlice = createSlice({
   initialState: buildDefaultGameDefsReduxState(),
   reducers: {
     updateItemDefs: (state: GameDefsReduxState, action: PayloadAction<ItemDefData[]>) => {
-      state.items = action.payload;
+      state.items = {};
+      action.payload.forEach((idd) => {
+        state.items[idd.id] = idd;
+      });
     },
     updateItemDef: (state: GameDefsReduxState, action: PayloadAction<ItemDefData>) => {
-      const index = state.items.findIndex((idd) => {
-        return idd.id === action.payload.id;
-      });
-      if (index !== -1) {
-        // Already existed, so update it.
-        state.items[index] = action.payload;
-      } else {
-        // New def, so add it.
-        state.items.push(action.payload);
-      }
+      state.items[action.payload.id] = action.payload;
     },
     deleteItemDef: (state: GameDefsReduxState, action: PayloadAction<number>) => {
-      state.items = state.items.filter((idd) => {
-        return idd.id !== action.payload;
-      });
+      delete state.items[action.payload];
     },
   },
 });

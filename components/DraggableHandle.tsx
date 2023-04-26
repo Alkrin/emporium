@@ -19,7 +19,7 @@ interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Can only trigger drop events on DropTargets with a matching dropType. */
   dropTypes: string[];
   /** Fired when a drag ends, whether or not it is over a matching DropTarget. */
-  dropHandler?: (dropTargetID: string | null) => void;
+  dropHandler?: (dropTargetID: string[]) => void;
 }
 
 interface InjectedProps {
@@ -135,27 +135,18 @@ class DraggableHandle extends React.Component<Props> {
       (this.props.currentDraggableBounds?.height ?? 0) / 2;
 
     // Iterate all matching DropTargets and see if we are over one.
-    let targetFound: boolean = false;
+    let targetsFound: string[] = [];
     this.props.dropTypes.forEach((dropType) => {
       Object.entries(this.props.dropTargets[dropType] ?? {}).forEach((entry) => {
-        // Only report to the first valid DropTarget.
-        if (targetFound) {
-          return;
-        }
-        const dropTargetID = entry[0];
-        const bounds = entry[1];
+        const [dropTargetId, bounds] = entry;
 
         if (dcx >= bounds.x && dcx <= bounds.right && dcy >= bounds.y && dcy <= bounds.bottom) {
-          targetFound = true;
-          this.props.dropHandler?.(dropTargetID);
+          targetsFound.push(dropTargetId);
         }
       });
     });
 
-    // Not all drops require a target.  Sometimes we just care where the item got dragged to.
-    if (!targetFound) {
-      this.props.dropHandler(null);
-    }
+    this.props.dropHandler(targetsFound);
   }
 }
 

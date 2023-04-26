@@ -24,7 +24,6 @@ type Props = ReactProps & InjectedProps;
 
 class DragAndDropPane extends React.Component<Props> {
   public render(): React.ReactNode {
-    // TODO: Does "dragging" get renamed by the .module. system?
     const dragClass = (this.props.currentDraggableID?.length ?? 0) > 0 ? styles.dragging : "";
     return <div className={`${styles.root} ${dragClass}`}>{this.renderDraggable()}</div>;
   }

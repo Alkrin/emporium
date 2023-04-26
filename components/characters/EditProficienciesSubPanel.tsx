@@ -156,8 +156,8 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
           draggingRender={() => {
             return this.renderAvailableProficiencyRowContents(data);
           }}
-          dropHandler={(dropTargetID) => {
-            this.handleProficiencyDropped(dropTargetID, data);
+          dropHandler={(dropTargetIds) => {
+            this.handleProficiencyDropped(dropTargetIds[0], data);
           }}
         >
           <TooltipSource
@@ -188,8 +188,8 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
           draggingRender={() => {
             return this.renderAvailableProficiencyRowContents(data);
           }}
-          dropHandler={(dropTargetID) => {
-            this.handleProficiencyDropped(dropTargetID, data);
+          dropHandler={(dropTargetIds) => {
+            this.handleProficiencyDropped(dropTargetIds[0], data);
           }}
         >
           <TooltipSource
@@ -402,7 +402,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
         <div className={styles.listRequiredLevel}></div>
         <DropTarget
           dropTypes={[DropTypeGeneralProficiency, DropTypeClassProficiency]}
-          dropID={`Extra${index + 1}`}
+          dropId={`Extra${index + 1}`}
           className={`${styles.proficiencySlot} ${changedClass}`}
         >
           {data && (
@@ -445,7 +445,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
 
         <DropTarget
           dropTypes={[DropTypeClassProficiency]}
-          dropID={source}
+          dropId={source}
           className={`${styles.proficiencySlot} ${changedClass}`}
         >
           {data && (
@@ -505,7 +505,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
         <div className={`${styles.listRequiredLevel} ${readyClass}`}>@ L{atLevel}</div>
         <DropTarget
           dropTypes={[DropTypeGeneralProficiency]}
-          dropID={`General${index + 1}`}
+          dropId={`General${index + 1}`}
           className={`${styles.proficiencySlot} ${changedClass}`}
         >
           {data && (

@@ -4,8 +4,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import * as React from 'react';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import * as React from "react";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface ModalButtonModel {
   text: string;
@@ -34,14 +34,14 @@ export interface ModalsState {
 
 function buildDefaultModalsState() {
   const DefaultModalsState: ModalsState = {
-    modals: []
+    modals: [],
   };
 
   return DefaultModalsState;
 }
 
 export const modalsSlice = createSlice({
-  name: 'modals',
+  name: "modals",
   initialState: buildDefaultModalsState(),
   reducers: {
     showModal: (state: ModalsState, action: PayloadAction<ModalParams>) => {
@@ -52,8 +52,8 @@ export const modalsSlice = createSlice({
         // Removes the first item from the array.
         state.modals.shift();
       }
-    }
-  }
+    },
+  },
 });
 
 export const { showModal, hideModal } = modalsSlice.actions;
