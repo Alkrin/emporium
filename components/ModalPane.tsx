@@ -43,21 +43,12 @@ class ModalPane extends React.Component<Props, State> {
     const modalClass = this.state.shouldShow ? styles.show : "";
     return (
       <div className={`${styles.root} ${modalClass}`}>
-        <div
-          className={styles.previousModalWrapper}
-          key={`Prev${this.state.prevModal?.id ?? "None"}`}
-        >
+        <div className={styles.previousModalWrapper} key={`Prev${this.state.prevModal?.id ?? "None"}`}>
           {this.renderModal(this.state.prevModal)}
         </div>
-        <div
-          className={styles.currentModalWrapper}
-          key={`Curr${this.state.currentModal?.id ?? "None"}`}
-        >
+        <div className={styles.currentModalWrapper} key={`Curr${this.state.currentModal?.id ?? "None"}`}>
           {this.state.currentModal?.escapable && (
-            <Escapable
-              escapeID={`Modal_${this.state.currentModal.id}`}
-              onEscape={this.onEscape.bind(this)}
-            />
+            <Escapable escapeId={`Modal_${this.state.currentModal.id}`} onEscape={this.onEscape.bind(this)} />
           )}
           {this.renderModal(this.state.currentModal)}
         </div>
@@ -75,28 +66,18 @@ class ModalPane extends React.Component<Props, State> {
     } else {
       return (
         <>
-          {modal.content.title && (
-            <div className={styles.titleText}>{modal.content.title}</div>
-          )}
-          {modal.content.message && (
-            <div className={styles.messageText}>{modal.content.message}</div>
-          )}
+          {modal.content.title && <div className={styles.titleText}>{modal.content.title}</div>}
+          {modal.content.message && <div className={styles.messageText}>{modal.content.message}</div>}
           {modal.content.extraButtons?.map((eb) => {
             return this.renderModalButton(eb.text, eb.onClick);
           })}
-          {this.renderModalButton(
-            modal.content.buttonText ?? "Close",
-            this.onButtonClick.bind(this)
-          )}
+          {this.renderModalButton(modal.content.buttonText ?? "Close", this.onButtonClick.bind(this))}
         </>
       );
     }
   }
 
-  private renderModalButton(
-    text: string,
-    onClick: () => void
-  ): React.ReactNode {
+  private renderModalButton(text: string, onClick: () => void): React.ReactNode {
     return (
       <div key={text} className={styles.button} onClick={onClick}>
         {text}
@@ -120,11 +101,7 @@ class ModalPane extends React.Component<Props, State> {
     }
   }
 
-  componentDidUpdate(
-    prevProps: Readonly<Props>,
-    prevState: Readonly<{}>,
-    snapshot?: any
-  ): void {
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
     // If the current modal has changed, update state.
     if (this.props.modals[0]?.id != this.state.currentModal?.id) {
       this.setState({

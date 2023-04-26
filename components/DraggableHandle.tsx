@@ -12,18 +12,18 @@ import { endDrag, startDrag, updateDragDelta } from "../redux/dragAndDropSlice";
 import { RootState } from "../redux/store";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Must match with the draggableID on a Draggable. */
-  draggableID: string;
+  /** Must match with the draggableId on a Draggable. */
+  draggableId: string;
   /** Used to render the matched Draggable when it is being dragged. */
   draggingRender: () => React.ReactNode;
   /** Can only trigger drop events on DropTargets with a matching dropType. */
   dropTypes: string[];
   /** Fired when a drag ends, whether or not it is over a matching DropTarget. */
-  dropHandler?: (dropTargetID: string | null) => void;
+  dropHandler?: (dropTargetId: string[]) => void;
 }
 
 interface InjectedProps {
-  currentDraggableID: string | null;
+  currentDraggableId: string | null;
   currentDraggableBounds: DOMRect | null;
   dragDelta: [number, number];
   dropTargets: Dictionary<Dictionary<DOMRect>>;
@@ -52,11 +52,11 @@ class DraggableHandle extends React.Component<Props> {
     const {
       children,
       style,
-      draggableID,
+      draggableId,
       draggingRender,
       dropTypes: dropType,
       dropHandler,
-      currentDraggableID,
+      currentDraggableId,
       currentDraggableBounds,
       dragDelta,
       dropTargets,
@@ -66,7 +66,7 @@ class DraggableHandle extends React.Component<Props> {
     return (
       <div
         {...otherProps}
-        id={`DraggableHandle_${draggableID}`}
+        id={`DraggableHandle_${draggableId}`}
         style={{
           // Defaulting to a technically-visible background color ensures that the handle can
           // receive mouse click events.  In Coherent, any pixel that isn't rendered will only
@@ -93,7 +93,7 @@ class DraggableHandle extends React.Component<Props> {
     // Tell Redux what we'll be dragging around.
     this.props.dispatch?.(
       startDrag({
-        draggableID: this.props.draggableID,
+        draggableId: this.props.draggableId,
         draggingRender: this.props.draggingRender,
       })
     );
@@ -135,36 +135,27 @@ class DraggableHandle extends React.Component<Props> {
       (this.props.currentDraggableBounds?.height ?? 0) / 2;
 
     // Iterate all matching DropTargets and see if we are over one.
-    let targetFound: boolean = false;
+    let targetsFound: string[] = [];
     this.props.dropTypes.forEach((dropType) => {
       Object.entries(this.props.dropTargets[dropType] ?? {}).forEach((entry) => {
-        // Only report to the first valid DropTarget.
-        if (targetFound) {
-          return;
-        }
-        const dropTargetID = entry[0];
-        const bounds = entry[1];
+        const [dropTargetId, bounds] = entry;
 
         if (dcx >= bounds.x && dcx <= bounds.right && dcy >= bounds.y && dcy <= bounds.bottom) {
-          targetFound = true;
-          this.props.dropHandler?.(dropTargetID);
+          targetsFound.push(dropTargetId);
         }
       });
     });
 
-    // Not all drops require a target.  Sometimes we just care where the item got dragged to.
-    if (!targetFound) {
-      this.props.dropHandler(null);
-    }
+    this.props.dropHandler(targetsFound);
   }
 }
 
 function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
-  const { currentDraggableID, currentDraggableBounds, dragDelta, dropTargets } = state.dragAndDrop;
+  const { currentDraggableId, currentDraggableBounds, dragDelta, dropTargets } = state.dragAndDrop;
 
   return {
     ...ownProps,
-    currentDraggableID,
+    currentDraggableId,
     currentDraggableBounds,
     dragDelta,
     dropTargets,

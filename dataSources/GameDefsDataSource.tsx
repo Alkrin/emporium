@@ -21,6 +21,11 @@ export async function refetchItemDefs(dispatch: Dispatch): Promise<void> {
     );
   } else {
     // Send the whole batch at once so we can axe defs that no longer exist.
+    result.forEach((idd) => {
+      // Force "booleans" to be true booleans.
+      idd.bundleable = !!idd.bundleable;
+      idd.fixed_weight = !!idd.fixed_weight;
+    });
     dispatch(updateItemDefs(result));
   }
 }

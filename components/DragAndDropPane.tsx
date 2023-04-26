@@ -13,7 +13,7 @@ import styles from "./DragAndDropPane.module.scss";
 interface ReactProps {}
 
 interface InjectedProps {
-  currentDraggableID: string | null;
+  currentDraggableId: string | null;
   currentDraggableBounds: DOMRect | null;
   currentDraggingRender: (() => React.ReactNode) | null;
   dragDelta: [number, number];
@@ -24,14 +24,13 @@ type Props = ReactProps & InjectedProps;
 
 class DragAndDropPane extends React.Component<Props> {
   public render(): React.ReactNode {
-    // TODO: Does "dragging" get renamed by the .module. system?
-    const dragClass = (this.props.currentDraggableID?.length ?? 0) > 0 ? styles.dragging : "";
+    const dragClass = (this.props.currentDraggableId?.length ?? 0) > 0 ? styles.dragging : "";
     return <div className={`${styles.root} ${dragClass}`}>{this.renderDraggable()}</div>;
   }
 
   private renderDraggable(): React.ReactNode {
     if (
-      (this.props.currentDraggableID?.length ?? 0) > 0 &&
+      (this.props.currentDraggableId?.length ?? 0) > 0 &&
       this.props.currentDraggingRender &&
       this.props.currentDraggableBounds
     ) {
@@ -53,11 +52,11 @@ class DragAndDropPane extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
-  const { currentDraggableID, currentDraggableBounds, currentDraggingRender, dragDelta } = state.dragAndDrop;
+  const { currentDraggableId, currentDraggableBounds, currentDraggingRender, dragDelta } = state.dragAndDrop;
 
   return {
     ...ownProps,
-    currentDraggableID,
+    currentDraggableId,
     currentDraggableBounds,
     currentDraggingRender,
     dragDelta,

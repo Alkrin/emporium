@@ -146,18 +146,18 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
   }
 
   private renderAvailableClassProficiencyRow(data: AbilityDisplayData): React.ReactNode {
-    const draggableID = `DragAvailableClassProficiency:${data.name}`;
+    const draggableId = `DragAvailableClassProficiency:${data.name}`;
     return (
-      <Draggable className={styles.availableProficiencyRowDraggable} draggableID={draggableID} key={draggableID}>
+      <Draggable className={styles.availableProficiencyRowDraggable} draggableId={draggableId} key={draggableId}>
         <DraggableHandle
           className={styles.availableProficiencyRowDraggableHandle}
-          draggableID={draggableID}
+          draggableId={draggableId}
           dropTypes={[DropTypeClassProficiency]}
           draggingRender={() => {
             return this.renderAvailableProficiencyRowContents(data);
           }}
-          dropHandler={(dropTargetID) => {
-            this.handleProficiencyDropped(dropTargetID, data);
+          dropHandler={(dropTargetIds) => {
+            this.handleProficiencyDropped(dropTargetIds[0], data);
           }}
         >
           <TooltipSource
@@ -178,18 +178,18 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
   }
 
   private renderAvailableGeneralProficiencyRow(data: AbilityDisplayData): React.ReactNode {
-    const draggableID = `DragAvailableGeneralProficiency:${data.name}`;
+    const draggableId = `DragAvailableGeneralProficiency:${data.name}`;
     return (
-      <Draggable className={styles.availableProficiencyRowDraggable} draggableID={draggableID} key={draggableID}>
+      <Draggable className={styles.availableProficiencyRowDraggable} draggableId={draggableId} key={draggableId}>
         <DraggableHandle
           className={styles.availableProficiencyRowDraggableHandle}
-          draggableID={draggableID}
+          draggableId={draggableId}
           dropTypes={[DropTypeGeneralProficiency]}
           draggingRender={() => {
             return this.renderAvailableProficiencyRowContents(data);
           }}
-          dropHandler={(dropTargetID) => {
-            this.handleProficiencyDropped(dropTargetID, data);
+          dropHandler={(dropTargetIds) => {
+            this.handleProficiencyDropped(dropTargetIds[0], data);
           }}
         >
           <TooltipSource
@@ -209,23 +209,23 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private handleProficiencyDropped(dropTargetID: string | null, data: AbilityDisplayData): void {
+  private handleProficiencyDropped(dropTargetId: string | null, data: AbilityDisplayData): void {
     // If the proficiency was dropped into open space, we don't have to do anything.
-    if (!dropTargetID || dropTargetID.length === 0) {
+    if (!dropTargetId || dropTargetId.length === 0) {
       return;
     }
 
-    if (dropTargetID.startsWith("Class")) {
+    if (dropTargetId.startsWith("Class")) {
       const assignedClassProficiencies = { ...this.state.assignedClassProficiencies };
-      assignedClassProficiencies[dropTargetID] = data;
+      assignedClassProficiencies[dropTargetId] = data;
       this.setState({ assignedClassProficiencies });
-    } else if (dropTargetID.startsWith("General")) {
+    } else if (dropTargetId.startsWith("General")) {
       const assignedGeneralProficiencies = { ...this.state.assignedGeneralProficiencies };
-      assignedGeneralProficiencies[dropTargetID] = data;
+      assignedGeneralProficiencies[dropTargetId] = data;
       this.setState({ assignedGeneralProficiencies });
-    } else if (dropTargetID.startsWith("Extra")) {
+    } else if (dropTargetId.startsWith("Extra")) {
       const assignedExtraProficiencies = [...this.state.assignedExtraProficiencies];
-      const index = +dropTargetID.charAt(5) - 1;
+      const index = +dropTargetId.charAt(5) - 1;
       assignedExtraProficiencies[index] = data;
       this.setState({ assignedExtraProficiencies });
     }
@@ -402,7 +402,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
         <div className={styles.listRequiredLevel}></div>
         <DropTarget
           dropTypes={[DropTypeGeneralProficiency, DropTypeClassProficiency]}
-          dropID={`Extra${index + 1}`}
+          dropId={`Extra${index + 1}`}
           className={`${styles.proficiencySlot} ${changedClass}`}
         >
           {data && (
@@ -445,7 +445,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
 
         <DropTarget
           dropTypes={[DropTypeClassProficiency]}
-          dropID={source}
+          dropId={source}
           className={`${styles.proficiencySlot} ${changedClass}`}
         >
           {data && (
@@ -505,7 +505,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
         <div className={`${styles.listRequiredLevel} ${readyClass}`}>@ L{atLevel}</div>
         <DropTarget
           dropTypes={[DropTypeGeneralProficiency]}
-          dropID={`General${index + 1}`}
+          dropId={`General${index + 1}`}
           className={`${styles.proficiencySlot} ${changedClass}`}
         >
           {data && (

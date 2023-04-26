@@ -11,8 +11,8 @@ import { removeDropTarget, reportDropTargetBounds } from "../redux/dragAndDropSl
 import { RootState } from "../redux/store";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** The drop handler will receive this dropID. */
-  dropID: string;
+  /** The drop handler will receive this dropId. */
+  dropId: string;
   /** Only Draggables with a matching dropType will trigger drop events. */
   dropTypes: string[];
 }
@@ -23,17 +23,17 @@ interface InjectedProps {
   // reports its bounds on a screen resize.
   hudWidth: number;
   hudHeight: number;
+  prevBounds: DOMRect;
 }
 
 type Props = ReactProps & InjectedProps;
 
 class DropTarget extends React.Component<Props> {
-  private needsToReportBounds: boolean = true;
   private ref: HTMLDivElement | null = null;
   public render(): React.ReactNode {
     this.reportBounds();
     // We pull out `children` and our custom props so the DOM's `div` doesn't get confused by unknown props.
-    const { children, dropID, dropTypes, dispatch, hudWidth, hudHeight, ...otherProps } = this.props;
+    const { children, dropId, dropTypes, dispatch, hudWidth, hudHeight, prevBounds, ...otherProps } = this.props;
     return (
       <div
         {...otherProps}
@@ -48,31 +48,37 @@ class DropTarget extends React.Component<Props> {
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
-    if (this.props.hudHeight !== prevProps.hudHeight || this.props.hudWidth !== prevProps.hudWidth) {
-      this.needsToReportBounds = true;
-    }
     this.reportBounds();
   }
 
   private reportBounds(): void {
-    if (this.ref && this.needsToReportBounds) {
-      this.needsToReportBounds = false;
+    if (this.ref) {
       // These bounds are used by DraggableHandle to decide if a drag was dropped on a target.
       const bounds = this.ref.getBoundingClientRect();
-      this.props.dispatch?.(
-        reportDropTargetBounds({
-          dropTargetID: this.props.dropID,
-          dropTypes: this.props.dropTypes,
-          bounds,
-        })
-      );
+      const { prevBounds } = this.props;
+      const { x, y, width: w, height: h } = bounds;
+      if (
+        !prevBounds ||
+        Math.round(x) !== Math.round(prevBounds.x) ||
+        Math.round(y) !== Math.round(prevBounds.y) ||
+        Math.round(w) !== Math.round(prevBounds.width) ||
+        Math.round(h) !== Math.round(prevBounds.height)
+      ) {
+        this.props.dispatch?.(
+          reportDropTargetBounds({
+            dropTargetId: this.props.dropId,
+            dropTypes: this.props.dropTypes,
+            bounds,
+          })
+        );
+      }
     }
   }
 
   componentWillUnmount(): void {
     this.props.dispatch?.(
       removeDropTarget({
-        dropTargetID: this.props.dropID,
+        dropTargetId: this.props.dropId,
         dropTypes: this.props.dropTypes,
       })
     );
@@ -81,11 +87,13 @@ class DropTarget extends React.Component<Props> {
 
 function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
   const { hudWidth, hudHeight } = state.hud;
+  const prevBounds = state.dragAndDrop.dropTargets[ownProps.dropTypes[0]]?.[ownProps.dropId];
 
   return {
     ...ownProps,
     hudWidth,
     hudHeight,
+    prevBounds,
   };
 }
 

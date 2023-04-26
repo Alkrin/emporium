@@ -1,0 +1,263 @@
+.root {
+  width: 90vmin;
+  height: 66.5vmin;
+  border-radius: 1vmin;
+  border: 2px solid white;
+  background-color: #222;
+}
+
+.actionButton {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.saveButton {
+  @extend .actionButton;
+  position: absolute;
+  bottom: 2vmin;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+}
+
+.savingVeil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  pointer-events: all;
+}
+
+.savingLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: wheat;
+  font-size: 3rem;
+}
+
+.equipmentSlotRoot {
+  margin-left: 0.5vmin;
+  flex-grow: 1;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 0.5vmin;
+  border: 2px solid gray;
+  transition: 0.2s linear;
+
+  &.validTarget {
+    border-color: lime;
+  }
+}
+
+.slotTitle {
+  font-size: 1rem;
+  color: wheat;
+  width: 7vmin;
+  text-align: right;
+}
+
+.sectionTitle {
+  position: absolute;
+  font-size: 1.3rem;
+  color: wheat;
+  border-bottom: 1px solid yellow;
+  text-align: center;
+}
+
+.equipmentSlotsTitle {
+  @extend .sectionTitle;
+  top: 1.5vmin;
+  left: 1.5vmin;
+  width: 27vmin;
+}
+
+.equipmentSlotList {
+  position: absolute;
+  top: 5vmin;
+  left: 1.5vmin;
+  width: 27vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.equipmentRow {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 0.5vmin;
+  min-height: 2.1vmin;
+}
+
+.personalPileTitle {
+  @extend .sectionTitle;
+  top: 20vmin;
+  left: 31.5vmin;
+  width: 27vmin;
+}
+
+.inventoriesTitle {
+  @extend .sectionTitle;
+  top: 1.5vmin;
+  left: 61.5vmin;
+  width: 27vmin;
+}
+
+.createItemsButton {
+  @extend .actionButton;
+  position: absolute;
+  top: 15vmin;
+  left: 38vmin;
+  width: 14vmin;
+}
+
+.personalPileRoot {
+  position: absolute;
+  top: 23.5vmin;
+  left: 31.5vmin;
+  width: 27vmin;
+  height: 41.5vmin;
+  box-sizing: border-box;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  background-color: black;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.personalPileRowDraggable {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  cursor: move;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.fullDraggableHandle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.personalPileRow {
+  margin-bottom: 0.5vmin;
+  padding: 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.personalPileRowContentWrapper {
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  cursor: move;
+}
+
+.personalPileItemName {
+  color: white;
+}
+
+.personalPileBundleButton {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  background-image: url("/images/EditIcon.png");
+  background-size: contain;
+  pointer-events: all;
+  cursor: pointer;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.equippedItemRow {
+  display: flex;
+  flex-direction: row;
+  color: white;
+  font-size: 1rem;
+  padding-left: 0.5vmin;
+  cursor: move;
+}
+
+.equipmentSlotContentWrapper {
+  margin-right: 0.5vmin;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  flex-grow: 1;
+}
+
+.equipmentSlotItemName {
+  color: white;
+}
+
+.equipmentCategorySpacer {
+  height: 1.5vmin;
+}
+
+.inventoriesListRoot {
+  position: absolute;
+  top: 5vmin;
+  left: 61.5vmin;
+  width: 27vmin;
+  height: 60vmin;
+}

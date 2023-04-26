@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { Dictionary } from "../lib/dictionary";
-import { CharacterData } from "../serverAPI";
+import { CharacterData, CharacterEquipmentData } from "../serverAPI";
 
 interface CharactersReduxState {
   characters: Dictionary<CharacterData>;
@@ -16,6 +16,12 @@ export interface SetXPParams {
 export interface SetHPParams {
   characterId: number;
   hp: number;
+}
+
+export interface SetEquipmentParams {
+  characterId: number;
+  itemId: number;
+  slot: keyof CharacterEquipmentData;
 }
 
 function buildDefaultCharactersReduxState(): CharactersReduxState {
@@ -46,7 +52,13 @@ export const charactersSlice = createSlice({
         state.characters[action.payload.characterId].xp = action.payload.xp;
       }
     },
+    setEquipment: (state: CharactersReduxState, action: PayloadAction<SetEquipmentParams>) => {
+      if (state.characters[action.payload.characterId]) {
+        state.characters[action.payload.characterId][action.payload.slot] = action.payload.itemId;
+      }
+    },
   },
 });
 
-export const { updateCharacter, setActiveCharacterId, setCharacterHP, setCharacterXP } = charactersSlice.actions;
+export const { updateCharacter, setActiveCharacterId, setCharacterHP, setCharacterXP, setEquipment } =
+  charactersSlice.actions;

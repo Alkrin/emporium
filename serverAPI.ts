@@ -9,6 +9,12 @@ import {
   RequestBody_CreateItemDef,
   RequestBody_EditItemDef,
   RequestBody_DeleteItemDef,
+  RequestBody_CreateStorage,
+  RequestBody_CreateItem,
+  ItemMoveParams,
+  RequestBody_MoveItems,
+  RequestBody_MergeBundleItems,
+  RequestBody_SplitBundleItems,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 
@@ -55,9 +61,77 @@ type ServerItemDefData = Omit<ItemDefData, "storage_filters" | "tags"> & {
   tags: string;
 };
 
+export interface ItemData {
+  id: number;
+  def_id: number;
+  count: number;
+  container_id: number;
+  storage_id: number;
+}
+
+export interface StorageData {
+  id: number;
+  name: string;
+  capacity: number;
+  location_id: number;
+  owner_id: number;
+  group_ids: number[];
+}
+type ServerStorageData = Omit<StorageData, "group_ids"> & {
+  group_ids: string;
+};
+
 export type Gender = "m" | "f" | "o";
 
-export interface CharacterData {
+export interface CharacterEquipmentData {
+  // Slots contain an item id or a zero for no item equipped.
+  slot_armor: number;
+  slot_backpack: number;
+  slot_bandolier1: number;
+  slot_bandolier2: number;
+  slot_cloak: number;
+  slot_eyes: number;
+  slot_feet: number;
+  slot_hands: number;
+  slot_head: number;
+  slot_melee1: number;
+  slot_melee2: number;
+  slot_necklace: number;
+  slot_pouch1: number;
+  slot_pouch2: number;
+  slot_ranged: number;
+  slot_ring1: number;
+  slot_ring2: number;
+  slot_shield: number;
+  slot_waist: number;
+  slot_wrists: number;
+}
+
+export const emptyEquipmentData: CharacterEquipmentData = {
+  slot_armor: 0,
+  slot_backpack: 0,
+  slot_bandolier1: 0,
+  slot_bandolier2: 0,
+  slot_cloak: 0,
+  slot_eyes: 0,
+  slot_feet: 0,
+  slot_hands: 0,
+  slot_head: 0,
+  slot_melee1: 0,
+  slot_melee2: 0,
+  slot_necklace: 0,
+  slot_pouch1: 0,
+  slot_pouch2: 0,
+  slot_ranged: 0,
+  slot_ring1: 0,
+  slot_ring2: 0,
+  slot_shield: 0,
+  slot_waist: 0,
+  slot_wrists: 0,
+};
+export const CharacterEquipmentSlots = Object.keys(emptyEquipmentData) as (keyof CharacterEquipmentData)[];
+
+export interface CharacterData extends CharacterEquipmentData {
   id: number;
   user_id: number;
   name: string;
@@ -108,10 +182,13 @@ export interface RowDeleted {
 export type LogInResult = ServerError | UserData;
 export type CharactersResult = ServerError | CharacterData[];
 export type ItemDefsResult = ServerError | ItemDefData[];
+export type ItemsResult = ServerError | ItemData[];
 export type UsersResult = ServerError | UserData[];
+export type StoragesResult = ServerError | StorageData[];
 export type ProficienciesResult = ServerError | ProficiencyData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetXPResult = ServerError | XPChange;
+export type MultiModifyResult = ServerError | (ServerError | EditRowResult | InsertRowResult | DeleteRowResult)[];
 export type InsertRowResult = ServerError | RowAdded;
 export type EditRowResult = ServerError | RowEdited;
 export type DeleteRowResult = ServerError | RowDeleted;
@@ -196,8 +273,8 @@ class AServerAPI {
       data.forEach((sItemData) => {
         itemData.push({
           ...sItemData,
-          tags: sItemData.tags.split(","),
-          storage_filters: sItemData.storage_filters.split(","),
+          tags: sItemData.tags.length > 0 ? sItemData.tags.split(",") : [],
+          storage_filters: sItemData.storage_filters.length > 0 ? sItemData.storage_filters.split(",") : [],
         });
       });
 
@@ -205,13 +282,70 @@ class AServerAPI {
     }
   }
 
-  async createCharacter(character: CharacterData): Promise<NoDataResult> {
+  async fetchItems(): Promise<ItemsResult> {
+    const res = await fetch("/api/fetchItems", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ItemData[] = await res.json();
+    return data;
+  }
+
+  async fetchStorages(): Promise<StoragesResult> {
+    const res = await fetch("/api/fetchStorages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerStorageData[] = await res.json();
+
+    if ("error" in data) {
+      return data;
+    } else {
+      // group_ids is stored in the db as comma separated strings, but in Redux as a number array,
+      // so we have to convert before passing the results along.
+      const storageData: StorageData[] = [];
+      data.forEach((storage) => {
+        storageData.push({
+          ...storage,
+          group_ids:
+            storage.group_ids.length > 0
+              ? storage.group_ids.split(",").map((str) => {
+                  return +str;
+                })
+              : [],
+        });
+      });
+      return storageData;
+    }
+  }
+
+  async createCharacter(character: CharacterData): Promise<InsertRowResult> {
     const requestBody: RequestBody_CreateCharacter = {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
     };
     const res = await fetch("/api/createCharacter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createItem(data: ItemData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateItem = {
+      ...data,
+    };
+    const res = await fetch("/api/createItem", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -229,6 +363,20 @@ class AServerAPI {
       tags: def.tags.join(","),
     };
     const res = await fetch("/api/createItemDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createStorage(storage: StorageData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateStorage = {
+      ...storage,
+    };
+    const res = await fetch("/api/createStorage", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -325,6 +473,61 @@ class AServerAPI {
       proficiencies,
     };
     const res = await fetch("/api/updateProficiencies", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async moveItems(moves: ItemMoveParams[]): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_MoveItems = { moves };
+    const res = await fetch("/api/moveItems", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async mergeBundleItems(
+    srcItemId: number,
+    destItemId: number,
+    count: number,
+    srcCharacterId?: number,
+    srcEquipmentSlot?: keyof CharacterEquipmentData
+  ): Promise<NoDataResult> {
+    const requestBody: RequestBody_MergeBundleItems = {
+      srcItemId,
+      destItemId,
+      count,
+      srcCharacterId,
+      srcEquipmentSlot,
+    };
+    const res = await fetch("/api/mergeBundleItems", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  /** Whichever of destContainerId and destStorageId is wrong, set to zero.  Returns the id of the newly created bundle item. */
+  async splitBundleItems(
+    srcItemId: number,
+    destContainerId: number,
+    destStorageId: number,
+    count: number,
+    itemDefId: number
+  ): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_SplitBundleItems = { srcItemId, destContainerId, destStorageId, count, itemDefId };
+    const res = await fetch("/api/splitBundleItems", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

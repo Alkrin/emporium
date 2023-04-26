@@ -11,12 +11,12 @@ import { reportDraggableBounds } from "../redux/dragAndDropSlice";
 import { RootState } from "../redux/store";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Must match with the draggableID on a DraggableHandle. */
-  draggableID: string;
+  /** Must match with the draggableId on a DraggableHandle. */
+  draggableId: string;
 }
 
 interface InjectedProps {
-  currentDraggableID: string | null;
+  currentDraggableId: string | null;
   dispatch?: Dispatch;
 }
 
@@ -26,20 +26,20 @@ class Draggable extends React.Component<Props> {
   private ref: HTMLDivElement | null = null;
   public render(): React.ReactNode {
     // We pull out `children` and our custom props so the DOM's `div` doesn't get confused by unknown props.
-    const { children, style, draggableID, currentDraggableID, dispatch, ...otherProps } = this.props;
+    const { children, style, draggableId, currentDraggableId, dispatch, ...otherProps } = this.props;
 
     const finalStyle = {};
     if (style) {
       Object.assign(finalStyle, style);
     }
     // When dragging, we render the dragged item elsewhere, but we retain the original to preserve layout flow.
-    const draggingStyle = draggableID === currentDraggableID ? { opacity: 0.5 } : {};
+    const draggingStyle = draggableId === currentDraggableId ? { opacity: 0.5 } : {};
     Object.assign(finalStyle, draggingStyle);
 
     return (
       <div
         {...otherProps}
-        id={`Draggable_${draggableID}`}
+        id={`Draggable_${draggableId}`}
         ref={(r) => {
           this.ref = r;
         }}
@@ -53,8 +53,8 @@ class Draggable extends React.Component<Props> {
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
     if (
       this.ref && // Can we get the bounds for this Draggable?
-      this.props.draggableID === this.props.currentDraggableID && // Are we dragging this Draggable?
-      prevProps.currentDraggableID !== this.props.currentDraggableID // Is this the first update after we started dragging this Draggable?
+      this.props.draggableId === this.props.currentDraggableId && // Are we dragging this Draggable?
+      prevProps.currentDraggableId !== this.props.currentDraggableId // Is this the first update after we started dragging this Draggable?
     ) {
       // This Draggable is currently being dragged, so report its bounds. We need its
       // size and position so that the dragRender output will match.
@@ -65,11 +65,11 @@ class Draggable extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
-  const { currentDraggableID } = state.dragAndDrop;
+  const { currentDraggableId } = state.dragAndDrop;
 
   return {
     ...ownProps,
-    currentDraggableID,
+    currentDraggableId,
   };
 }
 

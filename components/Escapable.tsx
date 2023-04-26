@@ -11,7 +11,7 @@ import { addOrUpdateEscapable, removeEscapable } from "../redux/hudSlice";
 import { RootState } from "../redux/store";
 
 interface ReactProps {
-  escapeID: string;
+  escapeId: string;
   onEscape: (dispatch: Dispatch) => void;
 }
 
@@ -31,7 +31,7 @@ class Escapable extends React.Component<Props> {
     // Register with Redux.
     this.props.dispatch?.(
       addOrUpdateEscapable({
-        id: this.props.escapeID,
+        id: this.props.escapeId,
         onEscape: this.props.onEscape.bind(this, this.props.dispatch),
       })
     );
@@ -39,7 +39,7 @@ class Escapable extends React.Component<Props> {
 
   componentWillUnmount(): void {
     //  Unregister with Redux.
-    this.props.dispatch?.(removeEscapable(this.props.escapeID));
+    this.props.dispatch?.(removeEscapable(this.props.escapeId));
   }
 }
 

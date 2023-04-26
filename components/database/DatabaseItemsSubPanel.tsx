@@ -1,11 +1,13 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
+import { Dictionary } from "../../lib/dictionary";
 import { deleteItemDef, updateItemDef } from "../../redux/gameDefsSlice";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import ServerAPI, { ItemDefData } from "../../serverAPI";
 import styles from "./DatabaseItemsSubPanel.module.scss";
+import { SearchableItemDefList } from "./SearchableItemDefList";
 
 interface State {
   selectedItemId: number;
@@ -68,7 +70,7 @@ const defaultState: State = {
 interface ReactProps {}
 
 interface InjectedProps {
-  allItemDefs: ItemDefData[];
+  allItemDefs: Dictionary<ItemDefData>;
   dispatch?: Dispatch;
 }
 
@@ -90,13 +92,25 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <div className={styles.panelTitle}>Item Database</div>
-        <div className={styles.itemListRoot}>
-          {this.getSortedItems().map((itemDef) => {
-            return this.renderItemRow(itemDef);
-          })}
-        </div>
+        <SearchableItemDefList
+          className={styles.itemListRoot}
+          selectedItemId={this.state.selectedItemId}
+          onItemSelected={(selectedItemId) => {
+            this.setState({ selectedItemId });
+            const idd = this.props.allItemDefs[selectedItemId];
+            if (idd) {
+              this.setState({
+                selectedItemId,
+                isSaving: this.state.isSaving,
+                ...this.props.allItemDefs[selectedItemId],
+                storage_filters: this.props.allItemDefs[selectedItemId].storage_filters?.join(","),
+                tags: this.props.allItemDefs[selectedItemId].tags?.join(","),
+              });
+            }
+          }}
+        />
         <div className={styles.dataPanelRoot}>
-          {this.renderIDSection()}
+          {this.renderIdSection()}
           {this.renderNameSection()}
           {this.renderDescriptionSection()}
           {this.renderSizeSection()}
@@ -136,7 +150,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private renderIDSection(): React.ReactNode {
+  private renderIdSection(): React.ReactNode {
     return (
       <div className={styles.row}>
         <div className={styles.firstLabel}>ID</div>
@@ -261,7 +275,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
         <div className={styles.row}>
           <div className={styles.firstLabel}>Price</div>
           <input
-            className={styles.smallInputField}
+            className={styles.gpInputField}
             type={"number"}
             value={this.state.cost_gp}
             min={0}
@@ -491,6 +505,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
         <textarea
           className={styles.tagsField}
           value={this.state.tags}
+          spellCheck={false}
           tabIndex={this.nextTabIndex++}
           onChange={(e) => {
             this.setState({ tags: e.target.value });
@@ -577,21 +592,8 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     this.setState({ isSaving: false });
   }
 
-  private getSortedItems(): ItemDefData[] {
-    const items: ItemDefData[] = [...this.props.allItemDefs];
-
-    // TODO: Filter when/if we add a search option?
-    items.sort((itemA, itemB) => {
-      return itemA.name.localeCompare(itemB.name);
-    });
-
-    return items;
-  }
-
   private onItemClicked(itemId: number): void {
-    const itemDef = this.props.allItemDefs.find((idd) => {
-      return idd.id === itemId;
-    });
+    const itemDef = this.props.allItemDefs[itemId];
     if (!itemDef) {
       return;
     }

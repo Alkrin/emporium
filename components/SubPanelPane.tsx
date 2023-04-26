@@ -43,21 +43,12 @@ class ASubPanelPane extends React.Component<Props, State> {
     const subPanelClass = this.state.shouldShow ? styles.show : "";
     return (
       <div className={`${styles.root} ${subPanelClass}`}>
-        <div
-          className={styles.previousSubPanelWrapper}
-          key={`Prev${this.state.prevSubPanel?.id ?? "None"}`}
-        >
+        <div className={styles.previousSubPanelWrapper} key={`Prev${this.state.prevSubPanel?.id ?? "None"}`}>
           {this.renderSubPanel(this.state.prevSubPanel)}
         </div>
-        <div
-          className={styles.currentSubPanelWrapper}
-          key={`Curr${this.state.currentSubPanel?.id ?? "None"}`}
-        >
+        <div className={styles.currentSubPanelWrapper} key={`Curr${this.state.currentSubPanel?.id ?? "None"}`}>
           {this.state.currentSubPanel?.escapable && (
-            <Escapable
-              escapeID={`SubPanel_${this.state.currentSubPanel.id}`}
-              onEscape={this.onEscape.bind(this)}
-            />
+            <Escapable escapeId={`SubPanel_${this.state.currentSubPanel.id}`} onEscape={this.onEscape.bind(this)} />
           )}
           {this.renderSubPanel(this.state.currentSubPanel)}
         </div>
@@ -82,11 +73,7 @@ class ASubPanelPane extends React.Component<Props, State> {
     this.props.dispatch?.(hideSubPanel());
   }
 
-  componentDidUpdate(
-    prevProps: Readonly<Props>,
-    prevState: Readonly<{}>,
-    snapshot?: any
-  ): void {
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
     // If the current subPanel has changed, update state.
     if (this.props.subPanels[0]?.id != this.state.currentSubPanel?.id) {
       this.setState({

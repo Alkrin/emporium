@@ -7,11 +7,7 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import {
-  ContextMenuParams,
-  hideContextMenu,
-  showContextMenu,
-} from "../redux/contextMenuSlice";
+import { ContextMenuParams, hideContextMenu, showContextMenu } from "../redux/contextMenuSlice";
 import { RootState } from "../redux/store";
 import { hideTooltip } from "../redux/tooltipSlice";
 
@@ -20,7 +16,7 @@ interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 interface InjectedProps {
-  currentMenuID: string | null;
+  currentMenuId: string | null;
   dispatch?: Dispatch;
 }
 
@@ -29,8 +25,7 @@ type Props = ReactProps & InjectedProps;
 class ContextMenuSource extends React.Component<Props> {
   public render(): React.ReactNode {
     // We pull out `children` and our custom props so the DOM's `div` doesn't get confused by unknown props.
-    const { children, menuParams, currentMenuID, dispatch, ...otherProps } =
-      this.props;
+    const { children, menuParams, currentMenuId, dispatch, ...otherProps } = this.props;
     return (
       <div {...otherProps} onMouseDown={this.onMouseDown.bind(this)}>
         {children}
@@ -57,17 +52,17 @@ class ContextMenuSource extends React.Component<Props> {
   }
 
   componentWillUnmount(): void {
-    if (this.props.currentMenuID === this.props.menuParams.id) {
+    if (this.props.currentMenuId === this.props.menuParams.id) {
       this.props.dispatch?.(hideContextMenu());
     }
   }
 }
 
 function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
-  const currentMenuID = state.contextMenu.id;
+  const currentMenuId = state.contextMenu.id;
   return {
     ...ownProps,
-    currentMenuID,
+    currentMenuId: currentMenuId,
   };
 }
 

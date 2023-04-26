@@ -4,8 +4,10 @@ import { contextMenuSlice } from "./contextMenuSlice";
 import { dragAndDropSlice } from "./dragAndDropSlice";
 import { gameDefsSlice } from "./gameDefsSlice";
 import { hudSlice } from "./hudSlice";
+import { itemsSlice } from "./itemsSlice";
 import { modalsSlice } from "./modalsSlice";
 import { proficienciesSlice } from "./proficienciesSlice";
+import { storagesSlice } from "./storageSlice";
 import { subPanelsSlice } from "./subPanelsSlice";
 import { toastersSlice } from "./toastersSlice";
 import { tooltipSlice } from "./tooltipSlice";
@@ -18,8 +20,10 @@ const store = configureStore({
     dragAndDrop: dragAndDropSlice.reducer,
     gameDefs: gameDefsSlice.reducer,
     hud: hudSlice.reducer,
+    items: itemsSlice.reducer,
     modals: modalsSlice.reducer,
     proficiencies: proficienciesSlice.reducer,
+    storages: storagesSlice.reducer,
     subPanels: subPanelsSlice.reducer,
     toasters: toastersSlice.reducer,
     tooltip: tooltipSlice.reducer,

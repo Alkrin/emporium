@@ -24,6 +24,29 @@ export enum ArmorStyle {
   Heavy = "Heavy", // Plate or less
 }
 
+export const PermittedArmorStyles: {
+  [key: string]: { [key: string]: boolean };
+} = {
+  [ArmorStyle.None]: {
+    [ArmorStyle.None]: true,
+  },
+  [ArmorStyle.Light]: {
+    [ArmorStyle.None]: true,
+    [ArmorStyle.Light]: true,
+  },
+  [ArmorStyle.Medium]: {
+    [ArmorStyle.None]: true,
+    [ArmorStyle.Light]: true,
+    [ArmorStyle.Medium]: true,
+  },
+  [ArmorStyle.Heavy]: {
+    [ArmorStyle.None]: true,
+    [ArmorStyle.Light]: true,
+    [ArmorStyle.Medium]: true,
+    [ArmorStyle.Heavy]: true,
+  },
+};
+
 export enum SavingThrowType {
   PetrificationAndParalysis = "Petrification and Paralysis",
   PoisonAndDeath = "Poison and Death",
@@ -36,7 +59,7 @@ export type CleaveMultiplier = 0 | 0.5 | 1;
 
 export interface CharacterClass {
   name: string;
-  hitDieSize: 4 | 6 | 8 | 10;
+  hitDieSize: 4 | 6 | 8 | 10 | 12;
   /** How many hp are gained at L10 and each subsequent level INSTEAD of rolling an extra hit die. */
   hpStep: number;
   primeRequisites: CharacterStat[];

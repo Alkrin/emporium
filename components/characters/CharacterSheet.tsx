@@ -10,6 +10,7 @@ import { SavingThrowType } from "../../staticData/types/characterClasses";
 import TooltipSource from "../TooltipSource";
 import { AbilitiesList } from "./AbilitiesList";
 import styles from "./CharacterSheet.module.scss";
+import { EditEquipmentSubPanel } from "./EditEquipmentSubPanel";
 import { EditHPDialog } from "./EditHPDialog";
 import { EditProficienciesSubPanel } from "./EditProficienciesSubPanel";
 import { EditXPDialog } from "./EditXPDialog";
@@ -40,6 +41,7 @@ class ACharacterSheet extends React.Component<Props> {
             {this.renderStatsPanel()}
             {this.renderSavingThrowsPanel()}
             {this.renderSpeedPanel()}
+            {this.renderEquipmentPanel()}
             {this.renderXPPanel()}
             {this.renderHPPanel()}
             {this.renderAbilitiesPanel()}
@@ -177,6 +179,35 @@ class ACharacterSheet extends React.Component<Props> {
     } else {
       return null;
     }
+  }
+
+  private renderEquipmentPanel(): React.ReactNode {
+    const acValue: number = 0;
+    return (
+      <div className={styles.equipmentPanel}>
+        <div className={styles.row}>
+          <div className={styles.abilitiesTitle}>{"Equipment"}</div>
+          <div className={styles.equipmentEditButton} onClick={this.onEditEquipmentClicked.bind(this)} />
+        </div>
+        <div className={styles.horizontalLine} />
+        <div className={styles.row}>
+          <div className={styles.acTitle}>AC:</div>
+          <div className={styles.valueText}>{acValue}</div>
+        </div>
+      </div>
+    );
+  }
+
+  private onEditEquipmentClicked(): void {
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "EditEquipment",
+        content: () => {
+          return <EditEquipmentSubPanel />;
+        },
+        escapable: true,
+      })
+    );
   }
 
   private renderSavingThrowsPanel(): React.ReactNode {

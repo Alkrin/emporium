@@ -78,6 +78,7 @@
 .editIcon {
   background-image: url("/images/EditIcon.png");
   background-size: contain;
+  cursor: pointer;
 }
 
 .nameLabel {
@@ -374,4 +375,39 @@
   &:active {
     opacity: 1;
   }
+}
+
+.equipmentPanel {
+  position: absolute;
+  top: 10vmin;
+  left: 22.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.equipmentEditButton {
+  @extend .editIcon;
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.acTitle {
+  @extend .normalText;
+  width: 6vmin;
 }
