@@ -5,7 +5,7 @@ import { refetchCharacters } from "../../dataSources/CharactersDataSource";
 import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
-import ServerAPI, { CharacterData, Gender } from "../../serverAPI";
+import ServerAPI, { CharacterData, Gender, emptyEquipmentData } from "../../serverAPI";
 import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { CharacterStat } from "../../staticData/types/characterClasses";
 import styles from "./CreateCharacterSubPanel.module.scss";
@@ -420,6 +420,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       xp: this.state.xp,
       hp: this.state.hitDice.reduce((a, b) => a + b, 0),
       hit_dice: this.state.hitDice,
+      ...emptyEquipmentData,
     };
     // Send it to the server!
     const res = await ServerAPI.createCharacter(character);

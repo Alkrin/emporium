@@ -107,7 +107,7 @@ export interface CharacterEquipmentData {
   slot_wrists: number;
 }
 
-const emptyEquipmentData: CharacterEquipmentData = {
+export const emptyEquipmentData: CharacterEquipmentData = {
   slot_armor: 0,
   slot_backpack: 0,
   slot_bandolier1: 0,
