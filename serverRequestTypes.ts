@@ -1,6 +1,7 @@
 import { CharacterEquipmentData, ProficiencyData } from "./serverAPI";
 
-export interface RequestBody_CreateCharacter {
+export interface RequestBody_CreateOrEditCharacter {
+  id: number;
   user_id: number;
   name: string;
   gender: string;

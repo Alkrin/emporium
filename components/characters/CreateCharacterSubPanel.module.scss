@@ -1,6 +1,6 @@
 .root {
   width: 50vmin;
-  height: 45vmin;
+  height: 47vmin;
   border-radius: 1vmin;
   border: 2px solid white;
   background-color: #222;
@@ -42,10 +42,21 @@
   margin-left: 0.5vmin;
 }
 
+.titleLabel {
+  position: absolute;
+  top: 0.5vmin;
+  left: 1vmin;
+  width: 48vmin;
+  font-size: 1.5rem;
+  color: wheat;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+}
+
 .nameLabel {
   @extend .label;
   position: absolute;
-  top: 1.3vmin;
+  top: 4.3vmin;
   left: 1vmin;
   width: 10vmin;
 }
@@ -53,7 +64,7 @@
 .nameTextField {
   @extend .textField;
   position: absolute;
-  top: 1vmin;
+  top: 4vmin;
   left: 12vmin;
   width: 30vmin;
 }
@@ -61,7 +72,7 @@
 .genderLabel {
   @extend .label;
   position: absolute;
-  top: 4.5vmin;
+  top: 7.5vmin;
   left: 1vmin;
   width: 10vmin;
 }
@@ -69,7 +80,7 @@
 .genderRadioGroup {
   @extend .radioGroup;
   position: absolute;
-  top: 4.5vmin;
+  top: 7.5vmin;
   left: 12vmin;
   width: 25vmin;
 }
@@ -77,14 +88,14 @@
 .classLabel {
   @extend .label;
   position: absolute;
-  top: 7.7vmin;
+  top: 10.7vmin;
   left: 1vmin;
   width: 10vmin;
 }
 
 .classSelector {
   position: absolute;
-  top: 7.9vmin;
+  top: 10.9vmin;
   left: 12vmin;
   width: 18vmin;
 }
@@ -92,7 +103,7 @@
 .levelLabel {
   @extend .label;
   position: absolute;
-  top: 7.7vmin;
+  top: 10.7vmin;
   left: 32vmin;
   width: 5vmin;
 }
@@ -101,14 +112,14 @@
   @extend .textField;
   position: absolute;
   width: 4vmin;
-  top: 7.6vmin;
+  top: 10.6vmin;
   left: 38vmin;
 }
 
 .xpLabel {
   @extend .label;
   position: absolute;
-  top: 11.1vmin;
+  top: 14.1vmin;
   left: 1vmin;
   width: 10vmin;
 }
@@ -116,14 +127,14 @@
 .xpRangeLabel {
   @extend .label;
   position: absolute;
-  top: 11.1vmin;
+  top: 14.1vmin;
   left: 24vmin;
 }
 
 .xpTextField {
   @extend .textField;
   position: absolute;
-  top: 10.9vmin;
+  top: 13.9vmin;
   left: 12vmin;
   width: 10vmin;
 }
@@ -131,7 +142,7 @@
 .strengthLabel {
   @extend .label;
   position: absolute;
-  top: 15.2vmin;
+  top: 18.2vmin;
   left: 1vmin;
   width: 10vmin;
 }
@@ -140,14 +151,14 @@
   @extend .textField;
   position: absolute;
   width: 4vmin;
-  top: 14.9vmin;
+  top: 17.9vmin;
   left: 12vmin;
 }
 
 .intelligenceLabel {
   @extend .label;
   position: absolute;
-  top: 18.4vmin;
+  top: 21.4vmin;
   left: 1vmin;
   width: 10vmin;
 }
@@ -156,14 +167,14 @@
   @extend .textField;
   position: absolute;
   width: 4vmin;
-  top: 18.1vmin;
+  top: 21.1vmin;
   left: 12vmin;
 }
 
 .wisdomLabel {
   @extend .label;
   position: absolute;
-  top: 21.6vmin;
+  top: 24.6vmin;
   left: 1vmin;
   width: 10vmin;
 }
@@ -172,14 +183,14 @@
   @extend .textField;
   position: absolute;
   width: 4vmin;
-  top: 21.3vmin;
+  top: 24.3vmin;
   left: 12vmin;
 }
 
 .dexterityLabel {
   @extend .label;
   position: absolute;
-  top: 15.2vmin;
+  top: 18.2vmin;
   left: 18vmin;
   width: 5vmin;
 }
@@ -188,14 +199,14 @@
   @extend .textField;
   position: absolute;
   width: 4vmin;
-  top: 14.9vmin;
+  top: 17.9vmin;
   left: 24vmin;
 }
 
 .constitutionLabel {
   @extend .label;
   position: absolute;
-  top: 18.4vmin;
+  top: 21.4vmin;
   left: 18vmin;
   width: 5vmin;
 }
@@ -204,14 +215,14 @@
   @extend .textField;
   position: absolute;
   width: 4vmin;
-  top: 18.1vmin;
+  top: 21.1vmin;
   left: 24vmin;
 }
 
 .charismaLabel {
   @extend .label;
   position: absolute;
-  top: 21.6vmin;
+  top: 24.6vmin;
   left: 18vmin;
   width: 5vmin;
 }
@@ -220,7 +231,7 @@
   @extend .textField;
   position: absolute;
   width: 4vmin;
-  top: 21.3vmin;
+  top: 24.3vmin;
   left: 24vmin;
 }
 
@@ -231,7 +242,7 @@
 .rerollStatsLabel {
   @extend .label;
   position: absolute;
-  top: 13.2vmin;
+  top: 16.2vmin;
   left: 38vmin;
   width: 6vmin;
   text-align: center;
@@ -239,7 +250,7 @@
 
 .rollStatsButton {
   position: absolute;
-  top: 17.5vmin;
+  top: 20.5vmin;
   left: 38vmin;
   width: 6vmin;
   height: 6vmin;
@@ -249,6 +260,7 @@
   background-size: contain;
   opacity: 0.5;
   box-sizing: border-box;
+  cursor: pointer;
 
   &:hover {
     opacity: 1;
@@ -264,14 +276,14 @@
 .hitDiceLabel {
   @extend .label;
   position: absolute;
-  top: 24.7vmin;
+  top: 27.7vmin;
   left: 1vmin;
   width: 10vmin;
 }
 
 .hitDiceWrapper {
   position: absolute;
-  top: 24.7vmin;
+  top: 27.7vmin;
   left: 12vmin;
   display: flex;
   flex-direction: row;
@@ -303,7 +315,7 @@
 .rerollHitpointsLabel {
   @extend .label;
   position: absolute;
-  top: 25.2vmin;
+  top: 28.2vmin;
   left: 37.5vmin;
   width: 7vmin;
   text-align: center;
@@ -311,7 +323,7 @@
 
 .rollHitpointsButton {
   position: absolute;
-  top: 29.5vmin;
+  top: 32.5vmin;
   left: 38vmin;
   width: 6vmin;
   height: 6vmin;
@@ -321,6 +333,7 @@
   background-size: contain;
   opacity: 0.5;
   box-sizing: border-box;
+  cursor: pointer;
 
   &:hover {
     opacity: 1;
@@ -335,7 +348,7 @@
 
 .saveButton {
   position: absolute;
-  top: 40vmin;
+  top: 42vmin;
   left: 50%;
   transform: translateX(-50%);
   padding: 0.5vmin;
@@ -344,6 +357,7 @@
   border: solid 2px #aaa;
   border-radius: 0.5vmin;
   font-size: 1.2rem;
+  cursor: pointer;
 
   &:hover {
     border-color: white;

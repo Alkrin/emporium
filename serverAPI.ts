@@ -1,7 +1,7 @@
 import { UserRole } from "./redux/userSlice";
 import {
   RequestBody_SetXP,
-  RequestBody_CreateCharacter,
+  RequestBody_CreateOrEditCharacter as RequestBody_CreateOrEditCharacter,
   RequestBody_EncryptString,
   RequestBody_LogIn,
   RequestBody_SetHP,
@@ -326,12 +326,28 @@ class AServerAPI {
   }
 
   async createCharacter(character: CharacterData): Promise<InsertRowResult> {
-    const requestBody: RequestBody_CreateCharacter = {
+    const requestBody: RequestBody_CreateOrEditCharacter = {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
     };
     const res = await fetch("/api/createCharacter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editCharacter(character: CharacterData): Promise<EditRowResult> {
+    const requestBody: RequestBody_CreateOrEditCharacter = {
+      ...character,
+      // Stored on the server as a comma separated string.
+      hit_dice: character.hit_dice.join(","),
+    };
+    const res = await fetch("/api/editCharacter", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

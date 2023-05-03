@@ -150,7 +150,9 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     // All equipped items.
     CharacterEquipmentSlots.forEach((slotId) => {
       const itemId = this.props.character[slotId];
-      if (itemId) {
+      // When swapping items, we can temporarily have items both equipped and in the PersonalPile.  When that
+      // occurs, we'll just add the item once.
+      if (itemId && !containerIds.includes(itemId)) {
         const item = this.props.allItems[itemId];
         if (!item) {
           // When moving bundleable equipment directly into a bundle, we temporarily get an invalid equipment id

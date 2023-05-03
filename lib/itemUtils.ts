@@ -1,4 +1,4 @@
-import { ItemData, ItemDefData } from "../serverAPI";
+import { CharacterData, CharacterEquipmentSlots, ItemData, ItemDefData } from "../serverAPI";
 import { Dictionary } from "./dictionary";
 
 const kAccuracy = 10000;
@@ -172,4 +172,20 @@ export function getMaxBundleItemsForRoom(def: ItemDefData, room: Stones): number
   }
 
   return 0;
+}
+
+export function getTotalEquippedWeight(
+  character: CharacterData,
+  allItems: Dictionary<ItemData>,
+  allItemDefs: Dictionary<ItemDefData>
+): Stones {
+  let weight: Stones = [0, 0];
+
+  CharacterEquipmentSlots.forEach((key) => {
+    const itemId = character[key];
+    const itemWeight = getItemTotalWeight(itemId, allItems, allItemDefs, []);
+    weight = StonesAPlusB(weight, itemWeight);
+  });
+
+  return weight;
 }

@@ -98,6 +98,7 @@ class ACharactersList extends React.Component<Props, State> {
         <div className={styles.listName}>{character.name}</div>
         <div className={styles.listLevel}>L{character.level}</div>
         <div className={styles.listClass}>{character.class_name}</div>
+        <div className={styles.editButton} onClick={this.onCharacterEditClick.bind(this, character.id)} />
       </div>
     );
   }
@@ -106,6 +107,21 @@ class ACharactersList extends React.Component<Props, State> {
     if (this.props.activeCharacterId !== characterId) {
       this.props.dispatch?.(setActiveCharacterId(characterId));
     }
+  }
+
+  private onCharacterEditClick(characterId: number): void {
+    // Editing also selects the character.
+    this.onCharacterRowClick(characterId);
+    // Open the characterCreator in edit mode.
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "EditCharacter",
+        content: () => {
+          return <CreateCharacterSubPanel isEditMode />;
+        },
+        escapable: true,
+      })
+    );
   }
 
   private sortPermittedUsers(): UserData[] {

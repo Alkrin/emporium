@@ -9,6 +9,7 @@ import ServerAPI, { CharacterData, Gender, emptyEquipmentData } from "../../serv
 import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { CharacterStat } from "../../staticData/types/characterClasses";
 import styles from "./CreateCharacterSubPanel.module.scss";
+import { getCharacterMaxHP } from "../../lib/characterUtils";
 
 interface State {
   nameText: string;
@@ -26,10 +27,13 @@ interface State {
   isSaving: boolean;
 }
 
-interface ReactProps {}
+interface ReactProps {
+  isEditMode?: boolean;
+}
 
 interface InjectedProps {
   currentUserId: number;
+  selectedCharacter?: CharacterData;
   dispatch?: Dispatch;
 }
 
@@ -39,21 +43,45 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = {
-      nameText: "",
-      gender: "m",
-      level: 1,
-      xp: 0,
-      class: "---",
-      strength: 9,
-      intelligence: 9,
-      wisdom: 9,
-      dexterity: 9,
-      constitution: 9,
-      charisma: 9,
-      hitDice: [4],
-      isSaving: false,
-    };
+    if (props.isEditMode) {
+      if (props.selectedCharacter) {
+        // Load the selected character.
+        this.state = {
+          nameText: props.selectedCharacter.name,
+          gender: props.selectedCharacter.gender,
+          level: props.selectedCharacter.level,
+          xp: props.selectedCharacter.xp,
+          class: props.selectedCharacter.class_name,
+          strength: props.selectedCharacter.strength,
+          intelligence: props.selectedCharacter.intelligence,
+          wisdom: props.selectedCharacter.wisdom,
+          dexterity: props.selectedCharacter.dexterity,
+          constitution: props.selectedCharacter.constitution,
+          charisma: props.selectedCharacter.charisma,
+          hitDice: props.selectedCharacter.hit_dice,
+          isSaving: false,
+        };
+      } else {
+        console.error("No SelectedCharacter was passed to CreateCharactersSubPanel!");
+      }
+    } else {
+      // Start with blank character data.
+      this.state = {
+        nameText: "",
+        gender: "m",
+        level: 1,
+        xp: 0,
+        class: "---",
+        strength: 9,
+        intelligence: 9,
+        wisdom: 9,
+        dexterity: 9,
+        constitution: 9,
+        charisma: 9,
+        hitDice: [4],
+        isSaving: false,
+      };
+    }
   }
 
   render(): React.ReactNode {
@@ -121,6 +149,11 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 
     return (
       <div className={styles.root}>
+        <div className={styles.titleLabel}>
+          {this.props.isEditMode
+            ? `Editing Character #${this.props.selectedCharacter?.id} (${this.props.selectedCharacter?.name})`
+            : "Create New Character"}
+        </div>
         <div className={styles.nameLabel}>Name</div>
         <input
           className={styles.nameTextField}
@@ -355,7 +388,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         <div className={styles.rollHitpointsButton} onClick={this.onRerollHitpointsClicked.bind(this)}></div>
 
         <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
-          Save Character
+          {this.props.isEditMode ? "Save Changes" : "Save Character"}
         </div>
 
         {this.state.isSaving && (
@@ -403,8 +436,9 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       return;
     }
 
+    // Create a new character.
     const character: CharacterData = {
-      id: -1,
+      id: this.props.selectedCharacter?.id ?? -1,
       user_id: this.props.currentUserId,
       name: this.state.nameText,
       gender: this.state.gender,
@@ -418,12 +452,21 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       constitution: this.state.constitution,
       charisma: this.state.charisma,
       xp: this.state.xp,
-      hp: this.state.hitDice.reduce((a, b) => a + b, 0),
+      hp: 0, // We'll replace this in a moment.
       hit_dice: this.state.hitDice,
+      // EquipmentData values are ignored when editing a character.
       ...emptyEquipmentData,
     };
-    // Send it to the server!
-    const res = await ServerAPI.createCharacter(character);
+    // Have to calculate this separately so it can account for class and Constitution bonus.
+    character.hp = getCharacterMaxHP(character);
+
+    if (this.props.isEditMode) {
+      // Edit the character.
+      const res = await ServerAPI.editCharacter(character);
+    } else {
+      // Send it to the server!
+      const res = await ServerAPI.createCharacter(character);
+    }
     this.setState({ isSaving: false });
     // Refetch characters.
     if (this.props.dispatch) {
@@ -477,9 +520,11 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
+  const selectedCharacter = state.characters.characters[state.characters.activeCharacterId];
   return {
     ...props,
     currentUserId: state.user.currentUser.id,
+    selectedCharacter,
   };
 }
 

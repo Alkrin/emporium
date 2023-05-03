@@ -6,7 +6,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
   try {
     const b = req.body as RequestBody_CreateOrEditCharacter;
     const results = await executeQuery<any>(
-      `INSERT INTO characters (user_id,name,gender,portrait_url,class_name,level,strength,intelligence,wisdom,dexterity,constitution,charisma,xp,hp,hit_dice) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      `UPDATE characters SET user_id=?,name=?,gender=?,portrait_url=?,class_name=?,level=?,strength=?,intelligence=?,wisdom=?,dexterity=?,constitution=?,charisma=?,xp=?,hp=?,hit_dice=? WHERE id=?`,
       [
         b.user_id,
         b.name,
@@ -23,6 +23,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         b.xp,
         b.hp,
         b.hit_dice,
+        b.id,
       ]
     );
 
