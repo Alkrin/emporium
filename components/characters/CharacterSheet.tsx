@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
-import { CharacterData } from "../../serverAPI";
+import { CharacterData, ItemData, ItemDefData } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import { SavingThrowType } from "../../staticData/types/characterClasses";
 import TooltipSource from "../TooltipSource";
@@ -14,6 +14,9 @@ import { EditEquipmentSubPanel } from "./EditEquipmentSubPanel";
 import { EditHPDialog } from "./EditHPDialog";
 import { EditProficienciesSubPanel } from "./EditProficienciesSubPanel";
 import { EditXPDialog } from "./EditXPDialog";
+import { Dictionary } from "../../lib/dictionary";
+import { Stones, StonesToNumber, getTotalEquippedWeight } from "../../lib/itemUtils";
+import { getBonusForStat, getCharacterMaxEncumbrance, getCharacterMaxHP } from "../../lib/characterUtils";
 
 interface ReactProps {
   characterId: number;
@@ -21,6 +24,8 @@ interface ReactProps {
 }
 
 interface InjectedProps {
+  allItems: Dictionary<ItemData>;
+  allItemDefs: Dictionary<ItemDefData>;
   character: CharacterData;
   dispatch?: Dispatch;
 }
@@ -108,7 +113,7 @@ class ACharacterSheet extends React.Component<Props> {
 
   private renderHPPanel(): React.ReactNode {
     if (this.props.character) {
-      const maxHP = this.props.character.hit_dice.reduce((a, b) => a + b, 0);
+      const maxHP = getCharacterMaxHP(this.props.character);
       const isDying = this.props.character.hp <= 0;
       const healthStyle = isDying ? styles.dying : "";
       return (
@@ -156,25 +161,53 @@ class ACharacterSheet extends React.Component<Props> {
     );
   }
 
+  private getBaseSpeedForEncumbrance(encumbrance: Stones): number {
+    // Calculate speed based on Encumbrance.
+    // TODO: Running proficiency.  Plus, Thrassians are always at 20 or less?
+    const maxEncumbrance: Stones = getCharacterMaxEncumbrance(this.props.character);
+
+    let speed = 40;
+
+    if (StonesToNumber(encumbrance) > StonesToNumber(maxEncumbrance)) {
+      speed = 0;
+    } else if (StonesToNumber(encumbrance) > StonesToNumber([10, 0])) {
+      speed = 10;
+    } else if (StonesToNumber(encumbrance) > StonesToNumber([7, 0])) {
+      speed = 20;
+    } else if (StonesToNumber(encumbrance) > StonesToNumber([5, 0])) {
+      speed = 30;
+    }
+
+    return speed;
+  }
+
   private renderSpeedPanel(): React.ReactNode {
     if (this.props.character) {
-      // TODO: Calculate based on Encumbrance and the Running proficiency.
-      const baseSpeed = 40;
-      // TODO: Calculate encumbrance based on equipment slots.
-      const fullStoneEncumbrance = 0;
-      const partialStoneEncumbrance = 0;
+      // Calculate encumbrance based on equipment slots.
+      const encumbrance = getTotalEquippedWeight(this.props.character, this.props.allItems, this.props.allItemDefs);
+      const [fullStoneEncumbrance, partialStoneEncumbrance] = encumbrance;
+      const speed = this.getBaseSpeedForEncumbrance(encumbrance);
+
       return (
-        <div className={styles.speedPanel}>
+        <TooltipSource
+          tooltipParams={{
+            id: "SpeedExplanation",
+            content: this.renderSpeedTooltip.bind(this),
+          }}
+          className={styles.speedPanel}
+        >
           <div className={styles.row}>
             <div className={styles.speedTitle}>Speed</div>
-            <div className={styles.speedValue}>{`${baseSpeed}' / ${baseSpeed * 3}'`}</div>
+            <div className={styles.speedValue}>{`${speed}' / ${speed * 3}'`}</div>
           </div>
           <div className={styles.row}>
             <div className={styles.speedTitle}>Encumbrance</div>
-            <div className={styles.speedValue}>{`${fullStoneEncumbrance}  ${partialStoneEncumbrance}/6`}</div>
+            <div className={styles.speedValue}>{`${fullStoneEncumbrance}${
+              partialStoneEncumbrance > 0 ? `  ${partialStoneEncumbrance}/6` : ""
+            }`}</div>
             <div className={styles.speedStone}>stone</div>
           </div>
-        </div>
+        </TooltipSource>
       );
     } else {
       return null;
@@ -182,7 +215,14 @@ class ACharacterSheet extends React.Component<Props> {
   }
 
   private renderEquipmentPanel(): React.ReactNode {
-    const acValue: number = 0;
+    const equippedArmorAC =
+      this.props.allItemDefs[this.props.allItems[this.props.character?.slot_armor]?.def_id]?.ac ?? 0;
+    const equippedShieldAC =
+      this.props.allItemDefs[this.props.allItems[this.props.character?.slot_shield]?.def_id]?.ac ?? 0;
+    const dexBonus = getBonusForStat(this.props.character.dexterity);
+    // TODO: Proficiencies and abilities that grant armor.
+    // TODO: Conditional boosts?
+    const acValue: number = equippedArmorAC + equippedShieldAC + dexBonus;
     return (
       <div className={styles.equipmentPanel}>
         <div className={styles.row}>
@@ -190,9 +230,89 @@ class ACharacterSheet extends React.Component<Props> {
           <div className={styles.equipmentEditButton} onClick={this.onEditEquipmentClicked.bind(this)} />
         </div>
         <div className={styles.horizontalLine} />
-        <div className={styles.row}>
+        <TooltipSource
+          tooltipParams={{
+            id: "ACExplanation",
+            content: this.renderACTooltip.bind(this),
+          }}
+          className={styles.row}
+        >
           <div className={styles.acTitle}>AC:</div>
           <div className={styles.valueText}>{acValue}</div>
+        </TooltipSource>
+      </div>
+    );
+  }
+
+  private renderACTooltip(): React.ReactNode {
+    const equippedArmor = this.props.allItemDefs[this.props.allItems[this.props.character?.slot_armor]?.def_id];
+    const equippedArmorAC = equippedArmor?.ac ?? 0;
+
+    const equippedShield = this.props.allItemDefs[this.props.allItems[this.props.character?.slot_shield]?.def_id];
+    const equippedShieldAC = equippedShield?.ac ?? 0;
+
+    const dexBonus = getBonusForStat(this.props.character.dexterity);
+
+    // TODO: Proficiencies and abilities that grant armor.
+    // TODO: Conditional boosts?
+
+    const acValue: number = equippedArmorAC + equippedShieldAC + dexBonus;
+
+    return (
+      <div className={styles.acTooltipRoot}>
+        <div className={styles.row}>
+          <div className={styles.acTooltipTitle}>Total AC:</div>
+          <div className={styles.acTooltipValue}>{acValue}</div>
+        </div>
+        <div className={styles.acTooltipDivider} />
+        {equippedArmor && (
+          <div className={styles.acTooltipSourceRow}>
+            <div className={styles.acTooltipSource}>{equippedArmor.name}</div>
+            <div className={styles.acTooltipValue}>{equippedArmor.ac}</div>
+          </div>
+        )}
+        {equippedShield && (
+          <div className={styles.acTooltipSourceRow}>
+            <div className={styles.acTooltipSource}>{equippedShield.name}</div>
+            <div className={styles.acTooltipValue}>{equippedShield.ac}</div>
+          </div>
+        )}
+        <div className={styles.acTooltipSourceRow}>
+          <div className={styles.acTooltipSource}>Dex Bonus</div>
+          <div className={styles.acTooltipSourceValue}>{`${dexBonus > 0 ? "+" : ""}${dexBonus}`}</div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderSpeedTooltip(): React.ReactNode {
+    const maxEncumbrance: Stones = getCharacterMaxEncumbrance(this.props.character);
+    const encumbrance = getTotalEquippedWeight(this.props.character, this.props.allItems, this.props.allItemDefs);
+    const baseSpeed = this.getBaseSpeedForEncumbrance(encumbrance);
+    // TODO: Running?  Thrassians?
+    const lowEncumbranceStyle = baseSpeed === 40 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+    const midEncumbranceStyle = baseSpeed === 30 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+    const highEncumbranceStyle = baseSpeed === 20 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+    const maxEncumbranceStyle = baseSpeed === 10 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+    const immobileStyle = baseSpeed === 0 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+
+    return (
+      <div className={styles.speedTooltipRoot}>
+        <div className={styles.speedTooltipEncumbranceColumn}>
+          <div className={styles.speedTooltipTitle}>Encumbrance</div>
+          <div className={lowEncumbranceStyle}>5 stone or less</div>
+          <div className={midEncumbranceStyle}>7 stone or less</div>
+          <div className={highEncumbranceStyle}>10 stone or less</div>
+          <div className={maxEncumbranceStyle}>{`${maxEncumbrance[0]} stone or less`}</div>
+          <div className={immobileStyle}>{`More than ${maxEncumbrance[0]} stone`}</div>
+        </div>
+        <div className={styles.speedTooltipSpeedColumn}>
+          <div className={styles.speedTooltipTitle}>Speed</div>
+          <div className={lowEncumbranceStyle}>40' / 120'</div>
+          <div className={midEncumbranceStyle}>30' / 90'</div>
+          <div className={highEncumbranceStyle}>20' / 60'</div>
+          <div className={maxEncumbranceStyle}>10' / 30'</div>
+          <div className={immobileStyle}>0' / 0'</div>
         </div>
       </div>
     );
@@ -259,7 +379,7 @@ class ACharacterSheet extends React.Component<Props> {
   }
 
   private renderStatPane(name: string, value: number, renderTooltip: () => React.ReactNode): React.ReactNode {
-    const bonus = this.bonusForStat(value);
+    const bonus = getBonusForStat(value);
     const bonusText = `${bonus > 0 ? "+" : ""}${bonus}`;
 
     return (
@@ -294,23 +414,15 @@ class ACharacterSheet extends React.Component<Props> {
   private renderCharismaTooltip(): React.ReactNode {
     return "Charisma";
   }
-
-  private bonusForStat(value: number) {
-    if (value <= 3) return -3;
-    if (value <= 5) return -2;
-    if (value <= 8) return -1;
-    if (value <= 12) return 0;
-    if (value <= 15) return 1;
-    if (value <= 17) return 2;
-    if (value <= 18) return 3;
-
-    return 0;
-  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
+  const { allItems } = state.items;
+  const allItemDefs = state.gameDefs.items;
   return {
     ...props,
+    allItems,
+    allItemDefs,
     character: state.characters.characters[props.characterId ?? 1] ?? null,
   };
 }

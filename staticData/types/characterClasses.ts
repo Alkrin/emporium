@@ -57,6 +57,16 @@ export enum SavingThrowType {
 
 export type CleaveMultiplier = 0 | 0.5 | 1;
 
+export enum SpellType {
+  Arcane = "Arcane",
+  Bladedancer = "Bladedancer",
+  Divine = "Divine",
+  Eldritch = "Eldritch",
+  Priestess = "Priestess",
+  Shaman = "Shaman",
+  Witch = "Witch",
+}
+
 export interface CharacterClass {
   name: string;
   hitDieSize: 4 | 6 | 8 | 10 | 12;
@@ -82,9 +92,7 @@ export interface CharacterClass {
   classProficienciesAt: number[];
   classProficiencies: AbilityFilter[];
   /** First index is character level-1, second index is spell level-1. */
-  arcaneSpellSlots?: number[][];
-  /** First index is character level-1, second index is spell level-1. */
-  divineSpellSlots?: number[][];
-  /** First index is character level-1, second index is spell level-1. */
-  eldritchSpellSlots?: number[][];
+  spellSlots: {
+    [type in SpellType]?: number[][];
+  };
 }

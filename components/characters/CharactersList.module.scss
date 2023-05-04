@@ -116,4 +116,28 @@
   margin-left: 0.5vmin;
   font-size: 1rem;
   color: wheat;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.editIcon {
+  background-image: url("/images/EditIcon.png");
+  background-size: contain;
+  cursor: pointer;
+}
+
+.editButton {
+  @extend .editIcon;
+  width: 1.16rem;
+  height: 1.16rem;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
 }

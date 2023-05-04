@@ -411,3 +411,84 @@
   @extend .normalText;
   width: 6vmin;
 }
+
+.acTooltipRoot {
+  max-width: 45vmin;
+}
+
+.acTooltipTitle {
+  font-size: 1rem;
+  color: wheat;
+  min-width: 10vmin;
+  flex-grow: 1;
+}
+
+.acTooltipValue {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.acTooltipDivider {
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
+
+.acTooltipSourceRow {
+  @extend .row;
+  margin-top: 0.5vmin;
+}
+
+.acTooltipSource {
+  flex-grow: 1;
+  font-size: 0.8rem;
+  color: gray;
+  text-align: justify;
+}
+
+.acTooltipSourceValue {
+  margin-left: 0.5vmin;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 0, 0.5);
+}
+
+.speedTooltipRoot {
+  width: 24vmin;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.speedTooltipEncumbranceColumn {
+  @extend .column;
+  width: 14.5vmin;
+}
+
+.speedTooltipSpeedColumn {
+  @extend .column;
+  width: 8vmin;
+}
+
+.speedTooltipTitle {
+  font-size: 1rem;
+  color: wheat;
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+}
+
+.speedTooltipActiveEntry {
+  font-size: 1rem;
+  color: white;
+  width: 100%;
+  text-align: center;
+  margin-top: 0.5vmin;
+}
+
+.speedTooltipInactiveEntry {
+  font-size: 0.8rem;
+  color: #555;
+  width: 100%;
+  text-align: center;
+  margin-top: 0.5vmin;
+}

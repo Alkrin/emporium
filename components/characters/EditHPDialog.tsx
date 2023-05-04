@@ -6,6 +6,8 @@ import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import ServerAPI, { CharacterData } from "../../serverAPI";
 import styles from "./EditHPDialog.module.scss";
+import { getCharacterMaxHP } from "../../lib/characterUtils";
+import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 
 interface State {
   hpTotal: number;
@@ -42,7 +44,7 @@ class AEditHPDialog extends React.Component<Props, State> {
             className={styles.hpTextField}
             type={"number"}
             value={this.state.hpTotal}
-            max={this.getMaxHP()}
+            max={getCharacterMaxHP(this.props.character)}
             onChange={(e) => {
               this.setState({ hpTotal: +e.target.value });
             }}
@@ -80,10 +82,6 @@ class AEditHPDialog extends React.Component<Props, State> {
     this.setState({ hpTotal: this.props.character.hp });
   }
 
-  private getMaxHP(): number {
-    return this.props.character.hit_dice.reduce((a, b) => a + b, 0);
-  }
-
   private async onSetHPTotalClicked(): Promise<void> {
     if (this.state.saving) {
       return;
@@ -116,7 +114,7 @@ class AEditHPDialog extends React.Component<Props, State> {
     this.setState({ saving: true });
     const result = await ServerAPI.setHP(
       this.props.character.id,
-      Math.min(this.props.character.hp + this.state.hpDelta, this.getMaxHP())
+      Math.min(this.props.character.hp + this.state.hpDelta, getCharacterMaxHP(this.props.character))
     );
 
     if ("error" in result) {
