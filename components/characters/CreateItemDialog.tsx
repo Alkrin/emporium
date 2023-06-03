@@ -46,6 +46,7 @@ class ACreateItemDialog extends React.Component<Props, State> {
       <div className={styles.root}>
         <SearchableDefList
           className={styles.itemListRoot}
+          allDefs={this.props.allItemDefs}
           selectedDefId={this.state.selectedItemId}
           onDefSelected={(selectedItemId) => {
             this.setState({ selectedItemId, numToCreate: 1 });
