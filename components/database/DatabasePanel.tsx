@@ -5,6 +5,7 @@ import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
 import { SubPanelPane } from "../SubPanelPane";
 import { DatabaseItemsSubPanel } from "./DatabaseItemsSubPanel";
+import { DatabaseSpellsSubPanel } from "./DatabaseSpellsSubPanel";
 import styles from "./DatabasePanel.module.scss";
 
 interface ReactProps {}
@@ -22,6 +23,9 @@ class ADatabasePanel extends React.Component<Props> {
         <div className={styles.dataButton} onClick={this.onItemsClicked.bind(this)}>
           Items
         </div>
+        <div className={styles.dataButton} onClick={this.onSpellsClicked.bind(this)}>
+          Spells
+        </div>
         <SubPanelPane />
       </div>
     );
@@ -33,6 +37,18 @@ class ADatabasePanel extends React.Component<Props> {
         id: "DatabaseItems",
         content: () => {
           return <DatabaseItemsSubPanel />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onSpellsClicked(): void {
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "DatabaseSpells",
+        content: () => {
+          return <DatabaseSpellsSubPanel />;
         },
         escapable: true,
       })

@@ -61,10 +61,27 @@ export enum SpellType {
   Arcane = "Arcane",
   Bladedancer = "Bladedancer",
   Divine = "Divine",
-  Eldritch = "Eldritch",
+  EldritchBlack = "Eldritch(Black)",
+  EldritchGrey = "Eldritch(Grey)",
+  EldritchWhite = "Eldritch(White)",
   Priestess = "Priestess",
   Shaman = "Shaman",
   Witch = "Witch",
+  WitchAntiquarian = "Witch(Antiquarian)",
+  WitchChthonic = "Witch(Chthonic)",
+  WitchSylvan = "Witch(Sylvan)",
+  WitchVoudon = "Witch(Voudon)",
+}
+
+export interface SpellCapability {
+  /** All spell types that can be cast from these spell slots. */
+  spellTypes: SpellType[];
+  /** First index is character level-1, second index is spell level-1. */
+  spellSlots: number[][];
+  /** If true, the character must have a repertoire and a spellbook in order to cast spells.
+   * If false, the character always has access to all spells from the listed spellTypes.
+   */
+  requiresSpellbook: boolean;
 }
 
 export interface CharacterClass {
@@ -91,8 +108,5 @@ export interface CharacterClass {
   /** The levels at which this class gains a Class Proficiency. */
   classProficienciesAt: number[];
   classProficiencies: AbilityFilter[];
-  /** First index is character level-1, second index is spell level-1. */
-  spellSlots: {
-    [type in SpellType]?: number[][];
-  };
+  spellcasting: SpellCapability[];
 }

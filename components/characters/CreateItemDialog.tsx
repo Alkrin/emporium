@@ -8,7 +8,7 @@ import { RootState } from "../../redux/store";
 import { showToaster } from "../../redux/toastersSlice";
 import ServerAPI, { CharacterData, ItemData, ItemDefData, StorageData } from "../../serverAPI";
 import { ItemTooltip } from "../database/ItemTooltip";
-import { SearchableItemDefList } from "../database/SearchableItemDefList";
+import { SearchableDefList } from "../database/SearchableDefList";
 import styles from "./CreateItemDialog.module.scss";
 
 interface State {
@@ -44,10 +44,11 @@ class ACreateItemDialog extends React.Component<Props, State> {
     const canEditCount = this.state.selectedItemId > 0 && this.props.allItemDefs[this.state.selectedItemId]?.bundleable;
     return (
       <div className={styles.root}>
-        <SearchableItemDefList
+        <SearchableDefList
           className={styles.itemListRoot}
-          selectedItemId={this.state.selectedItemId}
-          onItemSelected={(selectedItemId) => {
+          allDefs={this.props.allItemDefs}
+          selectedDefId={this.state.selectedItemId}
+          onDefSelected={(selectedItemId) => {
             this.setState({ selectedItemId, numToCreate: 1 });
           }}
           renderTooltip={(def) => {

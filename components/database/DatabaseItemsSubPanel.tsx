@@ -7,7 +7,7 @@ import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import ServerAPI, { ItemDefData } from "../../serverAPI";
 import styles from "./DatabaseItemsSubPanel.module.scss";
-import { SearchableItemDefList } from "./SearchableItemDefList";
+import { SearchableDefList } from "./SearchableDefList";
 
 interface State {
   selectedItemId: number;
@@ -92,10 +92,11 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <div className={styles.panelTitle}>Item Database</div>
-        <SearchableItemDefList
+        <SearchableDefList
           className={styles.itemListRoot}
-          selectedItemId={this.state.selectedItemId}
-          onItemSelected={(selectedItemId) => {
+          selectedDefId={this.state.selectedItemId}
+          allDefs={this.props.allItemDefs}
+          onDefSelected={(selectedItemId) => {
             this.setState({ selectedItemId });
             const idd = this.props.allItemDefs[selectedItemId];
             if (idd) {
@@ -133,19 +134,6 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
             <div className={styles.savingLabel}>Saving...</div>
           </div>
         )}
-      </div>
-    );
-  }
-
-  private renderItemRow(itemDef: ItemDefData): React.ReactNode {
-    const selectedClass = itemDef.id === this.state.selectedItemId ? styles.selected : "";
-    return (
-      <div
-        className={`${styles.listRow} ${selectedClass}`}
-        key={`idd${itemDef.id}`}
-        onClick={this.onItemClicked.bind(this, itemDef.id)}
-      >
-        {itemDef.name}
       </div>
     );
   }
@@ -590,21 +578,6 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     }
 
     this.setState({ isSaving: false });
-  }
-
-  private onItemClicked(itemId: number): void {
-    const itemDef = this.props.allItemDefs[itemId];
-    if (!itemDef) {
-      return;
-    }
-
-    this.setState({
-      selectedItemId: itemId,
-      isSaving: this.state.isSaving,
-      ...itemDef,
-      tags: itemDef.tags.join(","),
-      storage_filters: itemDef.storage_filters.join(","),
-    });
   }
 
   private onDeleteClicked(): void {

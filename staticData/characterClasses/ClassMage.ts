@@ -33,7 +33,14 @@ import { ProficiencySensingPower } from "../proficiencies/ProficiencySensingPowe
 import { ProficiencySoothsaying } from "../proficiencies/ProficiencySoothsaying";
 import { ProficiencyTransmogrification } from "../proficiencies/ProficiencyTransmogrification";
 import { ProficiencyUnflappableCasting } from "../proficiencies/ProficiencyUnflappableCasting";
-import { ArmorStyle, BaseWeaponStyle, CharacterClass, CharacterStat, SavingThrowType } from "../types/characterClasses";
+import {
+  ArmorStyle,
+  BaseWeaponStyle,
+  CharacterClass,
+  CharacterStat,
+  SavingThrowType,
+  SpellType,
+} from "../types/characterClasses";
 import { BaseWeaponType } from "../types/items";
 
 export const ClassMage: CharacterClass = {
@@ -95,22 +102,26 @@ export const ClassMage: CharacterClass = {
     { def: ProficiencySoothsaying },
     { def: ProficiencyUnflappableCasting },
   ],
-  spellSlots: {
-    Arcane: [
-      [1, 0, 0, 0, 0, 0],
-      [2, 0, 0, 0, 0, 0],
-      [2, 1, 0, 0, 0, 0],
-      [2, 2, 0, 0, 0, 0],
-      [2, 2, 1, 0, 0, 0],
-      [2, 2, 2, 0, 0, 0],
-      [3, 2, 2, 1, 0, 0],
-      [3, 3, 2, 2, 0, 0],
-      [3, 3, 3, 2, 1, 0],
-      [3, 3, 3, 3, 2, 0],
-      [4, 3, 3, 3, 2, 1],
-      [4, 4, 3, 3, 3, 2],
-      [4, 4, 4, 3, 3, 2],
-      [4, 4, 4, 4, 3, 3],
-    ],
-  },
+  spellcasting: [
+    {
+      spellTypes: [SpellType.Arcane],
+      requiresSpellbook: true,
+      spellSlots: [
+        [1, 0, 0, 0, 0, 0],
+        [2, 0, 0, 0, 0, 0],
+        [2, 1, 0, 0, 0, 0],
+        [2, 2, 0, 0, 0, 0],
+        [2, 2, 1, 0, 0, 0],
+        [2, 2, 2, 0, 0, 0],
+        [3, 2, 2, 1, 0, 0],
+        [3, 3, 2, 2, 0, 0],
+        [3, 3, 3, 2, 1, 0],
+        [3, 3, 3, 3, 2, 0],
+        [4, 3, 3, 3, 2, 1],
+        [4, 4, 3, 3, 3, 2],
+        [4, 4, 4, 3, 3, 2],
+        [4, 4, 4, 4, 3, 3],
+      ],
+    },
+  ],
 };

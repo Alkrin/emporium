@@ -87,5 +87,5 @@ export const ClassFighter: CharacterClass = {
     { def: ProficiencyWeaponFinesse },
     { def: ProficiencyWeaponFocus },
   ],
-  spellSlots: {},
+  spellcasting: [],
 };
