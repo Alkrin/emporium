@@ -57,12 +57,13 @@ export enum SavingThrowType {
 
 export type CleaveMultiplier = 0 | 0.5 | 1;
 
-// TODO: Should I define Types and Subtypes?  Would subtype just be class?  Or Class+Tradition?
 export enum SpellType {
   Arcane = "Arcane",
   Bladedancer = "Bladedancer",
   Divine = "Divine",
-  Eldritch = "Eldritch",
+  EldritchBlack = "Eldritch(Black)",
+  EldritchGrey = "Eldritch(Grey)",
+  EldritchWhite = "Eldritch(White)",
   Priestess = "Priestess",
   Shaman = "Shaman",
   Witch = "Witch",
