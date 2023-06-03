@@ -1,3 +1,4 @@
+import { Dictionary } from "./lib/dictionary";
 import { UserRole } from "./redux/userSlice";
 import {
   RequestBody_SetXP,
@@ -15,8 +16,12 @@ import {
   RequestBody_MoveItems,
   RequestBody_MergeBundleItems,
   RequestBody_SplitBundleItems,
+  RequestBody_CreateSpellDef,
+  RequestBody_EditSpellDef,
+  RequestBody_DeleteSpellDef,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
+import { SpellType } from "./staticData/types/characterClasses";
 
 export interface ServerError {
   error: string;
@@ -157,6 +162,48 @@ export interface ProficiencyData {
   source: ProficiencySource;
 }
 
+export interface SpellTableColumn {
+  title: string;
+  legend: string;
+  values: string[];
+}
+
+export interface SpellDefData {
+  id: number;
+  name: string;
+  description: string;
+  spell_range: string;
+  duration: string;
+  tags: string[];
+  type_levels: { [type in SpellType]?: number };
+  table_image: string;
+}
+
+export function SpellDefData_TypeLevelsToString(type_levels: { [type in SpellType]?: number }): string {
+  return Object.entries(type_levels)
+    .map(([type, level]) => {
+      return `${type}:${level}`;
+    })
+    .join(",");
+}
+export function SpellDefData_StringToTypeLevels(text: string): { [type in SpellType]?: number } {
+  const type_levels: Dictionary<number> = {};
+  text
+    .split(",") // Gives us an array of things like "Arcane:1"
+    .map((tl) => {
+      return tl.split(":"); // Gives us tuples like ["Arcane","1"]
+    })
+    .forEach(([type, level]) => {
+      type_levels[type] = +level; // Sets the SpellType as key and the spell's level as value.
+    });
+  return type_levels;
+}
+
+type ServerSpellDefData = Omit<SpellDefData, "tags" | "type_levels"> & {
+  tags: string;
+  type_levels: string;
+};
+
 type ServerCharacterData = Omit<CharacterData, "hit_dice"> & { hit_dice: string };
 
 export interface XPChange {
@@ -185,6 +232,7 @@ export type ItemDefsResult = ServerError | ItemDefData[];
 export type ItemsResult = ServerError | ItemData[];
 export type UsersResult = ServerError | UserData[];
 export type StoragesResult = ServerError | StorageData[];
+export type SpellDefsResult = ServerError | SpellDefData[];
 export type ProficienciesResult = ServerError | ProficiencyData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetXPResult = ServerError | XPChange;
@@ -325,6 +373,35 @@ class AServerAPI {
     }
   }
 
+  async fetchSpellDefs(): Promise<SpellDefsResult> {
+    const res = await fetch("/api/fetchSpellDefs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerSpellDefData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      // tags and type_levels are stored in the db as comma separated strings,
+      // so we have to convert before passing the results along.
+      const spellData: SpellDefData[] = [];
+      data.forEach((sSpellData) => {
+        const type_levels = SpellDefData_StringToTypeLevels(sSpellData.type_levels);
+
+        spellData.push({
+          ...sSpellData,
+          tags: sSpellData.tags.length > 0 ? sSpellData.tags.split(",") : [],
+          type_levels,
+        });
+      });
+
+      return spellData;
+    }
+  }
+
   async createCharacter(character: CharacterData): Promise<InsertRowResult> {
     const requestBody: RequestBody_CreateOrEditCharacter = {
       ...character,
@@ -424,6 +501,54 @@ class AServerAPI {
       itemDefId,
     };
     const res = await fetch("/api/deleteItemDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createSpellDef(def: SpellDefData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateSpellDef = {
+      ...def,
+      // Stored on the server as a comma separated string.
+      tags: def.tags.join(","),
+      type_levels: SpellDefData_TypeLevelsToString(def.type_levels),
+    };
+    const res = await fetch("/api/createSpellDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editSpellDef(def: SpellDefData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditSpellDef = {
+      ...def,
+      // Stored on the server as a comma separated string.
+      tags: def.tags.join(","),
+      type_levels: SpellDefData_TypeLevelsToString(def.type_levels),
+    };
+    const res = await fetch("/api/editSpellDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteSpellDef(spellDefId: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSpellDef = {
+      spellDefId,
+    };
+    const res = await fetch("/api/deleteSpellDef", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

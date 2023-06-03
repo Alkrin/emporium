@@ -93,6 +93,31 @@ export interface RequestBody_DeleteItemDef {
   itemDefId: number;
 }
 
+export interface RequestBody_CreateSpellDef {
+  name: string;
+  description: string;
+  spell_range: string;
+  duration: string;
+  tags: string;
+  type_levels: string;
+  table_image: string;
+}
+
+export interface RequestBody_EditSpellDef {
+  id: number;
+  name: string;
+  description: string;
+  spell_range: string;
+  duration: string;
+  tags: string;
+  type_levels: string;
+  table_image: string;
+}
+
+export interface RequestBody_DeleteSpellDef {
+  spellDefId: number;
+}
+
 export interface RequestBody_EncryptString {
   text: string;
 }
