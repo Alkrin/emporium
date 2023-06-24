@@ -26,6 +26,7 @@ export interface ModalParams {
   // If true, this modal will close itself in response to the Escape key,
   // (or whichever key is bound to the Menu action).
   escapable?: boolean;
+  widthVmin?: number;
 }
 
 export interface ModalsState {

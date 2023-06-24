@@ -1,0 +1,177 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: wheat;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.rowText {
+  @extend .normalText;
+  margin-right: 1vmin;
+  width: 11vmin;
+  text-align: right;
+}
+
+.dialogButton {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.actionButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
+}
+
+.spellListRoot {
+  position: relative;
+  width: 20vmin;
+  height: 40vmin;
+  box-sizing: border-box;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  background-color: black;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.spellbookRoot {
+  position: relative;
+  width: 20vmin;
+  height: 36vmin;
+  box-sizing: border-box;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  background-color: black;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.spellbookPageCount {
+  position: relative;
+  width: 100%;
+  height: 4vmin;
+  line-height: 4vmin;
+  text-align: center;
+  color: white;
+  font-size: 1rem;
+}
+
+.spellListTitle {
+  width: 100%;
+  text-align: center;
+  font-size: 1.3rem;
+  color: wheat;
+  border-bottom: 1px solid yellow;
+  margin-bottom: 0.5vmin;
+}
+
+.spellListHeader {
+  margin-bottom: 0.5vmin;
+  padding: 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.3);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.spellListRowDraggable {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  cursor: move;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.spellListRowContentWrapper {
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  cursor: move;
+}
+
+.spellListRowDraggableHandle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: move;
+}
+
+.spellName {
+  color: white;
+  user-select: none;
+}

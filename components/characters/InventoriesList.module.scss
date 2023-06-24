@@ -93,3 +93,23 @@
     opacity: 1;
   }
 }
+
+.spellbookButton {
+  position: relative;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+  background-image: url("/images/EditIcon.png");
+  background-size: contain;
+  pointer-events: all;
+  cursor: pointer;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}

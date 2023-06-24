@@ -19,6 +19,9 @@ import {
   RequestBody_CreateSpellDef,
   RequestBody_EditSpellDef,
   RequestBody_DeleteSpellDef,
+  RequestBody_AddToSpellbook,
+  RequestBody_RemoveFromSpellbook,
+  RequestBody_DeleteSpellbook,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -85,6 +88,12 @@ export interface StorageData {
 type ServerStorageData = Omit<StorageData, "group_ids"> & {
   group_ids: string;
 };
+
+export interface SpellbookEntryData {
+  id: number;
+  spellbook_id: number;
+  spell_id: number;
+}
 
 export type Gender = "m" | "f" | "o";
 
@@ -234,6 +243,7 @@ export type UsersResult = ServerError | UserData[];
 export type StoragesResult = ServerError | StorageData[];
 export type SpellDefsResult = ServerError | SpellDefData[];
 export type ProficienciesResult = ServerError | ProficiencyData[];
+export type SpellbooksResult = ServerError | SpellbookEntryData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetXPResult = ServerError | XPChange;
 export type MultiModifyResult = ServerError | (ServerError | EditRowResult | InsertRowResult | DeleteRowResult)[];
@@ -339,6 +349,18 @@ class AServerAPI {
     });
 
     const data: ServerError | ItemData[] = await res.json();
+    return data;
+  }
+
+  async fetchSpellbooks(): Promise<SpellbooksResult> {
+    const res = await fetch("/api/fetchSpellbooks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | SpellbookEntryData[] = await res.json();
     return data;
   }
 
@@ -669,6 +691,49 @@ class AServerAPI {
   ): Promise<MultiModifyResult> {
     const requestBody: RequestBody_SplitBundleItems = { srcItemId, destContainerId, destStorageId, count, itemDefId };
     const res = await fetch("/api/splitBundleItems", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async addToSpellbook(spellbook_id: number, spell_id: number): Promise<InsertRowResult> {
+    const requestBody: RequestBody_AddToSpellbook = {
+      spellbook_id,
+      spell_id,
+    };
+    const res = await fetch("/api/addToSpellbook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async removeFromSpellbook(entry_id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_RemoveFromSpellbook = {
+      entry_id,
+    };
+    const res = await fetch("/api/removeFromSpellbook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteSpellbook(spellbook_id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSpellbook = {
+      spellbook_id,
+    };
+    const res = await fetch("/api/deleteSpellbook", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

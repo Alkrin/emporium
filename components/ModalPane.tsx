@@ -41,12 +41,24 @@ class ModalPane extends React.Component<Props, State> {
 
   public render(): React.ReactNode {
     const modalClass = this.state.shouldShow ? styles.show : "";
+
+    const prevWidthOverride = `${this.state.prevModal?.widthVmin ?? 32}vmin`;
+    const currWidthOverride = `${this.state.currentModal?.widthVmin ?? 32}vmin`;
+
     return (
       <div className={`${styles.root} ${modalClass}`}>
-        <div className={styles.previousModalWrapper} key={`Prev${this.state.prevModal?.id ?? "None"}`}>
+        <div
+          className={styles.previousModalWrapper}
+          key={`Prev${this.state.prevModal?.id ?? "None"}`}
+          style={{ width: prevWidthOverride }}
+        >
           {this.renderModal(this.state.prevModal)}
         </div>
-        <div className={styles.currentModalWrapper} key={`Curr${this.state.currentModal?.id ?? "None"}`}>
+        <div
+          className={styles.currentModalWrapper}
+          key={`Curr${this.state.currentModal?.id ?? "None"}`}
+          style={{ width: currWidthOverride }}
+        >
           {this.state.currentModal?.escapable && (
             <Escapable escapeId={`Modal_${this.state.currentModal.id}`} onEscape={this.onEscape.bind(this)} />
           )}

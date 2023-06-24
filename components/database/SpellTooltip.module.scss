@@ -1,0 +1,71 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  max-width: 60vmin;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.nameRow {
+  @extend .row;
+  justify-content: space-between;
+}
+
+.name {
+  color: wheat;
+  font-size: 1rem;
+}
+
+.description {
+  color: gray;
+  font-size: 0.8rem;
+}
+
+.typeAndLevel {
+  color: white;
+  font-size: 0.9rem;
+
+  &:not(:last-child)::after {
+    color: white;
+    content: ",";
+    margin-right: 0.5vmin;
+  }
+}
+
+.spellId {
+  font-size: 0.8rem;
+  color: #447722;
+}
+
+.table {
+  position: relative;
+  max-width: 90%;
+  align-self: center;
+  margin: 0.5vmin;
+}
+
+.pretext {
+  color: orange;
+  font-size: 0.9rem;
+}
+
+.range {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: yellow;
+  font-size: 0.9rem;
+}
+
+.duration {
+  position: absolute;
+  top: 2.2vmin;
+  right: 0.5vmin;
+  color: yellow;
+  font-size: 0.9rem;
+}
