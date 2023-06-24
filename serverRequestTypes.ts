@@ -1,5 +1,18 @@
 import { CharacterEquipmentData, ProficiencyData } from "./serverAPI";
 
+export interface RequestBody_AddToSpellbook {
+  spellbook_id: number;
+  spell_id: number;
+}
+
+export interface RequestBody_RemoveFromSpellbook {
+  entry_id: number;
+}
+
+export interface RequestBody_DeleteSpellbook {
+  spellbook_id: number;
+}
+
 export interface RequestBody_CreateOrEditCharacter {
   id: number;
   user_id: number;

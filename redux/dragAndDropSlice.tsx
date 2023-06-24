@@ -61,7 +61,9 @@ export const dragAndDropSlice = createSlice({
       state.dragDelta = [0, 0];
     },
     reportDraggableBounds: (state: DragAndDropState, action: PayloadAction<DOMRect>) => {
-      state.currentDraggableBounds = action.payload;
+      if (state.currentDraggableBounds === null) {
+        state.currentDraggableBounds = action.payload;
+      }
     },
     reportDropTargetBounds: (state: DragAndDropState, action: PayloadAction<DropTargetParams>) => {
       const { dropTypes, dropTargetId, bounds } = action.payload;

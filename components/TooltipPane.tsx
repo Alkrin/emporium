@@ -16,9 +16,9 @@ import styles from "./TooltipPane.module.scss";
 const TOOLTIP_OFFSET_VMIN = 1;
 
 interface State {
-  tooltipBounds: DOMRect | null;
   xAnchor: HUDHorizontalAnchor;
   yAnchor: HUDVerticalAnchor;
+  yPinned: boolean;
 }
 
 interface ReactProps {}
@@ -40,10 +40,10 @@ class TooltipPane extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      tooltipBounds: null,
       // Tooltips show to the bottom right of the mouse by default (i.e. the mouse cursor is the TopLeft anchor of the tooltip).
       xAnchor: HUDHorizontalAnchor.Left,
       yAnchor: HUDVerticalAnchor.Top,
+      yPinned: false,
     };
   }
 
@@ -70,9 +70,7 @@ class TooltipPane extends React.Component<Props, State> {
         }}
         style={this.calculateTooltipStyle()}
       >
-        {this.props.tooltipState.disableBackground ? null : (
-          <div className={styles.tooltipBackground} />
-        )}
+        {this.props.tooltipState.disableBackground ? null : <div className={styles.tooltipBackground} />}
         {typeof this.props.tooltipState.content === "string" ? (
           <div className={styles.textWrapper}>{content}</div>
         ) : (
@@ -88,15 +86,17 @@ class TooltipPane extends React.Component<Props, State> {
     };
 
     if (this.state.xAnchor === HUDHorizontalAnchor.Left) {
-      finalStyle.left = `calc(${this.props.tooltipState.mouseX}px + ${TOOLTIP_OFFSET_VMIN}vmin)`;
+      finalStyle.left = `calc(${this.props.tooltipState.mouseX ?? 0}px + ${TOOLTIP_OFFSET_VMIN}vmin)`;
     } else {
       finalStyle.right = `calc(${
         this.props.hudWidth - (this.props.tooltipState.mouseX ?? 0)
       }px + ${TOOLTIP_OFFSET_VMIN}vmin)`;
     }
 
-    if (this.state.yAnchor === HUDVerticalAnchor.Top) {
-      finalStyle.top = `calc(${this.props.tooltipState.mouseY}px + ${TOOLTIP_OFFSET_VMIN}vmin)`;
+    if (this.state.yPinned) {
+      finalStyle.top = "1px";
+    } else if (this.state.yAnchor === HUDVerticalAnchor.Top) {
+      finalStyle.top = `calc(${this.props.tooltipState.mouseY ?? 0}px + ${TOOLTIP_OFFSET_VMIN}vmin)`;
     } else {
       finalStyle.bottom = `calc(${
         this.props.hudHeight - (this.props.tooltipState.mouseY ?? 0)
@@ -119,36 +119,33 @@ class TooltipPane extends React.Component<Props, State> {
       this.setState({ xAnchor: HUDHorizontalAnchor.Right });
     } else if (
       this.state.xAnchor === HUDHorizontalAnchor.Right &&
-      bounds.right + bounds.width + 2 * TOOLTIP_OFFSET_VMIN * pxToVmin <
-        this.props.hudWidth
+      bounds.right + bounds.width + 2 * TOOLTIP_OFFSET_VMIN * pxToVmin < this.props.hudWidth
     ) {
       this.setState({ xAnchor: HUDHorizontalAnchor.Left });
     }
 
     // If the tooltip hangs off the bottom edge (or has ceased to do so), change its vertical anchor.
     if (bounds.bottom > this.props.hudHeight) {
-      this.setState({ yAnchor: HUDVerticalAnchor.Bottom });
+      this.setState({ yAnchor: HUDVerticalAnchor.Bottom, yPinned: false });
     } else if (
       this.state.yAnchor === HUDVerticalAnchor.Bottom &&
-      bounds.bottom + bounds.height + 2 * TOOLTIP_OFFSET_VMIN * pxToVmin <
-        this.props.hudHeight
+      bounds.bottom + bounds.height + 2 * TOOLTIP_OFFSET_VMIN * pxToVmin < this.props.hudHeight
     ) {
-      this.setState({ yAnchor: HUDVerticalAnchor.Top });
+      this.setState({ yAnchor: HUDVerticalAnchor.Top, yPinned: false });
+    } else if (this.state.yAnchor === HUDVerticalAnchor.Bottom && bounds.top < 0) {
+      this.setState({ yPinned: true });
     }
     // However, if it is hanging off of the left or top edge, we have already flipped the anchor,
     // and there's no point in flipping it back, since we will overflow either way.
   }
 
-  componentDidUpdate(
-    prevProps: Readonly<Props>,
-    prevState: Readonly<State>,
-    snapshot?: any
-  ): void {
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
     // If the content changed, reset the anchors for the new tooltip.
     if (prevProps.tooltipState?.content !== this.props.tooltipState?.content) {
       this.setState({
         xAnchor: HUDHorizontalAnchor.Left,
         yAnchor: HUDVerticalAnchor.Top,
+        yPinned: false,
       });
     }
   }

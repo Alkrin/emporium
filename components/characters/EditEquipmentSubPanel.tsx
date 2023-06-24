@@ -36,6 +36,8 @@ import {
 } from "../../lib/itemUtils";
 import { setEquipment } from "../../redux/charactersSlice";
 import { SplitBundleDialog } from "./SplitBundleDialog";
+import { Tag } from "../../lib/tags";
+import { SpellbookDialog } from "./SpellbookDialog";
 
 export const DropTypeItem = "DropTypeItem";
 
@@ -298,11 +300,18 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
   }
 
   private renderPersonalPileRowContents(item: ItemData, def: ItemDefData): React.ReactNode {
+    const isSpellbook = def.tags.includes(Tag.Spellbook);
     return (
       <div className={styles.personalPileRowContentWrapper}>
         <div className={styles.personalPileItemName}>{getItemNameText(item, def)}</div>
         {def.bundleable && item.count > 1 && (
           <div className={styles.personalPileBundleButton} onClick={this.onBundleButtonClick.bind(this, item, def)} />
+        )}
+        {isSpellbook && (
+          <div
+            className={styles.personalPileSpellbookButton}
+            onClick={this.onSpellbookButtonClick.bind(this, item, def)}
+          />
         )}
       </div>
     );
@@ -316,6 +325,19 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
           return <SplitBundleDialog item={item} def={def} />;
         },
         escapable: true,
+      })
+    );
+  }
+
+  private onSpellbookButtonClick(item: ItemData, def: ItemDefData): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "spellbookDialog",
+        content: () => {
+          return <SpellbookDialog item={item} def={def} />;
+        },
+        escapable: true,
+        widthVmin: 50,
       })
     );
   }
