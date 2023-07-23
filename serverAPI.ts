@@ -1,3 +1,4 @@
+import { getAllCharacterAssociatedItemIds } from "./lib/characterUtils";
 import { Dictionary } from "./lib/dictionary";
 import { UserRole } from "./redux/userSlice";
 import {
@@ -22,6 +23,7 @@ import {
   RequestBody_AddToSpellbook,
   RequestBody_RemoveFromSpellbook,
   RequestBody_DeleteSpellbook,
+  RequestBody_DeleteCharacter,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -447,6 +449,21 @@ class AServerAPI {
       hit_dice: character.hit_dice.join(","),
     };
     const res = await fetch("/api/editCharacter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteCharacter(character: CharacterData): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteCharacter = {
+      id: character.id,
+      item_ids: getAllCharacterAssociatedItemIds(character.id),
+    };
+    const res = await fetch("/api/deleteCharacter", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

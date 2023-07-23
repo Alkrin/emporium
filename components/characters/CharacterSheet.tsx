@@ -36,9 +36,11 @@ class ACharacterSheet extends React.Component<Props> {
   render(): React.ReactNode {
     const animationClass = this.props.exiting ? styles.exit : styles.enter;
 
+    const characterExists = this.props.characterId > 0 && !!this.props.character;
+
     return (
       <div className={`${styles.root} ${animationClass}`}>
-        {this.props.characterId > 0 ? (
+        {characterExists ? (
           <>
             <div
               className={styles.nameLabel}

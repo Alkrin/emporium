@@ -32,6 +32,11 @@ export interface RequestBody_CreateOrEditCharacter {
   hit_dice: string;
 }
 
+export interface RequestBody_DeleteCharacter {
+  id: number;
+  item_ids: number[];
+}
+
 export interface RequestBody_CreateItemDef {
   name: string;
   description: string;

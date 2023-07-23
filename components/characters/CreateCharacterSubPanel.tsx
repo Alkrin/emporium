@@ -2,14 +2,18 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { refetchCharacters } from "../../dataSources/CharactersDataSource";
-import { showModal } from "../../redux/modalsSlice";
+import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
 import ServerAPI, { CharacterData, Gender, emptyEquipmentData } from "../../serverAPI";
 import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { CharacterStat } from "../../staticData/types/characterClasses";
 import styles from "./CreateCharacterSubPanel.module.scss";
-import { getCharacterMaxHP } from "../../lib/characterUtils";
+import { getAllCharacterAssociatedItemIds, getCharacterMaxHP } from "../../lib/characterUtils";
+import { deleteCharacter, setActiveCharacterId } from "../../redux/charactersSlice";
+import { deleteItem } from "../../redux/itemsSlice";
+import { deleteProficienciesForCharacter } from "../../redux/proficienciesSlice";
+import { deleteSpellbook } from "../../redux/spellbooksSlice";
 
 interface State {
   nameText: string;
@@ -61,8 +65,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           hitDice: props.selectedCharacter.hit_dice,
           isSaving: false,
         };
-      } else {
-        console.error("No SelectedCharacter was passed to CreateCharactersSubPanel!");
       }
     } else {
       // Start with blank character data.
@@ -391,6 +393,12 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           {this.props.isEditMode ? "Save Changes" : "Save Character"}
         </div>
 
+        {this.props.isEditMode && (
+          <div className={styles.deleteButton} onClick={this.onDeleteClicked.bind(this)}>
+            Delete
+          </div>
+        )}
+
         {this.state.isSaving && (
           <div className={styles.savingVeil}>
             <div className={styles.savingLabel}>Saving...</div>
@@ -418,6 +426,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           },
         })
       );
+      this.setState({ isSaving: false });
       return;
     }
 
@@ -433,6 +442,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           },
         })
       );
+      this.setState({ isSaving: false });
       return;
     }
 
@@ -474,6 +484,78 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     }
     // Close the subPanel.
     this.props.dispatch?.(hideSubPanel());
+  }
+
+  private async onDeleteClicked(): Promise<void> {
+    if (this.state.isSaving) {
+      return;
+    }
+    this.setState({ isSaving: true });
+
+    // Confirmation dialog.
+    this.props.dispatch?.(
+      showModal({
+        id: "DeleteCharacterConfirmation",
+        content: {
+          title: "Delete Character",
+          message: `Are you sure you wish to delete ${this.props.selectedCharacter?.name}?  This will also destroy associated records like items, storages, etc.  Deletion cannot be undone.`,
+          buttonText: "Delete",
+          onButtonClick: async () => {
+            // Guaranteed true, but have to check to make intellisense shut up.
+            if (this.props.selectedCharacter) {
+              const res = await ServerAPI.deleteCharacter(this.props.selectedCharacter);
+
+              // Get rid of the confirmation modal.
+              this.props.dispatch?.(hideModal());
+              if ("error" in res) {
+                // Error modal.
+                this.props.dispatch?.(
+                  showModal({
+                    id: "DeleteCharacterError",
+                    content: { title: "Error", message: "An Error occurred during character deletion." },
+                  })
+                );
+              } else {
+                // Close the subPanel.
+                this.props.dispatch?.(hideSubPanel());
+                // Delay so the subpanel is fully gone before we clear out the local character data.
+                setTimeout(() => {
+                  // Guaranteed true, but have to check to make intellisense shut up.
+                  if (this.props.selectedCharacter) {
+                    // Deselect the character.
+                    this.props.dispatch?.(setActiveCharacterId(0));
+
+                    // Update all local data.
+                    // Proficiencies.
+                    this.props.dispatch?.(deleteProficienciesForCharacter(this.props.selectedCharacter.id));
+                    // Items.
+                    const itemIds = getAllCharacterAssociatedItemIds(this.props.selectedCharacter.id);
+                    itemIds.forEach((itemId) => {
+                      // Spellbook data, if any.  No-op if it's not a spellbook.
+                      this.props.dispatch?.(deleteSpellbook(itemId));
+                      // The item itself.
+                      this.props.dispatch?.(deleteItem(itemId));
+                    });
+                    // The character itself.
+                    this.props.dispatch?.(deleteCharacter(this.props.selectedCharacter.id));
+                  }
+                }, 300);
+              }
+              this.setState({ isSaving: false });
+            }
+          },
+          extraButtons: [
+            {
+              text: "Cancel",
+              onClick: () => {
+                this.props.dispatch?.(hideModal());
+                this.setState({ isSaving: false });
+              },
+            },
+          ],
+        },
+      })
+    );
   }
 
   private onRerollClicked(): void {
