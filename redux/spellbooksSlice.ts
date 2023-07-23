@@ -47,7 +47,9 @@ export const spellbooksSlice = createSlice({
       }
     },
     deleteSpellbook: (state: SpellbooksReduxState, action: PayloadAction<number>) => {
-      delete state.books[action.payload];
+      if (state.books[action.payload]) {
+        delete state.books[action.payload];
+      }
     },
   },
 });

@@ -55,6 +55,7 @@ class ACharactersPanel extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+    // If the active character has changed, animate the old one out and the new one in.
     if (this.props.activeCharacterId !== this.state.currentCharacterId) {
       this.setState({
         currentCharacterId: this.props.activeCharacterId,

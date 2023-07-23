@@ -1,4 +1,5 @@
-import { CharacterData } from "../serverAPI";
+import store from "../redux/store";
+import { CharacterData, CharacterEquipmentSlots } from "../serverAPI";
 import { AllClasses } from "../staticData/characterClasses/AllClasses";
 import { Stones } from "./itemUtils";
 
@@ -38,4 +39,45 @@ export function getCharacterMaxHP(character: CharacterData): number {
 
 export function getCharacterMaxEncumbrance(character: CharacterData): Stones {
   return [20 + getBonusForStat(character.strength), 0];
+}
+
+export function getAllCharacterAssociatedItemIds(characterId: number): number[] {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return [];
+  }
+
+  const finalItemIds: number[] = [];
+
+  // Root items.
+  // All equipped items.
+  CharacterEquipmentSlots.forEach((slotId) => {
+    if (character[slotId]) {
+      finalItemIds.push(character[slotId]);
+    }
+  });
+  // All items in storages owned by the character.
+  Object.values(redux.items.allItems).forEach((item) => {
+    if (item.storage_id && redux.storages.allStorages[item.storage_id]?.owner_id === characterId) {
+      finalItemIds.push(item.id);
+    }
+  });
+
+  // Contained items.
+  // Bread First Search to find all nested items.
+  let activeItemIds: number[] = [...finalItemIds];
+  while (activeItemIds.length > 0) {
+    // Find all items contained inside the active items.
+    const containedItems = Object.values(redux.items.allItems).filter((item) => {
+      return activeItemIds.includes(item.container_id);
+    });
+    // Save this layer of items and dig down to the next.
+    activeItemIds = containedItems.map((i) => {
+      return i.id;
+    });
+    finalItemIds.push(...activeItemIds);
+  }
+
+  return finalItemIds;
 }

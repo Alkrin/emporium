@@ -32,7 +32,12 @@ export const proficienciesSlice = createSlice({
       // Then replace the whole data set in Redux.
       state.proficienciesByCharacterId = p;
     },
+    deleteProficienciesForCharacter: (state: ProficienciesReduxState, action: PayloadAction<number>) => {
+      if (state.proficienciesByCharacterId[action.payload]) {
+        delete state.proficienciesByCharacterId[action.payload];
+      }
+    },
   },
 });
 
-export const { updateProficiencies } = proficienciesSlice.actions;
+export const { updateProficiencies, deleteProficienciesForCharacter } = proficienciesSlice.actions;
