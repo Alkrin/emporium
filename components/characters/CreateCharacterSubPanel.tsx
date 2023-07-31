@@ -14,6 +14,7 @@ import { deleteCharacter, setActiveCharacterId } from "../../redux/charactersSli
 import { deleteItem } from "../../redux/itemsSlice";
 import { deleteProficienciesForCharacter } from "../../redux/proficienciesSlice";
 import { deleteSpellbook } from "../../redux/spellbooksSlice";
+import { deleteRepertoireForCharacter } from "../../redux/repertoiresSlice";
 
 interface State {
   nameText: string;
@@ -536,6 +537,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                       // The item itself.
                       this.props.dispatch?.(deleteItem(itemId));
                     });
+                    // Repertoire.
+                    this.props.dispatch?.(deleteRepertoireForCharacter(this.props.selectedCharacter.id));
                     // The character itself.
                     this.props.dispatch?.(deleteCharacter(this.props.selectedCharacter.id));
                   }

@@ -4,9 +4,9 @@ import { connect } from "react-redux";
 import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
-import { CharacterData, ItemData, ItemDefData } from "../../serverAPI";
+import { CharacterData, ItemData, ItemDefData, RepertoireEntryData, SpellDefData } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
-import { SavingThrowType } from "../../staticData/types/characterClasses";
+import { SavingThrowType, SpellType } from "../../staticData/types/characterClasses";
 import TooltipSource from "../TooltipSource";
 import { AbilitiesList } from "./AbilitiesList";
 import styles from "./CharacterSheet.module.scss";
@@ -16,7 +16,14 @@ import { EditProficienciesSubPanel } from "./EditProficienciesSubPanel";
 import { EditXPDialog } from "./EditXPDialog";
 import { Dictionary } from "../../lib/dictionary";
 import { Stones, StonesToNumber, getTotalEquippedWeight } from "../../lib/itemUtils";
-import { getBonusForStat, getCharacterMaxEncumbrance, getCharacterMaxHP } from "../../lib/characterUtils";
+import {
+  getBonusForStat,
+  getCharacterMaxEncumbrance,
+  getCharacterMaxHP,
+  getCharacterStat,
+} from "../../lib/characterUtils";
+import { RepertoireDialog } from "./RepertoireDialog";
+import { SpellTooltip } from "../database/SpellTooltip";
 
 interface ReactProps {
   characterId: number;
@@ -26,7 +33,9 @@ interface ReactProps {
 interface InjectedProps {
   allItems: Dictionary<ItemData>;
   allItemDefs: Dictionary<ItemDefData>;
+  allSpells: Dictionary<SpellDefData>;
   character: CharacterData;
+  repertoire: RepertoireEntryData[];
   dispatch?: Dispatch;
 }
 
@@ -52,10 +61,215 @@ class ACharacterSheet extends React.Component<Props> {
             {this.renderXPPanel()}
             {this.renderHPPanel()}
             {this.renderAbilitiesPanel()}
+            {this.renderSpellSlotsPanel()}
+            {this.renderSpellRepertoirePanel()}
           </>
         ) : (
           <div className={styles.placeholder} />
         )}
+      </div>
+    );
+  }
+
+  private renderSpellRepertoirePanel(): React.ReactNode {
+    // Return null if no spellcasting ability.
+    const characterClass = AllClasses[this.props.character.class_name];
+    if (characterClass.spellcasting.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className={styles.spellRepertoirePanel}>
+        <div className={styles.normalText}>{"Spell Repertoire"}</div>
+        <div className={styles.horizontalLine} />
+        <div className={styles.repertoireScroller}>
+          {characterClass.spellcasting.map((spellCapability, scIndex) => {
+            const repertoireBonus = spellCapability.repertoireStat
+              ? getBonusForStat(getCharacterStat(this.props.character, spellCapability.repertoireStat))
+              : 0;
+            const slots = spellCapability.spellSlots[this.props.character.level - 1];
+            return (
+              <div className={styles.repertoireSection} key={`SpellCapability${scIndex}`}>
+                <div className={styles.repertoireSectionHeader}>{spellCapability.spellTypes[0]}</div>
+                {slots.map((numSpells, index) => {
+                  let maxSpellsPrepared: number = 0;
+                  let spellsPrepared: SpellDefData[] = [];
+                  if (spellCapability.requiresSpellbook) {
+                    // Repertoire spells are assigned by the player, and must come from a carried spellbook.
+                    const repertoireEntries = this.props.repertoire.filter((entry) => {
+                      return entry.spell_type === spellCapability.spellTypes[0] && entry.spell_level === index + 1;
+                    });
+                    spellsPrepared = repertoireEntries.map((entry) => {
+                      return this.props.allSpells[entry.spell_id];
+                    });
+                    maxSpellsPrepared = numSpells > 0 ? numSpells + repertoireBonus : 0;
+                  } else {
+                    // Repertoire includes ALL spells for this capability.
+                    spellsPrepared = Object.values(this.props.allSpells).filter((sdd) => {
+                      return !!spellCapability.spellTypes.find((st) => {
+                        return sdd.type_levels[st] === index + 1;
+                      });
+                    });
+                  }
+                  const noneClass = maxSpellsPrepared === 0 ? styles.none : "";
+                  return (
+                    <>
+                      <div className={styles.repertoireLevelHeader} key={`RepertoireL${index + 1}`}>
+                        <div className={`${styles.repertoireLevelName} ${noneClass}`}>{`L${index + 1}`}</div>
+                        <div
+                          className={`${styles.repertoireLevelPreparedCount} ${noneClass}`}
+                        >{`${spellsPrepared.length} / ${maxSpellsPrepared}`}</div>
+                        {maxSpellsPrepared > 0 && spellCapability.requiresSpellbook ? (
+                          <div
+                            className={styles.repertoireEditButton}
+                            onClick={this.onEditRepertoireClicked.bind(
+                              this,
+                              spellCapability.spellTypes,
+                              index + 1,
+                              maxSpellsPrepared
+                            )}
+                          />
+                        ) : null}
+                      </div>
+                      {spellsPrepared.map((sdd) => {
+                        return (
+                          <TooltipSource
+                            className={styles.repertoireSpellRow}
+                            tooltipParams={{
+                              id: `Spell${sdd.id}`,
+                              content: () => {
+                                return <SpellTooltip spellId={sdd.id} />;
+                              },
+                            }}
+                          >
+                            {sdd.name}
+                          </TooltipSource>
+                        );
+                      })}
+                    </>
+                  );
+                })}
+                {spellCapability.ritualLevels.map((ritualLevel) => {
+                  let spellsPrepared: SpellDefData[] = [];
+                  if (spellCapability.requiresSpellbook) {
+                    // Repertoire spells are assigned by the player, and must come from a carried spellbook.
+                    const repertoireEntries = this.props.repertoire.filter((entry) => {
+                      return entry.spell_type === spellCapability.spellTypes[0] && entry.spell_level === ritualLevel;
+                    });
+                    spellsPrepared = repertoireEntries.map((entry) => {
+                      return this.props.allSpells[entry.spell_id];
+                    });
+                  } else {
+                    // Repertoire includes ALL spells for this capability.
+                    spellsPrepared = Object.values(this.props.allSpells).filter((sdd) => {
+                      return !!spellCapability.spellTypes.find((st) => {
+                        return sdd.type_levels[st] === ritualLevel;
+                      });
+                    });
+                  }
+                  const canCastRituals = this.props.character.level >= spellCapability.minRitualLevel;
+                  const noneClass = !canCastRituals || repertoireBonus === 0 ? styles.none : "";
+                  let maxSpellsPrepared = canCastRituals ? repertoireBonus : 0;
+                  return (
+                    <>
+                      <div className={styles.repertoireLevelHeader} key={`RepertoireL${ritualLevel}`}>
+                        <div className={`${styles.repertoireLevelName} ${noneClass}`}>{`L${ritualLevel} Rituals`}</div>
+                        <div
+                          className={`${styles.repertoireLevelPreparedCount} ${noneClass}`}
+                        >{`${spellsPrepared.length} / ${maxSpellsPrepared}`}</div>
+                        {repertoireBonus > 0 && canCastRituals && spellCapability.requiresSpellbook ? (
+                          <div
+                            className={styles.repertoireEditButton}
+                            onClick={this.onEditRepertoireClicked.bind(
+                              this,
+                              spellCapability.spellTypes,
+                              ritualLevel,
+                              repertoireBonus
+                            )}
+                          />
+                        ) : null}
+                      </div>
+                      {spellsPrepared.map((sdd) => {
+                        return (
+                          <TooltipSource
+                            className={styles.repertoireSpellRow}
+                            tooltipParams={{
+                              id: `Spell${sdd.id}`,
+                              content: () => {
+                                return <SpellTooltip spellId={sdd.id} />;
+                              },
+                            }}
+                          >
+                            {sdd.name}
+                          </TooltipSource>
+                        );
+                      })}
+                    </>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  private onEditRepertoireClicked(spellTypes: SpellType[], spellLevel: number, maxSpellsPrepared: number): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "repertoireEdit",
+        content: () => {
+          return (
+            <RepertoireDialog
+              character={this.props.character}
+              spellTypes={spellTypes}
+              spellLevel={spellLevel}
+              maxSpellsPrepared={maxSpellsPrepared}
+            />
+          );
+        },
+        escapable: true,
+        widthVmin: 45,
+      })
+    );
+  }
+
+  private renderSpellSlotsPanel(): React.ReactNode {
+    // Return null if no spellcasting ability.
+    const characterClass = AllClasses[this.props.character.class_name];
+    if (characterClass.spellcasting.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className={styles.spellSlotsPanel}>
+        <div className={styles.spellSlotsTitle}>{"Spell Slots"}</div>
+        <div className={styles.horizontalLine} />
+        {characterClass.spellcasting.map((spellType, stIndex) => {
+          const slots = spellType.spellSlots[this.props.character.level - 1];
+          return (
+            <>
+              <div className={styles.row} key={`SpellTypeColumn`}>
+                <div className={styles.column}>
+                  <div className={styles.spellSlotsCell} />
+                  <div className={styles.normalText}>{spellType.spellTypes[0]}</div>
+                </div>
+                {slots.map((numSpells, index) => {
+                  return (
+                    <div className={styles.column}>
+                      <div className={styles.spellSlotsHeader}>{`L${index + 1}`}</div>
+                      <div className={numSpells === 0 ? styles.spellSlotsNone : styles.spellSlotsValue}>
+                        {numSpells}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {stIndex < characterClass.spellcasting.length - 1 ? <div className={styles.spellTypeDivider} /> : null}
+            </>
+          );
+        })}
       </div>
     );
   }
@@ -420,12 +634,15 @@ class ACharacterSheet extends React.Component<Props> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allItems } = state.items;
-  const allItemDefs = state.gameDefs.items;
+  const { spells: allSpells, items: allItemDefs } = state.gameDefs;
+  const repertoire = state.repertoires.repertoiresByCharacter[props.characterId] ?? [];
   return {
     ...props,
     allItems,
     allItemDefs,
+    allSpells,
     character: state.characters.characters[props.characterId ?? 1] ?? null,
+    repertoire,
   };
 }
 

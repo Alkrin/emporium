@@ -13,6 +13,7 @@ import { toastersSlice } from "./toastersSlice";
 import { tooltipSlice } from "./tooltipSlice";
 import { userSlice } from "./userSlice";
 import { spellbooksSlice } from "./spellbooksSlice";
+import { repertoiresSlice } from "./repertoiresSlice";
 
 const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ const store = configureStore({
     items: itemsSlice.reducer,
     modals: modalsSlice.reducer,
     proficiencies: proficienciesSlice.reducer,
+    repertoires: repertoiresSlice.reducer,
     spellbooks: spellbooksSlice.reducer,
     storages: storagesSlice.reducer,
     subPanels: subPanelsSlice.reducer,

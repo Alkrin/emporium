@@ -24,6 +24,8 @@ import {
   RequestBody_RemoveFromSpellbook,
   RequestBody_DeleteSpellbook,
   RequestBody_DeleteCharacter,
+  RequestBody_AddToRepertoire,
+  RequestBody_RemoveFromRepertoire,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -95,6 +97,14 @@ export interface SpellbookEntryData {
   id: number;
   spellbook_id: number;
   spell_id: number;
+}
+
+export interface RepertoireEntryData {
+  id: number;
+  character_id: number;
+  spell_id: number;
+  spell_type: SpellType;
+  spell_level: number;
 }
 
 export type Gender = "m" | "f" | "o";
@@ -246,6 +256,7 @@ export type StoragesResult = ServerError | StorageData[];
 export type SpellDefsResult = ServerError | SpellDefData[];
 export type ProficienciesResult = ServerError | ProficiencyData[];
 export type SpellbooksResult = ServerError | SpellbookEntryData[];
+export type RepertoiresResult = ServerError | RepertoireEntryData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetXPResult = ServerError | XPChange;
 export type MultiModifyResult = ServerError | (ServerError | EditRowResult | InsertRowResult | DeleteRowResult)[];
@@ -363,6 +374,18 @@ class AServerAPI {
     });
 
     const data: ServerError | SpellbookEntryData[] = await res.json();
+    return data;
+  }
+
+  async fetchRepertoires(): Promise<RepertoiresResult> {
+    const res = await fetch("/api/fetchRepertoires", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | RepertoireEntryData[] = await res.json();
     return data;
   }
 
@@ -751,6 +774,42 @@ class AServerAPI {
       spellbook_id,
     };
     const res = await fetch("/api/deleteSpellbook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async addToRepertoire(
+    character_id: number,
+    spell_id: number,
+    spell_type: SpellType,
+    spell_level: number
+  ): Promise<InsertRowResult> {
+    const requestBody: RequestBody_AddToRepertoire = {
+      character_id,
+      spell_id,
+      spell_type,
+      spell_level,
+    };
+    const res = await fetch("/api/addToRepertoire", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async removeFromRepertoire(entry_id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_RemoveFromRepertoire = {
+      entry_id,
+    };
+    const res = await fetch("/api/removeFromRepertoire", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

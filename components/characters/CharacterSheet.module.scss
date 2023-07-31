@@ -59,6 +59,11 @@
   color: wheat;
 }
 
+.subText {
+  font-size: 1rem;
+  color: white;
+}
+
 .valueText {
   font-size: 1rem;
   color: yellow;
@@ -342,6 +347,154 @@
   &:active {
     opacity: 1;
   }
+}
+
+.spellRepertoirePanel {
+  @extend .column;
+  position: absolute;
+  top: 35vmin;
+  left: 23.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.repertoireEditButton {
+  @extend .editIcon;
+  margin-left: 3.5vmin;
+  margin-top: 0.5vmin;
+  margin-bottom: 0.5vmin;
+  width: 2vmin;
+  height: 2vmin;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.repertoireScroller {
+  @extend .column;
+  width: 26.5vmin;
+  height: 25vmin;
+  margin-bottom: 0.5vmin;
+  background-color: black;
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.repertoireSection {
+  @extend .column;
+}
+
+.repertoireSectionHeader {
+  @extend .row;
+  padding-left: 0.5vmin;
+  background-color: rgb(0, 35, 35);
+  color: white;
+  font-size: 1rem;
+}
+
+.repertoireLevelHeader {
+  @extend .row;
+  margin-left: 1vmin;
+  padding-left: 0.5vmin;
+  background-color: rgb(0, 25, 25);
+  color: white;
+  font-size: 1rem;
+}
+
+.repertoireLevelName {
+  color: white;
+  font-size: 1rem;
+  width: 12vmin;
+  text-align: left;
+
+  &.none {
+    color: gray;
+  }
+}
+
+.repertoireLevelPreparedCount {
+  color: white;
+  font-size: 1rem;
+  width: 5vmin;
+  text-align: center;
+
+  &.none {
+    color: gray;
+  }
+}
+
+.repertoireSpellRow {
+  @extend .row;
+  margin-left: 2vmin;
+  padding-left: 0.5vmin;
+  background-color: rgb(0, 15, 15);
+  color: white;
+  font-size: 1rem;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.spellSlotsPanel {
+  @extend .column;
+  position: absolute;
+  top: 24vmin;
+  left: 23.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.spellSlotsTitle {
+  @extend .normalText;
+}
+
+.spellSlotsCell {
+  height: 1vmin;
+}
+
+.spellSlotsHeader {
+  text-align: center;
+  width: 3vmin;
+}
+
+.spellSlotsValue {
+  @extend .valueText;
+  text-align: center;
+}
+
+.spellSlotsNone {
+  @extend .spellSlotsValue;
+  color: gray;
+}
+
+.spellTypeDivider {
+  @extend .horizontalLine;
+  background-color: wheat;
 }
 
 .abilitiesPanel {

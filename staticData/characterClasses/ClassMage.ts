@@ -122,6 +122,9 @@ export const ClassMage: CharacterClass = {
         [4, 4, 4, 3, 3, 2],
         [4, 4, 4, 4, 3, 3],
       ],
+      repertoireStat: CharacterStat.Intelligence,
+      minRitualLevel: 11,
+      ritualLevels: [7, 8, 9],
     },
   ],
 };
