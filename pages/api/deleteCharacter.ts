@@ -41,6 +41,12 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       values: [b.id],
     });
 
+    // Delete all spell repertoires.
+    queries.push({
+      query: `DELETE FROM repertoires WHERE character_id=?`,
+      values: [b.id],
+    });
+
     // The actual character gets deleted last, after all of its dependent data is gone.
     queries.push({
       query: `DELETE FROM characters WHERE id=?`,

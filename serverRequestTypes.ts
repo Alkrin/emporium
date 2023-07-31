@@ -1,4 +1,16 @@
 import { CharacterEquipmentData, ProficiencyData } from "./serverAPI";
+import { SpellType } from "./staticData/types/characterClasses";
+
+export interface RequestBody_AddToRepertoire {
+  character_id: number;
+  spell_id: number;
+  spell_type: SpellType;
+  spell_level: number;
+}
+
+export interface RequestBody_RemoveFromRepertoire {
+  entry_id: number;
+}
 
 export interface RequestBody_AddToSpellbook {
   spellbook_id: number;

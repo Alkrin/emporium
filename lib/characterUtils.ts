@@ -1,6 +1,7 @@
 import store from "../redux/store";
-import { CharacterData, CharacterEquipmentSlots } from "../serverAPI";
+import { CharacterData, CharacterEquipmentSlots, SpellDefData } from "../serverAPI";
 import { AllClasses } from "../staticData/characterClasses/AllClasses";
+import { CharacterStat, SpellType } from "../staticData/types/characterClasses";
 import { Stones } from "./itemUtils";
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
@@ -31,10 +32,27 @@ export function getCharacterMaxHP(character: CharacterData): number {
 
   // Add hp step bonus for all levels 10+.
   if (character.level > 9) {
-    maxHP = (character.level - 9) * characterClass.hpStep;
+    maxHP += (character.level - 9) * characterClass.hpStep;
   }
 
   return maxHP;
+}
+
+export function getCharacterStat(character: CharacterData, stat: CharacterStat): number {
+  switch (stat) {
+    case CharacterStat.Strength:
+      return character.strength;
+    case CharacterStat.Intelligence:
+      return character.intelligence;
+    case CharacterStat.Wisdom:
+      return character.wisdom;
+    case CharacterStat.Dexterity:
+      return character.dexterity;
+    case CharacterStat.Constitution:
+      return character.constitution;
+    case CharacterStat.Charisma:
+      return character.charisma;
+  }
 }
 
 export function getCharacterMaxEncumbrance(character: CharacterData): Stones {
@@ -80,4 +98,38 @@ export function getAllCharacterAssociatedItemIds(characterId: number): number[] 
   }
 
   return finalItemIds;
+}
+
+export function getCharacterPreparableSpells(
+  characterId: number,
+  spellTypes: SpellType[],
+  spellLevel: number
+): SpellDefData[] {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return [];
+  }
+
+  const preparableSpells: SpellDefData[] = [];
+
+  // A spell is preparable if it is in a spellbook owned/carried by the character.
+  // So first, find any spellbooks!
+  const itemIds = getAllCharacterAssociatedItemIds(characterId);
+  itemIds.forEach((itemId) => {
+    // Is this a spellbook?
+    redux.spellbooks.books[itemId]?.forEach((spellbookEntry) => {
+      const spellDef = redux.gameDefs.spells[spellbookEntry.spell_id];
+      // Does this spell match one of the approved types and level?
+      for (let i = 0; i < spellTypes.length; ++i) {
+        const approvedSpellType = spellTypes[i];
+
+        if (spellDef.type_levels[approvedSpellType] === spellLevel && !preparableSpells.includes(spellDef)) {
+          preparableSpells.push(spellDef);
+        }
+      }
+    });
+  });
+
+  return preparableSpells;
 }

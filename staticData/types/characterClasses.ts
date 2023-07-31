@@ -82,6 +82,12 @@ export interface SpellCapability {
    * If false, the character always has access to all spells from the listed spellTypes.
    */
   requiresSpellbook: boolean;
+  /** If defined, the bonus to this stat increases repertoire size for every spell level. */
+  repertoireStat?: CharacterStat;
+  /** The character level at which rituals become available. */
+  minRitualLevel: number;
+  /** The spell levels that count as rituals. */
+  ritualLevels: number[];
 }
 
 export interface CharacterClass {
