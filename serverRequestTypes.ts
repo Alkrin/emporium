@@ -42,6 +42,8 @@ export interface RequestBody_CreateOrEditCharacter {
   xp: number;
   hp: number;
   hit_dice: string;
+  /** Feature id, subtype, rank. */
+  selected_class_features: [string, string, number][];
 }
 
 export interface RequestBody_DeleteCharacter {
@@ -64,6 +66,7 @@ export interface RequestBody_CreateItemDef {
   damage_dice: number;
   damage_die_2h: number;
   damage_dice_2h: number;
+  range_increment: number;
   fixed_weight: boolean;
   magic_bonus: number;
   conditional_magic_bonus: number;
@@ -107,6 +110,7 @@ export interface RequestBody_EditItemDef {
   damage_dice: number;
   damage_die_2h: number;
   damage_dice_2h: number;
+  range_increment: number;
   fixed_weight: boolean;
   magic_bonus: number;
   conditional_magic_bonus: number;

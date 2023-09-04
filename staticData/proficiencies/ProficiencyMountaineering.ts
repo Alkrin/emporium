@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyMountaineering: AbilityOrProficiency = {
+  id: "Mountaineering",
   name: "Mountaineering",
   description: [
     "The character can use mountaineering gear to climb difficult mountains and cliff " +

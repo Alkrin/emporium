@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyArcaneDabbling: AbilityOrProficiency = {
+  id: "Arcane Dabbling",
   name: "Arcane Dabbling",
   description: [
     "The character may attempt to use wands, staffs, and other magic items only " +

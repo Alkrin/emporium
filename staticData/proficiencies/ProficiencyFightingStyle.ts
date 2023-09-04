@@ -1,7 +1,8 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyFightingStyle: AbilityOrProficiency = {
-  name: "FightingStyle",
+  id: "Fighting Style",
+  name: "Fighting Style",
   description: [
     "The character chooses to become proficient in a particular fighting style, " +
       "such as two weapon fighting or weapon and shield. Because of his familiarity " +
@@ -10,14 +11,14 @@ export const ProficiencyFightingStyle: AbilityOrProficiency = {
       "In addition, each fighting style provides a special bonus when the character " +
       "is fighting in that style. The fighting styles and their bonuses are listed below." +
       "\n" +
-      "Pole weapon +1 to initiative rolls" +
-      "Missile weapon +1 to attack throws" +
-      "Single weapon +1 to attack throws" +
-      "Two weapons +1 to attack throws" +
-      "Two-handed weapon +1 to damage rolls" +
-      "Weapon and shield +1 to armor class" +
+      "\nPole weapon +1 to initiative rolls" +
+      "\nMissile weapon +1 to attack throws" +
+      "\nSingle weapon +1 to attack throws" +
+      "\nTwo weapons +1 to attack throws" +
+      "\nTwo-handed weapon +1 to damage rolls" +
+      "\nWeapon and shield +1 to armor class" +
       "\n" +
-      "Bonuses are in addition to the standard bonuses for fighting in the given manner. " +
+      "\nBonuses are in addition to the standard bonuses for fighting in the given manner. " +
       "For instance, a character with weapon and shield fighting style proficiency gains " +
       "a total improvement to his AC of 2 points. A character may take this proficiency " +
       "multiple times, selecting an additional fighting style each time. If a character " +
@@ -28,12 +29,5 @@ export const ProficiencyFightingStyle: AbilityOrProficiency = {
       "to AC, but not both.",
   ],
   minLevel: 1,
-  subTypes: [
-    "Pole Weapon",
-    "Missile Weapon",
-    "Single Weapon",
-    "Two Weapons",
-    "Two-handed Weapon",
-    "Weapon and Shield",
-  ],
+  subTypes: ["Pole Weapon", "Missile Weapon", "Single Weapon", "Two Weapons", "Two-handed Weapon", "Weapon and Shield"],
 };

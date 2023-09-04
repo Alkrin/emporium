@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyTrapping: AbilityOrProficiency = {
+  id: "Trapping",
   name: "Trapping",
   description: [
     "The character can build simple pits, snares, and deadfalls capable of capturing " +

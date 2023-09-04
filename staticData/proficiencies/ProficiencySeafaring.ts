@@ -1,7 +1,8 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencySeafaring: AbilityOrProficiency = {
-  name: "Seafaring I",
+  id: "Seafaring",
+  name: "Seafaring",
   description: [
     "The character can crew large sailing ships or galleys.",
     "The character can crew large sailing ships or galleys and can serve as a captain " +

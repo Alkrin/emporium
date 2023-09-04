@@ -1,9 +1,9 @@
-import { SharedCreateMagicalConstructs } from "../classAbilities/SharedCreateMagicalConstructs";
-import { SharedCreateMagicalCrossbreeds } from "../classAbilities/SharedCreateMagicalCrossbreeds";
-import { SharedCreateUndead } from "../classAbilities/SharedCreateUndead";
-import { SharedMajorMagicCreation } from "../classAbilities/SharedMajorMagicCreation";
-import { SharedMinorMagicCreation } from "../classAbilities/SharedMinorMagicCreation";
-import { SharedRitualMagic } from "../classAbilities/SharedRitualMagic";
+import { SharedCreateMagicalConstructs } from "../classFeatures/SharedCreateMagicalConstructs";
+import { SharedCreateMagicalCrossbreeds } from "../classFeatures/SharedCreateMagicalCrossbreeds";
+import { SharedCreateUndead } from "../classFeatures/SharedCreateUndead";
+import { SharedMajorMagicCreation } from "../classFeatures/SharedMajorMagicCreation";
+import { SharedMinorMagicCreation } from "../classFeatures/SharedMinorMagicCreation";
+import { SharedRitualMagic } from "../classFeatures/SharedRitualMagic";
 import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyAlchemy } from "../proficiencies/ProficiencyAlchemy";
 import { ProficiencyBattleMagic } from "../proficiencies/ProficiencyBattleMagic";
@@ -33,15 +33,8 @@ import { ProficiencySensingPower } from "../proficiencies/ProficiencySensingPowe
 import { ProficiencySoothsaying } from "../proficiencies/ProficiencySoothsaying";
 import { ProficiencyTransmogrification } from "../proficiencies/ProficiencyTransmogrification";
 import { ProficiencyUnflappableCasting } from "../proficiencies/ProficiencyUnflappableCasting";
-import {
-  ArmorStyle,
-  BaseWeaponStyle,
-  CharacterClass,
-  CharacterStat,
-  SavingThrowType,
-  SpellType,
-} from "../types/characterClasses";
-import { BaseWeaponType } from "../types/items";
+import { WeaponStyle, CharacterClass, CharacterStat, SavingThrowType, SpellType } from "../types/characterClasses";
+import { WeaponType } from "../types/items";
 
 export const ClassMage: CharacterClass = {
   name: "Mage",
@@ -50,9 +43,9 @@ export const ClassMage: CharacterClass = {
   primeRequisites: [CharacterStat.Intelligence],
   statRequirements: {},
   xpToLevel: [0, 2500, 5000, 10000, 20000, 40000, 80000, 160000, 310000, 460000, 610000, 760000, 910000, 1060000],
-  weaponStyles: [BaseWeaponStyle.OneHandOnly, BaseWeaponStyle.TwoHanded],
-  weaponTypePermissions: [BaseWeaponType.Club, BaseWeaponType.Dagger, BaseWeaponType.Dart, BaseWeaponType.Staff],
-  armorStyle: ArmorStyle.None,
+  weaponStyles: [WeaponStyle.OneHandOnly, WeaponStyle.TwoHanded],
+  weaponTypePermissions: [WeaponType.Club, WeaponType.Dagger, WeaponType.Dart, WeaponType.Staff],
+  maxBaseArmor: 0, // None
   cleaveMultiplier: 0,
   savingThrows: {
     [SavingThrowType.PetrificationAndParalysis]: [13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9],
@@ -70,7 +63,9 @@ export const ClassMage: CharacterClass = {
     { def: SharedCreateMagicalConstructs },
     { def: SharedCreateMagicalCrossbreeds },
     { def: SharedCreateUndead },
+    { def: ProficiencyLanguage, subtypes: ["Common"] },
   ],
+  selectableClassFeatures: [],
   classProficienciesAt: [1, 6, 11],
   classProficiencies: [
     { def: ProficiencyAlchemy },
@@ -85,7 +80,6 @@ export const ClassMage: CharacterClass = {
     { def: ProficiencyEngineering },
     { def: ProficiencyFamiliar },
     { def: ProficiencyHealing },
-    { def: ProficiencySecondSight },
     { def: ProficiencyKnowledge },
     { def: ProficiencyLanguage },
     { def: ProficiencyLoremastery },
@@ -97,9 +91,10 @@ export const ClassMage: CharacterClass = {
     { def: ProficiencyPerformance },
     { def: ProficiencyPrestidigitation },
     { def: ProficiencyProfession },
+    { def: ProficiencySecondSight },
     { def: ProficiencySensingPower },
-    { def: ProficiencyTransmogrification },
     { def: ProficiencySoothsaying },
+    { def: ProficiencyTransmogrification },
     { def: ProficiencyUnflappableCasting },
   ],
   spellcasting: [
@@ -127,4 +122,5 @@ export const ClassMage: CharacterClass = {
       ritualLevels: [7, 8, 9],
     },
   ],
+  levelBasedSkills: [],
 };

@@ -37,18 +37,27 @@ class AItemTooltip extends React.Component<Props> {
       return null;
     }
 
-    const equipmentSlotTag = itemDef.tags.find((tag) => {
-      return tag.startsWith("Equipment");
-    });
+    const equipmentSlotTags = itemDef.tags
+      .filter((tag) => {
+        return tag.startsWith("Equipment");
+      })
+      .map((rawTag) => {
+        return rawTag.slice(9);
+      });
 
     return (
       <div className={styles.root}>
         <div className={styles.nameRow}>
           <div className={styles.name}>{getItemNameText(item, itemDef)}</div>
-          {equipmentSlotTag && <div className={styles.slot}>{equipmentSlotTag.slice(9)}</div>}
+          {<div className={styles.slot}>{equipmentSlotTags.join(", ")}</div>}
         </div>
         <div className={styles.row}>
           {itemDef.ac > 0 && <div className={styles.segment}>{`AC: ${itemDef.ac}`}</div>}
+          {itemDef.range_increment > 0 && (
+            <div className={styles.segment}>{`Range: ${itemDef.range_increment}' / ${itemDef.range_increment * 2}' / ${
+              itemDef.range_increment * 3
+            }'`}</div>
+          )}
         </div>
         <div className={styles.row}>
           <div className={styles.segment}>{this.getSizeText()}</div>

@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyMilitaryStrategy: AbilityOrProficiency = {
+  id: "Military Strategy",
   name: "Military Strategy",
   description: [
     "The character has studied the art of war and the methods of the great captains. " +

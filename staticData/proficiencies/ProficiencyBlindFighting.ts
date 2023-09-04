@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyBlindFighting: AbilityOrProficiency = {
+  id: "Blind Fighting",
   name: "Blind Fighting",
   description: [
     "The character can fight a target without being able to see it. Blind Fighting is " +

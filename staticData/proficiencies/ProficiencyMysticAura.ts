@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyMysticAura: AbilityOrProficiency = {
+  id: "Mystic Aura",
   name: "Mystic Aura",
   description: [
     "The character has learned to project his magical powers in a way that causes awe " +

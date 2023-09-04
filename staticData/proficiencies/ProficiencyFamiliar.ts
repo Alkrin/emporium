@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyFamiliar: AbilityOrProficiency = {
+  id: "Familiar",
   name: "Familiar",
   description: [
     "The character gains a familiar, a magical animal companion. The familiar will be a " +

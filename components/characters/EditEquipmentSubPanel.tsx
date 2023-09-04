@@ -24,7 +24,7 @@ import DropTarget from "../DropTarget";
 import { showToaster } from "../../redux/toastersSlice";
 import { ItemMoveParams } from "../../serverRequestTypes";
 import { deleteItem, updateItem } from "../../redux/itemsSlice";
-import { ArmorStyle, BaseWeaponStyle, PermittedArmorStyles } from "../../staticData/types/characterClasses";
+import { WeaponStyle } from "../../staticData/types/characterClasses";
 import { InventoriesList } from "./InventoriesList";
 import {
   StonesToNumber,
@@ -38,6 +38,15 @@ import { setEquipment } from "../../redux/charactersSlice";
 import { SplitBundleDialog } from "./SplitBundleDialog";
 import { Tag } from "../../lib/tags";
 import { SpellbookDialog } from "./SpellbookDialog";
+import {
+  canCharacterDualWield,
+  canCharacterEquipShields,
+  canCharacterEquipWeapon,
+  getMaxBaseArmorForCharacter,
+  isCharacterDualWielding,
+  isCharacterWielding2hWeapon,
+  whereIsItemEquipped,
+} from "../../lib/characterUtils";
 
 export const DropTypeItem = "DropTypeItem";
 
@@ -85,7 +94,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
   render(): React.ReactNode {
     const personalPile = this.getPersonalPile();
     const characterClass = AllClasses[this.props.character.class_name];
-    const canUseShield = characterClass.weaponStyles.includes(BaseWeaponStyle.OneHandAndShield);
+    const canUseShield = characterClass.weaponStyles.includes(WeaponStyle.OneHandAndShield);
 
     return (
       <div className={styles.root}>
@@ -716,15 +725,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     }
   }
 
-  private isArmorStyleAllowed(style: ArmorStyle): boolean {
-    const characterClass = AllClasses[this.props.character.class_name];
-
-    const maxArmorStyle = characterClass.armorStyle;
-    // TODO: Check for the proficiency that lets you wear stronger armor?
-
-    return PermittedArmorStyles[maxArmorStyle][style] ?? false;
-  }
-
   private async handleItemDroppedOnEquipmentSlot(
     item: ItemData,
     def: ItemDefData,
@@ -732,7 +732,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     slotId: keyof CharacterEquipmentData
   ): Promise<void> {
     // Is this already the item equipped here?
-    if (item.id === this.props.character.slot_armor) {
+    if (item.id === this.props.character[slotId]) {
       return;
     }
 
@@ -742,20 +742,19 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
       return;
     }
 
+    const moves: ItemMoveParams[] = [];
+    const itemUpdates: ItemData[] = [];
+
     // Special handling for Armor.
     if (slotTag === EquipmentSlotTag.Armor) {
-      // Verify if this character is allowed to wear armor of this class.
-      const armorStyle = def.tags.find((tag) => {
-        return tag.startsWith("Armor");
-      });
-      if (armorStyle && !this.isArmorStyleAllowed(armorStyle as ArmorStyle)) {
-        const styleName = armorStyle.slice(5);
+      const maxBaseArmor = getMaxBaseArmorForCharacter(this.props.character.id);
+      if (def.ac > maxBaseArmor) {
         this.props.dispatch?.(
           showToaster({
             id: "WrongType",
             content: {
               title: "Unable to Equip",
-              message: `${this.props.character.name} cannot equip ${styleName} armor.`,
+              message: `${this.props.character.name} can only equip armor with a base AC of ${maxBaseArmor}.  ${def.name} has a base AC of ${def.ac}.`,
             },
           })
         );
@@ -763,9 +762,167 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
       }
     }
 
-    // Either set it or swap it with what was previously in the slot.
-    const moves: ItemMoveParams[] = [];
-    const itemUpdates: ItemData[] = [];
+    // Special handling for Shield.
+    if (slotTag === EquipmentSlotTag.Shield) {
+      // Is this character able to equip shields?
+      if (!canCharacterEquipShields(this.props.character.id)) {
+        this.props.dispatch?.(
+          showToaster({
+            id: "WrongType",
+            content: {
+              title: "Unable to Equip",
+              message: `${this.props.character.name} can is not able to equip shields.`,
+            },
+          })
+        );
+        return;
+      }
+
+      // Is this character wielding a 2h-only weapon?
+      if (isCharacterWielding2hWeapon(this.props.character.id)) {
+        this.props.dispatch?.(
+          showToaster({
+            id: "WrongType",
+            content: {
+              title: "Unable to Equip",
+              message: `${this.props.character.name} is already wielding a two handed melee weapon.  Remove it first!`,
+            },
+          })
+        );
+        return;
+      }
+
+      // Is this character dual wielding?
+      if (isCharacterDualWielding(this.props.character.id)) {
+        this.props.dispatch?.(
+          showToaster({
+            id: "WrongType",
+            content: {
+              title: "Unable to Equip",
+              message: `${this.props.character.name} is already wielding two melee weapons.  Remove one first!`,
+            },
+          })
+        );
+        return;
+      }
+    }
+
+    // Special handling for weapons.
+    if (slotTag === EquipmentSlotTag.Melee || slotTag === EquipmentSlotTag.Ranged) {
+      // Could the character EVER equip this weapon?  (class, proficiencies, etc.)
+      if (!canCharacterEquipWeapon(this.props.character.id, item.id)) {
+        this.props.dispatch?.(
+          showToaster({
+            id: "WrongType",
+            content: {
+              title: "Unable to Equip",
+              message: `${this.props.character.name} is not trained in the use of ${def.name}.`,
+            },
+          })
+        );
+        return;
+      }
+
+      if (slotTag === EquipmentSlotTag.Melee) {
+        // TODO: Does this conflict with other equipped gear? (weapons / shield)
+        const hasShield = this.props.character.slot_shield > 0;
+        const otherSlotItemId =
+          slotId === "slot_melee1" ? this.props.character.slot_melee2 : this.props.character.slot_melee1;
+        const otherItem = this.props.allItems[otherSlotItemId];
+        const otherItemDef = this.props.allItemDefs[otherItem?.def_id];
+        const itemIs2hOnly = def?.damage_die === 0;
+        const otherItemIs2hOnly = otherItemDef?.damage_die === 0;
+
+        if (itemIs2hOnly) {
+          // If the item is a 2h-only, the user can't be weilding a shield at the same time.
+          if (hasShield) {
+            this.props.dispatch?.(
+              showToaster({
+                id: "WrongType",
+                content: {
+                  title: "Unable to Equip",
+                  message: `${this.props.character.name} cannot equip a 2-handed weapon at the same time as a shield.  Remove the shield first!`,
+                },
+              })
+            );
+            return;
+          }
+          // If the item is a 2h-only, the user can't place it in a blank slot if the other slot already has a weapon.
+          if (otherSlotItemId > 0) {
+            this.props.dispatch?.(
+              showToaster({
+                id: "WrongType",
+                content: {
+                  title: "Unable to Equip",
+                  message: `${this.props.character.name} cannot equip a 2-handed weapon at the same time as another weapon.  Remove the other weapon first!`,
+                },
+              })
+            );
+            return;
+          }
+        } else {
+          // If the item is 1h-capable, the user can't place it in a blank slot if other slot has a 2h-only weapon in it.
+          if (otherItemIs2hOnly) {
+            this.props.dispatch?.(
+              showToaster({
+                id: "WrongType",
+                content: {
+                  title: "Unable to Equip",
+                  message: `${this.props.character.name} cannot equip a 1-handed weapon at the same time as a 2-handed weapon.  Remove the other weapon first!.`,
+                },
+              })
+            );
+            return;
+          }
+          // If the item is 1h-capable, the user can't place it in a blank slot if the other slot is full and the character class can't dual wield.
+          if (otherItem && !canCharacterDualWield(this.props.character.id)) {
+            this.props.dispatch?.(
+              showToaster({
+                id: "WrongType",
+                content: {
+                  title: "Unable to Equip",
+                  message: `${this.props.character.name} is not trained in dual wielding.`,
+                },
+              })
+            );
+            return;
+          }
+          // Can't equip two weapons AND a shield.
+          if (otherItem && hasShield) {
+            this.props.dispatch?.(
+              showToaster({
+                id: "WrongType",
+                content: {
+                  title: "Unable to Equip",
+                  message: `${this.props.character.name} cannot equip two weapons AND a shield.  Remove one first!`,
+                },
+              })
+            );
+            return;
+          }
+        }
+      }
+    }
+
+    // If the item being equipped already equipped by this character (e.g. swapping between the two pouch slots), remove it from its old spot.
+    const previousSlotId = whereIsItemEquipped(this.props.character, item.id);
+    if (previousSlotId !== null) {
+      const destStorageId = this.getPersonalPile()?.id ?? 0;
+      const removeThisItem: ItemMoveParams = {
+        itemId: item.id,
+        // From the character.
+        srcCharacterId: this.props.character.id,
+        srcEquipmentSlot: previousSlotId,
+        // Into the personal pile.
+        destStorageId,
+      };
+      moves.push(removeThisItem);
+      // Don't need a matching local item update because we are moving between two equipment slots,
+      // ut we do need to update the character's own data.
+      this.props.dispatch?.(setEquipment({ characterId: this.props.character.id, itemId: 0, slot: previousSlotId }));
+    }
+
+    // If the item is being placed into an occupied equipment slot, remove whatever was there and drop it into the Personal Pile.
     if (this.props.character[slotId] !== 0) {
       // Have to swap out the previously worn equipment.
       const destStorageId = this.getPersonalPile()?.id ?? 0;
@@ -785,6 +942,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
       };
       itemUpdates.push(itemUpdate);
     }
+
     // Assign the item to the equipment slot from some non-equipped location.  That data is stored on the item's entry,
     // so we don't have to specify a src here.
     const srcSplit = def.bundleable && item.count > 1; // If the source item is a bundle, we split one item off to equip.

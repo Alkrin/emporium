@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyCeremonialMagic: AbilityOrProficiency = {
+  id: "Ceremonial Magic",
   name: "Ceremonial Magic",
   description: [
     "The character has studied the ceremonies of a particular tradition of ceremonial magic. The " +

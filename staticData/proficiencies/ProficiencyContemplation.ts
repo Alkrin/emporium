@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyContemplation: AbilityOrProficiency = {
+  id: "Contemplation",
   name: "Contemplation",
   description: [
     "The character may enter a meditative trance and regain the ability to cast a spell " +

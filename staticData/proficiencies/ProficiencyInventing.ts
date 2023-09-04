@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyInventing: AbilityOrProficiency = {
+  id: "Inventing",
   name: "Inventing",
   description: [
     "The character has a creative mind capable of envisioning new machines and devices. " +

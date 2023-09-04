@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyBrightLoreOfAura: AbilityOrProficiency = {
+  id: "Bright Lore of Aura",
   name: "Bright Lore of Aura",
   description: [
     "The character has studied the white magic of the Empyreans. The character can turn " +

@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyNaturalism: AbilityOrProficiency = {
+  id: "Naturalism",
   name: "Naturalism",
   description: [
     "The character is knowledgeable of common plant and animal life forms in terrain typical " +

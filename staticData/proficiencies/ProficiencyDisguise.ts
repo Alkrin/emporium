@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyDisguise: AbilityOrProficiency = {
+  id: "Disguise",
   name: "Disguise",
   description: [
     "The character can make someone look like someone else through make-up and clothing. " +

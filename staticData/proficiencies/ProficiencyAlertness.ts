@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyAlertness: AbilityOrProficiency = {
+  id: "Alertness",
   name: "Alertness",
   description: [
     "The character gains a +4 bonus on any proficiency throws to hear noises and detect " +

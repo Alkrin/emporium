@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyMagicalMusic: AbilityOrProficiency = {
+  id: "Magical Music",
   name: "Magical Music",
   description: [
     "The character can perform music that can serenade members of the opposite gender (as a " +

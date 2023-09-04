@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyMimicry: AbilityOrProficiency = {
+  id: "Mimicry",
   name: "Mimicry",
   description: [
     "The character can imitate animal calls and foreign language accents. With a proficiency " +

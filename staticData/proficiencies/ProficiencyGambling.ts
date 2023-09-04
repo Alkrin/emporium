@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyGambling: AbilityOrProficiency = {
+  id: "Gambling",
   name: "Gambling",
   description: [
     "The character has the ability to win money in games of skill (competitive card games) " +

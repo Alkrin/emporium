@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyBribery: AbilityOrProficiency = {
+  id: "Bribery",
   name: "Bribery",
   description: [
     "The character is exceptionally skilled at bribing officials with gifts of money or " +

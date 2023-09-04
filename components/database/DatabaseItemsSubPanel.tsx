@@ -26,6 +26,7 @@ interface State {
   damage_dice: number;
   damage_die_2h: number;
   damage_dice_2h: number;
+  range_increment: number;
   fixed_weight: boolean;
   magic_bonus: number;
   conditional_magic_bonus: number;
@@ -55,6 +56,7 @@ const defaultState: State = {
   damage_dice: 0,
   damage_die_2h: 0,
   damage_dice_2h: 0,
+  range_increment: 0,
   fixed_weight: false,
   magic_bonus: 0,
   conditional_magic_bonus: 0,
@@ -432,6 +434,20 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           />
         </div>
         <div className={styles.row}>
+          <div className={styles.firstLabel}>Range Increment</div>
+          <input
+            className={styles.smallInputField}
+            type={"number"}
+            value={this.state.range_increment}
+            min={0}
+            tabIndex={this.nextTabIndex++}
+            onChange={(e) => {
+              this.setState({ range_increment: +e.target.value });
+            }}
+          />
+          <div className={styles.secondLabel}>feet</div>
+        </div>
+        <div className={styles.row}>
           <div className={styles.firstLabel}>Max Cleaves</div>
           <input
             className={styles.smallInputField}
@@ -534,6 +550,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
       damage_dice: this.state.damage_dice,
       damage_die_2h: this.state.damage_die_2h,
       damage_dice_2h: this.state.damage_dice_2h,
+      range_increment: this.state.range_increment,
       fixed_weight: this.state.fixed_weight,
       magic_bonus: this.state.magic_bonus,
       conditional_magic_bonus: this.state.conditional_magic_bonus,

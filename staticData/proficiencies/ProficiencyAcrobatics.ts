@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyAcrobatics: AbilityOrProficiency = {
+  id: "Acrobatics",
   name: "Acrobatics",
   description: [
     "The character is trained to jump, tumble, somersault, and free-run around obstacles. " +

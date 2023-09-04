@@ -7,8 +7,8 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     const b = req.body as RequestBody_CreateItemDef;
     const results = await executeQuery<any>(
       `INSERT INTO item_defs (name,description,stones,sixth_stones,storage_stones,storage_sixth_stones,storage_filters,bundleable,` +
-        `number_per_stone,ac,damage_die,damage_dice,damage_die_2h,damage_dice_2h,fixed_weight,magic_bonus,conditional_magic_bonus,` +
-        `conditional_magic_bonus_type,max_cleaves,tags,purchase_quantity,cost_gp,cost_sp,cost_cp) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        `number_per_stone,ac,damage_die,damage_dice,damage_die_2h,damage_dice_2h,range_increment,fixed_weight,magic_bonus,conditional_magic_bonus,` +
+        `conditional_magic_bonus_type,max_cleaves,tags,purchase_quantity,cost_gp,cost_sp,cost_cp) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         b.name,
         b.description,
@@ -24,6 +24,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         b.damage_dice,
         b.damage_die_2h,
         b.damage_dice_2h,
+        b.range_increment,
         b.fixed_weight,
         b.magic_bonus,
         b.conditional_magic_bonus,

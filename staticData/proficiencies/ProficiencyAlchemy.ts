@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyAlchemy: AbilityOrProficiency = {
+  id: "Alchemy",
   name: "Alchemy",
   description: [
     "Can identify common alchemical substances, potions, and poisons with a proficiency " +

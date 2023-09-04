@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyUnflappableCasting: AbilityOrProficiency = {
+  id: "Unflappable Casting",
   name: "Unflappable Casting",
   description: [
     "When the character loses a spell by being interrupted or taking damage during the round, " +

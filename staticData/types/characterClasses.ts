@@ -1,5 +1,6 @@
+import { Dictionary } from "../../lib/dictionary";
 import { AbilityFilter } from "./abilitiesAndProficiencies";
-import { BaseWeaponType, WeaponCategory } from "./items";
+import { WeaponType, WeaponCategory } from "./items";
 
 export enum CharacterStat {
   Strength = "Strength",
@@ -10,42 +11,12 @@ export enum CharacterStat {
   Charisma = "Charisma",
 }
 
-export enum BaseWeaponStyle {
+export enum WeaponStyle {
   OneHandOnly = "One Hand Only",
   OneHandAndShield = "One Hand And Shield",
   DualWield = "Dual Wield",
   TwoHanded = "Two Handed",
 }
-
-export enum ArmorStyle {
-  None = "None",
-  Light = "Light", // Leather or less
-  Medium = "Medium", // Chain or less
-  Heavy = "Heavy", // Plate or less
-}
-
-export const PermittedArmorStyles: {
-  [key: string]: { [key: string]: boolean };
-} = {
-  [ArmorStyle.None]: {
-    [ArmorStyle.None]: true,
-  },
-  [ArmorStyle.Light]: {
-    [ArmorStyle.None]: true,
-    [ArmorStyle.Light]: true,
-  },
-  [ArmorStyle.Medium]: {
-    [ArmorStyle.None]: true,
-    [ArmorStyle.Light]: true,
-    [ArmorStyle.Medium]: true,
-  },
-  [ArmorStyle.Heavy]: {
-    [ArmorStyle.None]: true,
-    [ArmorStyle.Light]: true,
-    [ArmorStyle.Medium]: true,
-    [ArmorStyle.Heavy]: true,
-  },
-};
 
 export enum SavingThrowType {
   PetrificationAndParalysis = "Petrification and Paralysis",
@@ -90,6 +61,17 @@ export interface SpellCapability {
   ritualLevels: number[];
 }
 
+export interface LevelBasedSkill {
+  name: string;
+  rolls: (number | string)[];
+  tooltip?: string;
+}
+
+export interface SelectableClassFeature {
+  title: string;
+  selections: AbilityFilter | AbilityFilter[];
+}
+
 export interface CharacterClass {
   name: string;
   hitDieSize: 4 | 6 | 8 | 10 | 12;
@@ -99,20 +81,24 @@ export interface CharacterClass {
   statRequirements: { [stat in CharacterStat]?: number };
   /** XP required to reach each level, starting from level 1. */
   xpToLevel: number[];
-  weaponStyles: BaseWeaponStyle[];
+  weaponStyles: WeaponStyle[];
   /** If present, lists permissable weapon categories for this class.  Otherwise, all are assumed permissable. */
   weaponCategoryPermissions?: WeaponCategory[];
   /** If present, lists permissable weapon types for this class.  Otherwise, all are assumed permissable. */
-  weaponTypePermissions?: BaseWeaponType[];
-  armorStyle: ArmorStyle;
+  weaponTypePermissions?: WeaponType[];
+  // The maximum base AC of armor that this character can equip.  E.g. Fur = 1, Leather = 2, Plate = 6
+  maxBaseArmor: number;
   cleaveMultiplier: CleaveMultiplier;
   /** Array contains saving throw values by level in order, starting from level 1. */
   savingThrows: { [type in SavingThrowType]: number[] };
   /** Array contains to hit bonuses by level in order, starting from level 1. */
   toHitBonus: number[];
   classFeatures: AbilityFilter[];
+  /** Lists features/proficiencies that must be selected during character creation (i.e. Bards pick a Perform type, Craftpriests pick a Craft, etc.). */
+  selectableClassFeatures: SelectableClassFeature[];
   /** The levels at which this class gains a Class Proficiency. */
   classProficienciesAt: number[];
   classProficiencies: AbilityFilter[];
   spellcasting: SpellCapability[];
+  levelBasedSkills: LevelBasedSkill[];
 }

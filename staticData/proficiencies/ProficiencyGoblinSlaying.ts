@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyGoblinSlaying: AbilityOrProficiency = {
+  id: "Goblin-Slaying",
   name: "Goblin-Slaying",
   description: [
     "The character has been trained to ruthlessly cut down his race’s humanoid foes. He " +

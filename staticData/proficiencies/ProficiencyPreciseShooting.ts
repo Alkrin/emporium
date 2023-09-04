@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyPreciseShooting: AbilityOrProficiency = {
+  id: "Precise Shooting",
   name: "Precise Shooting",
   description: [
     "The character may conduct missile attacks against opponents engaged in melee at " +

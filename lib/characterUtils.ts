@@ -1,8 +1,25 @@
 import store from "../redux/store";
-import { CharacterData, CharacterEquipmentSlots, SpellDefData } from "../serverAPI";
+import { CharacterData, CharacterEquipmentData, CharacterEquipmentSlots, SpellDefData } from "../serverAPI";
 import { AllClasses } from "../staticData/characterClasses/AllClasses";
-import { CharacterStat, SpellType } from "../staticData/types/characterClasses";
+import { AntiPaladinAuraOfProtection } from "../staticData/classFeatures/AntiPaladinAuraOfProtection";
+import { BladeDancerMobility } from "../staticData/classFeatures/BladeDancerDefensiveMobility";
+import { PaladinAuraOfProtection } from "../staticData/classFeatures/PaladinAuraOfProtection";
+import { SharedAnimalReflexes } from "../staticData/classFeatures/SharedAnimalReflexes";
+import { SharedMeleeDamageBonus } from "../staticData/classFeatures/SharedMeleeDamageBonus";
+import { SharedRangedDamageBonus } from "../staticData/classFeatures/SharedRangedDamageBonus";
+import { SharedRangedAccuracyBonus } from "../staticData/classFeatures/SharedRangedAccuracyBonus";
+import { ProficiencyArmorTraining } from "../staticData/proficiencies/ProficiencyArmorTraining";
+import { ProficiencyDivineBlessing } from "../staticData/proficiencies/ProficiencyDivineBlessing";
+import { ProficiencyFightingStyle } from "../staticData/proficiencies/ProficiencyFightingStyle";
+import { ProficiencyMartialTraining } from "../staticData/proficiencies/ProficiencyMartialTraining";
+import { ProficiencySwashbuckling } from "../staticData/proficiencies/ProficiencySwashbuckling";
+import { ProficiencyWeaponFinesse } from "../staticData/proficiencies/ProficiencyWeaponFinesse";
+import { GeneralProficienciesAt, ProficiencySource } from "../staticData/types/abilitiesAndProficiencies";
+import { WeaponStyle, CharacterStat, SpellType } from "../staticData/types/characterClasses";
+import { WeaponCategory, WeaponType } from "../staticData/types/items";
+import { Dictionary } from "./dictionary";
 import { Stones } from "./itemUtils";
+import { Tag } from "./tags";
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
 export function getBonusForStat(value: number): StatBonus {
@@ -100,6 +117,18 @@ export function getAllCharacterAssociatedItemIds(characterId: number): number[] 
   return finalItemIds;
 }
 
+export function whereIsItemEquipped(character: CharacterData, itemId: number): keyof CharacterEquipmentData | null {
+  let result: keyof CharacterEquipmentData | null = null;
+  if (character) {
+    CharacterEquipmentSlots.forEach((slotId) => {
+      if (character[slotId] === itemId) {
+        result = slotId;
+      }
+    });
+  }
+  return result;
+}
+
 export function getCharacterPreparableSpells(
   characterId: number,
   spellTypes: SpellType[],
@@ -132,4 +161,624 @@ export function getCharacterPreparableSpells(
   });
 
   return preparableSpells;
+}
+
+export function getMaxBaseArmorForCharacter(characterId: number): number {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return 0;
+  } else {
+    const characterClass = AllClasses[character.class_name];
+    let maxBaseArmor = characterClass.maxBaseArmor;
+    // Armor Training proficiency?
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencyArmorTraining.name)) {
+      maxBaseArmor += 2;
+    }
+    return maxBaseArmor;
+  }
+}
+
+export function canCharacterEquipShields(characterId: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return false;
+  } else {
+    const characterClass = AllClasses[character.class_name];
+    return characterClass.weaponStyles.includes(WeaponStyle.OneHandAndShield);
+  }
+}
+
+export function canCharacterDualWield(characterId: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return false;
+  } else {
+    const characterClass = AllClasses[character.class_name];
+    return characterClass.weaponStyles.includes(WeaponStyle.DualWield);
+  }
+}
+
+export function isCharacterWielding2hWeapon(characterId: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return false;
+  } else {
+    const weapon1 = redux.items.allItems[character.slot_melee1];
+    const weapon2 = redux.items.allItems[character.slot_melee2];
+
+    // If a weapon doesn't have a 1h damage_die, then it is 2h-only.
+    if (weapon1) {
+      const weaponDef = redux.gameDefs.items[weapon1.def_id];
+      if (weaponDef.damage_die === 0) {
+        return true;
+      }
+    }
+    if (weapon2) {
+      const weaponDef = redux.gameDefs.items[weapon2.def_id];
+      if (weaponDef.damage_die === 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
+export function isCharacterDualWielding(characterId: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return false;
+  } else {
+    return character.slot_melee1 > 0 && character.slot_melee2 > 0;
+  }
+}
+
+export function canCharacterEquipWeapon(characterId: number, itemId: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const itemDef = redux.gameDefs.items[itemId];
+  if (!itemDef) {
+    // Can't equip if there is no item.
+    return false;
+  } else {
+    if (!character) {
+      // Can't equip if there is no one to equip it.
+      return false;
+    } else {
+      const characterClass = AllClasses[character.class_name];
+      const weaponCategory = itemDef.tags
+        .find((tag) => {
+          return tag.startsWith("WeaponCategory");
+        })
+        ?.slice(14) as WeaponCategory;
+      const weaponType = itemDef.tags
+        .find((tag) => {
+          return tag.startsWith("WeaponType");
+        })
+        ?.slice(10) as WeaponType;
+
+      // Supported weapon category?
+      if (
+        // If no weapon category, this is an improvised weapon, which anyone can use.
+        weaponCategory &&
+        // If the character class doesn't support this weapon category, only proficiencies can save it.
+        !characterClass.weaponCategoryPermissions?.includes(weaponCategory) &&
+        // So... do we have the proficiency that lets you use this even when your class says no?
+        !isProficiencyUnlockedForCharacter(characterId, ProficiencyMartialTraining.name, weaponType ?? "None")
+      ) {
+        // Looks like this is not an improvised weapon, the character class forbids it, and the character
+        // didn't get special training.  So nope!  Can't use it.
+        return false;
+      }
+
+      // Supported weapon type?
+      if (
+        // If no weapon type, this is an improvised weapon, which anyone can use.
+        weaponType &&
+        // If the character class doesn't support this weapon type, only proficiencies can save it.
+        !characterClass.weaponTypePermissions?.includes(weaponType) &&
+        // So... do we have the proficiency that lets you use this even when your class says no?
+        !isProficiencyUnlockedForCharacter(characterId, ProficiencyMartialTraining.name, weaponType ?? "None")
+      ) {
+        // Looks like this is not an improvised weapon, the character class forbids it, and the character
+        // didn't get special training.  So nope!  Can't use it.
+        return false;
+      }
+
+      // Supported weapon style?
+      // If this is a 2h-only weapon, the player must be able to equip 2h weapons.
+      // In all other cases, it can be wielded one handed... which all classes support.
+      if (itemDef.damage_die === 0 && !characterClass.weaponStyles.includes(WeaponStyle.TwoHanded)) {
+        return false;
+      }
+
+      // That should be all of the limitations.  If you made it here, they could theoretically wield the weapon.
+      return true;
+    }
+  }
+}
+
+export function isProficiencyUnlockedForCharacter(
+  characterId: number,
+  proficiencyName: string,
+  subtype?: string
+): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return false;
+  } else {
+    const characterClass = AllClasses[character.class_name];
+
+    // Is this an unlocked class feature?
+    const feature = characterClass.classFeatures.find((abilityFilter) => {
+      const isSameBaseAbility = abilityFilter.def.name === proficiencyName;
+      const isMatchingSubtype = !subtype || abilityFilter.subtypes?.includes(subtype);
+      return isSameBaseAbility && isMatchingSubtype;
+    });
+    if (feature) {
+      return true;
+    }
+
+    // Is this an assigned, unlocked proficiency?
+    const proficiencies = redux.proficiencies.proficienciesByCharacterId[characterId];
+    const pdata = proficiencies?.find((p) => {
+      const isSameBaseAbility = p.feature_id === proficiencyName;
+      const isMatchingSubtype = !subtype || p.subtype === subtype;
+      return isSameBaseAbility && isMatchingSubtype;
+    });
+    if (pdata) {
+      const minLevelForSource: Dictionary<number> = {
+        [ProficiencySource.Selectable1]: 1,
+        [ProficiencySource.Selectable2]: 1,
+        [ProficiencySource.Selectable3]: 1,
+        [ProficiencySource.Selectable4]: 1,
+        [ProficiencySource.Extra]: 1,
+        [ProficiencySource.General1]: GeneralProficienciesAt[0] ?? 99,
+        [ProficiencySource.General2]: GeneralProficienciesAt[1] ?? 99,
+        [ProficiencySource.General3]: GeneralProficienciesAt[2] ?? 99,
+        [ProficiencySource.General4]: GeneralProficienciesAt[3] ?? 99,
+        [ProficiencySource.Class1]: characterClass.classProficienciesAt[0] ?? 99,
+        [ProficiencySource.Class2]: characterClass.classProficienciesAt[1] ?? 99,
+        [ProficiencySource.Class3]: characterClass.classProficienciesAt[2] ?? 99,
+        [ProficiencySource.Class4]: characterClass.classProficienciesAt[3] ?? 99,
+        [ProficiencySource.Class5]: characterClass.classProficienciesAt[4] ?? 99,
+      };
+
+      if (character.level >= minLevelForSource[pdata.source]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
+export interface BonusCalculations {
+  totalBonus: number;
+  // We use arrays to preserve ordering.
+  sources: [string, number][];
+  conditionalSources: [string, number][];
+}
+
+export function getInitiativeBonusForCharacter(characterId: number): BonusCalculations {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  if (!character) {
+    return calc;
+  } else {
+    calc.totalBonus = getBonusForStat(character.dexterity);
+    calc.sources.push(["Dex Bonus", calc.totalBonus]);
+
+    // Is the character wielding a weapon with an initiative penalty tag?  (e.g. Great Axe)
+    if (getWeaponTagsForCharacter(characterId).includes(Tag.InitiativeMinusOne)) {
+      calc.sources.push(["Slow Weapon", -1]);
+      calc.totalBonus -= 1;
+    }
+
+    // Is the character wielding a spear/polearm with the matching proficiency?
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencyFightingStyle.name, "Pole Weapon")) {
+      const weapon1 = redux.items.allItems[character.slot_melee1];
+      const weapon2 = redux.items.allItems[character.slot_melee2];
+      const def1 = redux.gameDefs.items[weapon1?.def_id];
+      const def2 = redux.gameDefs.items[weapon2?.def_id];
+      if (def1?.tags.includes(WeaponCategory.SpearPoleArm) || def2?.tags.includes(WeaponCategory.SpearPoleArm)) {
+        calc.sources.push(["Fighting Style: Pole Weapon", 1]);
+        calc.totalBonus += 1;
+      }
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, BladeDancerMobility.name)) {
+      calc.sources.push(["Blade Dancer Mobility", 1]);
+      calc.totalBonus += 1;
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, SharedAnimalReflexes.name)) {
+      calc.sources.push(["Animal Reflexes", 1]);
+      calc.totalBonus += 1;
+    }
+
+    return calc;
+  }
+}
+
+export function getArmorBonusForCharacter(characterId: number): BonusCalculations {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  if (!character) {
+    return calc;
+  } else {
+    calc.totalBonus = getBonusForStat(character.dexterity);
+    calc.sources.push(["Dex Bonus", calc.totalBonus]);
+
+    const equippedArmor = redux.gameDefs.items[redux.items.allItems[character?.slot_armor]?.def_id];
+    if (equippedArmor) {
+      const equippedArmorAC = (equippedArmor?.ac ?? 0) + (equippedArmor?.magic_bonus ?? 0);
+      calc.totalBonus += equippedArmorAC;
+      calc.sources.push([equippedArmor.name, equippedArmorAC]);
+    }
+
+    const equippedShield = redux.gameDefs.items[redux.items.allItems[character?.slot_shield]?.def_id];
+    if (equippedShield) {
+      const equippedShieldAC = (equippedShield?.ac ?? 0) + (equippedShield?.magic_bonus ?? 0);
+      calc.totalBonus += equippedShieldAC;
+      calc.sources.push([equippedShield.name, equippedShieldAC]);
+    }
+
+    // Proficiencies and abilities that grant armor.
+    if (
+      equippedShield &&
+      isProficiencyUnlockedForCharacter(characterId, ProficiencyFightingStyle.name, "Weapon and Shield")
+    ) {
+      calc.sources.push(["Fighting Style (Weapon and Shield)", 1]);
+      calc.totalBonus += 1;
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, BladeDancerMobility.name)) {
+      let mBonus = 1;
+      if (character.level >= 7) ++mBonus;
+      if (character.level >= 13) ++mBonus;
+
+      calc.sources.push(["Blade Dancer Mobility", mBonus]);
+      calc.totalBonus += mBonus;
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencySwashbuckling.name)) {
+      let mBonus = 1;
+      if (character.level >= 7) ++mBonus;
+      if (character.level >= 13) ++mBonus;
+
+      calc.sources.push(["Swashbuckling", mBonus]);
+      calc.totalBonus += mBonus;
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, AntiPaladinAuraOfProtection.name)) {
+      calc.conditionalSources.push(["Is target Good-aligned?", 1]);
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, PaladinAuraOfProtection.name)) {
+      calc.conditionalSources.push(["Is source Evil-aligned?", 1]);
+    }
+
+    return calc;
+  }
+}
+
+export function getSavingThrowBonusForCharacter(characterId: number): BonusCalculations {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  if (!character) {
+    return calc;
+  } else {
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencyDivineBlessing.name)) {
+      calc.sources.push(["Divine Blessing", 2]);
+      calc.totalBonus += 2;
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, AntiPaladinAuraOfProtection.name)) {
+      calc.conditionalSources.push(["Is source Good-aligned?", 1]);
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, PaladinAuraOfProtection.name)) {
+      calc.conditionalSources.push(["Is source Evil-aligned?", 1]);
+    }
+
+    return calc;
+  }
+}
+
+export function getWeaponTagsForCharacter(characterId: number): Tag[] {
+  const tags: Tag[] = [];
+
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (character) {
+    const weapon1 = redux.items.allItems[character.slot_melee1];
+    const weapon2 = redux.items.allItems[character.slot_melee2];
+    const ranged = redux.items.allItems[character.slot_ranged];
+
+    if (weapon1) {
+      const def = redux.gameDefs.items[weapon1.def_id];
+      def?.tags.forEach((t) => {
+        tags.push(t as Tag);
+      });
+    }
+
+    if (weapon2) {
+      const def = redux.gameDefs.items[weapon2.def_id];
+      def?.tags.forEach((t) => {
+        tags.push(t as Tag);
+      });
+    }
+
+    if (ranged) {
+      const def = redux.gameDefs.items[ranged.def_id];
+      def?.tags.forEach((t) => {
+        tags.push(t as Tag);
+      });
+    }
+  }
+
+  return tags;
+}
+
+export function getMeleeHitCalculationsForCharacter(characterId: number): [number, [string, number][]] {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return [0, []];
+  } else {
+    const characterClass = AllClasses[character.class_name];
+    // What is equipped?
+    const weapon1 = redux.items.allItems[character.slot_melee1];
+    const weapon2 = redux.items.allItems[character.slot_melee2];
+    const def1 = redux.gameDefs.items[weapon1?.def_id];
+    const def2 = redux.gameDefs.items[weapon2?.def_id];
+
+    // By default, you get the Strength bonus to hit.
+    let totalHitBonus: number = getBonusForStat(character.strength);
+    const bonuses: [string, number][] = [["Str Bonus", totalHitBonus]];
+    // If the character has Weapon Finesse and is wielding 1h weapon(s), they can use the greater of Dex and Str bonus.
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencyWeaponFinesse.name)) {
+      if ((def1 && def2) || def1?.damage_dice || def2?.damage_dice) {
+        const dexBonus = getBonusForStat(character.dexterity);
+        if (dexBonus > totalHitBonus) {
+          totalHitBonus = dexBonus;
+          bonuses[0] = ["Dex Bonus (Weapon Finesse)", dexBonus];
+        }
+      }
+    }
+
+    // Level-based bonus.
+    const lbb = characterClass.toHitBonus[character.level - 1];
+    if (lbb > 0) {
+      bonuses.push(["Level Bonus", lbb]);
+      totalHitBonus += lbb;
+    }
+
+    // Magic weapon bonus/penalty.
+    if (def1 && def1.magic_bonus !== 0) {
+      bonuses.push([def1.name, def1.magic_bonus]);
+      totalHitBonus += def1.magic_bonus;
+    }
+    if (def2 && def2.magic_bonus !== 0) {
+      bonuses.push([def2.name, def2.magic_bonus]);
+      totalHitBonus += def2.magic_bonus;
+    }
+
+    // Dual-wielding grants +1 to hit.
+    if (def1 && def2) {
+      bonuses.push(["Dual Wielding", 1]);
+      totalHitBonus += 1;
+
+      // Fighting Style (Two Weapons) grants an extra +1 to hit.
+      if (isProficiencyUnlockedForCharacter(characterId, ProficiencyFightingStyle.name, "Two Weapons")) {
+        bonuses.push(["Fighting Style (Two Weapons)", 1]);
+        totalHitBonus += 1;
+      }
+    }
+
+    // Fighting Style (Single Weapon) grants +1 to hit.
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencyFightingStyle.name, "Single Weapon")) {
+      if ((def1 && !def2) || (def2 && !def1)) {
+        bonuses.push(["Fighting Style (Single Weapon)", 1]);
+        totalHitBonus += 1;
+      }
+    }
+
+    // TODO: How to do conditional bonuses?
+
+    return [totalHitBonus, bonuses];
+  }
+}
+
+interface WeaponDamageCalculations {
+  weaponName: string;
+  numDice: number;
+  sizeDice: number;
+  bonuses: [string, number][];
+  rangeIncrement: number;
+}
+export function getMeleeDamageCalculationsForCharacter(characterId: number): WeaponDamageCalculations {
+  const calc: WeaponDamageCalculations = {
+    weaponName: "Unarmed Strike",
+    numDice: 1,
+    sizeDice: 2,
+    bonuses: [],
+    rangeIncrement: 0,
+  };
+
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return calc;
+  } else {
+    // Strength bonus.
+    const strBonus = getBonusForStat(character.strength);
+    if (strBonus !== 0) {
+      calc.bonuses.push(["Str Bonus", strBonus]);
+    }
+
+    // Class melee damage bonus.
+    if (isProficiencyUnlockedForCharacter(characterId, SharedMeleeDamageBonus.name)) {
+      if (character.level >= 12) calc.bonuses.push(["Class Melee Damage Bonus", 5]);
+      else if (character.level >= 9) calc.bonuses.push(["Class Melee Damage Bonus", 4]);
+      else if (character.level >= 6) calc.bonuses.push(["Class Melee Damage Bonus", 3]);
+      else if (character.level >= 3) calc.bonuses.push(["Class Melee Damage Bonus", 2]);
+      else calc.bonuses.push(["Class Melee Damage Bonus", 1]);
+    }
+
+    // Does this character have a melee weapon equipped?
+    const weapon1 = redux.items.allItems[character.slot_melee1];
+    const weapon2 = redux.items.allItems[character.slot_melee2];
+    const def1 = redux.gameDefs.items[weapon1?.def_id];
+    const def2 = redux.gameDefs.items[weapon2?.def_id];
+
+    // If no weapon equipped, we will show unarmed combat.
+    // If both weapons equipped, show dual wield data.
+    if (def1 && def2) {
+      const outputOne = def1.damage_dice * def1.damage_die + def1.magic_bonus;
+      const outputTwo = def2.damage_dice * def2.damage_die + def2.magic_bonus;
+      if (outputTwo > outputOne) {
+        // Weapon two is better.
+        calc.numDice = def2.damage_dice;
+        calc.sizeDice = def2.damage_die;
+        if (def2.magic_bonus !== 0) {
+          calc.bonuses.push([def2.name, def2.magic_bonus]);
+        }
+      } else {
+        // Weapon one is equal/better.
+        calc.numDice = def1.damage_dice;
+        calc.sizeDice = def1.damage_die;
+        if (def1.magic_bonus !== 0) {
+          calc.bonuses.push([def1.name, def1.magic_bonus]);
+        }
+      }
+      calc.weaponName = `${def1.name} & ${def2.name}`;
+    }
+    // If one weapon equipped, show single attack data.
+    else if (def1 || def2) {
+      const def = def1 ?? def2;
+      if (def.damage_dice_2h) {
+        calc.numDice = def.damage_dice_2h;
+        calc.sizeDice = def.damage_die_2h;
+        // Fighting Style (Two-handed Weapon) gives +1 damage.
+        if (isProficiencyUnlockedForCharacter(characterId, ProficiencyFightingStyle.name, "Two-handed Weapon")) {
+          if ((def1 && !def2) || (def2 && !def1)) {
+            calc.bonuses.push(["Fighting Style (Two-handed Weapon)", 1]);
+          }
+        }
+      } else {
+        calc.numDice = def.damage_dice;
+        calc.sizeDice = def.damage_die;
+      }
+      if (def.magic_bonus !== 0) {
+        calc.bonuses.push([def.name, def.magic_bonus]);
+      }
+      calc.weaponName = def.name;
+    }
+
+    // TODO: How to do conditional bonuses?
+
+    return calc;
+  }
+}
+
+export function getRangedHitCalculationsForCharacter(characterId: number): [number, [string, number][]] {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return [0, []];
+  } else {
+    const characterClass = AllClasses[character.class_name];
+
+    // What is equipped?
+    const weapon = redux.items.allItems[character.slot_ranged];
+    const def = redux.gameDefs.items[weapon?.def_id];
+
+    // By default, you get the Dexterity bonus to hit.
+    let totalHitBonus: number = getBonusForStat(character.dexterity);
+    const bonuses: [string, number][] = [["Dex Bonus", totalHitBonus]];
+
+    // Level-based bonus.
+    const lbb = characterClass.toHitBonus[character.level - 1];
+    if (lbb > 0) {
+      bonuses.push(["Level Bonus", lbb]);
+      totalHitBonus += lbb;
+    }
+
+    // Magic weapon bonus/penalty.
+    if (def && def.magic_bonus !== 0) {
+      bonuses.push([def.name, def.magic_bonus]);
+      totalHitBonus += def.magic_bonus;
+    }
+
+    // Fighting Style (Missile Weapon) grants +1 to hit.
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencyFightingStyle.name, "Missile Weapon")) {
+      bonuses.push(["Fighting Style (Missile Weapon)", 1]);
+      totalHitBonus += 1;
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, SharedRangedAccuracyBonus.name)) {
+      bonuses.push(["Ranged Accuracy Bonus", 1]);
+      totalHitBonus += 1;
+    }
+
+    // TODO: How to do conditional bonuses?
+
+    return [totalHitBonus, bonuses];
+  }
+}
+
+export function getRangedDamageCalculationsForCharacter(characterId: number): WeaponDamageCalculations {
+  const calc: WeaponDamageCalculations = {
+    weaponName: "Improvised Projectile",
+    numDice: 1,
+    sizeDice: 2,
+    bonuses: [],
+    rangeIncrement: 10,
+  };
+
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  if (!character) {
+    return calc;
+  } else {
+    // Class ranged damage bonus.
+    if (isProficiencyUnlockedForCharacter(characterId, SharedRangedDamageBonus.name)) {
+      if (character.level >= 12) calc.bonuses.push(["Class Ranged Damage Bonus", 5]);
+      else if (character.level >= 9) calc.bonuses.push(["Class Ranged Damage Bonus", 4]);
+      else if (character.level >= 6) calc.bonuses.push(["Class Ranged Damage Bonus", 3]);
+      else if (character.level >= 3) calc.bonuses.push(["Class Ranged Damage Bonus", 2]);
+      else calc.bonuses.push(["Class Ranged Damage Bonus", 1]);
+    }
+
+    // Does this character have a ranged weapon equipped?
+    const weapon = redux.items.allItems[character.slot_ranged];
+    const def = redux.gameDefs.items[weapon?.def_id];
+
+    // If no weapon equipped, we will show improvised weapons (throw a rock).
+    // If one weapon equipped, show single attack data.
+    if (def) {
+      calc.numDice = def.damage_dice;
+      calc.sizeDice = def.damage_die;
+      if (def.magic_bonus !== 0) {
+        calc.bonuses.push([def.name, def.magic_bonus]);
+      }
+      calc.weaponName = def.name;
+      calc.rangeIncrement = def.range_increment;
+    }
+
+    // TODO: How to do conditional bonuses?
+
+    return calc;
+  }
 }

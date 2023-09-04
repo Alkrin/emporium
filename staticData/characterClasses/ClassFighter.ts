@@ -1,6 +1,6 @@
-import { FighterBattlefieldProwess } from "../classAbilities/FighterBattlefieldProwess";
-import { SharedMeleeDamageBonus } from "../classAbilities/SharedMeleeDamageBonus";
-import { SharedRangedDamageBonus } from "../classAbilities/SharedMissileDamageBonus";
+import { FighterBattlefieldProwess } from "../classFeatures/FighterBattlefieldProwess";
+import { SharedMeleeDamageBonus } from "../classFeatures/SharedMeleeDamageBonus";
+import { SharedRangedDamageBonus } from "../classFeatures/SharedRangedDamageBonus";
 import { ProficiencyAcrobatics } from "../proficiencies/ProficiencyAcrobatics";
 import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyAlertness } from "../proficiencies/ProficiencyAlertness";
@@ -14,6 +14,7 @@ import { ProficiencyEndurance } from "../proficiencies/ProficiencyEndurance";
 import { ProficiencyFightingStyle } from "../proficiencies/ProficiencyFightingStyle";
 import { ProficiencyGambling } from "../proficiencies/ProficiencyGambling";
 import { ProficiencyIntimidation } from "../proficiencies/ProficiencyIntimidation";
+import { ProficiencyLanguage } from "../proficiencies/ProficiencyLanguage";
 import { ProficiencyLeadership } from "../proficiencies/ProficiencyLeadership";
 import { ProficiencyManualOfArms } from "../proficiencies/ProficiencyManualOfArms";
 import { ProficiencyMilitaryStrategy } from "../proficiencies/ProficiencyMilitaryStrategy";
@@ -26,7 +27,7 @@ import { ProficiencySurvival } from "../proficiencies/ProficiencySurvival";
 import { ProficiencySwashbuckling } from "../proficiencies/ProficiencySwashbuckling";
 import { ProficiencyWeaponFinesse } from "../proficiencies/ProficiencyWeaponFinesse";
 import { ProficiencyWeaponFocus } from "../proficiencies/ProficiencyWeaponFocus";
-import { ArmorStyle, BaseWeaponStyle, CharacterClass, CharacterStat, SavingThrowType } from "../types/characterClasses";
+import { WeaponStyle, CharacterClass, CharacterStat, SavingThrowType } from "../types/characterClasses";
 
 export const ClassFighter: CharacterClass = {
   name: "Fighter",
@@ -35,13 +36,8 @@ export const ClassFighter: CharacterClass = {
   primeRequisites: [CharacterStat.Strength],
   statRequirements: {},
   xpToLevel: [0, 2000, 4000, 8000, 16000, 32000, 65000, 130000, 250000, 370000, 490000, 610000, 730000, 850000],
-  weaponStyles: [
-    BaseWeaponStyle.OneHandOnly,
-    BaseWeaponStyle.OneHandAndShield,
-    BaseWeaponStyle.DualWield,
-    BaseWeaponStyle.TwoHanded,
-  ],
-  armorStyle: ArmorStyle.Heavy,
+  weaponStyles: [WeaponStyle.OneHandOnly, WeaponStyle.OneHandAndShield, WeaponStyle.DualWield, WeaponStyle.TwoHanded],
+  maxBaseArmor: 6, // Plate
   cleaveMultiplier: 1,
   savingThrows: {
     [SavingThrowType.PetrificationAndParalysis]: [15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6],
@@ -56,7 +52,9 @@ export const ClassFighter: CharacterClass = {
     { def: SharedMeleeDamageBonus },
     { def: SharedRangedDamageBonus },
     { def: FighterBattlefieldProwess },
+    { def: ProficiencyLanguage, subtypes: ["Common"] },
   ],
+  selectableClassFeatures: [],
   classProficienciesAt: [1, 3, 6, 9, 12],
   classProficiencies: [
     { def: ProficiencyAcrobatics },
@@ -88,4 +86,5 @@ export const ClassFighter: CharacterClass = {
     { def: ProficiencyWeaponFocus },
   ],
   spellcasting: [],
+  levelBasedSkills: [],
 };

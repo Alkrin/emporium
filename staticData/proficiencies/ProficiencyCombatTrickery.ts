@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyCombatTrickery: AbilityOrProficiency = {
+  id: "Combat Trickery",
   name: "Combat Trickery",
   description: [
     "When the character attempts the chosen maneuver in combat, the to hit penalty is " +
@@ -11,13 +12,5 @@ export const ProficiencyCombatTrickery: AbilityOrProficiency = {
       "maneuver to learn each time.",
   ],
   minLevel: 1,
-  subTypes: [
-    "Disarm",
-    "Force Back",
-    "Incapacitate",
-    "Knock Down",
-    "Overrun",
-    "Sunder",
-    "Wrestle.",
-  ],
+  subTypes: ["Disarm", "Force Back", "Incapacitate", "Knock Down", "Overrun", "Sunder", "Wrestle"],
 };

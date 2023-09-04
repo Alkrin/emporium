@@ -19,6 +19,7 @@ import DraggableHandle from "../DraggableHandle";
 import DropTarget from "../DropTarget";
 import TooltipSource from "../TooltipSource";
 import styles from "./EditProficienciesSubPanel.module.scss";
+import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
 
 const DropTypeClassProficiency = "ClassProficiency";
 const DropTypeGeneralProficiency = "GeneralProficiency";
@@ -163,11 +164,11 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
           <TooltipSource
             className={styles.availableProficiencyRowDraggableHandle}
             tooltipParams={{
-              id: data.name,
+              id: data.def.id,
               content: this.renderAbilityTooltip.bind(
                 this,
                 data,
-                this.getCurrentProficiencyRank(data.name, data.subtype) + 1
+                this.getCurrentProficiencyRank(data.def.id, data.subtype) + 1
               ),
             }}
           />
@@ -195,11 +196,11 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
           <TooltipSource
             className={styles.availableProficiencyRowDraggableHandle}
             tooltipParams={{
-              id: data.name,
+              id: data.def.id,
               content: this.renderAbilityTooltip.bind(
                 this,
                 data,
-                this.getCurrentProficiencyRank(data.name, data.subtype) + 1
+                this.getCurrentProficiencyRank(data.def.id, data.subtype) + 1
               ),
             }}
           />
@@ -240,17 +241,20 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
   }
 
   private buildDisplayDataFromProficiencyData(pData: ProficiencyData): AbilityDisplayData {
-    const { name, subtype } = pData;
-    let displayName: string = name;
-    if (subtype && subtype.length > 0) {
-      displayName = `${name} (${subtype})`;
+    let def = AllProficiencies[pData.feature_id];
+    if (!def) {
+      def = AllClassFeatures[pData.feature_id];
+    }
+    let displayName: string = def.name;
+    if (pData.subtype && pData.subtype.length > 0) {
+      displayName = `${displayName} (${pData.subtype})`;
     }
 
     const data: AbilityDisplayData = {
       name: displayName,
       rank: 1,
       subtype: pData.subtype,
-      def: AllProficiencies[pData.name],
+      def: AllProficiencies[pData.feature_id],
     };
     return data;
   }
@@ -274,13 +278,13 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       const maxRank = filter.def.description.length;
       if (subtypesToIterate.length === 0) {
         // Single standard proficiency, no subtypes.
-        if (this.getCurrentProficiencyRank(filter.def.name) < maxRank) {
+        if (this.getCurrentProficiencyRank(filter.def.id) < maxRank) {
           data.push(this.buildDisplayDataForProficiency(filter.def));
         }
       } else {
         // Has subtype(s).  One entry for each.
         subtypesToIterate.forEach((subtype) => {
-          if (this.getCurrentProficiencyRank(filter.def.name, subtype) < maxRank) {
+          if (this.getCurrentProficiencyRank(filter.def.id, subtype) < maxRank) {
             data.push(this.buildDisplayDataForProficiency(filter.def, subtype));
           }
         });
@@ -308,13 +312,13 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       const maxRank = def.description.length;
       if (subtypesToIterate.length === 0) {
         // Single standard proficiency, no subtypes.
-        if (this.getCurrentProficiencyRank(def.name) < maxRank) {
+        if (this.getCurrentProficiencyRank(def.id) < maxRank) {
           data.push(this.buildDisplayDataForProficiency(def));
         }
       } else {
         // Has subtype(s).  One entry for each.
         subtypesToIterate.forEach((subtype) => {
-          if (this.getCurrentProficiencyRank(def.name, subtype) < maxRank) {
+          if (this.getCurrentProficiencyRank(def.id, subtype) < maxRank) {
             data.push(this.buildDisplayDataForProficiency(def, subtype));
           }
         });
@@ -344,7 +348,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     return data;
   }
 
-  private getCurrentProficiencyRank(name: string, subtype?: string): number {
+  private getCurrentProficiencyRank(feature_id: string, subtype?: string): number {
     let currentRank = 0;
 
     // Check if it is granted by the class at the current level.
@@ -352,7 +356,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     if (
       characterClass.classFeatures.find((filter) => {
         return (
-          filter.def.name === name &&
+          filter.def.id === feature_id &&
           (!subtype || filter.subtypes?.[0] === subtype) &&
           filter.def.minLevel <= this.props.character.level
         );
@@ -364,19 +368,19 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     // Check if it is assigned to any of the proficiency slots.
     // In class proficiencies?
     Object.values(this.state.assignedClassProficiencies).forEach((prof) => {
-      if (prof.name.startsWith(name) && (!subtype || subtype === prof.subtype)) {
+      if (prof.def.id === feature_id && (!subtype || subtype === prof.subtype)) {
         currentRank += 1;
       }
     });
     // In general proficiencies?
     Object.values(this.state.assignedGeneralProficiencies).forEach((prof) => {
-      if (prof.name.startsWith(name) && (!subtype || subtype === prof.subtype)) {
+      if (prof.def.id === feature_id && (!subtype || subtype === prof.subtype)) {
         currentRank += 1;
       }
     });
     // In extra proficiencies?
     this.state.assignedExtraProficiencies.forEach((prof) => {
-      if (prof.name.startsWith(name) && (!subtype || subtype === prof.subtype)) {
+      if (prof.def.id === feature_id && (!subtype || subtype === prof.subtype)) {
         currentRank += 1;
       }
     });
@@ -392,7 +396,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
 
     const data = this.state.assignedExtraProficiencies[index];
     const changedClass =
-      data?.name !== this.originalExtraProficiencies[index]?.name ||
+      data?.def?.id !== this.originalExtraProficiencies[index]?.def?.id ||
       data?.subtype !== this.originalExtraProficiencies[index]?.subtype
         ? styles.changed
         : "";
@@ -408,11 +412,11 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
           {data && (
             <TooltipSource
               tooltipParams={{
-                id: data.name,
+                id: data.def.id,
                 content: this.renderAbilityTooltip.bind(
                   this,
                   data,
-                  this.getCurrentProficiencyRank(data.name, data.subtype)
+                  this.getCurrentProficiencyRank(data.def.id, data.subtype)
                 ),
               }}
             >
@@ -435,7 +439,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     const source = `Class${index + 1}` as ProficiencySource;
     const data = this.state.assignedClassProficiencies[source];
     const changedClass =
-      data?.name !== this.originalClassProficiencies[source]?.name ||
+      data?.def?.id !== this.originalClassProficiencies[source]?.def?.id ||
       data?.subtype !== this.originalClassProficiencies[source]?.subtype
         ? styles.changed
         : "";
@@ -451,11 +455,11 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
           {data && (
             <TooltipSource
               tooltipParams={{
-                id: data.name,
+                id: data.def.id,
                 content: this.renderAbilityTooltip.bind(
                   this,
                   data,
-                  this.getCurrentProficiencyRank(data.name, data.subtype)
+                  this.getCurrentProficiencyRank(data.def.id, data.subtype)
                 ),
               }}
             >
@@ -494,7 +498,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     const source = `General${index + 1}` as ProficiencySource;
     const data = this.state.assignedGeneralProficiencies[source];
     const changedClass =
-      data?.name !== this.originalGeneralProficiencies[source]?.name ||
+      data?.def?.id !== this.originalGeneralProficiencies[source]?.def?.id ||
       data?.subtype !== this.originalGeneralProficiencies[source]?.subtype
         ? styles.changed
         : "";
@@ -511,11 +515,11 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
           {data && (
             <TooltipSource
               tooltipParams={{
-                id: data.name,
+                id: data.def.id,
                 content: this.renderAbilityTooltip.bind(
                   this,
                   data,
-                  this.getCurrentProficiencyRank(data.name, data.subtype)
+                  this.getCurrentProficiencyRank(data.def.id, data.subtype)
                 ),
               }}
             >
@@ -533,12 +537,31 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
 
     const features: AbilityDisplayData[] = [];
 
+    // Static features.
     characterClass.classFeatures.forEach((feature) => {
       features.push({
         name: feature.def.name,
         rank: feature.rank ?? 1,
         subtype: feature.subtypes?.[0] ?? "",
         def: feature.def,
+      });
+    });
+
+    // Selectable features.
+    characterClass.selectableClassFeatures.forEach((selectableFeature, index) => {
+      const selection = this.props.proficiencies.filter((pdata) => {
+        return pdata.source === (`Selectable${index + 1}` as ProficiencySource);
+      });
+      let def = AllProficiencies[selection[0].feature_id];
+      if (!def) {
+        def = AllClassFeatures[selection[0].feature_id];
+      }
+
+      features.push({
+        name: def.name,
+        rank: selection.length,
+        subtype: selection[0].subtype ?? "",
+        def,
       });
     });
 
@@ -566,6 +589,13 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
 
   private renderFeatureRow(ability: AbilityDisplayData, index: number): React.ReactNode {
     const readyClass = ability.def.minLevel > this.props.character.level ? styles.notReady : "";
+    let featureName = ability.name;
+    if (ability.subtype) {
+      featureName += ` (${ability.subtype})`;
+    }
+    if (ability.rank > 1) {
+      featureName += ` ${this.getRomanNumerals(ability.rank)}`;
+    }
     return (
       <TooltipSource
         className={`${styles.classFeaturesListRow} ${readyClass}`}
@@ -576,9 +606,14 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
         }}
       >
         <div className={`${styles.listRequiredLevel} ${readyClass}`}>@ L{ability.def.minLevel} </div>
-        <div className={styles.listName}>{ability.name}</div>
+        <div className={styles.listName}>{featureName}</div>
       </TooltipSource>
     );
+  }
+
+  private getRomanNumerals(num: number): string {
+    const numerals = ["0", "I", "II", "III", "IV", "V"];
+    return numerals[num] ?? "";
   }
 
   private async onSaveClicked(): Promise<void> {
@@ -601,7 +636,8 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       // Check Class assignments.
       oldClassKeys.forEach((key) => {
         hasChanges =
-          hasChanges || this.originalClassProficiencies[key].name !== this.state.assignedClassProficiencies[key].name;
+          hasChanges ||
+          this.originalClassProficiencies[key].def.id !== this.state.assignedClassProficiencies[key].def.id;
       });
     }
     if (!hasChanges) {
@@ -609,13 +645,13 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       oldGeneralKeys.forEach((key) => {
         hasChanges =
           hasChanges ||
-          this.originalGeneralProficiencies[key].name !== this.state.assignedGeneralProficiencies[key].name;
+          this.originalGeneralProficiencies[key].def.id !== this.state.assignedGeneralProficiencies[key].def.id;
       });
     }
 
     // Check Extra assignments.
     for (let i = 0; !hasChanges && i < this.originalExtraProficiencies.length; ++i) {
-      hasChanges = this.originalExtraProficiencies[i].name !== this.state.assignedExtraProficiencies[i].name;
+      hasChanges = this.originalExtraProficiencies[i].def.id !== this.state.assignedExtraProficiencies[i].def.id;
     }
 
     // If nothing changed, do nothing.
@@ -648,6 +684,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     });
 
     const res = await ServerAPI.updateProficiencies(this.props.character.id, pData);
+    console.log(res);
 
     this.setState({ isSaving: false });
     // // Refetch proficiencies.
@@ -664,7 +701,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
   ): ProficiencyData {
     return {
       character_id: this.props.character.id,
-      name: displayData.def.name,
+      feature_id: displayData.def.id,
       subtype: displayData.def.subTypes?.[0] ?? "",
       source,
     };

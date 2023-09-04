@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyTracking: AbilityOrProficiency = {
+  id: "Tracking",
   name: "Tracking",
   description: [
     "The character can follow tracks with a proficiency throw of 11+. The Judge should increase " +

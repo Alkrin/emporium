@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyTransmogrification: AbilityOrProficiency = {
+  id: "Transmogrification",
   name: "Transmogrification",
   description: [
     "The character has mastered grotesque arts of transformation. When the character casts " +

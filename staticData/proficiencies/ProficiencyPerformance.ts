@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyPerformance: AbilityOrProficiency = {
+  id: "Performance",
   name: "Performance",
   description: [
     "The character can perform in a skilled manner. The character chooses the type of performance " +
@@ -34,14 +35,5 @@ export const ProficiencyPerformance: AbilityOrProficiency = {
       "Can identify famous performers, masterpieces, and rare instruments with a proficiency throw of 3+",
   ],
   minLevel: 1,
-  subTypes: [
-    "Act",
-    "Chant",
-    "Dance",
-    "Juggle",
-    "Play Instrument",
-    "Recite Poetry",
-    "Sing",
-    "Tell Stories",
-  ],
+  subTypes: ["Act", "Chant", "Dance", "Juggle", "Play Instrument", "Recite Poetry", "Sing", "Tell Stories"],
 };

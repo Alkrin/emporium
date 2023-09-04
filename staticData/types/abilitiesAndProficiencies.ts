@@ -1,4 +1,5 @@
 export interface AbilityOrProficiency {
+  id: string;
   name: string;
   description: string[]; // One entry per rank, in order.
   /** The character level at which this ability/proficiency becomes active. */
@@ -34,6 +35,10 @@ export enum ProficiencySource {
   General3 = "General3",
   General4 = "General4",
   Extra = "Extra",
+  Selectable1 = "Selectable1",
+  Selectable2 = "Selectable2",
+  Selectable3 = "Selectable3",
+  Selectable4 = "Selectable4",
 }
 
 export const GeneralProficienciesAt = [1, 5, 9, 13];

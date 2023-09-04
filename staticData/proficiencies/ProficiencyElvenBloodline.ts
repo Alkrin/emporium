@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyElvenBloodline: AbilityOrProficiency = {
+  id: "Elven Bloodline",
   name: "Elven Bloodline",
   description: [
     "The character has the blood of the ageless elves in his ancestry. His lifespan " +

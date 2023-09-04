@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyVerminSlaying: AbilityOrProficiency = {
+  id: "Vermin-Slaying",
   name: "Vermin-Slaying",
   description: [
     "The character specializes in exterminating the insects, slimes, and swarms that plague the " +
