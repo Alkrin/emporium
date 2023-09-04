@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyLanguage: AbilityOrProficiency = {
+  id: "Language",
   name: "Language",
   description: [
     "This proficiency enables the character to learn to speak, read, and write an additional language. " +
@@ -10,16 +11,5 @@ export const ProficiencyLanguage: AbilityOrProficiency = {
       "character already speaks.",
   ],
   minLevel: 1,
-  subTypes: [
-    "Common",
-    "Draconic",
-    "Dwarven",
-    "Elven",
-    "Gnoll",
-    "Gnome",
-    "Goblin",
-    "Hobgoblin",
-    "Kobold",
-    "Orc",
-  ],
+  subTypes: ["Common", "Draconic", "Dwarven", "Elven", "Gnoll", "Gnome", "Goblin", "Hobgoblin", "Kobold", "Orc"],
 };

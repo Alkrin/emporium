@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const FighterBattlefieldProwess: AbilityOrProficiency = {
+  id: "Battlefield Prowess.Fighter",
   name: "Battlefield Prowess",
   description: [
     "When a fighter reaches 5th level (Exemplar), his battlefield " +

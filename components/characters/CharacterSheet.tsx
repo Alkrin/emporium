@@ -17,10 +17,18 @@ import { EditXPDialog } from "./EditXPDialog";
 import { Dictionary } from "../../lib/dictionary";
 import { Stones, StonesToNumber, getTotalEquippedWeight } from "../../lib/itemUtils";
 import {
+  BonusCalculations,
+  getArmorBonusForCharacter,
   getBonusForStat,
   getCharacterMaxEncumbrance,
   getCharacterMaxHP,
   getCharacterStat,
+  getInitiativeBonusForCharacter,
+  getMeleeDamageCalculationsForCharacter,
+  getMeleeHitCalculationsForCharacter,
+  getRangedDamageCalculationsForCharacter,
+  getRangedHitCalculationsForCharacter,
+  getSavingThrowBonusForCharacter,
 } from "../../lib/characterUtils";
 import { RepertoireDialog } from "./RepertoireDialog";
 import { SpellTooltip } from "../database/SpellTooltip";
@@ -57,12 +65,15 @@ class ACharacterSheet extends React.Component<Props> {
             {this.renderStatsPanel()}
             {this.renderSavingThrowsPanel()}
             {this.renderSpeedPanel()}
+            {this.renderInitiativePanel()}
             {this.renderEquipmentPanel()}
+            {this.renderCombatPanel()}
             {this.renderXPPanel()}
             {this.renderHPPanel()}
             {this.renderAbilitiesPanel()}
             {this.renderSpellSlotsPanel()}
             {this.renderSpellRepertoirePanel()}
+            {this.renderLevelBasedSkillsPanel()}
           </>
         ) : (
           <div className={styles.placeholder} />
@@ -113,12 +124,12 @@ class ACharacterSheet extends React.Component<Props> {
                   }
                   const noneClass = maxSpellsPrepared === 0 ? styles.none : "";
                   return (
-                    <>
-                      <div className={styles.repertoireLevelHeader} key={`RepertoireL${index + 1}`}>
+                    <div key={`RepertoireL${index + 1}`}>
+                      <div className={styles.repertoireLevelHeader}>
                         <div className={`${styles.repertoireLevelName} ${noneClass}`}>{`L${index + 1}`}</div>
-                        <div
-                          className={`${styles.repertoireLevelPreparedCount} ${noneClass}`}
-                        >{`${spellsPrepared.length} / ${maxSpellsPrepared}`}</div>
+                        <div className={`${styles.repertoireLevelPreparedCount} ${noneClass}`}>
+                          {maxSpellsPrepared > 0 ? `${spellsPrepared.length} / ${maxSpellsPrepared}` : ""}
+                        </div>
                         {maxSpellsPrepared > 0 && spellCapability.requiresSpellbook ? (
                           <div
                             className={styles.repertoireEditButton}
@@ -141,12 +152,13 @@ class ACharacterSheet extends React.Component<Props> {
                                 return <SpellTooltip spellId={sdd.id} />;
                               },
                             }}
+                            key={`Spell${sdd.id}`}
                           >
                             {sdd.name}
                           </TooltipSource>
                         );
                       })}
-                    </>
+                    </div>
                   );
                 })}
                 {spellCapability.ritualLevels.map((ritualLevel) => {
@@ -171,12 +183,12 @@ class ACharacterSheet extends React.Component<Props> {
                   const noneClass = !canCastRituals || repertoireBonus === 0 ? styles.none : "";
                   let maxSpellsPrepared = canCastRituals ? repertoireBonus : 0;
                   return (
-                    <>
-                      <div className={styles.repertoireLevelHeader} key={`RepertoireL${ritualLevel}`}>
+                    <div key={`RepertoireL${ritualLevel}`}>
+                      <div className={styles.repertoireLevelHeader}>
                         <div className={`${styles.repertoireLevelName} ${noneClass}`}>{`L${ritualLevel} Rituals`}</div>
-                        <div
-                          className={`${styles.repertoireLevelPreparedCount} ${noneClass}`}
-                        >{`${spellsPrepared.length} / ${maxSpellsPrepared}`}</div>
+                        <div className={`${styles.repertoireLevelPreparedCount} ${noneClass}`}>
+                          {maxSpellsPrepared > 0 ? `${spellsPrepared.length} / ${maxSpellsPrepared}` : ""}
+                        </div>
                         {repertoireBonus > 0 && canCastRituals && spellCapability.requiresSpellbook ? (
                           <div
                             className={styles.repertoireEditButton}
@@ -199,12 +211,13 @@ class ACharacterSheet extends React.Component<Props> {
                                 return <SpellTooltip spellId={sdd.id} />;
                               },
                             }}
+                            key={`Spell${sdd.id}`}
                           >
                             {sdd.name}
                           </TooltipSource>
                         );
                       })}
-                    </>
+                    </div>
                   );
                 })}
               </div>
@@ -249,15 +262,15 @@ class ACharacterSheet extends React.Component<Props> {
         {characterClass.spellcasting.map((spellType, stIndex) => {
           const slots = spellType.spellSlots[this.props.character.level - 1];
           return (
-            <>
-              <div className={styles.row} key={`SpellTypeColumn`}>
+            <div key={`SpellTypeColumn${stIndex}`}>
+              <div className={styles.row}>
                 <div className={styles.column}>
                   <div className={styles.spellSlotsCell} />
                   <div className={styles.normalText}>{spellType.spellTypes[0]}</div>
                 </div>
                 {slots.map((numSpells, index) => {
                   return (
-                    <div className={styles.column}>
+                    <div className={styles.column} key={`Slots${index + 1}`}>
                       <div className={styles.spellSlotsHeader}>{`L${index + 1}`}</div>
                       <div className={numSpells === 0 ? styles.spellSlotsNone : styles.spellSlotsValue}>
                         {numSpells}
@@ -267,7 +280,7 @@ class ACharacterSheet extends React.Component<Props> {
                 })}
               </div>
               {stIndex < characterClass.spellcasting.length - 1 ? <div className={styles.spellTypeDivider} /> : null}
-            </>
+            </div>
           );
         })}
       </div>
@@ -349,6 +362,48 @@ class ACharacterSheet extends React.Component<Props> {
     }
   }
 
+  private renderLevelBasedSkillsPanel(): React.ReactNode {
+    if (this.props.character) {
+      const characterClass = AllClasses[this.props.character.class_name];
+      if (characterClass.levelBasedSkills.length > 0) {
+        return (
+          <div className={styles.levelBasedSkillsPanel}>
+            <div className={styles.abilitiesTitle}>{"Special Skills"}</div>
+            <div className={styles.horizontalLine} />
+            <div className={styles.specialSkillsContainer}>
+              {characterClass.levelBasedSkills.map((lbs) => {
+                return (
+                  <TooltipSource
+                    className={styles.specialSkillRow}
+                    tooltipParams={{
+                      id: lbs.name,
+                      content: lbs.tooltip
+                        ? () => {
+                            return <div className={styles.specialSkillsTooltip}>{lbs.tooltip}</div>;
+                          }
+                        : null,
+                    }}
+                    key={lbs.name}
+                  >
+                    <div className={styles.row}>
+                      <div className={styles.specialSkillName}>{lbs.name}</div>
+                      {lbs.tooltip ? <div className={styles.infoAsterisk}>*</div> : null}
+                    </div>
+                    <div className={styles.specialSkillRoll}>{lbs.rolls[this.props.character.level - 1]}</div>
+                  </TooltipSource>
+                );
+              })}
+            </div>
+          </div>
+        );
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
   private onLevelUpClicked(): void {
     // TODO: Level Up dialog?
   }
@@ -397,6 +452,32 @@ class ACharacterSheet extends React.Component<Props> {
     return speed;
   }
 
+  private renderInitiativePanel(): React.ReactNode {
+    if (this.props.character) {
+      let calc = getInitiativeBonusForCharacter(this.props.characterId);
+      const hasConditionalBonuses = calc.conditionalSources.length > 0;
+      return (
+        <TooltipSource
+          tooltipParams={{
+            id: "InitiativeExplanation",
+            content: this.renderBonusTooltip.bind(this, "Initiative", calc),
+          }}
+          className={styles.initiativePanel}
+        >
+          <div className={styles.row}>
+            <div className={styles.initiativeTitle}>Initiative Bonus</div>
+            <div className={styles.valueText}>
+              {`${calc.totalBonus > 0 ? "+" : ""} ${calc.totalBonus}`}
+              {hasConditionalBonuses ? <span className={styles.infoAsterisk}>*</span> : null}
+            </div>
+          </div>
+        </TooltipSource>
+      );
+    } else {
+      return null;
+    }
+  }
+
   private renderSpeedPanel(): React.ReactNode {
     if (this.props.character) {
       // Calculate encumbrance based on equipment slots.
@@ -431,14 +512,8 @@ class ACharacterSheet extends React.Component<Props> {
   }
 
   private renderEquipmentPanel(): React.ReactNode {
-    const equippedArmorAC =
-      this.props.allItemDefs[this.props.allItems[this.props.character?.slot_armor]?.def_id]?.ac ?? 0;
-    const equippedShieldAC =
-      this.props.allItemDefs[this.props.allItems[this.props.character?.slot_shield]?.def_id]?.ac ?? 0;
-    const dexBonus = getBonusForStat(this.props.character.dexterity);
-    // TODO: Proficiencies and abilities that grant armor.
-    // TODO: Conditional boosts?
-    const acValue: number = equippedArmorAC + equippedShieldAC + dexBonus;
+    let calc = getArmorBonusForCharacter(this.props.characterId);
+
     return (
       <div className={styles.equipmentPanel}>
         <div className={styles.row}>
@@ -449,54 +524,243 @@ class ACharacterSheet extends React.Component<Props> {
         <TooltipSource
           tooltipParams={{
             id: "ACExplanation",
-            content: this.renderACTooltip.bind(this),
+            content: this.renderBonusTooltip.bind(this, "AC", calc, true),
           }}
           className={styles.row}
         >
           <div className={styles.acTitle}>AC:</div>
-          <div className={styles.valueText}>{acValue}</div>
+          <div className={styles.valueText}>
+            {calc.totalBonus}
+            {calc.conditionalSources.length > 0 ? <span className={styles.infoAsterisk}>*</span> : null}
+          </div>
         </TooltipSource>
       </div>
     );
   }
 
-  private renderACTooltip(): React.ReactNode {
-    const equippedArmor = this.props.allItemDefs[this.props.allItems[this.props.character?.slot_armor]?.def_id];
-    const equippedArmorAC = equippedArmor?.ac ?? 0;
+  private renderCombatPanel(): React.ReactNode {
+    return (
+      <div className={styles.combatPanel}>
+        <div className={styles.combatTitle}>{"Combat"}</div>
+        <div className={styles.horizontalLine} />
+        {this.renderMeleeCombatSection()}
+        {this.renderRangedCombatSection()}
+      </div>
+    );
+  }
 
-    const equippedShield = this.props.allItemDefs[this.props.allItems[this.props.character?.slot_shield]?.def_id];
-    const equippedShieldAC = equippedShield?.ac ?? 0;
-
-    const dexBonus = getBonusForStat(this.props.character.dexterity);
-
-    // TODO: Proficiencies and abilities that grant armor.
-    // TODO: Conditional boosts?
-
-    const acValue: number = equippedArmorAC + equippedShieldAC + dexBonus;
+  private renderMeleeCombatSection(): React.ReactNode {
+    const [toHit, toHitBonuses] = getMeleeHitCalculationsForCharacter(this.props.characterId);
+    const damage = getMeleeDamageCalculationsForCharacter(this.props.characterId);
+    const damageBonus = damage.bonuses
+      .map((entry) => {
+        return entry[1];
+      })
+      .reduce((runningTotal, currentValue) => {
+        return runningTotal + currentValue;
+      }, 0);
 
     return (
-      <div className={styles.acTooltipRoot}>
+      <div className={styles.column}>
+        <TooltipSource
+          className={styles.combatTypeContainer}
+          tooltipParams={{
+            id: "MeleeExplanation",
+            content: this.renderMeleeCombatTooltip.bind(this, toHitBonuses, damage.bonuses),
+          }}
+        >
+          <div className={styles.combatTypeName}>{damage.weaponName}</div>
+          <div className={styles.row}>
+            <div className={styles.combatDamageRoll}>{`${damage.numDice}d${damage.sizeDice}${
+              damageBonus > 0 ? `+${damageBonus}` : ""
+            }${damageBonus < 0 ? damageBonus : ""}`}</div>
+            <div className={styles.combatHitRoll}>{`${toHit >= 0 ? "+" : ""}${toHit} to hit`}</div>
+          </div>
+        </TooltipSource>
+      </div>
+    );
+  }
+
+  private renderMeleeCombatTooltip(
+    toHitBonuses: [string, number][],
+    damageBonuses: [string, number][]
+  ): React.ReactNode {
+    const totalDamageBonus = damageBonuses
+      .map((entry) => {
+        return entry[1];
+      })
+      .reduce((runningTotal, currentValue) => {
+        return runningTotal + currentValue;
+      }, 0);
+
+    const totalHitBonus = toHitBonuses
+      .map((entry) => {
+        return entry[1];
+      })
+      .reduce((runningTotal, currentValue) => {
+        return runningTotal + currentValue;
+      }, 0);
+
+    return (
+      <div className={styles.combatTooltipRoot}>
         <div className={styles.row}>
-          <div className={styles.acTooltipTitle}>Total AC:</div>
-          <div className={styles.acTooltipValue}>{acValue}</div>
+          <div className={styles.acTooltipTitle}>Damage</div>
+          <div className={styles.acTooltipValue}>{`${totalDamageBonus > 0 ? "+" : ""} ${totalDamageBonus}`}</div>
         </div>
         <div className={styles.acTooltipDivider} />
-        {equippedArmor && (
-          <div className={styles.acTooltipSourceRow}>
-            <div className={styles.acTooltipSource}>{equippedArmor.name}</div>
-            <div className={styles.acTooltipValue}>{equippedArmor.ac}</div>
-          </div>
-        )}
-        {equippedShield && (
-          <div className={styles.acTooltipSourceRow}>
-            <div className={styles.acTooltipSource}>{equippedShield.name}</div>
-            <div className={styles.acTooltipValue}>{equippedShield.ac}</div>
-          </div>
-        )}
-        <div className={styles.acTooltipSourceRow}>
-          <div className={styles.acTooltipSource}>Dex Bonus</div>
-          <div className={styles.acTooltipSourceValue}>{`${dexBonus > 0 ? "+" : ""}${dexBonus}`}</div>
+        {damageBonuses.map(([text, value]) => {
+          return (
+            <div className={styles.acTooltipSourceRow} key={text}>
+              <div className={styles.acTooltipSource}>{text}</div>
+              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""} ${value}`}</div>
+            </div>
+          );
+        })}
+        <div style={{ height: "1vmin" }} />
+        <div className={styles.row}>
+          <div className={styles.acTooltipTitle}>To Hit</div>
+          <div className={styles.acTooltipValue}>{`${totalHitBonus > 0 ? "+" : ""} ${totalHitBonus}`}</div>
         </div>
+        <div className={styles.acTooltipDivider} />
+        {toHitBonuses.map(([text, value]) => {
+          return (
+            <div className={styles.acTooltipSourceRow} key={text}>
+              <div className={styles.acTooltipSource}>{text}</div>
+              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""} ${value}`}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  private renderRangedCombatSection(): React.ReactNode {
+    const [toHit, toHitBonuses] = getRangedHitCalculationsForCharacter(this.props.characterId);
+    const damage = getRangedDamageCalculationsForCharacter(this.props.characterId);
+    const damageBonus = damage.bonuses
+      .map((entry) => {
+        return entry[1];
+      })
+      .reduce((runningTotal, currentValue) => {
+        return runningTotal + currentValue;
+      }, 0);
+
+    return (
+      <div className={styles.column}>
+        <TooltipSource
+          className={styles.combatTypeContainer}
+          tooltipParams={{
+            id: "RangedExplanation",
+            content: this.renderRangedCombatTooltip.bind(this, toHitBonuses, damage.bonuses),
+          }}
+        >
+          <div className={styles.combatTypeName}>{damage.weaponName}</div>
+          <div className={styles.combatTypeName}>{`Range: ${damage.rangeIncrement}' / ${damage.rangeIncrement * 2}' / ${
+            damage.rangeIncrement * 3
+          }' `}</div>
+          <div className={styles.row}>
+            <div className={styles.combatDamageRoll}>{`${damage.numDice}d${damage.sizeDice}${
+              damageBonus > 0 ? `+${damageBonus}` : ""
+            }${damageBonus < 0 ? damageBonus : ""}`}</div>
+            <div className={styles.combatHitRoll}>{`${toHit >= 0 ? "+" : ""}${toHit} to hit`}</div>
+          </div>
+        </TooltipSource>
+      </div>
+    );
+  }
+
+  private renderRangedCombatTooltip(
+    toHitBonuses: [string, number][],
+    damageBonuses: [string, number][]
+  ): React.ReactNode {
+    const totalDamageBonus = damageBonuses
+      .map((entry) => {
+        return entry[1];
+      })
+      .reduce((runningTotal, currentValue) => {
+        return runningTotal + currentValue;
+      }, 0);
+
+    const totalHitBonus = toHitBonuses
+      .map((entry) => {
+        return entry[1];
+      })
+      .reduce((runningTotal, currentValue) => {
+        return runningTotal + currentValue;
+      }, 0);
+
+    return (
+      <div className={styles.combatTooltipRoot}>
+        <div className={styles.row}>
+          <div className={styles.acTooltipTitle}>Damage</div>
+          <div className={styles.acTooltipValue}>{`${totalDamageBonus > 0 ? "+" : ""} ${totalDamageBonus}`}</div>
+        </div>
+        <div className={styles.acTooltipDivider} />
+        {damageBonuses.map(([text, value]) => {
+          return (
+            <div className={styles.acTooltipSourceRow} key={text}>
+              <div className={styles.acTooltipSource}>{text}</div>
+              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""} ${value}`}</div>
+            </div>
+          );
+        })}
+        <div style={{ height: "1vmin" }} />
+        <div className={styles.row}>
+          <div className={styles.acTooltipTitle}>To Hit</div>
+          <div className={styles.acTooltipValue}>{`${totalHitBonus > 0 ? "+" : ""} ${totalHitBonus}`}</div>
+        </div>
+        <div className={styles.acTooltipDivider} />
+        {toHitBonuses.map(([text, value]) => {
+          return (
+            <div className={styles.acTooltipSourceRow} key={text}>
+              <div className={styles.acTooltipSource}>{text}</div>
+              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""} ${value}`}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  private renderBonusTooltip(
+    header: string,
+    calc: BonusCalculations,
+    isFlatValue?: boolean,
+    hideZeroBonus?: boolean
+  ): React.ReactNode {
+    return (
+      <div className={styles.initiativeTooltipRoot}>
+        <div className={styles.row}>
+          <div className={styles.acTooltipTitle}>{header}</div>
+          {!hideZeroBonus && (
+            <div className={styles.acTooltipValue}>{`${!isFlatValue && calc.totalBonus > 0 ? "+" : ""}${
+              calc.totalBonus
+            }`}</div>
+          )}
+        </div>
+        <div className={styles.acTooltipDivider} />
+        {calc.sources.map(([text, value]) => {
+          return (
+            <div className={styles.acTooltipSourceRow} key={text}>
+              <div className={styles.acTooltipSource}>{text}</div>
+              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
+            </div>
+          );
+        })}
+        {calc.conditionalSources.length > 0 ? (
+          <>
+            <div className={styles.tooltipConditionalHeader}>Conditional Bonuses</div>
+            <div className={styles.acTooltipDivider} />
+            {calc.conditionalSources.map(([text, value]) => {
+              return (
+                <div className={styles.acTooltipSourceRow} key={text}>
+                  <div className={styles.acTooltipSource}>{text}</div>
+                  <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
+                </div>
+              );
+            })}
+          </>
+        ) : null}
       </div>
     );
   }
@@ -564,14 +828,21 @@ class ACharacterSheet extends React.Component<Props> {
     if (this.props.character) {
       const characterClass = AllClasses[this.props.character.class_name];
       const baseValue = characterClass.savingThrows[type][this.props.character.level - 1];
+      const calc = getSavingThrowBonusForCharacter(this.props.characterId);
 
-      // TODO: Include things like Familiar (which is conditional?) or Divine Blessing proficiency bonuses.
-      // TODO: Conditionals from items or consumables? Those herbs that increase your poison save?
       const finalValue = baseValue;
       return (
-        <TooltipSource className={styles.row} tooltipParams={{ id: `stRow${name}`, content: type }}>
+        <TooltipSource
+          className={styles.row}
+          tooltipParams={{ id: `stRow${name}`, content: this.renderBonusTooltip.bind(this, type, calc, false, true) }}
+        >
           <div className={styles.savingThrowsName}>{name}</div>
-          <div className={styles.savingThrowsValue}>{finalValue}</div>
+          <div className={styles.savingThrowsValue}>
+            {finalValue}
+            {calc.conditionalSources.length > 0 || calc.sources.length > 0 ? (
+              <span className={styles.infoAsterisk}>*</span>
+            ) : null}
+          </div>
         </TooltipSource>
       );
     } else {

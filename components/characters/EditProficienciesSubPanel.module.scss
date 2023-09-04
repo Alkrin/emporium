@@ -94,6 +94,7 @@
   font-size: 1rem;
   display: flex;
   flex-direction: row;
+  text-overflow: clip;
   cursor: pointer;
 
   &.notReady {
@@ -168,6 +169,8 @@
 
 .assignedProficiencyName {
   margin-left: 0.5vmin;
+  white-space: nowrap;
+  overflow: hidden;
   cursor: move;
 }
 

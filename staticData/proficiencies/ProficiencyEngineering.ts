@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyEngineering: AbilityOrProficiency = {
+  id: "Engineering",
   name: "Engineering",
   description: [
     "The character is skilled in planning, designing, and constructing castles, towers, roads, " +
@@ -12,19 +13,19 @@ export const ProficiencyEngineering: AbilityOrProficiency = {
     "The character is skilled in planning, designing, and constructing castles, towers, roads, " +
       "and so forth. Any character with this skill can evaluate constructions the party is passing " +
       "through to assess what shape they are in, when and by whom they were built, etc., with a proficiency " +
-      "throw of 9+." +
+      "throw of 7+." +
       "\n" +
       "May supervise 50,000gp worth of permanent construction.",
     "The character is skilled in planning, designing, and constructing castles, towers, roads, " +
       "and so forth. Any character with this skill can evaluate constructions the party is passing " +
       "through to assess what shape they are in, when and by whom they were built, etc., with a proficiency " +
-      "throw of 7+." +
+      "throw of 3+." +
       "\n" +
       "May supervise 75,000gp worth of permanent construction.",
     "The character is skilled in planning, designing, and constructing castles, towers, roads, " +
       "and so forth. Any character with this skill can evaluate constructions the party is passing " +
       "through to assess what shape they are in, when and by whom they were built, etc., with a proficiency " +
-      "throw of 5+." +
+      "throw of 1+." +
       "\n" +
       "May supervise 100,000gp worth of permanent construction." +
       "\n" +

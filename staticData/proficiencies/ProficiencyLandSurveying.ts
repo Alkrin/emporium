@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyLandSurveying: AbilityOrProficiency = {
+  id: "Land Surveying",
   name: "Land Surveying",
   description: [
     "The character is an expert at surveying the land around him. With a proficiency throw " +

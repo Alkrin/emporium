@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencySkirmishing: AbilityOrProficiency = {
+  id: "Skirmishing",
   name: "Skirmishing",
   description: [
     "The character may withdraw or retreat from melee combat without declaring the " +

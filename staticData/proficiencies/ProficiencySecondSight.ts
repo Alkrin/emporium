@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencySecondSight: AbilityOrProficiency = {
+  id: "Second Sight",
   name: "Second Sight",
   description: [
     "The character has a connection to the hidden world, and can see innately or magically " +

@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyRiding: AbilityOrProficiency = {
+  id: "Riding",
   name: "Riding",
   description: [
     "The character knows not only the care and feeding of a riding animal, but also how " +
@@ -9,5 +10,5 @@ export const ProficiencyRiding: AbilityOrProficiency = {
       "is not required to simply ride a domesticated animal under non-combat conditions.",
   ],
   minLevel: 1,
-  subTypes: ["Dragon", "Giant Eagle", "Horse", "Pegasus"],
+  subTypes: ["Dragon", "Giant Eagle", "Griffon", "Horse", "Pegasus"],
 };

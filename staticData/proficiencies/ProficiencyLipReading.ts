@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyLipReading: AbilityOrProficiency = {
+  id: "Lip Reading",
   name: "Lip Reading",
   description: [
     "The character can “overhear” conversations spoken in a language he understands. If the " +

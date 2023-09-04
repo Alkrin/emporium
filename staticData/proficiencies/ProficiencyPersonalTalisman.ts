@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyPersonalTalisman: AbilityOrProficiency = {
+  id: "Personal Talisman",
   name: "Personal Talisman",
   description: [
     "A ceremonialist with the Personal Talisman proficiency has created a special magic " +

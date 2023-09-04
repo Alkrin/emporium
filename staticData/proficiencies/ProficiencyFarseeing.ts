@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyFarseeing: AbilityOrProficiency = {
+  id: "Farseeing",
   name: "Farseeing",
   description: [
     "The character can see the fates of mortals. He may determine how many Fate Points a " +

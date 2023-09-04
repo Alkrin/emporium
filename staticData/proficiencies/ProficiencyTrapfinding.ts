@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyTrapfinding: AbilityOrProficiency = {
+  id: "Trapfinding",
   name: "Trapfinding",
   description: [
     "The character is an expert trap finder, receiving a +2 bonus on proficiency throws to find " +

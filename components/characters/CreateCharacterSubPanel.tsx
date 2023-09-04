@@ -5,7 +5,7 @@ import { refetchCharacters } from "../../dataSources/CharactersDataSource";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
-import ServerAPI, { CharacterData, Gender, emptyEquipmentData } from "../../serverAPI";
+import ServerAPI, { CharacterData, Gender, ProficiencyData, emptyEquipmentData } from "../../serverAPI";
 import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { CharacterStat } from "../../staticData/types/characterClasses";
 import styles from "./CreateCharacterSubPanel.module.scss";
@@ -15,6 +15,8 @@ import { deleteItem } from "../../redux/itemsSlice";
 import { deleteProficienciesForCharacter } from "../../redux/proficienciesSlice";
 import { deleteSpellbook } from "../../redux/spellbooksSlice";
 import { deleteRepertoireForCharacter } from "../../redux/repertoiresSlice";
+import { refetchProficiencies } from "../../dataSources/ProficienciesDataSource";
+import { AbilityFilter } from "../../staticData/types/abilitiesAndProficiencies";
 
 interface State {
   nameText: string;
@@ -29,6 +31,8 @@ interface State {
   constitution: number;
   charisma: number;
   hitDice: number[];
+  /** Feature id, subtype, rank. */
+  selectableValues: [string, string, number][];
   isSaving: boolean;
 }
 
@@ -39,6 +43,7 @@ interface ReactProps {
 interface InjectedProps {
   currentUserId: number;
   selectedCharacter?: CharacterData;
+  selectedCharacterProficiencies?: ProficiencyData[];
   dispatch?: Dispatch;
 }
 
@@ -51,6 +56,21 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     if (props.isEditMode) {
       if (props.selectedCharacter) {
         // Load the selected character.
+        const selectableValues: [string, string, number][] = [
+          ["---", "", 0],
+          ["---", "", 0],
+          ["---", "", 0],
+          ["---", "", 0],
+        ];
+        this.props.selectedCharacterProficiencies?.forEach((p) => {
+          if (p.source.startsWith("Selectable")) {
+            const pIndex = +p.source.slice(10) - 1;
+            selectableValues[pIndex][0] = p.feature_id;
+            selectableValues[pIndex][1] = p.subtype;
+            selectableValues[pIndex][2] += 1;
+          }
+        });
+
         this.state = {
           nameText: props.selectedCharacter.name,
           gender: props.selectedCharacter.gender,
@@ -64,6 +84,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           constitution: props.selectedCharacter.constitution,
           charisma: props.selectedCharacter.charisma,
           hitDice: props.selectedCharacter.hit_dice,
+          selectableValues,
           isSaving: false,
         };
       }
@@ -82,6 +103,12 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         constitution: 9,
         charisma: 9,
         hitDice: [4],
+        selectableValues: [
+          ["---", "", 0],
+          ["---", "", 0],
+          ["---", "", 0],
+          ["---", "", 0],
+        ],
         isSaving: false,
       };
     }
@@ -150,6 +177,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 
     const hitDieSize = selectedClass?.hitDieSize ?? 4;
 
+    let nextTabIndex: number = 1;
+
     return (
       <div className={styles.root}>
         <div className={styles.titleLabel}>
@@ -165,7 +194,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           onChange={(e) => {
             this.setState({ nameText: e.target.value });
           }}
-          tabIndex={1}
+          tabIndex={nextTabIndex++}
           spellCheck={false}
           autoFocus={true}
         />
@@ -181,7 +210,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             onChange={(e) => {
               this.setState({ gender: e.target.value as Gender });
             }}
-            tabIndex={2}
+            tabIndex={nextTabIndex++}
           />
           <span className={styles.radioLabel}>Male</span>
           <input
@@ -213,9 +242,17 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           className={styles.classSelector}
           value={this.state.class}
           onChange={(e) => {
-            this.setState({ class: e.target.value });
+            this.setState({
+              class: e.target.value,
+              selectableValues: [
+                ["---", "", 0],
+                ["---", "", 0],
+                ["---", "", 0],
+                ["---", "", 0],
+              ],
+            });
           }}
-          tabIndex={3}
+          tabIndex={nextTabIndex++}
         >
           <option value={"---"}>---</option>
           {AllClassesArray.map(({ name }) => {
@@ -242,7 +279,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             }
             this.setState({ level, hitDice });
           }}
-          tabIndex={4}
+          tabIndex={nextTabIndex++}
         />
 
         <div className={styles.xpLabel}>XP</div>
@@ -254,7 +291,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           onChange={(e) => {
             this.setState({ xp: +e.target.value });
           }}
-          tabIndex={5}
+          tabIndex={nextTabIndex++}
           spellCheck={false}
         />
         <div className={styles.xpRangeLabel}>{`${minXP} - ${maxXP}`}</div>
@@ -272,7 +309,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           onChange={(e) => {
             this.setState({ strength: +e.target.value });
           }}
-          tabIndex={6}
+          tabIndex={nextTabIndex++}
         />
 
         <div className={styles.intelligenceLabel}>
@@ -290,7 +327,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           onChange={(e) => {
             this.setState({ intelligence: +e.target.value });
           }}
-          tabIndex={7}
+          tabIndex={nextTabIndex++}
         />
 
         <div className={styles.wisdomLabel}>
@@ -306,7 +343,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           onChange={(e) => {
             this.setState({ wisdom: +e.target.value });
           }}
-          tabIndex={8}
+          tabIndex={nextTabIndex++}
         />
 
         <div className={styles.dexterityLabel}>
@@ -322,7 +359,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           onChange={(e) => {
             this.setState({ dexterity: +e.target.value });
           }}
-          tabIndex={9}
+          tabIndex={nextTabIndex++}
         />
 
         <div className={styles.constitutionLabel}>
@@ -340,7 +377,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           onChange={(e) => {
             this.setState({ constitution: +e.target.value });
           }}
-          tabIndex={10}
+          tabIndex={nextTabIndex++}
         />
 
         <div className={styles.charismaLabel}>
@@ -356,7 +393,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           onChange={(e) => {
             this.setState({ charisma: +e.target.value });
           }}
-          tabIndex={11}
+          tabIndex={nextTabIndex++}
         />
 
         <div className={styles.rerollStatsLabel}>Reroll Stats</div>
@@ -380,7 +417,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                     hitDice[index] = +e.target.value;
                     this.setState({ hitDice });
                   }}
-                  tabIndex={12 + index}
+                  tabIndex={nextTabIndex++}
                 />
               </div>
             );
@@ -389,6 +426,73 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 
         <div className={styles.rerollHitpointsLabel}>Reroll Hitpoints</div>
         <div className={styles.rollHitpointsButton} onClick={this.onRerollHitpointsClicked.bind(this)}></div>
+
+        {selectedClass?.selectableClassFeatures.length > 0 ? (
+          <div className={styles.selectablesContainer}>
+            <div className={styles.selectablesTitle}>{"Selectable Features"}</div>
+            {selectedClass.selectableClassFeatures.map((feature, featureIndex) => {
+              let featureOptions: AbilityFilter[] = [];
+              if (Array.isArray(feature.selections)) {
+                featureOptions = feature.selections;
+              } else {
+                const filter = feature.selections;
+                if (filter.subtypes) {
+                  filter.subtypes?.forEach((subtype) => {
+                    // Turn each option into its own full entry.
+                    featureOptions.push({ ...filter, subtypes: [subtype] });
+                  });
+                } else {
+                  filter.def.subTypes?.forEach((subtype) => {
+                    // Turn each option into its own full entry.
+                    featureOptions.push({ ...filter, subtypes: [subtype] });
+                  });
+                }
+              }
+
+              return (
+                <div className={styles.row} key={`${feature.title}${featureIndex}`}>
+                  <div className={styles.selectableName}>{feature.title}</div>
+                  <select
+                    className={styles.selectableSelector}
+                    value={this.state.selectableValues[featureIndex].join(",")}
+                    onChange={(e) => {
+                      const selectableValues: [string, string, number][] = [...this.state.selectableValues];
+                      if (e.target.value === "---") {
+                        selectableValues[featureIndex] = ["---", "", 0];
+                      } else {
+                        const [featureId, subtype, rank] = e.target.value.split(",");
+                        selectableValues[featureIndex][0] = featureId;
+                        selectableValues[featureIndex][1] = subtype;
+                        selectableValues[featureIndex][2] = +rank;
+                      }
+                      this.setState({ selectableValues });
+                    }}
+                    tabIndex={nextTabIndex++}
+                  >
+                    <option value={"---"}>---</option>
+                    {featureOptions.map((filter) => {
+                      let id = filter.def.id;
+                      let name = filter.def.name;
+                      let subtype = filter.subtypes?.[0] ?? "";
+                      let rank = filter.rank ?? 1;
+
+                      let displayName = name;
+                      if (subtype.length > 0) {
+                        displayName = `${displayName} (${subtype})`;
+                      }
+
+                      return (
+                        <option value={`${id},${subtype},${rank}`} key={`selectable${name}${subtype}`}>
+                          {displayName}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
 
         <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
           {this.props.isEditMode ? "Save Changes" : "Save Character"}
@@ -447,6 +551,29 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       return;
     }
 
+    // Valid selectables?
+    let hasValidSelectables: boolean = true;
+    const selectedClass = AllClasses[this.state.class];
+    selectedClass.selectableClassFeatures?.forEach((_, featureIndex) => {
+      if (this.state.selectableValues[featureIndex][0] === "---") {
+        hasValidSelectables = false;
+      }
+    });
+    if (!hasValidSelectables) {
+      this.props.dispatch?.(
+        showModal({
+          id: "NoSelectableError",
+          content: {
+            title: "Error!",
+            message: "Please choose an option for all Selectable Features!",
+            buttonText: "Okay",
+          },
+        })
+      );
+      this.setState({ isSaving: false });
+      return;
+    }
+
     // Create a new character.
     const character: CharacterData = {
       id: this.props.selectedCharacter?.id ?? -1,
@@ -473,15 +600,17 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 
     if (this.props.isEditMode) {
       // Edit the character.
-      const res = await ServerAPI.editCharacter(character);
+      const res = await ServerAPI.editCharacter(character, this.state.selectableValues);
     } else {
       // Send it to the server!
-      const res = await ServerAPI.createCharacter(character);
+      const res = await ServerAPI.createCharacter(character, this.state.selectableValues);
+      console.log(res);
     }
     this.setState({ isSaving: false });
     // Refetch characters.
     if (this.props.dispatch) {
       await refetchCharacters(this.props.dispatch);
+      await refetchProficiencies(this.props.dispatch);
     }
     // Close the subPanel.
     this.props.dispatch?.(hideSubPanel());
@@ -606,10 +735,12 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const selectedCharacter = state.characters.characters[state.characters.activeCharacterId];
+  const selectedCharacterProficiencies = state.proficiencies.proficienciesByCharacterId[selectedCharacter?.id];
   return {
     ...props,
     currentUserId: state.user.currentUser.id,
     selectedCharacter,
+    selectedCharacterProficiencies,
   };
 }
 

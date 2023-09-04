@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencySensingPower: AbilityOrProficiency = {
+  id: "Sensing Power",
   name: "Sensing Power",
   description: [
     "The character can detect spellcasters within 60' and estimate their level of power " +

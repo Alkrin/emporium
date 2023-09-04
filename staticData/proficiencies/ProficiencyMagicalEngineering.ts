@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyMagicalEngineering: AbilityOrProficiency = {
+  id: "Magical Engineering",
   name: "Magical Engineering",
   description: [
     "The character has specialized knowledge of magical items. He gains a +1 to magical research throws. " +

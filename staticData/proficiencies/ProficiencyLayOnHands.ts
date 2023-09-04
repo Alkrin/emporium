@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyLayOnHands: AbilityOrProficiency = {
+  id: "Lay On Hands",
   name: "Lay On Hands",
   description: [
     "The character can heal himself or another by laying on hands once per day. The character " +

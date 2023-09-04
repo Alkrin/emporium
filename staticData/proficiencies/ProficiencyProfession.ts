@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyProfession: AbilityOrProficiency = {
+  id: "Profession",
   name: "Profession",
   description: [
     "The character is highly skilled at a civil profession and is considered an apprentice " +
@@ -40,5 +41,6 @@ export const ProficiencyProfession: AbilityOrProficiency = {
     "Restauranteur",
     "Scribe",
     "Seneschal",
+    "Torturer",
   ],
 };

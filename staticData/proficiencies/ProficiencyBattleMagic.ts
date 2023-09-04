@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyBattleMagic: AbilityOrProficiency = {
+  id: "Battle Magic",
   name: "Battle Magic",
   description: [
     "The character gains a +1 initiative bonus when casting spells. He is considered " +

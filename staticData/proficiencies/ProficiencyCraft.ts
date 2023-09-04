@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyCraft: AbilityOrProficiency = {
+  id: "Craft",
   name: "Craft",
   description: [
     "The character has studied a guild craft and is considered an apprentice in his trade. " +
@@ -23,7 +24,7 @@ export const ProficiencyCraft: AbilityOrProficiency = {
       "When items made by grand masters or above are discovered, their mark or style will be " +
       "apparent to characters who make the appropriate Art, Craft, Knowledge, or Loremastery roll." +
       "\n" +
-      "Can identify masterwork items, rare materials, and famous artisans with a proficiency roll of 9+.",
+      "Can identify masterwork items, rare materials, and famous artisans with a proficiency roll of 7+.",
     "The character has studied a guild craft and is considered a master craftsman. " +
       "The character must choose the craft at the time he chooses the proficiency. He can spend " +
       "more proficiency selections to have several types of craft proficiencies." +
@@ -34,7 +35,7 @@ export const ProficiencyCraft: AbilityOrProficiency = {
       "When items made by grand masters or above are discovered, their mark or style will be " +
       "apparent to characters who make the appropriate Art, Craft, Knowledge, or Loremastery roll." +
       "\n" +
-      "Can identify masterwork items, rare materials, and famous artisans with a proficiency roll of 7+.",
+      "Can identify masterwork items, rare materials, and famous artisans with a proficiency roll of 3+.",
     "The character has studied a guild craft and considered a grand master craftsman. " +
       "The character must choose the craft at the time he chooses the proficiency. He can " +
       "spend more proficiency selections to have several types of craft proficiencies." +
@@ -76,17 +77,8 @@ export const ProficiencyCraft: AbilityOrProficiency = {
       "When items made by grand masters or above are discovered, their mark or style will be apparent " +
       "to characters who make the appropriate Art, Craft, Knowledge, or Loremastery roll." +
       "\n" +
-      "Can identify masterwork items, rare materials, and famous artisans with a proficiency roll of 5+.",
+      "Can identify masterwork items, rare materials, and famous artisans with a proficiency roll of 1+.",
   ],
   minLevel: 1,
-  subTypes: [
-    "Armorer",
-    "Bowyer",
-    "Glassblower",
-    "Jeweler",
-    "Leatherworker",
-    "Shipwright",
-    "Smith",
-    "Weaponsmith",
-  ],
+  subTypes: ["Armorer", "Bowyer", "Glassblower", "Jeweler", "Leatherworker", "Shipwright", "Smith", "Weaponsmith"],
 };

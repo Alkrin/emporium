@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyArmorTraining: AbilityOrProficiency = {
+  id: "Armor Training",
   name: "Armor Training",
   description: [
     "The character may fight wearing armor up to 2 points heavier than normally permitted by " +

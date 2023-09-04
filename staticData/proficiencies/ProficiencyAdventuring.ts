@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyAdventuring: AbilityOrProficiency = {
+  id: "Adventuring",
   name: "Adventuring",
   description: [
     "The character is well-equipped for a life of adventure. He knows how to clean and " +

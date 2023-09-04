@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyLockPicking: AbilityOrProficiency = {
+  id: "Lock Picking",
   name: "Lock Picking",
   description: [
     "The character is an expert with locks and receives a +2 bonus on proficiency throws " +

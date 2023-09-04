@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyTheology: AbilityOrProficiency = {
+  id: "Theology",
   name: "Theology",
   description: [
     "The character has received formal religious instruction at a seminary or monastery, and is " +

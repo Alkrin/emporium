@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencySeduction: AbilityOrProficiency = {
+  id: "Seduction",
   name: "Seduction",
   description: [
     "The character is either naturally alluring or a practiced seducer. He always " +

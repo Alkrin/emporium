@@ -186,6 +186,22 @@
   margin-left: 0.3rem;
 }
 
+.initiativePanel {
+  position: absolute;
+  top: 17.2vmin;
+  right: 19vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.initiativeTitle {
+  @extend .normalText;
+  width: 11.5vmin;
+}
+
 .xpPanel {
   @extend .column;
   position: absolute;
@@ -577,6 +593,7 @@
 }
 
 .acTooltipValue {
+  margin-left: 1vmin;
   font-size: 1rem;
   color: yellow;
 }
@@ -644,4 +661,124 @@
   width: 100%;
   text-align: center;
   margin-top: 0.5vmin;
+}
+
+.initiativeTooltipRoot {
+  max-width: 45vmin;
+}
+
+.combatPanel {
+  @extend .column;
+  position: absolute;
+  top: 10vmin;
+  left: 34.5vmin;
+  width: 16vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.combatTitle {
+  @extend .normalText;
+}
+
+.combatTypeContainer {
+  margin-bottom: 0.5vmin;
+  border-radius: 0.5vmin;
+  background-color: black;
+}
+
+.combatTypeName {
+  color: white;
+  font-size: 0.7rem;
+}
+
+.combatDamageRoll {
+  color: #ff5511;
+  font-size: 0.9rem;
+}
+
+.combatHitRoll {
+  margin-left: 1vmin;
+  color: green;
+  font-size: 0.9rem;
+}
+
+.combatTooltipRoot {
+  max-width: 45vmin;
+}
+
+.levelBasedSkillsPanel {
+  @extend .column;
+  position: absolute;
+  top: 51.5vmin;
+  left: 1.5vmin;
+  width: 20vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.specialSkillsContainer {
+  @extend .column;
+  position: relative;
+  margin-top: 0.5vmin;
+  margin-bottom: 0.5vmin;
+  height: 20vmin;
+  background-color: black;
+
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.specialSkillRow {
+  @extend .row;
+  justify-content: space-between;
+  background-color: #111;
+  border-radius: 0.2vmin;
+  margin-bottom: 2px;
+}
+
+.specialSkillName {
+  font-size: 0.8rem;
+  color: white;
+}
+
+.infoAsterisk {
+  font-size: 0.8rem;
+  color: lime;
+}
+
+.specialSkillRoll {
+  font-size: 0.8rem;
+  color: yellow;
+  width: 3vmin;
+  text-align: center;
+}
+
+.specialSkillsTooltip {
+  max-width: 35vmin;
+  color: #ffd;
+  font-size: 1rem;
+}
+
+.tooltipConditionalHeader {
+  margin-top: 1vmin;
+  font-size: 0.8rem;
+  color: wheat;
 }

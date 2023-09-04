@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyAmbushing: AbilityOrProficiency = {
+  id: "Ambushing",
   name: "Ambushing",
   description: [
     "When the character attacks with surprise, he gets a +4 bonus on his attack " +

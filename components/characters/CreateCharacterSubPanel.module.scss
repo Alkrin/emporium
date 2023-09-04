@@ -1,9 +1,14 @@
 .root {
   width: 50vmin;
-  height: 47vmin;
+  min-height: 47vmin;
   border-radius: 1vmin;
   border: 2px solid white;
   background-color: #222;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
 }
 
 .label {
@@ -346,9 +351,34 @@
   }
 }
 
+.selectablesContainer {
+  position: relative;
+  margin-top: 40vmin;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
+  margin-bottom: 6.5vmin;
+}
+
+.selectablesTitle {
+  @extend .label;
+  text-align: center;
+}
+
+.selectableName {
+  @extend .label;
+  font-size: 1rem;
+  width: 20vmin;
+  color: rgb(225, 255, 179);
+}
+
+.selectableSelector {
+  margin-left: 1vmin;
+  width: 15vmin;
+}
+
 .saveButton {
   position: absolute;
-  top: 42vmin;
+  bottom: 1.5vmin;
   left: 50%;
   transform: translateX(-50%);
   padding: 0.5vmin;
@@ -370,7 +400,7 @@
 
 .deleteButton {
   position: absolute;
-  top: 42vmin;
+  bottom: 1.5vmin;
   left: 2vmin;
   padding: 0.5vmin;
   box-sizing: border-box;

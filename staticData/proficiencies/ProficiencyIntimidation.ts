@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyIntimidation: AbilityOrProficiency = {
+  id: "Intimidation",
   name: "Intimidation",
   description: [
     "The character knows how to bully others to get what he wants. He receives a +2 bonus " +

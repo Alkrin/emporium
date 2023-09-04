@@ -56,6 +56,7 @@ export interface ItemDefData {
   damage_dice: number;
   damage_die_2h: number;
   damage_dice_2h: number;
+  range_increment: number;
   fixed_weight: boolean;
   magic_bonus: number;
   conditional_magic_bonus: number;
@@ -178,7 +179,7 @@ export interface CharacterData extends CharacterEquipmentData {
 
 export interface ProficiencyData {
   character_id: number;
-  name: string;
+  feature_id: string;
   subtype: string;
   source: ProficiencySource;
 }
@@ -449,11 +450,15 @@ class AServerAPI {
     }
   }
 
-  async createCharacter(character: CharacterData): Promise<InsertRowResult> {
+  async createCharacter(
+    character: CharacterData,
+    selected_class_features: [string, string, number][]
+  ): Promise<InsertRowResult> {
     const requestBody: RequestBody_CreateOrEditCharacter = {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
+      selected_class_features,
     };
     const res = await fetch("/api/createCharacter", {
       method: "POST",
@@ -465,11 +470,15 @@ class AServerAPI {
     return await res.json();
   }
 
-  async editCharacter(character: CharacterData): Promise<EditRowResult> {
+  async editCharacter(
+    character: CharacterData,
+    selected_class_features: [string, string, number][]
+  ): Promise<EditRowResult> {
     const requestBody: RequestBody_CreateOrEditCharacter = {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
+      selected_class_features,
     };
     const res = await fetch("/api/editCharacter", {
       method: "POST",

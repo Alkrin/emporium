@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyJuryRigging: AbilityOrProficiency = {
+  id: "Jury-Rigging",
   name: "Jury-Rigging",
   description: [
     "The character can somehow get automatons running again with seemingly little more " +

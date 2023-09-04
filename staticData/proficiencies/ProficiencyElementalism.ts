@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyElementalism: AbilityOrProficiency = {
+  id: "Elementalism",
   name: "Elementalism",
   description: [
     "Spells using this element do +1 damage per die and impose a -2 saving throw " +

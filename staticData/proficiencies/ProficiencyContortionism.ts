@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyContortionism: AbilityOrProficiency = {
+  id: "Contortionism",
   name: "Contortionism",
   description: [
     "The character is extremely flexible, able to squeeze or fold his body in ways that " +

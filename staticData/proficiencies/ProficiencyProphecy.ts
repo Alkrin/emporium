@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyProphecy: AbilityOrProficiency = {
+  id: "Prophecy",
   name: "Prophecy",
   description: [
     "The character is subject to premonitions and dreams of the past and future. The Judge will " +

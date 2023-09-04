@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyLeadership: AbilityOrProficiency = {
+  id: "Leadership",
   name: "Leadership",
   description: [
     "The character is an inspirational authority figure who earns great loyalty. The character " +

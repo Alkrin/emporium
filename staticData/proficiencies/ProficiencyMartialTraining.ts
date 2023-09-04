@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyMartialTraining: AbilityOrProficiency = {
+  id: "Martial Training",
   name: "Martial Training",
   description: [
     "As a crusader of the faith, the character has had weapons training that supersedes " +

@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyWeaponFocus: AbilityOrProficiency = {
+  id: "Weapon Focus",
   name: "Weapon Focus",
   description: [
     "When using a favored type of weapon, the character is capable of devastating strikes. " +

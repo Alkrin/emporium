@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencySwashbuckling: AbilityOrProficiency = {
+  id: "Swashbuckling",
   name: "Swashbuckling",
   description: [
     "The character gains a +1 bonus to Armor Class if wearing leather armor or less and able to " +

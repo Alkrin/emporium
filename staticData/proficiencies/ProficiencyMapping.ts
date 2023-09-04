@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyMapping: AbilityOrProficiency = {
+  id: "Mapping",
   name: "Mapping",
   description: [
     "The character can understand and make maps, even if he cannot read or write. With a " +

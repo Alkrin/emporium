@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyBlackLoreOfZahar: AbilityOrProficiency = {
+  id: "Black Lore of Zahar",
   name: "Black Lore of Zahar",
   description: [
     "The character has studied the terrible necromancies of ancient Zahar. He can control " +

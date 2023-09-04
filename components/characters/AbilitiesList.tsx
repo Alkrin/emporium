@@ -7,13 +7,11 @@ import { UserRole } from "../../redux/userSlice";
 import { CharacterData, ProficiencyData } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import { AllProficiencies } from "../../staticData/proficiencies/AllProficiencies";
-import {
-  AbilityOrProficiency,
-  GeneralProficienciesAt,
-  ProficiencySource,
-} from "../../staticData/types/abilitiesAndProficiencies";
+import { AbilityOrProficiency } from "../../staticData/types/abilitiesAndProficiencies";
 import TooltipSource from "../TooltipSource";
 import styles from "./AbilitiesList.module.scss";
+import { isProficiencyUnlockedForCharacter } from "../../lib/characterUtils";
+import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
 
 interface AbilityDisplayData {
   name: string;
@@ -73,18 +71,6 @@ class AAbilitiesList extends React.Component<Props> {
   private sortAbilities(): AbilityDisplayData[] {
     const characterClass = AllClasses[this.props.character.class_name];
     const displayDataByName: Dictionary<AbilityDisplayData> = {};
-    const minLevelForSource: Dictionary<number> = {
-      [ProficiencySource.Extra]: 1,
-      [ProficiencySource.General1]: GeneralProficienciesAt[0] ?? 99,
-      [ProficiencySource.General2]: GeneralProficienciesAt[1] ?? 99,
-      [ProficiencySource.General3]: GeneralProficienciesAt[2] ?? 99,
-      [ProficiencySource.General4]: GeneralProficienciesAt[3] ?? 99,
-      [ProficiencySource.Class1]: characterClass.classProficienciesAt[0] ?? 99,
-      [ProficiencySource.Class2]: characterClass.classProficienciesAt[1] ?? 99,
-      [ProficiencySource.Class3]: characterClass.classProficienciesAt[2] ?? 99,
-      [ProficiencySource.Class4]: characterClass.classProficienciesAt[3] ?? 99,
-      [ProficiencySource.Class5]: characterClass.classProficienciesAt[4] ?? 99,
-    };
 
     // Class abilities/proficiencies.
     characterClass.classFeatures.forEach((classFeature) => {
@@ -105,11 +91,14 @@ class AAbilitiesList extends React.Component<Props> {
     // Chosen proficiencies.
     this.props.proficiencies.forEach((proficiency) => {
       // Only include abilities this character has unlocked.
-      if (this.props.character.level < minLevelForSource[proficiency.source]) {
+      if (!isProficiencyUnlockedForCharacter(this.props.character.id, proficiency.feature_id, proficiency.subtype)) {
         return;
       }
 
-      const def = AllProficiencies[proficiency.name];
+      let def = AllProficiencies[proficiency.feature_id];
+      if (!def) {
+        def = AllClassFeatures[proficiency.feature_id];
+      }
       const identifyingName = this.buildIdentifyingName(def, proficiency.subtype);
 
       if (displayDataByName[identifyingName]) {

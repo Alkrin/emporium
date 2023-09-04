@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyMasteryOfCharmsAndIllusions: AbilityOrProficiency = {
+  id: "Mastery of Charms and Illusions",
   name: "Mastery of Charms and Illusions",
   description: [
     "When the character casts enchantment spells (such as charm person) or illusion spells " +

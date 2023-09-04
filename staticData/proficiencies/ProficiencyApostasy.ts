@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyApostasy: AbilityOrProficiency = {
+  id: "Apostasy",
   name: "Apostasy",
   description: [
     "The character has learned knowledge forbidden to his order. He may select 4 divine spells " +

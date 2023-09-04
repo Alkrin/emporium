@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencySiegeEngineering: AbilityOrProficiency = {
+  id: "Siege Engineering",
   name: "Siege Engineering",
   description: [
     "The character is highly skilled in the construction and placement of temporary defensive " +

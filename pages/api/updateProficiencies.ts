@@ -9,13 +9,16 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     const queries: SQLQuery[] = [];
 
     // First we clean out the old proficiency data for this character.
-    queries.push({ query: "DELETE FROM proficiencies WHERE character_id=?", values: [b.character_id] });
+    queries.push({
+      query: "DELETE FROM proficiencies WHERE character_id=? AND source NOT LIKE 'Selectable%'",
+      values: [b.character_id],
+    });
 
     // Then we insert all the new proficiency data.
     b.proficiencies.forEach((data) => {
       queries.push({
-        query: "INSERT INTO proficiencies (character_id,name,subtype,source) VALUES(?,?,?,?)",
-        values: [data.character_id, data.name, data.subtype ?? "", data.source],
+        query: "INSERT INTO proficiencies (character_id,feature_id,subtype,source) VALUES(?,?,?,?)",
+        values: [data.character_id, data.feature_id, data.subtype ?? "", data.source],
       });
     });
 

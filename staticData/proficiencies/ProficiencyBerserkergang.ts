@@ -1,6 +1,7 @@
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyBerserkergang: AbilityOrProficiency = {
+  id: "Berserkergang",
   name: "Berserkergang",
   description: [
     "The character may enter a berserker rage. While enraged, he gains a +2 bonus to " +
