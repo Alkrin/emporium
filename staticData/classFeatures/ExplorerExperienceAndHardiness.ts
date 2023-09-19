@@ -8,7 +8,7 @@ export const ExplorerExperienceAndHardiness: AbilityOrProficiency = {
       "and hardiness reassures those who follow him into the wild. " +
       "Hirelings on a wilderness adventure led by the explorer gain " +
       "a +1 bonus to their morale score. This bonus stacks with any " +
-      "modifiers from the explorer’s Charisma or proficiencies.",
+      "modifiers from the explorer's Charisma or proficiencies.",
   ],
   minLevel: 5,
 };

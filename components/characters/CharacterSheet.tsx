@@ -550,7 +550,7 @@ class ACharacterSheet extends React.Component<Props> {
   }
 
   private renderMeleeCombatSection(): React.ReactNode {
-    const [toHit, toHitBonuses] = getMeleeHitCalculationsForCharacter(this.props.characterId);
+    const toHit = getMeleeHitCalculationsForCharacter(this.props.characterId);
     const damage = getMeleeDamageCalculationsForCharacter(this.props.characterId);
     const damageBonus = damage.bonuses
       .map((entry) => {
@@ -566,7 +566,7 @@ class ACharacterSheet extends React.Component<Props> {
           className={styles.combatTypeContainer}
           tooltipParams={{
             id: "MeleeExplanation",
-            content: this.renderMeleeCombatTooltip.bind(this, toHitBonuses, damage.bonuses),
+            content: this.renderMeleeCombatTooltip.bind(this, toHit, damage.bonuses),
           }}
         >
           <div className={styles.combatTypeName}>{damage.weaponName}</div>
@@ -574,26 +574,17 @@ class ACharacterSheet extends React.Component<Props> {
             <div className={styles.combatDamageRoll}>{`${damage.numDice}d${damage.sizeDice}${
               damageBonus > 0 ? `+${damageBonus}` : ""
             }${damageBonus < 0 ? damageBonus : ""}`}</div>
-            <div className={styles.combatHitRoll}>{`${toHit >= 0 ? "+" : ""}${toHit} to hit`}</div>
+            <div className={styles.combatHitRoll}>{`${toHit.totalBonus >= 0 ? "+" : ""}${
+              toHit.totalBonus
+            } to hit`}</div>
           </div>
         </TooltipSource>
       </div>
     );
   }
 
-  private renderMeleeCombatTooltip(
-    toHitBonuses: [string, number][],
-    damageBonuses: [string, number][]
-  ): React.ReactNode {
+  private renderMeleeCombatTooltip(toHit: BonusCalculations, damageBonuses: [string, number][]): React.ReactNode {
     const totalDamageBonus = damageBonuses
-      .map((entry) => {
-        return entry[1];
-      })
-      .reduce((runningTotal, currentValue) => {
-        return runningTotal + currentValue;
-      }, 0);
-
-    const totalHitBonus = toHitBonuses
       .map((entry) => {
         return entry[1];
       })
@@ -619,10 +610,10 @@ class ACharacterSheet extends React.Component<Props> {
         <div style={{ height: "1vmin" }} />
         <div className={styles.row}>
           <div className={styles.acTooltipTitle}>To Hit</div>
-          <div className={styles.acTooltipValue}>{`${totalHitBonus > 0 ? "+" : ""} ${totalHitBonus}`}</div>
+          <div className={styles.acTooltipValue}>{`${toHit.totalBonus > 0 ? "+" : ""} ${toHit.totalBonus}`}</div>
         </div>
         <div className={styles.acTooltipDivider} />
-        {toHitBonuses.map(([text, value]) => {
+        {toHit.sources.map(([text, value]) => {
           return (
             <div className={styles.acTooltipSourceRow} key={text}>
               <div className={styles.acTooltipSource}>{text}</div>
@@ -630,12 +621,26 @@ class ACharacterSheet extends React.Component<Props> {
             </div>
           );
         })}
+        {toHit.conditionalSources.length > 0 ? (
+          <>
+            <div className={styles.tooltipConditionalHeader}>Conditional Hit Bonuses</div>
+            <div className={styles.acTooltipDivider} />
+            {toHit.conditionalSources.map(([text, value]) => {
+              return (
+                <div className={styles.acTooltipSourceRow} key={text}>
+                  <div className={styles.acTooltipSource}>{text}</div>
+                  <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
+                </div>
+              );
+            })}
+          </>
+        ) : null}
       </div>
     );
   }
 
   private renderRangedCombatSection(): React.ReactNode {
-    const [toHit, toHitBonuses] = getRangedHitCalculationsForCharacter(this.props.characterId);
+    const toHit = getRangedHitCalculationsForCharacter(this.props.characterId);
     const damage = getRangedDamageCalculationsForCharacter(this.props.characterId);
     const damageBonus = damage.bonuses
       .map((entry) => {
@@ -651,7 +656,7 @@ class ACharacterSheet extends React.Component<Props> {
           className={styles.combatTypeContainer}
           tooltipParams={{
             id: "RangedExplanation",
-            content: this.renderRangedCombatTooltip.bind(this, toHitBonuses, damage.bonuses),
+            content: this.renderRangedCombatTooltip.bind(this, toHit, damage.bonuses),
           }}
         >
           <div className={styles.combatTypeName}>{damage.weaponName}</div>
@@ -662,26 +667,17 @@ class ACharacterSheet extends React.Component<Props> {
             <div className={styles.combatDamageRoll}>{`${damage.numDice}d${damage.sizeDice}${
               damageBonus > 0 ? `+${damageBonus}` : ""
             }${damageBonus < 0 ? damageBonus : ""}`}</div>
-            <div className={styles.combatHitRoll}>{`${toHit >= 0 ? "+" : ""}${toHit} to hit`}</div>
+            <div className={styles.combatHitRoll}>{`${toHit.totalBonus >= 0 ? "+" : ""}${
+              toHit.totalBonus
+            } to hit`}</div>
           </div>
         </TooltipSource>
       </div>
     );
   }
 
-  private renderRangedCombatTooltip(
-    toHitBonuses: [string, number][],
-    damageBonuses: [string, number][]
-  ): React.ReactNode {
+  private renderRangedCombatTooltip(toHit: BonusCalculations, damageBonuses: [string, number][]): React.ReactNode {
     const totalDamageBonus = damageBonuses
-      .map((entry) => {
-        return entry[1];
-      })
-      .reduce((runningTotal, currentValue) => {
-        return runningTotal + currentValue;
-      }, 0);
-
-    const totalHitBonus = toHitBonuses
       .map((entry) => {
         return entry[1];
       })
@@ -707,10 +703,10 @@ class ACharacterSheet extends React.Component<Props> {
         <div style={{ height: "1vmin" }} />
         <div className={styles.row}>
           <div className={styles.acTooltipTitle}>To Hit</div>
-          <div className={styles.acTooltipValue}>{`${totalHitBonus > 0 ? "+" : ""} ${totalHitBonus}`}</div>
+          <div className={styles.acTooltipValue}>{`${toHit.totalBonus > 0 ? "+" : ""} ${toHit.totalBonus}`}</div>
         </div>
         <div className={styles.acTooltipDivider} />
-        {toHitBonuses.map(([text, value]) => {
+        {toHit.sources.map(([text, value]) => {
           return (
             <div className={styles.acTooltipSourceRow} key={text}>
               <div className={styles.acTooltipSource}>{text}</div>
@@ -718,6 +714,20 @@ class ACharacterSheet extends React.Component<Props> {
             </div>
           );
         })}
+        {toHit.conditionalSources.length > 0 ? (
+          <>
+            <div className={styles.tooltipConditionalHeader}>Conditional Hit Bonuses</div>
+            <div className={styles.acTooltipDivider} />
+            {toHit.conditionalSources.map(([text, value]) => {
+              return (
+                <div className={styles.acTooltipSourceRow} key={text}>
+                  <div className={styles.acTooltipSource}>{text}</div>
+                  <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
+                </div>
+              );
+            })}
+          </>
+        ) : null}
       </div>
     );
   }

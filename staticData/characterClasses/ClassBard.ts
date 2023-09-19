@@ -1,6 +1,6 @@
 import { BardArcaneScrollUse } from "../classFeatures/BardArcaneScrollUse";
 import { BardChroniclesOfBattle } from "../classFeatures/BardChroniclesOfBattle";
-import { BardInspireCourage } from "../classFeatures/BardInspireCourage";
+import { SharedInspireCourage } from "../classFeatures/SharedInspireCourage";
 import { ProficiencyAcrobatics } from "../proficiencies/ProficiencyAcrobatics";
 import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyArcaneDabbling } from "../proficiencies/ProficiencyArcaneDabbling";
@@ -56,7 +56,7 @@ export const ClassBard: CharacterClass = {
     { def: ProficiencyAdventuring },
     { def: ProficiencyLoremastery },
     { def: ProficiencyArcaneDabbling },
-    { def: BardInspireCourage },
+    { def: SharedInspireCourage },
     { def: BardChroniclesOfBattle },
     { def: BardArcaneScrollUse },
     { def: ProficiencyLanguage, subtypes: ["Common"] },

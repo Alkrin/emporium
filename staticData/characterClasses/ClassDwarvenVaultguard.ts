@@ -37,7 +37,7 @@ export const ClassDwarvenVaultguard: CharacterClass = {
   hpStep: 3,
   primeRequisites: [CharacterStat.Strength],
   statRequirements: { [CharacterStat.Constitution]: 9 },
-  xpToLevel: [0, 2200, 4400, 800, 17500, 35000, 70000, 140000, 270000, 400000, 530000, 660000, 790000],
+  xpToLevel: [0, 2200, 4400, 8000, 17500, 35000, 70000, 140000, 270000, 400000, 530000, 660000, 790000],
   weaponStyles: [WeaponStyle.OneHandOnly, WeaponStyle.OneHandAndShield, WeaponStyle.DualWield, WeaponStyle.TwoHanded],
   weaponTypePermissions: [
     WeaponType.Arbalest,

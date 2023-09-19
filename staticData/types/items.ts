@@ -36,4 +36,5 @@ export enum WeaponType {
   Sap = "Sap",
   Staff = "Staff",
   Whip = "Whip",
+  GoatBiteRam = "Bite/Ram",
 }

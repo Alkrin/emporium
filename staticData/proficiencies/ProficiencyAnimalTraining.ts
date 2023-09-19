@@ -15,7 +15,7 @@ export const ProficiencyAnimalTraining: AbilityOrProficiency = {
       "Initial training, which simply makes the animal safe for handling, takes one month. " +
       "Each additional task or trick taught thereafter takes an additional 1d4 weeks. An " +
       "animal can be taught a maximum of 2d4 different tasks or tricks. The animal trainer " +
-      "will only learn the animal’s limit when he reaches it.",
+      "will only learn the animal's limit when he reaches it.",
   ],
   minLevel: 1,
   subTypes: ["Bear", "Horse", "Owlbear", "Pegasus"],
