@@ -5,7 +5,7 @@ export const PaladinAuraOfProtection: AbilityOrProficiency = {
   name: "Aura Of Protection",
   description: [
     "Grants a +1 bonus to AC and a +1 bonus on saving throws against attacks " +
-      "made or effects created by evil creatures. The paladin’s Aura Of " +
+      "made or effects created by evil creatures. The paladin's Aura Of " +
       "Protection appears as a golden halo when viewed with Detect Evil, " +
       "Detect Magic, or True Seeing.",
   ],

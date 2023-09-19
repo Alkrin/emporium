@@ -604,7 +604,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     } else {
       // Send it to the server!
       const res = await ServerAPI.createCharacter(character, this.state.selectableValues);
-      console.log(res);
     }
     this.setState({ isSaving: false });
     // Refetch characters.

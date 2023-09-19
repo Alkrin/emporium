@@ -1,5 +1,5 @@
 import { BarbarianAnimalMagnetism } from "../classFeatures/BarbarianAnimalMagnetism";
-import { BarbarianSavageResilience } from "../classFeatures/BarbarianSavageResilience";
+import { SharedSavageResilience } from "../classFeatures/SharedSavageResilience";
 import { SharedAnimalReflexes } from "../classFeatures/SharedAnimalReflexes";
 import { SharedMeleeDamageBonus } from "../classFeatures/SharedMeleeDamageBonus";
 import { SharedRangedDamageBonus } from "../classFeatures/SharedRangedDamageBonus";
@@ -68,7 +68,7 @@ export const ClassBarbarianSkysostan: CharacterClass = {
     { def: ProficiencyPreciseShooting },
     { def: SharedAnimalReflexes },
     { def: SharedNaturallyStealthy },
-    { def: BarbarianSavageResilience },
+    { def: SharedSavageResilience },
     { def: BarbarianAnimalMagnetism },
     { def: ProficiencyLanguage, subtypes: ["Common"] },
   ],

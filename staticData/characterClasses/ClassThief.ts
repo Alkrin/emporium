@@ -103,7 +103,7 @@ export const ClassThief: CharacterClass = {
     },
     {
       name: "Pick Pockets",
-      rolls: ["17+", "16+", "15+", "14+", "13+", "12+", "10", "8+", "6+", "4+", "2+", "-1+", "-3+", "-5+"],
+      rolls: ["17+", "16+", "15+", "14+", "13+", "12+", "10+", "8+", "6+", "4+", "2+", "-1+", "-3+", "-5+"],
       tooltip: "The character receives a -1 penalty for each level the target is higher than the pick pocket.",
     },
     {

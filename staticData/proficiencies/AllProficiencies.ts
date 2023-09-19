@@ -41,6 +41,7 @@ import { ProficiencyElementalism } from "./ProficiencyElementalism";
 import { ProficiencyElvenBloodline } from "./ProficiencyElvenBloodline";
 import { ProficiencyEndurance } from "./ProficiencyEndurance";
 import { ProficiencyEngineering } from "./ProficiencyEngineering";
+import { ProficiencyExperimenting } from "./ProficiencyExperimenting";
 import { ProficiencyFamiliar } from "./ProficiencyFamiliar";
 import { ProficiencyFarseeing } from "./ProficiencyFarseeing";
 import { ProficiencyFightingStyle } from "./ProficiencyFightingStyle";
@@ -66,6 +67,7 @@ import { ProficiencyManualOfArms } from "./ProficiencyManualOfArms";
 import { ProficiencyMapping } from "./ProficiencyMapping";
 import { ProficiencyMartialTraining } from "./ProficiencyMartialTraining";
 import { ProficiencyMasteryOfCharmsAndIllusions } from "./ProficiencyMasteryOfCharmsAndIllusions";
+import { ProficiencyMechanicalEngineering } from "./ProficiencyMechanicalEngineering";
 import { ProficiencyMilitaryStrategy } from "./ProficiencyMilitaryStrategy";
 import { ProficiencyMimicry } from "./ProficiencyMimicry";
 import { ProficiencyMountaineering } from "./ProficiencyMountaineering";
@@ -79,6 +81,7 @@ import { ProficiencyPreciseShooting } from "./ProficiencyPreciseShooting";
 import { ProficiencyPrestidigitation } from "./ProficiencyPrestidigitation";
 import { ProficiencyProfession } from "./ProficiencyProfession";
 import { ProficiencyProphecy } from "./ProficiencyProphecy";
+import { ProficiencyProspecting } from "./ProficiencyProspecting";
 import { ProficiencyQuietMagic } from "./ProficiencyQuietMagic";
 import { ProficiencyRiding } from "./ProficiencyRiding";
 import { ProficiencyRighteousTurning } from "./ProficiencyRighteousTurning";
@@ -152,6 +155,7 @@ export const AllProficiencies: Dictionary<AbilityOrProficiency> = {
   [ProficiencyElvenBloodline.id]: ProficiencyElvenBloodline,
   [ProficiencyEndurance.id]: ProficiencyEndurance,
   [ProficiencyEngineering.id]: ProficiencyEngineering,
+  [ProficiencyExperimenting.id]: ProficiencyExperimenting,
   [ProficiencyFamiliar.id]: ProficiencyFamiliar,
   [ProficiencyFarseeing.id]: ProficiencyFarseeing,
   [ProficiencyFightingStyle.id]: ProficiencyFightingStyle,
@@ -177,6 +181,7 @@ export const AllProficiencies: Dictionary<AbilityOrProficiency> = {
   [ProficiencyMapping.id]: ProficiencyMapping,
   [ProficiencyMartialTraining.id]: ProficiencyMartialTraining,
   [ProficiencyMasteryOfCharmsAndIllusions.id]: ProficiencyMasteryOfCharmsAndIllusions,
+  [ProficiencyMechanicalEngineering.id]: ProficiencyMechanicalEngineering,
   [ProficiencyMilitaryStrategy.id]: ProficiencyMilitaryStrategy,
   [ProficiencyMimicry.id]: ProficiencyMimicry,
   [ProficiencyMountaineering.id]: ProficiencyMountaineering,
@@ -190,6 +195,7 @@ export const AllProficiencies: Dictionary<AbilityOrProficiency> = {
   [ProficiencyPrestidigitation.id]: ProficiencyPrestidigitation,
   [ProficiencyProfession.id]: ProficiencyProfession,
   [ProficiencyProphecy.id]: ProficiencyProphecy,
+  [ProficiencyProspecting.id]: ProficiencyProspecting,
   [ProficiencyQuietMagic.id]: ProficiencyQuietMagic,
   [ProficiencyRiding.id]: ProficiencyRiding,
   [ProficiencyRighteousTurning.id]: ProficiencyRighteousTurning,

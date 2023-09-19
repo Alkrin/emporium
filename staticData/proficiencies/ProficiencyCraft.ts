@@ -48,13 +48,13 @@ export const ProficiencyCraft: AbilityOrProficiency = {
       "A masterwork weapon costing 80gp extra may provide +1 to hit or +1 to damage. A masterwork " +
       "weapon costing 650gp extra provides both +1 to hit and damage. In neither case does the " +
       "weapon provide the ability to hit magical monsters, unless forged of a material otherwise " +
-      "capable of doing so (e.g. silver). Additional ornaments or engraving can add to the weapon’s " +
-      "value without necessarily increasing the weapon’s characteristics." +
+      "capable of doing so (e.g. silver). Additional ornaments or engraving can add to the weapon's " +
+      "value without necessarily increasing the weapon's characteristics." +
       "\n" +
       "A masterwork set of armor costing 80gp extra weighs one less stone (armor or shields weighing " +
       "one stone counts as one item instead) while providing normal AC. A masterwork set of armor " +
       "costing 650gp extra provides +1 AC while weighing the same as normal. Additional ornaments " +
-      "or engraving can add to the value without necessarily improving the armor’s characteristics." +
+      "or engraving can add to the value without necessarily improving the armor's characteristics." +
       "\n" +
       "A masterwork structure costing 2 times normal gains +1 to AC or +10% to structural hit points. " +
       "A masterwork structure costing 4 times normal gains both +1 to AC and +10% to structural hit points." +
@@ -80,5 +80,15 @@ export const ProficiencyCraft: AbilityOrProficiency = {
       "Can identify masterwork items, rare materials, and famous artisans with a proficiency roll of 1+.",
   ],
   minLevel: 1,
-  subTypes: ["Armorer", "Bowyer", "Glassblower", "Jeweler", "Leatherworker", "Shipwright", "Smith", "Weaponsmith"],
+  subTypes: [
+    "Armorer",
+    "Bowyer",
+    "Clockmaker",
+    "Glassblower",
+    "Jeweler",
+    "Leatherworker",
+    "Shipwright",
+    "Smith",
+    "Weaponsmith",
+  ],
 };

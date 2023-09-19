@@ -1,5 +1,5 @@
 import { DwarfStoneSense } from "../classFeatures/DwarfStoneSense";
-import { DwarvenCraftpriestAttentionToDetail } from "../classFeatures/DwarvenCraftpriestAttentionToDetail";
+import { DwarfAttentionToDetail } from "../classFeatures/DwarfAttentionToDetail";
 import { DwarvenCraftpriestCreateMagicalConstructs } from "../classFeatures/DwarvenCraftpriestCreateMagicalConstructs";
 import { DwarvenCraftpriestReligiousTraining } from "../classFeatures/DwarvenCraftpriestReligiousTraining";
 import { SharedMajorMagicCreation } from "../classFeatures/SharedMajorMagicCreation";
@@ -69,8 +69,8 @@ export const ClassDwarvenCraftpriest: CharacterClass = {
   toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
   classFeatures: [
     { def: ProficiencyAdventuring },
+    { def: DwarfAttentionToDetail },
     { def: DwarfStoneSense },
-    { def: DwarvenCraftpriestAttentionToDetail },
     { def: DwarvenCraftpriestReligiousTraining },
     { def: SharedMinorMagicCreation },
     { def: SharedMajorMagicCreation },

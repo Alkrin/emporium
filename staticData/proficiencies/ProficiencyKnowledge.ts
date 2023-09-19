@@ -37,5 +37,6 @@ export const ProficiencyKnowledge: AbilityOrProficiency = {
     "Natural History",
     "Natural Philosophy",
     "Political Economy",
+    "Political History",
   ],
 };
