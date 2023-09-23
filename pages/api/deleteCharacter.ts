@@ -47,6 +47,12 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       values: [b.id],
     });
 
+    // Set all of their henchmen free.
+    queries.push({
+      query: `UPDATE characters SET henchmaster_id=0 WHERE henchmaster_id=?`,
+      values: [b.id],
+    });
+
     // The actual character gets deleted last, after all of its dependent data is gone.
     queries.push({
       query: `DELETE FROM characters WHERE id=?`,

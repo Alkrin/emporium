@@ -1,0 +1,51 @@
+.root {
+  max-width: 45vmin;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.title {
+  font-size: 1rem;
+  color: wheat;
+  min-width: 10vmin;
+  flex-grow: 1;
+}
+
+.value {
+  margin-left: 1vmin;
+  font-size: 1rem;
+  color: yellow;
+}
+
+.divider {
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
+
+.sourceRow {
+  @extend .row;
+  margin-top: 0.5vmin;
+}
+
+.source {
+  flex-grow: 1;
+  font-size: 0.8rem;
+  color: gray;
+  text-align: justify;
+}
+
+.sourceValue {
+  margin-left: 0.5vmin;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 0, 0.5);
+}
+
+.conditionalHeader {
+  margin-top: 1vmin;
+  font-size: 0.8rem;
+  color: wheat;
+}

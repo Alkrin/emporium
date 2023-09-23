@@ -9,8 +9,8 @@ import ServerAPI, { CharacterData, Gender, ProficiencyData, emptyEquipmentData }
 import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { CharacterStat } from "../../staticData/types/characterClasses";
 import styles from "./CreateCharacterSubPanel.module.scss";
-import { getAllCharacterAssociatedItemIds, getCharacterMaxHP } from "../../lib/characterUtils";
-import { deleteCharacter, setActiveCharacterId } from "../../redux/charactersSlice";
+import { getAllCharacterAssociatedItemIds, getCharacterMaxHP, randomInt } from "../../lib/characterUtils";
+import { deleteCharacter, setActiveCharacterId, unsetAllHenchmenForCharacter } from "../../redux/charactersSlice";
 import { deleteItem } from "../../redux/itemsSlice";
 import { deleteProficienciesForCharacter } from "../../redux/proficienciesSlice";
 import { deleteSpellbook } from "../../redux/spellbooksSlice";
@@ -592,6 +592,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       xp: this.state.xp,
       hp: 0, // We'll replace this in a moment.
       hit_dice: this.state.hitDice,
+      henchmaster_id: 0,
       // EquipmentData values are ignored when editing a character.
       ...emptyEquipmentData,
     };
@@ -667,6 +668,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                     });
                     // Repertoire.
                     this.props.dispatch?.(deleteRepertoireForCharacter(this.props.selectedCharacter.id));
+                    // Henchmen.
+                    this.props.dispatch?.(unsetAllHenchmenForCharacter(this.props.selectedCharacter.id));
                     // The character itself.
                     this.props.dispatch?.(deleteCharacter(this.props.selectedCharacter.id));
                   }
@@ -722,13 +725,9 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
   private rollDice(num: number, max: number) {
     let result: number = 0;
     for (let i = 0; i < num; ++i) {
-      result += this.randomInt(1, max);
+      result += randomInt(1, max);
     }
     return result;
-  }
-
-  private randomInt(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 }
 

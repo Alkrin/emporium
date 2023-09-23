@@ -28,6 +28,10 @@ import { MysticGracefulFightingStyle } from "../staticData/classFeatures/MysticG
 import { WildHarvesterNaturalTactics } from "../staticData/classFeatures/WildHarvesterNaturalTactics";
 import { BattlegoatGatecrasherRuneCarvedHorns } from "../staticData/classFeatures/BattlegoatGatecrasherRuneCarvedHorns";
 import { BattlegoatGatecrasherSteelWool } from "../staticData/classFeatures/BattlegoatGatecrasherSteelWool";
+import { ProficiencyLeadership } from "../staticData/proficiencies/ProficiencyLeadership";
+import { ProficiencyMysticAura } from "../staticData/proficiencies/ProficiencyMysticAura";
+import { MysticCommandOfVoice } from "../staticData/classFeatures/MysticCommandOfVoice";
+import { ProficiencySeduction } from "../staticData/proficiencies/ProficiencySeduction";
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
 export function getBonusForStat(value: number): StatBonus {
@@ -859,4 +863,64 @@ export function getRangedDamageCalculationsForCharacter(characterId: number): We
 
     return calc;
   }
+}
+
+export function getMaxMinionCountForCharacter(characterId: number): BonusCalculations {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  if (!character) {
+    return calc;
+  } else {
+    calc.totalBonus = 4;
+    calc.sources.push(["Base Value", 4]);
+
+    const chaBonus = getBonusForStat(character.charisma);
+    calc.totalBonus += chaBonus;
+    calc.sources.push(["Charisma Bonus", chaBonus]);
+
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencyLeadership.id)) {
+      calc.sources.push(["Proficiency: Leadership", 1]);
+      calc.totalBonus += 1;
+    }
+
+    // if (isProficiencyUnlockedForCharacter(characterId, MysticMeditativeFocus.id)) {
+    //   calc.conditionalSources.push(["Is Mediative Focus active?", 1]);
+    // }
+
+    return calc;
+  }
+}
+
+export function getRecruitmentRollBonusForCharacter(characterId: number): BonusCalculations {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  if (!character) {
+    return calc;
+  } else {
+    const chaBonus = getBonusForStat(character.charisma);
+    calc.totalBonus = chaBonus;
+    calc.sources.push(["Charisma Bonus", chaBonus]);
+
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencyMysticAura.id)) {
+      calc.sources.push(["Proficiency: Mystic Aura", 2]);
+      calc.totalBonus += 2;
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, MysticCommandOfVoice.id)) {
+      calc.sources.push(["Mystic, Command Of Voice", 2]);
+      calc.totalBonus += 2;
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencySeduction.id)) {
+      calc.conditionalSources.push(["Is henchman of opposite gender?", 1]);
+    }
+
+    return calc;
+  }
+}
+
+export function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

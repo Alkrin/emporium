@@ -24,6 +24,11 @@ export interface SetEquipmentParams {
   slot: keyof CharacterEquipmentData;
 }
 
+export interface SetHenchmasterParams {
+  masterCharacterId: number;
+  minionCharacterId: number;
+}
+
 function buildDefaultCharactersReduxState(): CharactersReduxState {
   const defaults: CharactersReduxState = {
     characters: {},
@@ -62,8 +67,28 @@ export const charactersSlice = createSlice({
         state.characters[action.payload.characterId][action.payload.slot] = action.payload.itemId;
       }
     },
+    setHenchmaster: (state: CharactersReduxState, action: PayloadAction<SetHenchmasterParams>) => {
+      if (state.characters[action.payload.minionCharacterId]) {
+        state.characters[action.payload.minionCharacterId].henchmaster_id = action.payload.masterCharacterId;
+      }
+    },
+    unsetAllHenchmenForCharacter: (state: CharactersReduxState, action: PayloadAction<number>) => {
+      Object.values(state.characters).forEach((character) => {
+        if (character.henchmaster_id === action.payload) {
+          character.henchmaster_id = 0;
+        }
+      });
+    },
   },
 });
 
-export const { updateCharacter, deleteCharacter, setActiveCharacterId, setCharacterHP, setCharacterXP, setEquipment } =
-  charactersSlice.actions;
+export const {
+  updateCharacter,
+  deleteCharacter,
+  setActiveCharacterId,
+  setCharacterHP,
+  setCharacterXP,
+  setEquipment,
+  setHenchmaster,
+  unsetAllHenchmenForCharacter,
+} = charactersSlice.actions;

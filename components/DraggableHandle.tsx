@@ -99,7 +99,13 @@ class DraggableHandle extends React.Component<Props> {
     );
   }
 
-  private handleMouseUp(): void {
+  private handleMouseUp(e: MouseEvent): void {
+    // If the item wasn't dragged, then this was really a click event.
+    if (Math.abs(this.props.dragDelta[0]) <= 5 && Math.abs(this.props.dragDelta[1]) <= 5) {
+      this.props.onClick?.(e as any);
+      // We'll still continue on and do all of the drag cleanup, of course.
+    }
+
     // Report the drop before ending the drag so that the dropHandler can still access the current Draggable.
     this.reportDrop();
 

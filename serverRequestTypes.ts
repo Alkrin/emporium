@@ -51,6 +51,11 @@ export interface RequestBody_DeleteCharacter {
   item_ids: number[];
 }
 
+export interface RequestBody_SetHenchmaster {
+  masterCharacterId: number;
+  minionCharacterId: number;
+}
+
 export interface RequestBody_CreateItemDef {
   name: string;
   description: string;

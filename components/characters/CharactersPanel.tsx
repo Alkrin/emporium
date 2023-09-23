@@ -8,6 +8,9 @@ import { SubPanelPane } from "../SubPanelPane";
 import { CharacterSheet } from "./CharacterSheet";
 import { CharactersList } from "./CharactersList";
 import styles from "./CharactersPanel.module.scss";
+import TooltipSource from "../TooltipSource";
+import { showSubPanel } from "../../redux/subPanelsSlice";
+import { HenchmanHierarchySubPanel } from "./HenchmanHierarchySubPanel";
 
 interface State {
   currentCharacterId: number;
@@ -49,8 +52,27 @@ class ACharactersPanel extends React.Component<Props, State> {
             exiting={true}
           />
         ) : null}
+        <div className={styles.buttonBar}>
+          <TooltipSource
+            className={styles.barButton}
+            tooltipParams={{ id: "Henchman Hierarchy", content: "Henchman Hierarchy" }}
+            onClick={this.onHenchmanHierarchyClicked.bind(this)}
+          />
+        </div>
         <SubPanelPane />
       </div>
+    );
+  }
+
+  private onHenchmanHierarchyClicked(): void {
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "HenchmanHierarchySubPanel",
+        content: () => {
+          return <HenchmanHierarchySubPanel />;
+        },
+        escapable: true,
+      })
     );
   }
 
