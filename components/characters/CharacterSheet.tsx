@@ -32,6 +32,7 @@ import {
 } from "../../lib/characterUtils";
 import { RepertoireDialog } from "./RepertoireDialog";
 import { SpellTooltip } from "../database/SpellTooltip";
+import BonusTooltip from "../BonusTooltip";
 
 interface ReactProps {
   characterId: number;
@@ -460,7 +461,9 @@ class ACharacterSheet extends React.Component<Props> {
         <TooltipSource
           tooltipParams={{
             id: "InitiativeExplanation",
-            content: this.renderBonusTooltip.bind(this, "Initiative", calc),
+            content: () => {
+              return <BonusTooltip header={"Initiative"} calc={calc} />;
+            },
           }}
           className={styles.initiativePanel}
         >
@@ -524,7 +527,9 @@ class ACharacterSheet extends React.Component<Props> {
         <TooltipSource
           tooltipParams={{
             id: "ACExplanation",
-            content: this.renderBonusTooltip.bind(this, "AC", calc, true),
+            content: () => {
+              return <BonusTooltip header={"AC"} calc={calc} isFlatValue={true} />;
+            },
           }}
           className={styles.row}
         >
@@ -732,49 +737,6 @@ class ACharacterSheet extends React.Component<Props> {
     );
   }
 
-  private renderBonusTooltip(
-    header: string,
-    calc: BonusCalculations,
-    isFlatValue?: boolean,
-    hideZeroBonus?: boolean
-  ): React.ReactNode {
-    return (
-      <div className={styles.initiativeTooltipRoot}>
-        <div className={styles.row}>
-          <div className={styles.acTooltipTitle}>{header}</div>
-          {!hideZeroBonus && (
-            <div className={styles.acTooltipValue}>{`${!isFlatValue && calc.totalBonus > 0 ? "+" : ""}${
-              calc.totalBonus
-            }`}</div>
-          )}
-        </div>
-        <div className={styles.acTooltipDivider} />
-        {calc.sources.map(([text, value]) => {
-          return (
-            <div className={styles.acTooltipSourceRow} key={text}>
-              <div className={styles.acTooltipSource}>{text}</div>
-              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
-            </div>
-          );
-        })}
-        {calc.conditionalSources.length > 0 ? (
-          <>
-            <div className={styles.tooltipConditionalHeader}>Conditional Bonuses</div>
-            <div className={styles.acTooltipDivider} />
-            {calc.conditionalSources.map(([text, value]) => {
-              return (
-                <div className={styles.acTooltipSourceRow} key={text}>
-                  <div className={styles.acTooltipSource}>{text}</div>
-                  <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
-                </div>
-              );
-            })}
-          </>
-        ) : null}
-      </div>
-    );
-  }
-
   private renderSpeedTooltip(): React.ReactNode {
     const maxEncumbrance: Stones = getCharacterMaxEncumbrance(this.props.character);
     const encumbrance = getTotalEquippedWeight(this.props.character, this.props.allItems, this.props.allItemDefs);
@@ -844,7 +806,12 @@ class ACharacterSheet extends React.Component<Props> {
       return (
         <TooltipSource
           className={styles.row}
-          tooltipParams={{ id: `stRow${name}`, content: this.renderBonusTooltip.bind(this, type, calc, false, true) }}
+          tooltipParams={{
+            id: `stRow${name}`,
+            content: () => {
+              return <BonusTooltip header={"Saving Throws"} calc={calc} hideZeroBonus={true} />;
+            },
+          }}
         >
           <div className={styles.savingThrowsName}>{name}</div>
           <div className={styles.savingThrowsValue}>

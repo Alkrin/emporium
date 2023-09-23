@@ -30,6 +30,7 @@ import { ProficiencyPerformance } from "./ProficiencyPerformance";
 import { ProficiencyProfession } from "./ProficiencyProfession";
 import { ProficiencyRiding } from "./ProficiencyRiding";
 import { ProficiencySeafaring } from "./ProficiencySeafaring";
+import { ProficiencySeduction } from "./ProficiencySeduction";
 import { ProficiencySiegeEngineering } from "./ProficiencySiegeEngineering";
 import { ProficiencySignaling } from "./ProficiencySignaling";
 import { ProficiencyTheology } from "./ProficiencyTheology";
@@ -68,6 +69,7 @@ export const GeneralProficiencies: AbilityOrProficiency[] = [
   ProficiencyProfession,
   ProficiencyRiding,
   ProficiencySeafaring,
+  ProficiencySeduction,
   ProficiencySiegeEngineering,
   ProficiencySignaling,
   ProficiencyTheology,

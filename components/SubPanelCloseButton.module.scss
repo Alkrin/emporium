@@ -1,0 +1,29 @@
+.root {
+  position: absolute;
+  top: -1vmin;
+  right: -1vmin;
+  width: 4vmin;
+  height: 4vmin;
+  background-color: black;
+  border-radius: 2vmin;
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
+
+  &:hover {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+  }
+
+  &:active {
+    outline: 2px solid rgba(255, 255, 255, 1);
+  }
+}
+
+.bigX {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  font-size: 2rem;
+  line-height: 4.2vmin;
+  color: white;
+  text-align: center;
+}

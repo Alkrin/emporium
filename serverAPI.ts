@@ -26,6 +26,7 @@ import {
   RequestBody_DeleteCharacter,
   RequestBody_AddToRepertoire,
   RequestBody_RemoveFromRepertoire,
+  RequestBody_SetHenchmaster,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -175,6 +176,7 @@ export interface CharacterData extends CharacterEquipmentData {
   xp: number;
   hp: number;
   hit_dice: number[];
+  henchmaster_id: number;
 }
 
 export interface ProficiencyData {
@@ -496,6 +498,21 @@ class AServerAPI {
       item_ids: getAllCharacterAssociatedItemIds(character.id),
     };
     const res = await fetch("/api/deleteCharacter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async setHenchmaster(masterCharacterId: number, minionCharacterId: number): Promise<EditRowResult> {
+    const requestBody: RequestBody_SetHenchmaster = {
+      masterCharacterId,
+      minionCharacterId,
+    };
+    const res = await fetch("/api/setHenchmaster", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
