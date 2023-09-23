@@ -173,7 +173,6 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
       return;
     }
 
-    // TODO: Can we safely set the minion now?
     const res = await ServerAPI.setHenchmaster(this.state.selectedCharacterId, character.id);
     if ("error" in res) {
       this.showErrorToaster("A server error occurred.  Henchman not assigned.");
