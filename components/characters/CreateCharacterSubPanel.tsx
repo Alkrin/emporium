@@ -17,6 +17,7 @@ import { deleteSpellbook } from "../../redux/spellbooksSlice";
 import { deleteRepertoireForCharacter } from "../../redux/repertoiresSlice";
 import { refetchProficiencies } from "../../dataSources/ProficienciesDataSource";
 import { AbilityFilter } from "../../staticData/types/abilitiesAndProficiencies";
+import { SubPanelCloseButton } from "../SubPanelCloseButton";
 
 interface State {
   nameText: string;
@@ -509,6 +510,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             <div className={styles.savingLabel}>Saving...</div>
           </div>
         )}
+        <SubPanelCloseButton />
       </div>
     );
   }
@@ -593,6 +595,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       hp: 0, // We'll replace this in a moment.
       hit_dice: this.state.hitDice,
       henchmaster_id: 0,
+      money: 0,
       // EquipmentData values are ignored when editing a character.
       ...emptyEquipmentData,
     };

@@ -27,6 +27,7 @@ import {
   RequestBody_AddToRepertoire,
   RequestBody_RemoveFromRepertoire,
   RequestBody_SetHenchmaster,
+  RequestBody_SetMoney,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -177,6 +178,8 @@ export interface CharacterData extends CharacterEquipmentData {
   hp: number;
   hit_dice: number[];
   henchmaster_id: number;
+  /** Whole gp, decimal sp/cp. */
+  money: number;
 }
 
 export interface ProficiencyData {
@@ -238,6 +241,10 @@ export interface HPChange {
   newHPValue: number;
 }
 
+export interface MoneyChange {
+  newMoneyValue: number;
+}
+
 export interface RowAdded {
   insertId: number;
 }
@@ -261,6 +268,7 @@ export type ProficienciesResult = ServerError | ProficiencyData[];
 export type SpellbooksResult = ServerError | SpellbookEntryData[];
 export type RepertoiresResult = ServerError | RepertoireEntryData[];
 export type SetHPResult = ServerError | HPChange;
+export type SetMoneyResult = ServerError | MoneyChange;
 export type SetXPResult = ServerError | XPChange;
 export type MultiModifyResult = ServerError | (ServerError | EditRowResult | InsertRowResult | DeleteRowResult)[];
 export type InsertRowResult = ServerError | RowAdded;
@@ -672,6 +680,21 @@ class AServerAPI {
       hp,
     };
     const res = await fetch("/api/setHP", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async setMoney(characterId: number, gp: number): Promise<SetMoneyResult> {
+    const requestBody: RequestBody_SetMoney = {
+      characterId,
+      gp,
+    };
+    const res = await fetch("/api/setMoney", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -18,6 +18,7 @@ import { Dictionary } from "../../lib/dictionary";
 import { Stones, StonesToNumber, getTotalEquippedWeight } from "../../lib/itemUtils";
 import {
   BonusCalculations,
+  addCommasToNumber,
   getArmorBonusForCharacter,
   getBonusForStat,
   getCharacterMaxEncumbrance,
@@ -33,6 +34,7 @@ import {
 import { RepertoireDialog } from "./RepertoireDialog";
 import { SpellTooltip } from "../database/SpellTooltip";
 import BonusTooltip from "../BonusTooltip";
+import { EditMoneyDialog } from "./EditMoneyDialog";
 
 interface ReactProps {
   characterId: number;
@@ -66,6 +68,7 @@ class ACharacterSheet extends React.Component<Props> {
             {this.renderStatsPanel()}
             {this.renderSavingThrowsPanel()}
             {this.renderSpeedPanel()}
+            {this.renderMoneyPanel()}
             {this.renderInitiativePanel()}
             {this.renderEquipmentPanel()}
             {this.renderCombatPanel()}
@@ -363,6 +366,22 @@ class ACharacterSheet extends React.Component<Props> {
     }
   }
 
+  private renderMoneyPanel(): React.ReactNode {
+    if (this.props.character) {
+      return (
+        <div className={styles.moneyPanel}>
+          <div className={styles.row}>
+            <div className={styles.moneyTitle}>GP:</div>
+            <div className={styles.moneyEditButton} onClick={this.onMoneyEditClicked.bind(this)} />
+          </div>
+          <div className={styles.moneyValue}>{addCommasToNumber(this.props.character.money, 2)}</div>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   private renderLevelBasedSkillsPanel(): React.ReactNode {
     if (this.props.character) {
       const characterClass = AllClasses[this.props.character.class_name];
@@ -415,6 +434,18 @@ class ACharacterSheet extends React.Component<Props> {
         id: "hpEdit",
         content: () => {
           return <EditHPDialog />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onMoneyEditClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "moneyEdit",
+        content: () => {
+          return <EditMoneyDialog />;
         },
         escapable: true,
       })

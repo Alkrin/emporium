@@ -18,6 +18,11 @@ export interface SetHPParams {
   hp: number;
 }
 
+export interface SetMoneyParams {
+  characterId: number;
+  money: number;
+}
+
 export interface SetEquipmentParams {
   characterId: number;
   itemId: number;
@@ -57,6 +62,11 @@ export const charactersSlice = createSlice({
         state.characters[action.payload.characterId].hp = action.payload.hp;
       }
     },
+    setCharacterMoney: (state: CharactersReduxState, action: PayloadAction<SetMoneyParams>) => {
+      if (state.characters[action.payload.characterId]) {
+        state.characters[action.payload.characterId].money = action.payload.money;
+      }
+    },
     setCharacterXP: (state: CharactersReduxState, action: PayloadAction<SetXPParams>) => {
       if (state.characters[action.payload.characterId]) {
         state.characters[action.payload.characterId].xp = action.payload.xp;
@@ -87,6 +97,7 @@ export const {
   deleteCharacter,
   setActiveCharacterId,
   setCharacterHP,
+  setCharacterMoney,
   setCharacterXP,
   setEquipment,
   setHenchmaster,

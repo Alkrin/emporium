@@ -47,6 +47,7 @@ import {
   isCharacterWielding2hWeapon,
   whereIsItemEquipped,
 } from "../../lib/characterUtils";
+import { SubPanelCloseButton } from "../SubPanelCloseButton";
 
 export const DropTypeItem = "DropTypeItem";
 
@@ -143,6 +144,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
           containerIds={this.getContainerIds()}
           handleItemDropped={this.handleItemDropped.bind(this)}
         />
+        <SubPanelCloseButton />
       </div>
     );
   }

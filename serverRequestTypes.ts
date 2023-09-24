@@ -176,6 +176,11 @@ export interface RequestBody_SetHP {
   hp: number;
 }
 
+export interface RequestBody_SetMoney {
+  characterId: number;
+  gp: number;
+}
+
 export interface RequestBody_UpdateProficiencies {
   character_id: number;
   proficiencies: ProficiencyData[];

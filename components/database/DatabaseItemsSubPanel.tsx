@@ -8,6 +8,7 @@ import { RootState } from "../../redux/store";
 import ServerAPI, { ItemDefData } from "../../serverAPI";
 import styles from "./DatabaseItemsSubPanel.module.scss";
 import { SearchableDefList } from "./SearchableDefList";
+import { SubPanelCloseButton } from "../SubPanelCloseButton";
 
 interface State {
   selectedItemId: number;
@@ -136,6 +137,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
             <div className={styles.savingLabel}>Saving...</div>
           </div>
         )}
+        <SubPanelCloseButton />
       </div>
     );
   }

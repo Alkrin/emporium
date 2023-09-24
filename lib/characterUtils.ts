@@ -924,3 +924,11 @@ export function getRecruitmentRollBonusForCharacter(characterId: number): BonusC
 export function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export function addCommasToNumber(x: number, decimals: number = -1) {
+  if (decimals >= 0) {
+    return x.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  } else {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+}

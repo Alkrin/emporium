@@ -12,6 +12,7 @@ import ServerAPI, {
 } from "../../serverAPI";
 import styles from "./DatabaseSpellsSubPanel.module.scss";
 import { SearchableDefList } from "./SearchableDefList";
+import { SubPanelCloseButton } from "../SubPanelCloseButton";
 
 interface State {
   selectedSpellId: number;
@@ -104,6 +105,7 @@ class ADatabaseSpellsSubPanel extends React.Component<Props, State> {
             <div className={styles.savingLabel}>Saving...</div>
           </div>
         )}
+        <SubPanelCloseButton />
       </div>
     );
   }
