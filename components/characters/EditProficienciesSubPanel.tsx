@@ -20,6 +20,7 @@ import DropTarget from "../DropTarget";
 import TooltipSource from "../TooltipSource";
 import styles from "./EditProficienciesSubPanel.module.scss";
 import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
+import { SubPanelCloseButton } from "../SubPanelCloseButton";
 
 const DropTypeClassProficiency = "ClassProficiency";
 const DropTypeGeneralProficiency = "GeneralProficiency";
@@ -117,6 +118,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
             <div className={styles.savingLabel}>Saving...</div>
           </div>
         )}
+        <SubPanelCloseButton />
       </div>
     );
   }

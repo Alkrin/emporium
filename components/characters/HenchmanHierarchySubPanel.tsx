@@ -219,7 +219,6 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
     const minions = this.getMinions(character.id);
     const maxMinions = getMaxMinionCountForCharacter(character.id);
     const countStyle = minions.length === maxMinions.totalBonus ? styles.full : "";
-    console.log(`"${character.gender}"`);
     return (
       <div className={styles.characterRowContentWrapper}>
         <div className={styles.allCharactersListName}>{character.name}</div>

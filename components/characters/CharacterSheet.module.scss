@@ -782,3 +782,43 @@
   font-size: 0.8rem;
   color: wheat;
 }
+
+.moneyPanel {
+  @extend .column;
+  position: absolute;
+  top: 5vmin;
+  left: 40.5vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.moneyTitle {
+  @extend .normalText;
+  width: 7.5vmin;
+}
+
+.moneyValue {
+  @extend .valueText;
+  margin-top: -0.5vmin;
+  text-align: center;
+}
+
+.moneyEditButton {
+  @extend .editIcon;
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
