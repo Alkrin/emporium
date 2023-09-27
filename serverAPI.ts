@@ -28,6 +28,9 @@ import {
   RequestBody_RemoveFromRepertoire,
   RequestBody_SetHenchmaster,
   RequestBody_SetMoney,
+  RequestBody_CreateOrEditEquipmentSet,
+  RequestBody_DeleteEquipmentSet,
+  RequestField_StartingEquipmentData,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -206,6 +209,23 @@ export interface SpellDefData {
   table_image: string;
 }
 
+export interface EquipmentSetData {
+  id: number;
+  name: string;
+  class_name: string;
+}
+
+export interface EquipmentSetItemData {
+  set_id: number;
+  /** These are pseudo-item ids, used internally to the equipment set to track container contents. */
+  item_id: number;
+  /** Matches an item def. */
+  def_id: number;
+  /** Either matches an equipment slot from CharacterEquipmentData (e.g. slot_armor), or is "Container#"
+   * where # matches to the item_id from another EquipmentSetItemData from the same equipment set.  */
+  slot_name: string;
+}
+
 export function SpellDefData_TypeLevelsToString(type_levels: { [type in SpellType]?: number }): string {
   return Object.entries(type_levels)
     .map(([type, level]) => {
@@ -259,6 +279,8 @@ export interface RowDeleted {
 
 export type LogInResult = ServerError | UserData;
 export type CharactersResult = ServerError | CharacterData[];
+export type EquipmentSetsResult = ServerError | EquipmentSetData[];
+export type EquipmentSetItemsResult = ServerError | EquipmentSetItemData[];
 export type ItemDefsResult = ServerError | ItemDefData[];
 export type ItemsResult = ServerError | ItemData[];
 export type UsersResult = ServerError | UserData[];
@@ -460,15 +482,39 @@ class AServerAPI {
     }
   }
 
+  async fetchEquipmentSets(): Promise<EquipmentSetsResult> {
+    const res = await fetch("/api/fetchEquipmentSets", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return await res.json();
+  }
+
+  async fetchEquipmentSetItems(): Promise<EquipmentSetItemsResult> {
+    const res = await fetch("/api/fetchEquipmentSetItems", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return await res.json();
+  }
+
   async createCharacter(
     character: CharacterData,
-    selected_class_features: [string, string, number][]
-  ): Promise<InsertRowResult> {
+    selected_class_features: [string, string, number][],
+    equipment: RequestField_StartingEquipmentData[]
+  ): Promise<MultiModifyResult> {
     const requestBody: RequestBody_CreateOrEditCharacter = {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
       selected_class_features,
+      equipment,
     };
     const res = await fetch("/api/createCharacter", {
       method: "POST",
@@ -859,6 +905,50 @@ class AServerAPI {
       entry_id,
     };
     const res = await fetch("/api/removeFromRepertoire", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createEquipmentSet(setData: EquipmentSetData, itemData: EquipmentSetItemData[]): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_CreateOrEditEquipmentSet = {
+      setData,
+      itemData,
+    };
+    const res = await fetch("/api/createEquipmentSet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editEquipmentSet(setData: EquipmentSetData, itemData: EquipmentSetItemData[]): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_CreateOrEditEquipmentSet = {
+      setData,
+      itemData,
+    };
+    const res = await fetch("/api/editEquipmentSet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteEquipmentSet(setId: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteEquipmentSet = {
+      setId,
+    };
+    const res = await fetch("/api/deleteEquipmentSet", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

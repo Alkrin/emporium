@@ -36,7 +36,7 @@ import {
 } from "../../lib/itemUtils";
 import { setEquipment } from "../../redux/charactersSlice";
 import { SplitBundleDialog } from "./SplitBundleDialog";
-import { Tag } from "../../lib/tags";
+import { EquipmentSlotTag, Tag } from "../../lib/tags";
 import { SpellbookDialog } from "./SpellbookDialog";
 import {
   canCharacterDualWield,
@@ -50,25 +50,6 @@ import {
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 
 export const DropTypeItem = "DropTypeItem";
-
-enum EquipmentSlotTag {
-  Armor = "EquipmentArmor",
-  Backpack = "EquipmentBackpack",
-  Bandolier = "EquipmentBandolier",
-  Cloak = "EquipmentCloak",
-  Eyes = "EquipmentEyes",
-  Feet = "EquipmentFeet",
-  Hands = "EquipmentHands",
-  Head = "EquipmentHead",
-  Melee = "EquipmentMelee",
-  Necklace = "EquipmentNecklace",
-  Pouch = "EquipmentPouch",
-  Ranged = "EquipmentRanged",
-  Ring = "EquipmentRing",
-  Shield = "EquipmentShield",
-  Waist = "EquipmentWaist",
-  Wrists = "EquipmentWrists",
-}
 
 const DropTargetPersonalPile = "PersonalPile";
 

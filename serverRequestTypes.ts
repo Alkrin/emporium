@@ -1,4 +1,4 @@
-import { CharacterEquipmentData, ProficiencyData } from "./serverAPI";
+import { CharacterEquipmentData, EquipmentSetData, EquipmentSetItemData, ProficiencyData } from "./serverAPI";
 import { SpellType } from "./staticData/types/characterClasses";
 
 export interface RequestBody_AddToRepertoire {
@@ -25,6 +25,9 @@ export interface RequestBody_DeleteSpellbook {
   spellbook_id: number;
 }
 
+export interface RequestField_StartingEquipmentData extends EquipmentSetItemData {
+  count: number;
+}
 export interface RequestBody_CreateOrEditCharacter {
   id: number;
   user_id: number;
@@ -44,6 +47,7 @@ export interface RequestBody_CreateOrEditCharacter {
   hit_dice: string;
   /** Feature id, subtype, rank. */
   selected_class_features: [string, string, number][];
+  equipment?: RequestField_StartingEquipmentData[];
 }
 
 export interface RequestBody_DeleteCharacter {
@@ -219,4 +223,13 @@ export interface RequestBody_SplitBundleItems {
   destStorageId: number;
   count: number;
   itemDefId: number;
+}
+
+export interface RequestBody_CreateOrEditEquipmentSet {
+  setData: EquipmentSetData;
+  itemData: EquipmentSetItemData[];
+}
+
+export interface RequestBody_DeleteEquipmentSet {
+  setId: number;
 }

@@ -1,5 +1,11 @@
 import store from "../redux/store";
-import { CharacterData, CharacterEquipmentData, CharacterEquipmentSlots, SpellDefData } from "../serverAPI";
+import {
+  CharacterData,
+  CharacterEquipmentData,
+  CharacterEquipmentSlots,
+  ItemDefData,
+  SpellDefData,
+} from "../serverAPI";
 import { AllClasses } from "../staticData/characterClasses/AllClasses";
 import { AntiPaladinAuraOfProtection } from "../staticData/classFeatures/AntiPaladinAuraOfProtection";
 import { BladeDancerMobility } from "../staticData/classFeatures/BladeDancerDefensiveMobility";
@@ -19,7 +25,7 @@ import { WeaponStyle, CharacterStat, SpellType } from "../staticData/types/chara
 import { WeaponCategory, WeaponType } from "../staticData/types/items";
 import { Dictionary } from "./dictionary";
 import { Stones } from "./itemUtils";
-import { Tag } from "./tags";
+import { EquipmentSlotTag, Tag } from "./tags";
 import { DwarvenFuryFleshRunes } from "../staticData/classFeatures/DwarvenFuryFleshRunes";
 import { SharedMeleeAccuracyBonus } from "../staticData/classFeatures/SharedMeleeAccuracyBonus";
 import { MysticMeditativeFocus } from "../staticData/classFeatures/MysticMeditativeFocus";
@@ -931,4 +937,123 @@ export function addCommasToNumber(x: number, decimals: number = -1) {
   } else {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
+}
+
+export function getEquipmentSlotTagForSlot(slotName: keyof CharacterEquipmentData): EquipmentSlotTag {
+  switch (slotName) {
+    case "slot_melee1":
+    case "slot_melee2":
+      return EquipmentSlotTag.Melee;
+    case "slot_ranged":
+      return EquipmentSlotTag.Ranged;
+    case "slot_armor":
+      return EquipmentSlotTag.Armor;
+    case "slot_shield":
+      return EquipmentSlotTag.Shield;
+    case "slot_backpack":
+      return EquipmentSlotTag.Backpack;
+    case "slot_pouch1":
+    case "slot_pouch2":
+      return EquipmentSlotTag.Pouch;
+    case "slot_bandolier1":
+    case "slot_bandolier2":
+      return EquipmentSlotTag.Bandolier;
+    case "slot_cloak":
+      return EquipmentSlotTag.Cloak;
+    case "slot_eyes":
+      return EquipmentSlotTag.Eyes;
+    case "slot_feet":
+      return EquipmentSlotTag.Feet;
+    case "slot_hands":
+      return EquipmentSlotTag.Hands;
+    case "slot_head":
+      return EquipmentSlotTag.Head;
+    case "slot_necklace":
+      return EquipmentSlotTag.Necklace;
+    case "slot_ring1":
+    case "slot_ring2":
+      return EquipmentSlotTag.Ring;
+    case "slot_waist":
+      return EquipmentSlotTag.Waist;
+    case "slot_wrists":
+      return EquipmentSlotTag.Wrists;
+  }
+}
+
+export function getEquippableItemsForSlot(className: string, slotName: keyof CharacterEquipmentData): ItemDefData[] {
+  let items: ItemDefData[] = [];
+
+  const characterClass = AllClasses[className];
+  if (characterClass) {
+    const redux = store.getState();
+    const slotTag = getEquipmentSlotTagForSlot(slotName);
+    items = Object.values(redux.gameDefs.items).filter((itemDef) => {
+      // Exclude any items that don't match this equipment slot.
+      if (!itemDef.tags.includes(slotTag)) {
+        return false;
+      }
+
+      // If the class can't use shields, exclude all shields.
+      if (slotTag === EquipmentSlotTag.Shield && !characterClass.weaponStyles.includes(WeaponStyle.OneHandAndShield)) {
+        return false;
+      }
+
+      // If the class can't use 2h weapons, exclude all 2h-only weapons.
+      if (
+        slotTag === EquipmentSlotTag.Melee &&
+        !characterClass.weaponStyles.includes(WeaponStyle.TwoHanded) &&
+        itemDef.damage_dice === 0
+      ) {
+        return false;
+      }
+
+      // If the class can't dual wield, exclude all items for slot_melee2.
+      if (slotName === "slot_melee2" && !characterClass.weaponStyles.includes(WeaponStyle.DualWield)) {
+        return false;
+      }
+
+      // WeaponType and WeaponCategory filters.
+      if (slotTag === EquipmentSlotTag.Melee || slotTag === EquipmentSlotTag.Ranged) {
+        // If the item has an unsupported WeaponCategory, exclude it.
+        if (characterClass.weaponCategoryPermissions) {
+          const catTag = itemDef.tags.find((tag) => {
+            return tag.startsWith("WeaponCategory");
+          });
+          if (catTag) {
+            const cat = catTag.slice(14) as WeaponCategory;
+            if (!characterClass.weaponCategoryPermissions.includes(cat)) {
+              return false;
+            }
+          }
+        }
+
+        // If the item has an unsupported WeaponType, exclude it.
+        if (characterClass.weaponTypePermissions) {
+          const typeTag = itemDef.tags.find((tag) => {
+            return tag.startsWith("WeaponType");
+          });
+          if (typeTag) {
+            const type = typeTag.slice(10) as WeaponType;
+            if (!characterClass.weaponTypePermissions.includes(type)) {
+              return false;
+            }
+          }
+        }
+      }
+
+      // If the armor's base AC is too high, exclude it.
+      if (slotTag === EquipmentSlotTag.Armor && itemDef.ac > characterClass.maxBaseArmor) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Sort alphabetically.
+    items.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  return items;
 }

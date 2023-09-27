@@ -1,0 +1,84 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: wheat;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.dialogButton {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
+}
+
+.title {
+  font-size: 2rem;
+  color: wheat;
+  position: relative;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+  user-select: none;
+  width: 100%;
+}
+
+.containerName {
+  font-size: 1.2rem;
+  color: wheat;
+  position: relative;
+  text-align: center;
+  user-select: none;
+}
+
+.capacityLabel {
+  font-size: 1rem;
+  color: yellow;
+  position: relative;
+  text-align: center;
+  user-select: none;
+}
+
+.contentsLabel {
+  font-size: 1rem;
+  color: goldenrod;
+  position: relative;
+  text-align: center;
+  user-select: none;
+}
+
+.itemSelector {
+  position: relative;
+  width: 100%;
+}
