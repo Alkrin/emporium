@@ -5,7 +5,15 @@ import { refetchCharacters } from "../../dataSources/CharactersDataSource";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
-import ServerAPI, { CharacterData, Gender, ProficiencyData, emptyEquipmentData } from "../../serverAPI";
+import ServerAPI, {
+  CharacterData,
+  EquipmentSetData,
+  EquipmentSetItemData,
+  Gender,
+  ItemDefData,
+  ProficiencyData,
+  emptyEquipmentData,
+} from "../../serverAPI";
 import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { CharacterStat } from "../../staticData/types/characterClasses";
 import styles from "./CreateCharacterSubPanel.module.scss";
@@ -18,6 +26,9 @@ import { deleteRepertoireForCharacter } from "../../redux/repertoiresSlice";
 import { refetchProficiencies } from "../../dataSources/ProficienciesDataSource";
 import { AbilityFilter } from "../../staticData/types/abilitiesAndProficiencies";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
+import { Dictionary } from "../../lib/dictionary";
+import { RequestField_StartingEquipmentData } from "../../serverRequestTypes";
+import { refetchItems } from "../../dataSources/ItemsDataSource";
 
 interface State {
   nameText: string;
@@ -25,6 +36,7 @@ interface State {
   level: number;
   xp: number;
   class: string;
+  equipmentSetId: number;
   strength: number;
   intelligence: number;
   wisdom: number;
@@ -45,6 +57,9 @@ interface InjectedProps {
   currentUserId: number;
   selectedCharacter?: CharacterData;
   selectedCharacterProficiencies?: ProficiencyData[];
+  equipmentSetsByClass: Dictionary<EquipmentSetData[]>;
+  equipmentSetItemsBySet: Dictionary<EquipmentSetItemData[]>;
+  allItemDefs: Dictionary<ItemDefData>;
   dispatch?: Dispatch;
 }
 
@@ -78,6 +93,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           level: props.selectedCharacter.level,
           xp: props.selectedCharacter.xp,
           class: props.selectedCharacter.class_name,
+          equipmentSetId: 0,
           strength: props.selectedCharacter.strength,
           intelligence: props.selectedCharacter.intelligence,
           wisdom: props.selectedCharacter.wisdom,
@@ -97,6 +113,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         level: 1,
         xp: 0,
         class: "---",
+        equipmentSetId: 0,
         strength: 9,
         intelligence: 9,
         wisdom: 9,
@@ -187,323 +204,393 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             ? `Editing Character #${this.props.selectedCharacter?.id} (${this.props.selectedCharacter?.name})`
             : "Create New Character"}
         </div>
-        <div className={styles.nameLabel}>Name</div>
-        <input
-          className={styles.nameTextField}
-          type={"text"}
-          value={this.state.nameText}
-          onChange={(e) => {
-            this.setState({ nameText: e.target.value });
-          }}
-          tabIndex={nextTabIndex++}
-          spellCheck={false}
-          autoFocus={true}
-        />
-
-        <div className={styles.genderLabel}>Gender</div>
-        <div className={styles.genderRadioGroup}>
+        <div className={styles.contentRow}>
+          <div className={styles.nameLabel}>Name</div>
           <input
-            className={styles.radioButton}
-            type="radio"
-            value="m"
-            name="gender"
-            checked={this.state.gender === "m"}
+            className={styles.nameTextField}
+            type={"text"}
+            value={this.state.nameText}
             onChange={(e) => {
-              this.setState({ gender: e.target.value as Gender });
+              this.setState({ nameText: e.target.value });
+            }}
+            tabIndex={nextTabIndex++}
+            spellCheck={false}
+            autoFocus={true}
+          />
+          <div className={styles.rollPersonalsButton} onClick={this.onRerollPersonalsClicked.bind(this)}></div>
+        </div>
+
+        <div className={styles.contentRow}>
+          <div className={styles.genderLabel}>Gender</div>
+          <div className={styles.genderRadioGroup}>
+            <input
+              className={styles.radioButton}
+              type="radio"
+              value="m"
+              name="gender"
+              checked={this.state.gender === "m"}
+              onChange={(e) => {
+                this.setState({ gender: e.target.value as Gender });
+              }}
+              tabIndex={nextTabIndex++}
+            />
+            <span className={styles.radioLabel}>Male</span>
+            <input
+              className={styles.radioButton}
+              type="radio"
+              value="f"
+              name="gender"
+              checked={this.state.gender === "f"}
+              onChange={(e) => {
+                this.setState({ gender: e.target.value as Gender });
+              }}
+            />
+            <span className={styles.radioLabel}>Female</span>
+            <input
+              className={styles.radioButton}
+              type="radio"
+              value="o"
+              name="gender"
+              checked={this.state.gender === "o"}
+              onChange={(e) => {
+                this.setState({ gender: e.target.value as Gender });
+              }}
+            />
+            <span className={styles.radioLabel}>Other</span>
+          </div>
+        </div>
+
+        <div className={styles.contentRow}>
+          <div className={styles.classLabel}>Class</div>
+          <select
+            className={styles.classSelector}
+            value={this.state.class}
+            onChange={(e) => {
+              this.setState({
+                class: e.target.value,
+                selectableValues: [
+                  ["---", "", 0],
+                  ["---", "", 0],
+                  ["---", "", 0],
+                  ["---", "", 0],
+                ],
+                equipmentSetId: 0,
+              });
+            }}
+            tabIndex={nextTabIndex++}
+          >
+            <option value={"---"}>---</option>
+            {AllClassesArray.map(({ name }) => {
+              return (
+                <option value={name} key={`class${name}`}>
+                  {name}
+                </option>
+              );
+            })}
+          </select>
+
+          <div className={styles.levelLabel}>Level</div>
+          <input
+            className={styles.levelTextField}
+            type={"number"}
+            value={this.state.level}
+            min={1}
+            max={maxLevel}
+            onChange={(e) => {
+              const level = +e.target.value;
+              const hitDice: number[] = this.state.hitDice.slice(0, level);
+              while (hitDice.length < level) {
+                hitDice.push(this.rollDice(1, hitDieSize));
+              }
+              this.setState({ level, hitDice });
             }}
             tabIndex={nextTabIndex++}
           />
-          <span className={styles.radioLabel}>Male</span>
+        </div>
+
+        {!this.props.isEditMode && (
+          <div className={styles.contentRow}>
+            <div className={styles.classLabel}>Equipment</div>
+            <select
+              className={styles.classSelector}
+              value={this.state.equipmentSetId}
+              onChange={(e) => {
+                this.setState({
+                  equipmentSetId: +e.target.value,
+                });
+              }}
+              disabled={this.state.class === "---"}
+              tabIndex={nextTabIndex++}
+            >
+              <option value={0}>---</option>
+              {this.props.equipmentSetsByClass[this.state.class]?.map(({ name, id }) => {
+                return (
+                  <option value={id} key={`equipmentSet${name}`}>
+                    {name}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        )}
+
+        <div className={styles.contentRow}>
+          <div className={styles.xpLabel}>XP</div>
           <input
-            className={styles.radioButton}
-            type="radio"
-            value="f"
-            name="gender"
-            checked={this.state.gender === "f"}
+            className={styles.xpTextField}
+            type={"number"}
+            value={this.state.xp}
+            min={minXP}
             onChange={(e) => {
-              this.setState({ gender: e.target.value as Gender });
+              this.setState({ xp: +e.target.value });
             }}
+            tabIndex={nextTabIndex++}
+            spellCheck={false}
           />
-          <span className={styles.radioLabel}>Female</span>
-          <input
-            className={styles.radioButton}
-            type="radio"
-            value="o"
-            name="gender"
-            checked={this.state.gender === "o"}
-            onChange={(e) => {
-              this.setState({ gender: e.target.value as Gender });
-            }}
-          />
-          <span className={styles.radioLabel}>Other</span>
+          <div className={styles.xpRangeLabel}>{`${minXP} - ${maxXP}`}</div>
         </div>
 
-        <div className={styles.classLabel}>Class</div>
-        <select
-          className={styles.classSelector}
-          value={this.state.class}
-          onChange={(e) => {
-            this.setState({
-              class: e.target.value,
-              selectableValues: [
-                ["---", "", 0],
-                ["---", "", 0],
-                ["---", "", 0],
-                ["---", "", 0],
-              ],
-            });
-          }}
-          tabIndex={nextTabIndex++}
-        >
-          <option value={"---"}>---</option>
-          {AllClassesArray.map(({ name }) => {
-            return (
-              <option value={name} key={`class${name}`}>
-                {name}
-              </option>
-            );
-          })}
-        </select>
-
-        <div className={styles.levelLabel}>Level</div>
-        <input
-          className={styles.levelTextField}
-          type={"number"}
-          value={this.state.level}
-          min={1}
-          max={maxLevel}
-          onChange={(e) => {
-            const level = +e.target.value;
-            const hitDice: number[] = this.state.hitDice.slice(0, level);
-            while (hitDice.length < level) {
-              hitDice.push(this.rollDice(1, hitDieSize));
-            }
-            this.setState({ level, hitDice });
-          }}
-          tabIndex={nextTabIndex++}
-        />
-
-        <div className={styles.xpLabel}>XP</div>
-        <input
-          className={styles.xpTextField}
-          type={"number"}
-          value={this.state.xp}
-          min={minXP}
-          onChange={(e) => {
-            this.setState({ xp: +e.target.value });
-          }}
-          tabIndex={nextTabIndex++}
-          spellCheck={false}
-        />
-        <div className={styles.xpRangeLabel}>{`${minXP} - ${maxXP}`}</div>
-
-        <div className={styles.strengthLabel}>
-          {primeRequisites.includes(CharacterStat.Strength) && <span className={styles.primeRequisiteLabel}>*</span>}
-          STR
-        </div>
-        <input
-          className={styles.strengthTextField}
-          type={"number"}
-          value={this.state.strength}
-          min={minStrength}
-          max={18}
-          onChange={(e) => {
-            this.setState({ strength: +e.target.value });
-          }}
-          tabIndex={nextTabIndex++}
-        />
-
-        <div className={styles.intelligenceLabel}>
-          {primeRequisites.includes(CharacterStat.Intelligence) && (
-            <span className={styles.primeRequisiteLabel}>*</span>
-          )}
-          INT
-        </div>
-        <input
-          className={styles.intelligenceTextField}
-          type={"number"}
-          value={this.state.intelligence}
-          min={minIntelligence}
-          max={18}
-          onChange={(e) => {
-            this.setState({ intelligence: +e.target.value });
-          }}
-          tabIndex={nextTabIndex++}
-        />
-
-        <div className={styles.wisdomLabel}>
-          {primeRequisites.includes(CharacterStat.Wisdom) && <span className={styles.primeRequisiteLabel}>*</span>}
-          WIS
-        </div>
-        <input
-          className={styles.wisdomTextField}
-          type={"number"}
-          value={this.state.wisdom}
-          min={minWisdom}
-          max={18}
-          onChange={(e) => {
-            this.setState({ wisdom: +e.target.value });
-          }}
-          tabIndex={nextTabIndex++}
-        />
-
-        <div className={styles.dexterityLabel}>
-          {primeRequisites.includes(CharacterStat.Dexterity) && <span className={styles.primeRequisiteLabel}>*</span>}
-          DEX
-        </div>
-        <input
-          className={styles.dexterityTextField}
-          type={"number"}
-          value={this.state.dexterity}
-          min={minDexterity}
-          max={18}
-          onChange={(e) => {
-            this.setState({ dexterity: +e.target.value });
-          }}
-          tabIndex={nextTabIndex++}
-        />
-
-        <div className={styles.constitutionLabel}>
-          {primeRequisites.includes(CharacterStat.Constitution) && (
-            <span className={styles.primeRequisiteLabel}>*</span>
-          )}
-          CON
-        </div>
-        <input
-          className={styles.constitutionTextField}
-          type={"number"}
-          value={this.state.constitution}
-          min={minConstitution}
-          max={18}
-          onChange={(e) => {
-            this.setState({ constitution: +e.target.value });
-          }}
-          tabIndex={nextTabIndex++}
-        />
-
-        <div className={styles.charismaLabel}>
-          {primeRequisites.includes(CharacterStat.Charisma) && <span className={styles.primeRequisiteLabel}>*</span>}
-          CHA
-        </div>
-        <input
-          className={styles.charismaTextField}
-          type={"number"}
-          value={this.state.charisma}
-          min={minCharisma}
-          max={18}
-          onChange={(e) => {
-            this.setState({ charisma: +e.target.value });
-          }}
-          tabIndex={nextTabIndex++}
-        />
-
-        <div className={styles.rerollStatsLabel}>Reroll Stats</div>
-        <div className={styles.rollStatsButton} onClick={this.onRerollClicked.bind(this)}></div>
-
-        <div className={styles.hitDiceLabel}>{`Hit Dice (d${hitDieSize})`}</div>
-        <div className={styles.hitDiceWrapper}>
-          {this.state.hitDice.map((hp, index) => {
-            return (
-              <div className={styles.hitDieWrapper} key={`hd${index}`}>
-                <span className={styles.hitDieLabel}>{`L${index + 1}`}</span>
-                <input
-                  key={`hdtf${index}`}
-                  className={styles.hitDieTextField}
-                  type={"number"}
-                  value={hp}
-                  min={1}
-                  max={hitDieSize}
-                  onChange={(e) => {
-                    const hitDice = [...this.state.hitDice];
-                    hitDice[index] = +e.target.value;
-                    this.setState({ hitDice });
-                  }}
-                  tabIndex={nextTabIndex++}
-                />
+        <div className={styles.contentRow}>
+          <div className={styles.column}>
+            <div className={styles.row}>
+              <div className={styles.strengthLabel}>
+                {primeRequisites.includes(CharacterStat.Strength) && (
+                  <span className={styles.primeRequisiteLabel}>*</span>
+                )}
+                STR
               </div>
-            );
-          })}
+              <input
+                className={styles.strengthTextField}
+                type={"number"}
+                value={this.state.strength}
+                min={minStrength}
+                max={18}
+                onChange={(e) => {
+                  this.setState({ strength: +e.target.value });
+                }}
+                tabIndex={nextTabIndex++}
+              />
+            </div>
+
+            <div className={styles.row}>
+              <div className={styles.intelligenceLabel}>
+                {primeRequisites.includes(CharacterStat.Intelligence) && (
+                  <span className={styles.primeRequisiteLabel}>*</span>
+                )}
+                INT
+              </div>
+              <input
+                className={styles.intelligenceTextField}
+                type={"number"}
+                value={this.state.intelligence}
+                min={minIntelligence}
+                max={18}
+                onChange={(e) => {
+                  this.setState({ intelligence: +e.target.value });
+                }}
+                tabIndex={nextTabIndex++}
+              />
+            </div>
+
+            <div className={styles.row}>
+              <div className={styles.wisdomLabel}>
+                {primeRequisites.includes(CharacterStat.Wisdom) && (
+                  <span className={styles.primeRequisiteLabel}>*</span>
+                )}
+                WIS
+              </div>
+              <input
+                className={styles.wisdomTextField}
+                type={"number"}
+                value={this.state.wisdom}
+                min={minWisdom}
+                max={18}
+                onChange={(e) => {
+                  this.setState({ wisdom: +e.target.value });
+                }}
+                tabIndex={nextTabIndex++}
+              />
+            </div>
+          </div>
+
+          <div className={styles.column}>
+            <div className={styles.row}>
+              <div className={styles.dexterityLabel}>
+                {primeRequisites.includes(CharacterStat.Dexterity) && (
+                  <span className={styles.primeRequisiteLabel}>*</span>
+                )}
+                DEX
+              </div>
+              <input
+                className={styles.dexterityTextField}
+                type={"number"}
+                value={this.state.dexterity}
+                min={minDexterity}
+                max={18}
+                onChange={(e) => {
+                  this.setState({ dexterity: +e.target.value });
+                }}
+                tabIndex={nextTabIndex++}
+              />
+            </div>
+
+            <div className={styles.row}>
+              <div className={styles.constitutionLabel}>
+                {primeRequisites.includes(CharacterStat.Constitution) && (
+                  <span className={styles.primeRequisiteLabel}>*</span>
+                )}
+                CON
+              </div>
+              <input
+                className={styles.constitutionTextField}
+                type={"number"}
+                value={this.state.constitution}
+                min={minConstitution}
+                max={18}
+                onChange={(e) => {
+                  this.setState({ constitution: +e.target.value });
+                }}
+                tabIndex={nextTabIndex++}
+              />
+            </div>
+
+            <div className={styles.row}>
+              <div className={styles.charismaLabel}>
+                {primeRequisites.includes(CharacterStat.Charisma) && (
+                  <span className={styles.primeRequisiteLabel}>*</span>
+                )}
+                CHA
+              </div>
+              <input
+                className={styles.charismaTextField}
+                type={"number"}
+                value={this.state.charisma}
+                min={minCharisma}
+                max={18}
+                onChange={(e) => {
+                  this.setState({ charisma: +e.target.value });
+                }}
+                tabIndex={nextTabIndex++}
+              />
+            </div>
+          </div>
+
+          <div className={styles.column}>
+            <div className={styles.rollStatsButton} onClick={this.onRerollClicked.bind(this)}></div>
+          </div>
         </div>
 
-        <div className={styles.rerollHitpointsLabel}>Reroll Hitpoints</div>
-        <div className={styles.rollHitpointsButton} onClick={this.onRerollHitpointsClicked.bind(this)}></div>
-
-        {selectedClass?.selectableClassFeatures.length > 0 ? (
-          <div className={styles.selectablesContainer}>
-            <div className={styles.selectablesTitle}>{"Selectable Features"}</div>
-            {selectedClass.selectableClassFeatures.map((feature, featureIndex) => {
-              let featureOptions: AbilityFilter[] = [];
-              if (Array.isArray(feature.selections)) {
-                featureOptions = feature.selections;
-              } else {
-                const filter = feature.selections;
-                if (filter.subtypes) {
-                  filter.subtypes?.forEach((subtype) => {
-                    // Turn each option into its own full entry.
-                    featureOptions.push({ ...filter, subtypes: [subtype] });
-                  });
-                } else {
-                  filter.def.subTypes?.forEach((subtype) => {
-                    // Turn each option into its own full entry.
-                    featureOptions.push({ ...filter, subtypes: [subtype] });
-                  });
-                }
-              }
-
+        <div className={styles.contentRow}>
+          <div className={styles.hitDiceLabel}>{`Hit Dice (d${hitDieSize})`}</div>
+          <div className={styles.hitDiceWrapper}>
+            {this.state.hitDice.map((hp, index) => {
               return (
-                <div className={styles.row} key={`${feature.title}${featureIndex}`}>
-                  <div className={styles.selectableName}>{feature.title}</div>
-                  <select
-                    className={styles.selectableSelector}
-                    value={this.state.selectableValues[featureIndex].join(",")}
+                <div className={styles.hitDieWrapper} key={`hd${index}`}>
+                  <span className={styles.hitDieLabel}>{`L${index + 1}`}</span>
+                  <input
+                    key={`hdtf${index}`}
+                    className={styles.hitDieTextField}
+                    type={"number"}
+                    value={hp}
+                    min={1}
+                    max={hitDieSize}
                     onChange={(e) => {
-                      const selectableValues: [string, string, number][] = [...this.state.selectableValues];
-                      if (e.target.value === "---") {
-                        selectableValues[featureIndex] = ["---", "", 0];
-                      } else {
-                        const [featureId, subtype, rank] = e.target.value.split(",");
-                        selectableValues[featureIndex][0] = featureId;
-                        selectableValues[featureIndex][1] = subtype;
-                        selectableValues[featureIndex][2] = +rank;
-                      }
-                      this.setState({ selectableValues });
+                      const hitDice = [...this.state.hitDice];
+                      hitDice[index] = +e.target.value;
+                      this.setState({ hitDice });
                     }}
                     tabIndex={nextTabIndex++}
-                  >
-                    <option value={"---"}>---</option>
-                    {featureOptions.map((filter) => {
-                      let id = filter.def.id;
-                      let name = filter.def.name;
-                      let subtype = filter.subtypes?.[0] ?? "";
-                      let rank = filter.rank ?? 1;
-
-                      let displayName = name;
-                      if (subtype.length > 0) {
-                        displayName = `${displayName} (${subtype})`;
-                      }
-
-                      return (
-                        <option value={`${id},${subtype},${rank}`} key={`selectable${name}${subtype}`}>
-                          {displayName}
-                        </option>
-                      );
-                    })}
-                  </select>
+                  />
                 </div>
               );
             })}
           </div>
-        ) : null}
 
-        <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
-          {this.props.isEditMode ? "Save Changes" : "Save Character"}
+          <div className={styles.column}>
+            <div className={styles.rollHitpointsButton} onClick={this.onRerollHitpointsClicked.bind(this)}></div>
+          </div>
         </div>
 
-        {this.props.isEditMode && (
-          <div className={styles.deleteButton} onClick={this.onDeleteClicked.bind(this)}>
-            Delete
+        {selectedClass?.selectableClassFeatures.length > 0 ? (
+          <div className={styles.contentRow}>
+            <div className={styles.column}>
+              <div className={styles.selectablesTitle}>{"Selectable Features"}</div>
+              {selectedClass.selectableClassFeatures.map((feature, featureIndex) => {
+                let featureOptions: AbilityFilter[] = [];
+                if (Array.isArray(feature.selections)) {
+                  featureOptions = feature.selections;
+                } else {
+                  const filter = feature.selections;
+                  if (filter.subtypes) {
+                    filter.subtypes?.forEach((subtype) => {
+                      // Turn each option into its own full entry.
+                      featureOptions.push({ ...filter, subtypes: [subtype] });
+                    });
+                  } else {
+                    filter.def.subTypes?.forEach((subtype) => {
+                      // Turn each option into its own full entry.
+                      featureOptions.push({ ...filter, subtypes: [subtype] });
+                    });
+                  }
+                }
+
+                return (
+                  <div className={styles.row} key={`${feature.title}${featureIndex}`}>
+                    <div className={styles.selectableName}>{feature.title}</div>
+                    <select
+                      className={styles.selectableSelector}
+                      value={this.state.selectableValues[featureIndex].join(",")}
+                      onChange={(e) => {
+                        const selectableValues: [string, string, number][] = [...this.state.selectableValues];
+                        if (e.target.value === "---") {
+                          selectableValues[featureIndex] = ["---", "", 0];
+                        } else {
+                          const [featureId, subtype, rank] = e.target.value.split(",");
+                          selectableValues[featureIndex][0] = featureId;
+                          selectableValues[featureIndex][1] = subtype;
+                          selectableValues[featureIndex][2] = +rank;
+                        }
+                        this.setState({ selectableValues });
+                      }}
+                      tabIndex={nextTabIndex++}
+                    >
+                      <option value={"---"}>---</option>
+                      {featureOptions.map((filter) => {
+                        let id = filter.def.id;
+                        let name = filter.def.name;
+                        let subtype = filter.subtypes?.[0] ?? "";
+                        let rank = filter.rank ?? 1;
+
+                        let displayName = name;
+                        if (subtype.length > 0) {
+                          displayName = `${displayName} (${subtype})`;
+                        }
+
+                        return (
+                          <option value={`${id},${subtype},${rank}`} key={`selectable${name}${subtype}`}>
+                            {displayName}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
+        ) : null}
+
+        <div className={styles.buttonRow}>
+          <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
+            {this.props.isEditMode ? "Save Changes" : "Save Character"}
+          </div>
+
+          {this.props.isEditMode && (
+            <div className={styles.deleteButton} onClick={this.onDeleteClicked.bind(this)}>
+              Delete
+            </div>
+          )}
+        </div>
 
         {this.state.isSaving && (
           <div className={styles.savingVeil}>
@@ -607,16 +694,42 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       const res = await ServerAPI.editCharacter(character, this.state.selectableValues);
     } else {
       // Send it to the server!
-      const res = await ServerAPI.createCharacter(character, this.state.selectableValues);
+      const res = await ServerAPI.createCharacter(
+        character,
+        this.state.selectableValues,
+        this.generateStartingEquipmentData()
+      );
     }
     this.setState({ isSaving: false });
     // Refetch characters.
     if (this.props.dispatch) {
+      // The character itself.
       await refetchCharacters(this.props.dispatch);
+      // Any selectable class features.
       await refetchProficiencies(this.props.dispatch);
+      if (!this.props.isEditMode) {
+        // Any starting equipment (only assigned when creating new characters).
+        await refetchItems(this.props.dispatch);
+      }
     }
     // Close the subPanel.
     this.props.dispatch?.(hideSubPanel());
+  }
+
+  private generateStartingEquipmentData(): RequestField_StartingEquipmentData[] {
+    const items = this.props.equipmentSetItemsBySet[this.state.equipmentSetId] ?? [];
+
+    const data: RequestField_StartingEquipmentData[] = items.map((item) => {
+      const def = this.props.allItemDefs[item.def_id];
+      const count = def.purchase_quantity;
+      const datum: RequestField_StartingEquipmentData = {
+        ...item,
+        count,
+      };
+      return datum;
+    });
+
+    return data;
   }
 
   private async onDeleteClicked(): Promise<void> {
@@ -695,6 +808,18 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     );
   }
 
+  private onRerollPersonalsClicked(): void {
+    // Pick two random letters for the name.
+    const firstChar = String.fromCharCode("A".charCodeAt(0) + randomInt(0, 25));
+    const secondChar = String.fromCharCode("a".charCodeAt(0) + randomInt(0, 25));
+    const nameText = firstChar + secondChar;
+
+    // Pick a random gender.
+    const g = randomInt(0, 100);
+    const gender = g === 0 ? "o" : g <= 50 ? "m" : "f";
+    this.setState({ nameText, gender });
+  }
+
   private onRerollClicked(): void {
     const reqs = this.state.class === "---" ? {} : AllClasses[this.state.class].statRequirements;
 
@@ -737,11 +862,15 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const selectedCharacter = state.characters.characters[state.characters.activeCharacterId];
   const selectedCharacterProficiencies = state.proficiencies.proficienciesByCharacterId[selectedCharacter?.id];
+  const { equipmentSetsByClass, equipmentSetItemsBySet, items: allItemDefs } = state.gameDefs;
   return {
     ...props,
     currentUserId: state.user.currentUser.id,
     selectedCharacter,
     selectedCharacterProficiencies,
+    equipmentSetsByClass,
+    equipmentSetItemsBySet,
+    allItemDefs,
   };
 }
 

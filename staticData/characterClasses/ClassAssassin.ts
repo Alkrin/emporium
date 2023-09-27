@@ -38,7 +38,7 @@ export const ClassAssassin: CharacterClass = {
   statRequirements: {},
   xpToLevel: [0, 1700, 3400, 6800, 14000, 28000, 55000, 110000, 230000, 350000, 470000, 590000, 710000, 830000],
   weaponStyles: [WeaponStyle.OneHandOnly, WeaponStyle.DualWield, WeaponStyle.TwoHanded],
-  maxBaseArmor: 6, // Plate
+  maxBaseArmor: 2, // Leather
   cleaveMultiplier: 0.5,
   savingThrows: {
     [SavingThrowType.PetrificationAndParalysis]: [13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8, 8, 7, 7],

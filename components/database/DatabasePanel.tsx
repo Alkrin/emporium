@@ -7,6 +7,7 @@ import { SubPanelPane } from "../SubPanelPane";
 import { DatabaseItemsSubPanel } from "./DatabaseItemsSubPanel";
 import { DatabaseSpellsSubPanel } from "./DatabaseSpellsSubPanel";
 import styles from "./DatabasePanel.module.scss";
+import { DatabaseEquipmentSetsSubPanel } from "./DatabaseEquipmentSetsSubPanel";
 
 interface ReactProps {}
 
@@ -20,6 +21,9 @@ class ADatabasePanel extends React.Component<Props> {
   render(): React.ReactNode {
     return (
       <div className={styles.root}>
+        <div className={styles.dataButton} onClick={this.onEquipmentSetsClicked.bind(this)}>
+          Equipment Sets
+        </div>
         <div className={styles.dataButton} onClick={this.onItemsClicked.bind(this)}>
           Items
         </div>
@@ -28,6 +32,18 @@ class ADatabasePanel extends React.Component<Props> {
         </div>
         <SubPanelPane />
       </div>
+    );
+  }
+
+  private onEquipmentSetsClicked(): void {
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "DatabaseEquipmentSets",
+        content: () => {
+          return <DatabaseEquipmentSetsSubPanel />;
+        },
+        escapable: true,
+      })
     );
   }
 

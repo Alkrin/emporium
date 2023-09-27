@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { SQLQuery, executeTransaction } from "../../lib/db";
-import { RequestBody_CreateOrEditCharacter } from "../../serverRequestTypes";
+import { RequestBody_CreateOrEditCharacter, RequestField_StartingEquipmentData } from "../../serverRequestTypes";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
@@ -45,6 +45,63 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         }
       }
     });
+
+    if (b.equipment) {
+      const rootItems = b.equipment.filter((item) => {
+        return !item.slot_name.startsWith("Container");
+      });
+      const containedItems = b.equipment.filter((item) => {
+        return item.slot_name.startsWith("Container");
+      });
+
+      if (rootItems.length > 0) {
+        // Depth-first traversal of containers.
+        const generateItem = (item: RequestField_StartingEquipmentData, depth: number): void => {
+          // Insert the item into the `items` table.
+          if (depth === 0) {
+            // Root item.  We add it to the character a little later.
+            queries.push({
+              query: `INSERT INTO items (def_id,count,container_id,storage_id) VALUES(?,?,0,0)`,
+              values: [item.def_id, item.count],
+            });
+          } else {
+            // Contained item.  Gets added to the container created in the previous loop of this recursion.
+            queries.push({
+              query: `INSERT INTO items (def_id,count,container_id,storage_id) VALUES(?,?,@id${depth - 1},0)`,
+              values: [item.def_id, item.count],
+            });
+          }
+
+          // Grab the id of the newly generated item record.
+          queries.push({
+            query: `SELECT @id${depth}:=LAST_INSERT_ID();`,
+            values: [],
+          });
+
+          if (depth === 0) {
+            // Root items equip directly to the character.
+            queries.push({
+              query: `UPDATE characters SET ${item.slot_name}=@id${depth} WHERE id=@id`,
+              values: [],
+            });
+          }
+
+          // Create any items contained in this item.
+          // Note that this item_id is a temporary one for matching containers to contents,
+          // not the actual id of the db record for the item.
+          const containerSlotName = `Container${item.item_id}`;
+          containedItems.forEach((containedItem) => {
+            if (containedItem.slot_name === containerSlotName) {
+              generateItem(containedItem, depth + 1);
+            }
+          });
+        };
+
+        rootItems.forEach((rootItem) => {
+          generateItem(rootItem, 0);
+        });
+      }
+    }
 
     const results = await executeTransaction<any>(queries);
 

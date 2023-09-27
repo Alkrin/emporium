@@ -1,14 +1,20 @@
 .root {
   width: 50vmin;
-  min-height: 47vmin;
   border-radius: 1vmin;
   border: 2px solid white;
   background-color: #222;
+  display: flex;
+  flex-direction: column;
 }
 
 .row {
   display: flex;
   flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
 }
 
 .label {
@@ -18,7 +24,16 @@
 }
 
 .textField {
+  position: relative;
   font-size: 1.1rem;
+}
+
+.contentRow {
+  @extend .row;
+  position: relative;
+  margin-top: 1vmin;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
 }
 
 .radioGroup {
@@ -29,6 +44,7 @@
 }
 
 .radioButton {
+  margin-top: 0vmin;
   appearance: none;
   width: 1rem;
   height: 1rem;
@@ -48,10 +64,10 @@
 }
 
 .titleLabel {
-  position: absolute;
-  top: 0.5vmin;
-  left: 1vmin;
-  width: 48vmin;
+  position: relative;
+  margin-top: 0.5vmin;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
   font-size: 1.5rem;
   color: wheat;
   text-align: center;
@@ -60,203 +76,184 @@
 
 .nameLabel {
   @extend .label;
-  position: absolute;
-  top: 4.3vmin;
-  left: 1vmin;
+  position: relative;
   width: 10vmin;
 }
 
 .nameTextField {
   @extend .textField;
-  position: absolute;
-  top: 4vmin;
-  left: 12vmin;
+  margin-left: 1vmin;
   width: 30vmin;
 }
 
 .genderLabel {
   @extend .label;
-  position: absolute;
-  top: 7.5vmin;
-  left: 1vmin;
+  position: relative;
   width: 10vmin;
 }
 
 .genderRadioGroup {
   @extend .radioGroup;
-  position: absolute;
-  top: 7.5vmin;
-  left: 12vmin;
+  margin-left: 1vmin;
   width: 25vmin;
+}
+
+.rollPersonalsButton {
+  position: relative;
+  margin-left: 1vmin;
+  margin-top: 0vmin;
+  margin-bottom: -4vmin;
+  width: 6vmin;
+  height: 6vmin;
+  border: solid 0.25vmin #aaa;
+  border-radius: 1.5vmin;
+  background-image: url("/images/ThreeDSix.png");
+  background-size: contain;
+  opacity: 0.5;
+  box-sizing: border-box;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+    border: solid 0.25vmin yellow;
+  }
+
+  &:active {
+    opacity: 0.8;
+    border: solid 0.25vmin lime;
+  }
 }
 
 .classLabel {
   @extend .label;
-  position: absolute;
-  top: 10.7vmin;
-  left: 1vmin;
+  position: relative;
   width: 10vmin;
 }
 
 .classSelector {
-  position: absolute;
-  top: 10.9vmin;
-  left: 12vmin;
+  position: relative;
+  margin-left: 1vmin;
   width: 18vmin;
 }
 
 .levelLabel {
   @extend .label;
-  position: absolute;
-  top: 10.7vmin;
-  left: 32vmin;
-  width: 5vmin;
+  position: relative;
+  width: 7vmin;
 }
 
 .levelTextField {
   @extend .textField;
-  position: absolute;
+  position: relative;
   width: 4vmin;
-  top: 10.6vmin;
-  left: 38vmin;
+  margin-left: 0.5vmin;
 }
 
 .xpLabel {
   @extend .label;
-  position: absolute;
-  top: 14.1vmin;
-  left: 1vmin;
+  position: relative;
   width: 10vmin;
 }
 
 .xpRangeLabel {
   @extend .label;
-  position: absolute;
-  top: 14.1vmin;
-  left: 24vmin;
+  position: relative;
+  margin-left: 1vmin;
 }
 
 .xpTextField {
   @extend .textField;
-  position: absolute;
-  top: 13.9vmin;
-  left: 12vmin;
+  position: relative;
+  margin-left: 1vmin;
   width: 10vmin;
 }
 
 .strengthLabel {
   @extend .label;
-  position: absolute;
-  top: 18.2vmin;
-  left: 1vmin;
+  position: relative;
   width: 10vmin;
 }
 
 .strengthTextField {
   @extend .textField;
-  position: absolute;
+  position: relative;
   width: 4vmin;
-  top: 17.9vmin;
-  left: 12vmin;
+  margin-left: 1vmin;
 }
 
 .intelligenceLabel {
   @extend .label;
-  position: absolute;
-  top: 21.4vmin;
-  left: 1vmin;
+  position: relative;
   width: 10vmin;
 }
 
 .intelligenceTextField {
   @extend .textField;
-  position: absolute;
+  position: relative;
   width: 4vmin;
-  top: 21.1vmin;
-  left: 12vmin;
+  margin-left: 1vmin;
 }
 
 .wisdomLabel {
   @extend .label;
-  position: absolute;
-  top: 24.6vmin;
-  left: 1vmin;
+  position: relative;
   width: 10vmin;
 }
 
 .wisdomTextField {
   @extend .textField;
-  position: absolute;
+  position: relative;
   width: 4vmin;
-  top: 24.3vmin;
-  left: 12vmin;
+  margin-left: 1vmin;
 }
 
 .dexterityLabel {
   @extend .label;
-  position: absolute;
-  top: 18.2vmin;
-  left: 18vmin;
+  position: relative;
   width: 5vmin;
 }
 
 .dexterityTextField {
   @extend .textField;
-  position: absolute;
+  position: relative;
+  margin-left: 1vmin;
   width: 4vmin;
-  top: 17.9vmin;
-  left: 24vmin;
 }
 
 .constitutionLabel {
   @extend .label;
-  position: absolute;
-  top: 21.4vmin;
-  left: 18vmin;
+  position: relative;
   width: 5vmin;
 }
 
 .constitutionTextField {
   @extend .textField;
-  position: absolute;
+  position: relative;
+  margin-left: 1vmin;
   width: 4vmin;
-  top: 21.1vmin;
-  left: 24vmin;
 }
 
 .charismaLabel {
   @extend .label;
-  position: absolute;
-  top: 24.6vmin;
-  left: 18vmin;
+  position: relative;
   width: 5vmin;
 }
 
 .charismaTextField {
   @extend .textField;
-  position: absolute;
+  position: relative;
+  margin-left: 1vmin;
   width: 4vmin;
-  top: 24.3vmin;
-  left: 24vmin;
 }
 
 .primeRequisiteLabel {
   color: magenta;
 }
 
-.rerollStatsLabel {
-  @extend .label;
-  position: absolute;
-  top: 16.2vmin;
-  left: 38vmin;
-  width: 6vmin;
-  text-align: center;
-}
-
 .rollStatsButton {
-  position: absolute;
-  top: 20.5vmin;
-  left: 38vmin;
+  position: relative;
+  margin-left: 1vmin;
+  margin-top: 0.7vmin;
   width: 6vmin;
   height: 6vmin;
   border: solid 0.25vmin #aaa;
@@ -280,20 +277,18 @@
 
 .hitDiceLabel {
   @extend .label;
-  position: absolute;
-  top: 27.7vmin;
-  left: 1vmin;
+  position: relative;
   width: 10vmin;
 }
 
 .hitDiceWrapper {
-  position: absolute;
-  top: 27.7vmin;
-  left: 12vmin;
+  position: relative;
+  margin-left: 1vmin;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  max-width: 30vmin;
+  max-width: 23.1vmin;
+  align-items: flex-start;
 }
 
 .hitDieWrapper {
@@ -306,6 +301,7 @@
 
 .hitDieLabel {
   @extend .label;
+  flex-shrink: 0;
   width: 3vmin;
   font-size: 1rem;
   color: white;
@@ -317,19 +313,10 @@
   margin-left: 0.5vmin;
 }
 
-.rerollHitpointsLabel {
-  @extend .label;
-  position: absolute;
-  top: 28.2vmin;
-  left: 37.5vmin;
-  width: 7vmin;
-  text-align: center;
-}
-
 .rollHitpointsButton {
-  position: absolute;
-  top: 32.5vmin;
-  left: 38vmin;
+  position: relative;
+  margin-top: 0.5vmin;
+  margin-left: 1vmin;
   width: 6vmin;
   height: 6vmin;
   border: solid 0.25vmin #aaa;
@@ -351,14 +338,6 @@
   }
 }
 
-.selectablesContainer {
-  position: relative;
-  margin-top: 40vmin;
-  margin-left: 1vmin;
-  margin-right: 1vmin;
-  margin-bottom: 6.5vmin;
-}
-
 .selectablesTitle {
   @extend .label;
   text-align: center;
@@ -376,11 +355,16 @@
   width: 15vmin;
 }
 
+.buttonRow {
+  @extend .row;
+  margin-top: 1.5vmin;
+  margin-bottom: 1.5vmin;
+  position: relative;
+  justify-content: center;
+}
+
 .saveButton {
-  position: absolute;
-  bottom: 1.5vmin;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   padding: 0.5vmin;
   box-sizing: border-box;
   background-color: black;
@@ -399,9 +383,8 @@
 }
 
 .deleteButton {
-  position: absolute;
-  bottom: 1.5vmin;
-  left: 2vmin;
+  position: relative;
+  margin-left: 2vmin;
   padding: 0.5vmin;
   box-sizing: border-box;
   background-color: black;
