@@ -1,6 +1,8 @@
 export enum Tag {
   Barding = "Barding",
   InitiativeMinusOne = "InitiativeMinusOne", // 2h weapons gives this penalty.
+  Magic = "Magic", // Magic weapons.
+  Silver = "Silver", // Silver weapons.
   Spellbook = "Spellbook",
 }
 

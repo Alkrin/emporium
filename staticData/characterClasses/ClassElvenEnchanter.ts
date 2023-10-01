@@ -119,6 +119,7 @@ export const ClassElvenEnchanter: CharacterClass = {
   ],
   spellcasting: [
     {
+      spellSource: SpellType.Arcane,
       spellTypes: [SpellType.Arcane],
       requiresSpellbook: true,
       spellSlots: [

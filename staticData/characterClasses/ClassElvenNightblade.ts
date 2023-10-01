@@ -106,6 +106,7 @@ export const ClassElvenNightblade: CharacterClass = {
   ],
   spellcasting: [
     {
+      spellSource: SpellType.Arcane,
       spellTypes: [SpellType.Arcane],
       requiresSpellbook: true,
       spellSlots: [

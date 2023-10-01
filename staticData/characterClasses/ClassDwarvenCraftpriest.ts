@@ -118,6 +118,7 @@ export const ClassDwarvenCraftpriest: CharacterClass = {
   ],
   spellcasting: [
     {
+      spellSource: SpellType.Divine,
       spellTypes: [SpellType.Divine],
       requiresSpellbook: true,
       spellSlots: [

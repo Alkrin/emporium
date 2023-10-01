@@ -122,6 +122,7 @@ export const ClassElvenCourtier: CharacterClass = {
   ],
   spellcasting: [
     {
+      spellSource: SpellType.Arcane,
       spellTypes: [SpellType.Arcane],
       requiresSpellbook: true,
       spellSlots: [

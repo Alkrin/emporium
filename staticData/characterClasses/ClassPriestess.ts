@@ -98,6 +98,7 @@ export const ClassPriestess: CharacterClass = {
   ],
   spellcasting: [
     {
+      spellSource: SpellType.Divine,
       spellTypes: [SpellType.Divine],
       requiresSpellbook: false,
       spellSlots: [

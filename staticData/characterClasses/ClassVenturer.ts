@@ -94,6 +94,7 @@ export const ClassVenturer: CharacterClass = {
   ],
   spellcasting: [
     {
+      spellSource: SpellType.Arcane,
       spellTypes: [SpellType.Arcane],
       requiresSpellbook: true,
       spellSlots: [

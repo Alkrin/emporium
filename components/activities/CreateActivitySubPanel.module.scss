@@ -1,0 +1,306 @@
+.root {
+  width: 60vmin;
+  border-radius: 1vmin;
+  border: 2px solid white;
+  background-color: #222;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  position: relative;
+  color: wheat;
+  font-size: 1.2rem;
+}
+
+.textField {
+  position: relative;
+  font-size: 1.1rem;
+}
+
+.contentRow {
+  @extend .row;
+  position: relative;
+  margin-top: 1vmin;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
+}
+
+.titleLabel {
+  position: relative;
+  margin-top: 0.5vmin;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
+  font-size: 1.5rem;
+  color: wheat;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+}
+
+.nameTextField {
+  @extend .textField;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
+}
+
+.buttonRow {
+  @extend .row;
+  margin-top: 1.5vmin;
+  margin-bottom: 1.5vmin;
+  position: relative;
+  justify-content: center;
+}
+
+.saveButton {
+  position: relative;
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+}
+
+.deleteButton {
+  position: relative;
+  margin-left: 2vmin;
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+}
+
+.savingVeil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  pointer-events: all;
+}
+
+.savingLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: wheat;
+  font-size: 3rem;
+}
+
+.descriptionTextField {
+  position: relative;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
+  resize: none;
+  height: 10vmin;
+}
+
+.dateRow {
+  @extend .contentRow;
+  justify-content: space-between;
+}
+
+.participantsSection {
+  @extend .contentRow;
+  justify-content: space-between;
+}
+
+.participantsContainer {
+  @extend .column;
+  position: relative;
+  width: 49%;
+}
+
+.participantsHeader {
+  @extend .label;
+  font-size: 1rem;
+}
+
+.listContainer {
+  position: relative;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.participantsListContainer {
+  @extend .listContainer;
+  height: 25vmin;
+}
+
+.adventurersListContainer {
+  @extend .listContainer;
+  height: 20vmin;
+}
+
+.listRow {
+  margin-bottom: 0.25vmin;
+  padding: 0.25vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.listName {
+  font-size: 0.8rem;
+  color: wheat;
+  text-align: left;
+  width: 15vmin;
+  flex-grow: 1;
+}
+
+.listLevel {
+  margin-left: 0.5vmin;
+  font-size: 0.8rem;
+  color: yellow;
+  text-align: center;
+  width: 2vmin;
+  flex-shrink: 0;
+}
+
+.listClass {
+  margin-left: 0.25vmin;
+  font-size: 0.8rem;
+  color: wheat;
+  width: 9vmin;
+  text-align: left;
+}
+
+.plusMinusButton {
+  position: relative;
+  margin-left: 0.25vmin;
+  margin-top: -0.1vmin;
+  margin-bottom: -0.1vmin;
+  width: 1.2vmin;
+  height: 1.2vmin;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.4vmin;
+  color: wheat;
+  border: 1px solid wheat;
+  border-radius: 0.25vmin;
+  opacity: 0.5;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.filtersContainer {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  background-color: #222;
+}
+
+.filterText {
+  position: relative;
+  width: 8vmin;
+  margin-left: 0.5vmin;
+  margin-right: 0.5vmin;
+  font-size: 1rem;
+  color: wheat;
+  text-align: left;
+}
+
+.filterSelector {
+  width: 19.4vmin;
+}
+
+.summarySection {
+  @extend .row;
+  position: relative;
+  padding: 1vmin;
+  justify-content: space-between;
+}
+
+.summaryColumn {
+  @extend .column;
+  position: relative;
+  width: 49%;
+}
+
+.summaryLabel {
+  @extend .label;
+  font-size: 1rem;
+  text-align: left;
+  margin-right: 1vmin;
+}
+
+.summaryValue {
+  position: relative;
+  color: yellow;
+  font-size: 1rem;
+}
+
+.preparednessContainer {
+  align-self: center;
+  width: 60%;
+}

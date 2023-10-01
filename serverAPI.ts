@@ -31,6 +31,9 @@ import {
   RequestBody_CreateOrEditEquipmentSet,
   RequestBody_DeleteEquipmentSet,
   RequestField_StartingEquipmentData,
+  RequestBody_CreateActivity,
+  RequestBody_EditActivity,
+  RequestBody_DeleteActivity,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -253,6 +256,117 @@ type ServerSpellDefData = Omit<SpellDefData, "tags" | "type_levels"> & {
 
 type ServerCharacterData = Omit<CharacterData, "hit_dice"> & { hit_dice: string };
 
+export interface ActivityData {
+  id: number;
+  user_id: number;
+  name: string;
+  description: string;
+  start_date: Date;
+  end_date: Date;
+  participants: ActivityParticipant[];
+  resolution_text: string;
+}
+
+type ServerActivityData = Omit<ActivityData, "participants"> & {
+  participants: string;
+};
+
+export interface ActivityParticipant {
+  characterId: number;
+  characterLevel: number;
+  isArcane: boolean;
+  isDivine: boolean;
+  canTurnUndead: boolean;
+  canSneak: boolean;
+  canFindTraps: boolean;
+  hasMagicWeapons: boolean;
+  hasSilverWeapons: boolean;
+}
+
+export function ActivityData_StringToParticipants(s: string): ActivityParticipant[] {
+  if (s.length === 0) {
+    return [];
+  }
+  const stringIds = s.split(",");
+  return stringIds.map((sid) => {
+    const [pid, level, isArcane, isDivine, canTurnUndead, canSneak, canFindTraps, hasMagicWeapons, hasSilverWeapons] =
+      sid.split(":");
+    const p: ActivityParticipant = {
+      characterId: +pid,
+      characterLevel: +level,
+      isArcane: isArcane === "T",
+      isDivine: isDivine === "T",
+      canTurnUndead: canTurnUndead === "T",
+      canSneak: canSneak === "T",
+      canFindTraps: canFindTraps === "T",
+      hasMagicWeapons: hasMagicWeapons === "T",
+      hasSilverWeapons: hasSilverWeapons === "T",
+    };
+    return p;
+  });
+}
+
+export function ActivityData_ParticipantsToString(participants: ActivityParticipant[]): string {
+  return participants
+    .map((p) => {
+      return (
+        `${p.characterId}:` +
+        `${p.characterLevel}:` +
+        `${p.isArcane ? "T" : "F"}:` +
+        `${p.isDivine ? "T" : "F"}:` +
+        `${p.canTurnUndead ? "T" : "F"}:` +
+        `${p.canSneak ? "T" : "F"}:` +
+        `${p.canFindTraps ? "T" : "F"}:` +
+        `${p.hasMagicWeapons ? "T" : "F"}:` +
+        `${p.hasSilverWeapons ? "T" : "F"}`
+      );
+    })
+    .join(",");
+}
+
+export enum ActivityOutcomeType {
+  Invalid = "Invalid",
+  GroupXP = "GroupXP",
+  GroupGold = "GroupGold",
+  GroupItem = "GroupItem",
+  InjuryTwoWeeks = "InjuryTwoWeeks",
+  InjuryFourWeeks = "InjuryFourWeeks",
+  Death = "Death",
+  Relocate = "Relocate", // Character changed to a new location.
+}
+export interface ActivityOutcomeData {
+  id: number;
+  activity_id: number;
+  type: ActivityOutcomeType;
+  target_id: number;
+  quantity: number;
+}
+
+type ServerActivityOutcomeData = Omit<ActivityOutcomeData, "type"> & {
+  type: string;
+};
+
+export function ActivityOutcomeData_StringToType(s: string): ActivityOutcomeType {
+  switch (s) {
+    case ActivityOutcomeType.GroupXP:
+      return ActivityOutcomeType.GroupXP;
+    case ActivityOutcomeType.GroupGold:
+      return ActivityOutcomeType.GroupGold;
+    case ActivityOutcomeType.GroupItem:
+      return ActivityOutcomeType.GroupItem;
+    case ActivityOutcomeType.InjuryTwoWeeks:
+      return ActivityOutcomeType.InjuryTwoWeeks;
+    case ActivityOutcomeType.InjuryFourWeeks:
+      return ActivityOutcomeType.InjuryFourWeeks;
+    case ActivityOutcomeType.Death:
+      return ActivityOutcomeType.Death;
+    case ActivityOutcomeType.Relocate:
+      return ActivityOutcomeType.Relocate;
+    default:
+      return ActivityOutcomeType.Invalid;
+  }
+}
+
 export interface XPChange {
   newXPValue: number;
 }
@@ -278,6 +392,8 @@ export interface RowDeleted {
 }
 
 export type LogInResult = ServerError | UserData;
+export type ActivitiesResult = ServerError | ActivityData[];
+export type ActivityOutcomesResult = ServerError | ActivityOutcomeData[];
 export type CharactersResult = ServerError | CharacterData[];
 export type EquipmentSetsResult = ServerError | EquipmentSetData[];
 export type EquipmentSetItemsResult = ServerError | EquipmentSetItemData[];
@@ -329,6 +445,56 @@ class AServerAPI {
       body: JSON.stringify(requestBody),
     });
     return await res.json();
+  }
+
+  async fetchActivities(): Promise<ActivitiesResult> {
+    const res = await fetch("/api/fetchActivities", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerActivityData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      const activityData: ActivityData[] = [];
+      data.forEach((sActivityData) => {
+        activityData.push({
+          ...sActivityData,
+          participants: ActivityData_StringToParticipants(sActivityData.participants),
+          start_date: new Date(sActivityData.start_date),
+          end_date: new Date(sActivityData.end_date),
+        });
+      });
+
+      return activityData;
+    }
+  }
+
+  async fetchActivityOutcomes(): Promise<ActivityOutcomesResult> {
+    const res = await fetch("/api/fetchActivityOutcomes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerActivityOutcomeData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      const outcomeData: ActivityOutcomeData[] = [];
+      data.forEach((sOutcomeData) => {
+        outcomeData.push({
+          ...sOutcomeData,
+          type: ActivityOutcomeData_StringToType(sOutcomeData.type),
+        });
+      });
+
+      return outcomeData;
+    }
   }
 
   async fetchCharacters(): Promise<CharactersResult> {
@@ -949,6 +1115,50 @@ class AServerAPI {
       setId,
     };
     const res = await fetch("/api/deleteEquipmentSet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createActivity(activity: ActivityData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateActivity = {
+      ...activity,
+      participants: ActivityData_ParticipantsToString(activity.participants),
+    };
+    const res = await fetch("/api/createActivity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editActivity(activity: ActivityData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditActivity = {
+      ...activity,
+      participant_ids: ActivityData_ParticipantsToString(activity.participants),
+    };
+    const res = await fetch("/api/editActivity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteActivity(activityId: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteActivity = {
+      activityId,
+    };
+    const res = await fetch("/api/deleteActivity", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -25,7 +25,7 @@ import { SubPanelCloseButton } from "../SubPanelCloseButton";
 const DropTypeClassProficiency = "ClassProficiency";
 const DropTypeGeneralProficiency = "GeneralProficiency";
 
-interface AbilityDisplayData {
+export interface AbilityDisplayData {
   name: string;
   rank: number;
   subtype?: string;

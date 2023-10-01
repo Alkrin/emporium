@@ -233,3 +233,27 @@ export interface RequestBody_CreateOrEditEquipmentSet {
 export interface RequestBody_DeleteEquipmentSet {
   setId: number;
 }
+
+export interface RequestBody_CreateActivity {
+  user_id: number;
+  name: string;
+  description: string;
+  start_date: Date;
+  end_date: Date;
+  participants: string;
+}
+
+export interface RequestBody_EditActivity {
+  id: number;
+  user_id: number;
+  name: string;
+  description: string;
+  start_date: Date;
+  end_date: Date;
+  participant_ids: string;
+  resolution_text: string;
+}
+
+export interface RequestBody_DeleteActivity {
+  activityId: number;
+}

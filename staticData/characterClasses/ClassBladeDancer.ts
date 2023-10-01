@@ -106,6 +106,7 @@ export const ClassBladeDancer: CharacterClass = {
   ],
   spellcasting: [
     {
+      spellSource: SpellType.Divine,
       spellTypes: [SpellType.Bladedancer],
       requiresSpellbook: false,
       spellSlots: [
