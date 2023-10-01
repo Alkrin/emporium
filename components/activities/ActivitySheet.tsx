@@ -28,45 +28,47 @@ class AActivitySheet extends React.Component<Props> {
 
     const activityExists = this.props.activityId > 0 && !!this.props.activity;
 
-    return (
-      <div className={`${styles.root} ${animationClass}`}>
-        {activityExists ? (
-          <>
-            <div className={styles.nameLabel}>{`#${this.props.activity.id}: ${this.props.activity.name}`}</div>
-            <div className={styles.row}>
-              <div className={styles.dateLabel}>Start:</div>
-              <div className={styles.dateValue}>{dateFormat(this.props.activity.start_date, "d. mmm yyyy")}</div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.dateLabel}>End:</div>
-              <div className={styles.dateValue}>{dateFormat(this.props.activity.end_date, "d. mmm yyyy")}</div>
-            </div>
-            <textarea
-              className={styles.descriptionTextField}
-              value={this.props.activity.description}
-              disabled
-              spellCheck={false}
-            />
-            <div className={styles.row}>
-              <div className={styles.column}>
-                <div className={styles.normalText}>Participants</div>
-                <div className={styles.participantsList}>
-                  {this.props.activity.participants.map((p) => {
-                    const character = this.props.allCharacters[p.characterId];
-                    return `${character.name} L${p.characterLevel} ${character.class_name}`;
-                  })}
-                </div>
-              </div>
-              <div className={styles.preparednessContainer}>
-                <ActivityPreparednessDisplay participants={this.props.activity.participants} cellSizeVmin={7} />
+    if (this.props.activity) {
+      return (
+        <div className={`${styles.root} ${animationClass}`}>
+          <div className={styles.nameLabel}>{`#${this.props.activity.id}: ${this.props.activity.name}`}</div>
+          <div className={styles.row}>
+            <div className={styles.dateLabel}>Start:</div>
+            <div className={styles.dateValue}>{dateFormat(this.props.activity.start_date, "d. mmm yyyy")}</div>
+          </div>
+          <div className={styles.row}>
+            <div className={styles.dateLabel}>End:</div>
+            <div className={styles.dateValue}>{dateFormat(this.props.activity.end_date, "d. mmm yyyy")}</div>
+          </div>
+          <textarea
+            className={styles.descriptionTextField}
+            value={this.props.activity.description}
+            disabled
+            spellCheck={false}
+          />
+          <div className={styles.row}>
+            <div className={styles.column}>
+              <div className={styles.normalText}>Participants</div>
+              <div className={styles.participantsList}>
+                {this.props.activity.participants.map((p) => {
+                  const character = this.props.allCharacters[p.characterId];
+                  return `${character.name} L${p.characterLevel} ${character.class_name}`;
+                })}
               </div>
             </div>
-          </>
-        ) : (
+            <div className={styles.preparednessContainer}>
+              <ActivityPreparednessDisplay participants={this.props.activity.participants} cellSizeVmin={7} />
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className={`${styles.root} ${animationClass}`}>
           <div className={styles.placeholder} />
-        )}
-      </div>
-    );
+        </div>
+      );
+    }
   }
 }
 
