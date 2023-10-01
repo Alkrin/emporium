@@ -250,7 +250,7 @@ export interface RequestBody_EditActivity {
   description: string;
   start_date: Date;
   end_date: Date;
-  participant_ids: string;
+  participants: string;
   resolution_text: string;
 }
 

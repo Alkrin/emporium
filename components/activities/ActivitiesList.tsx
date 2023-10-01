@@ -99,20 +99,38 @@ class AActivitiesList extends React.Component<Props, State> {
         }
       })
       .sort((a, b) => {
+        // Unresolved, then in progress, then resolved.
+
         // Activities that need resolved should go first.
         const aEnd = a.end_date.getTime();
         const bEnd = b.end_date.getTime();
-        const aReady = aEnd <= todayTime;
-        const bReady = bEnd <= todayTime;
-        if (aReady !== bReady) {
-          // TODO: Is this the right direction?
-          return aReady ? -1 : 1;
+        const aCompleted = aEnd <= todayTime;
+        const bCompleted = bEnd <= todayTime;
+        const aResolved = a.resolution_text.length > 0;
+        const bResolved = b.resolution_text.length > 0;
+
+        const aCompletedUnresolved = aCompleted && !aResolved;
+        const bCompletedUnresolved = bCompleted && !bResolved;
+
+        // Completed, unresolved activities show first.
+        let dateOrder = 1;
+        if (aCompletedUnresolved !== bCompletedUnresolved) {
+          return aCompletedUnresolved ? -1 : 1;
+        }
+
+        // Uncompleted activities show second.
+        if (aCompleted !== bCompleted) {
+          return aCompleted ? 1 : -1;
+        }
+
+        // Completed, resolved activities show last.
+        if (aResolved && bResolved) {
+          dateOrder = -1;
         }
 
         // After that, sort by end date, so you can see what's coming up.
         if (aEnd - bEnd !== 0) {
-          // TODO: Is this the right direction?
-          return aEnd - bEnd;
+          return (aEnd - bEnd) * dateOrder;
         }
 
         // After that, sort by name.

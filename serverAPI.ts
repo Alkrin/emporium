@@ -1142,7 +1142,7 @@ class AServerAPI {
   async editActivity(activity: ActivityData): Promise<EditRowResult> {
     const requestBody: RequestBody_EditActivity = {
       ...activity,
-      participant_ids: ActivityData_ParticipantsToString(activity.participants),
+      participants: ActivityData_ParticipantsToString(activity.participants),
     };
     const res = await fetch("/api/editActivity", {
       method: "POST",
