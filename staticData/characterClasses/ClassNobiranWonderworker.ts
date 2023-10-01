@@ -115,6 +115,7 @@ export const ClassNobiranWonderworker: CharacterClass = {
   ],
   spellcasting: [
     {
+      spellSource: SpellType.Arcane,
       spellTypes: [SpellType.Arcane],
       requiresSpellbook: true,
       spellSlots: [
@@ -136,6 +137,7 @@ export const ClassNobiranWonderworker: CharacterClass = {
       ritualLevels: [7, 8, 9],
     },
     {
+      spellSource: SpellType.Divine,
       spellTypes: [SpellType.Divine],
       requiresSpellbook: false,
       spellSlots: [

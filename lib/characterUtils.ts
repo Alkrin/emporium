@@ -38,6 +38,7 @@ import { ProficiencyLeadership } from "../staticData/proficiencies/ProficiencyLe
 import { ProficiencyMysticAura } from "../staticData/proficiencies/ProficiencyMysticAura";
 import { MysticCommandOfVoice } from "../staticData/classFeatures/MysticCommandOfVoice";
 import { ProficiencySeduction } from "../staticData/proficiencies/ProficiencySeduction";
+import { ProficiencyLayOnHands } from "../staticData/proficiencies/ProficiencyLayOnHands";
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
 export function getBonusForStat(value: number): StatBonus {
@@ -94,7 +95,7 @@ export function getCharacterMaxEncumbrance(character: CharacterData): Stones {
   return [20 + getBonusForStat(character.strength), 0];
 }
 
-export function getAllCharacterAssociatedItemIds(characterId: number): number[] {
+export function getAllCharacterAssociatedItemIds(characterId: number, excludeStorages?: boolean): number[] {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
   if (!character) {
@@ -110,15 +111,18 @@ export function getAllCharacterAssociatedItemIds(characterId: number): number[] 
       finalItemIds.push(character[slotId]);
     }
   });
-  // All items in storages owned by the character.
-  Object.values(redux.items.allItems).forEach((item) => {
-    if (item.storage_id && redux.storages.allStorages[item.storage_id]?.owner_id === characterId) {
-      finalItemIds.push(item.id);
-    }
-  });
+
+  if (!excludeStorages) {
+    // All items in storages owned by the character.
+    Object.values(redux.items.allItems).forEach((item) => {
+      if (item.storage_id && redux.storages.allStorages[item.storage_id]?.owner_id === characterId) {
+        finalItemIds.push(item.id);
+      }
+    });
+  }
 
   // Contained items.
-  // Bread First Search to find all nested items.
+  // Breadth First Search to find all nested items.
   let activeItemIds: number[] = [...finalItemIds];
   while (activeItemIds.length > 0) {
     // Find all items contained inside the active items.
@@ -285,6 +289,7 @@ export function canCharacterEquipWeapon(characterId: number, itemId: number): bo
       if (
         // If no weapon category, this is an improvised weapon, which anyone can use.
         weaponCategory &&
+        (characterClass.weaponCategoryPermissions?.length ?? 0) > 0 &&
         // If the character class doesn't support this weapon category, only proficiencies can save it.
         !characterClass.weaponCategoryPermissions?.includes(weaponCategory) &&
         // So... do we have the proficiency that lets you use this even when your class says no?
@@ -299,6 +304,7 @@ export function canCharacterEquipWeapon(characterId: number, itemId: number): bo
       if (
         // If no weapon type, this is an improvised weapon, which anyone can use.
         weaponType &&
+        (characterClass.weaponTypePermissions?.length ?? 0) > 0 &&
         // If the character class doesn't support this weapon type, only proficiencies can save it.
         !characterClass.weaponTypePermissions?.includes(weaponType) &&
         // So... do we have the proficiency that lets you use this even when your class says no?
@@ -325,7 +331,8 @@ export function canCharacterEquipWeapon(characterId: number, itemId: number): bo
 export function isProficiencyUnlockedForCharacter(
   characterId: number,
   proficiencyId: string,
-  subtype?: string
+  subtype?: string,
+  levelOverride?: number
 ): boolean {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
@@ -333,12 +340,15 @@ export function isProficiencyUnlockedForCharacter(
     return false;
   } else {
     const characterClass = AllClasses[character.class_name];
+    const characterLevel = levelOverride ?? character.level;
 
     // Is this an unlocked class feature?
     const feature = characterClass.classFeatures.find((abilityFilter) => {
       const isSameBaseAbility = abilityFilter.def.id === proficiencyId;
       const isMatchingSubtype = !subtype || abilityFilter.subtypes?.includes(subtype);
-      return isSameBaseAbility && isMatchingSubtype;
+      // TODO: The minLevel should be part of the filter, not the def.
+      const meetsMinimumLevel = characterLevel >= abilityFilter.def.minLevel;
+      return isSameBaseAbility && isMatchingSubtype && meetsMinimumLevel;
     });
     if (feature) {
       return true;
@@ -369,7 +379,7 @@ export function isProficiencyUnlockedForCharacter(
         [ProficiencySource.Class5]: characterClass.classProficienciesAt[4] ?? 99,
       };
 
-      if (character.level >= minLevelForSource[pdata.source]) {
+      if (characterLevel >= minLevelForSource[pdata.source]) {
         return true;
       }
     }
@@ -1056,4 +1066,90 @@ export function getEquippableItemsForSlot(className: string, slotName: keyof Cha
   }
 
   return items;
+}
+
+export function isCharacterArcane(characterId: number, levelOverride?: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const characterClass = AllClasses[character.class_name];
+  const characterLevel = levelOverride ?? character.level;
+  // Does this character have base arcane capacity at their current level?
+  const arcaneCapacity = characterClass.spellcasting.find((sc) => {
+    return sc.spellSource === SpellType.Arcane && sc.spellSlots[characterLevel - 1][0] > 0;
+  });
+  return !!arcaneCapacity;
+}
+
+export function isCharacterDivine(characterId: number, levelOverride?: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const characterClass = AllClasses[character.class_name];
+  const characterLevel = levelOverride ?? character.level;
+  // Does this character have base divine capacity at their current level?
+  const arcaneCapacity = characterClass.spellcasting.find((sc) => {
+    return sc.spellSource === SpellType.Divine && sc.spellSlots[characterLevel - 1][0] > 0;
+  });
+  return (
+    !!arcaneCapacity ||
+    isProficiencyUnlockedForCharacter(characterId, ProficiencyLayOnHands.id, undefined, characterLevel)
+  );
+}
+
+export function canCharacterTurnUndead(characterId: number, levelOverride?: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const characterClass = AllClasses[character.class_name];
+  const characterLevel = levelOverride ?? character.level;
+  // Does this character's class have any Turn Undead ability at its current level?
+  const turnCapacity = characterClass.levelBasedSkills.find((lbc) => {
+    // "-" means the character can't turn at their current level.
+    return lbc.name.startsWith("Turn Undead") && lbc.rolls[characterLevel - 1] !== "-";
+  });
+  return !!turnCapacity;
+}
+
+export function canCharacterSneak(characterId: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const characterClass = AllClasses[character.class_name];
+  // Does this character's class have any Sneak ability at its current level?
+  const sneakCapacity = characterClass.levelBasedSkills.find((lbc) => {
+    return lbc.name === "Move Silently" || lbc.name === "Hide In Shadows";
+  });
+  return !!sneakCapacity;
+}
+
+export function canCharacterFindTraps(characterId: number): boolean {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const characterClass = AllClasses[character.class_name];
+  // Does this character's class have any Trap ability at its current level?
+  const trapCapacity = characterClass.levelBasedSkills.find((lbc) => {
+    return lbc.name === "Find Traps" || lbc.name === "Remove Traps";
+  });
+  return !!trapCapacity;
+}
+
+export function doesCharacterHaveMagicWeapons(characterId: number): boolean {
+  const redux = store.getState();
+  // Does this character have a magic weapon or magic ammo on hand?
+  const itemIds = getAllCharacterAssociatedItemIds(characterId, true);
+  const magicWeapon = itemIds.find((iid) => {
+    const item = redux.items.allItems[iid];
+    const def = redux.gameDefs.items[item.def_id];
+    return def.tags.includes(Tag.Magic);
+  });
+  return !!magicWeapon;
+}
+
+export function doesCharacterHaveSilverWeapons(characterId: number): boolean {
+  const redux = store.getState();
+  // Does this character have a silver weapon or silver ammo on hand?
+  const itemIds = getAllCharacterAssociatedItemIds(characterId, true);
+  const magicWeapon = itemIds.find((iid) => {
+    const item = redux.items.allItems[iid];
+    const def = redux.gameDefs.items[item.def_id];
+    return def.tags.includes(Tag.Silver);
+  });
+  return !!magicWeapon;
 }

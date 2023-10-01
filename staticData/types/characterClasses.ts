@@ -45,6 +45,8 @@ export enum SpellType {
 }
 
 export interface SpellCapability {
+  /** The primary source is either divine (granted by a god) or arcane (learned through study). */
+  spellSource: SpellType.Arcane | SpellType.Divine;
   /** All spell types that can be cast from these spell slots. */
   spellTypes: SpellType[];
   /** First index is character level-1, second index is spell level-1. */

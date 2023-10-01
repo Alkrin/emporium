@@ -15,6 +15,8 @@ import ToasterPane from "./ToasterPane";
 import TooltipPane from "./TooltipPane";
 import TooltipSource from "./TooltipSource";
 import { WorldPanel } from "./world/WorldPanel";
+import { setActiveCharacterId } from "../redux/charactersSlice";
+import { setActiveActivityId } from "../redux/activitiesSlice";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -66,7 +68,10 @@ class AMainPage extends React.Component<Props, State> {
             }`}
             tooltipParams={{ id: "CharactersPanel", content: "Characters" }}
             onMouseDown={() => {
-              this.setState({ activePanel: "Characters" });
+              this.props.dispatch?.(setActiveCharacterId(0));
+              requestAnimationFrame(() => {
+                this.setState({ activePanel: "Characters" });
+              });
             }}
           >
             <img className={styles.panelSelectorImage} src={"/images/Characters.png"} />
@@ -77,7 +82,10 @@ class AMainPage extends React.Component<Props, State> {
             }`}
             tooltipParams={{ id: "ActivitiesPanel", content: "Activities" }}
             onMouseDown={() => {
-              this.setState({ activePanel: "Activities" });
+              this.props.dispatch?.(setActiveActivityId(0));
+              requestAnimationFrame(() => {
+                this.setState({ activePanel: "Activities" });
+              });
             }}
           >
             <img className={styles.panelSelectorImage} src={"/images/Activities.png"} />

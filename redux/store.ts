@@ -14,9 +14,11 @@ import { tooltipSlice } from "./tooltipSlice";
 import { userSlice } from "./userSlice";
 import { spellbooksSlice } from "./spellbooksSlice";
 import { repertoiresSlice } from "./repertoiresSlice";
+import { activitiesSlice } from "./activitiesSlice";
 
 const store = configureStore({
   reducer: {
+    activities: activitiesSlice.reducer,
     characters: charactersSlice.reducer,
     contextMenu: contextMenuSlice.reducer,
     dragAndDrop: dragAndDropSlice.reducer,

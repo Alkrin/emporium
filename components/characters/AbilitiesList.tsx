@@ -12,13 +12,7 @@ import TooltipSource from "../TooltipSource";
 import styles from "./AbilitiesList.module.scss";
 import { isProficiencyUnlockedForCharacter } from "../../lib/characterUtils";
 import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
-
-interface AbilityDisplayData {
-  name: string;
-  rank: number;
-  subtype?: string;
-  def: AbilityOrProficiency;
-}
+import { AbilityDisplayData } from "./EditProficienciesSubPanel";
 
 interface ReactProps {
   characterId: number;
