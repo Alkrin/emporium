@@ -102,8 +102,8 @@ class AActivitiesList extends React.Component<Props, State> {
         // Unresolved, then in progress, then resolved.
 
         // Activities that need resolved should go first.
-        const aEnd = a.end_date.getTime();
-        const bEnd = b.end_date.getTime();
+        const aEnd = new Date(a.end_date).getTime();
+        const bEnd = new Date(b.end_date).getTime();
         const aCompleted = aEnd <= todayTime;
         const bCompleted = bEnd <= todayTime;
         const aResolved = a.resolution_text.length > 0;
@@ -156,7 +156,9 @@ class AActivitiesList extends React.Component<Props, State> {
 
   private renderActivityRow(activity: ActivityData, index: number): React.ReactNode {
     const selectedClass = activity.id === this.props.activeActivityId ? styles.selected : "";
-    const readyClass = activity.end_date.getTime() < new Date().getTime() ? styles.ready : "";
+    const localEndDate = new Date(activity.end_date);
+    let localEndDateTime = localEndDate.getTime() + localEndDate.getTimezoneOffset() * 60000;
+    const readyClass = new Date(activity.end_date).getTime() < new Date().getTime() ? styles.ready : "";
     return (
       <div
         className={`${styles.listRow} ${selectedClass} ${readyClass}`}
@@ -166,7 +168,7 @@ class AActivitiesList extends React.Component<Props, State> {
         <div className={styles.listName}>
           #{activity.id}: {activity.name}
         </div>
-        <div className={styles.listEndDate}>{dateFormat(activity.end_date, "d. mmm yyyy")}</div>
+        <div className={styles.listEndDate}>{dateFormat(localEndDateTime, "d. mmm yyyy")}</div>
         <div className={styles.editButton} onClick={this.onActivityEditClick.bind(this, activity.id)} />
       </div>
     );
