@@ -26,19 +26,22 @@ class AActivitySheet extends React.Component<Props> {
   render(): React.ReactNode {
     const animationClass = this.props.exiting ? styles.exit : styles.enter;
 
-    const activityExists = this.props.activityId > 0 && !!this.props.activity;
-
     if (this.props.activity) {
+      // Dates are stored in UTC, so we have to pretend we are in a UTC time zone, else display is wrong.
+      const localStartDate = new Date(this.props.activity.start_date);
+      let localStartDateTime = localStartDate.getTime() + localStartDate.getTimezoneOffset() * 60000;
+      const localEndDate = new Date(this.props.activity.end_date);
+      let localEndDateTime = localEndDate.getTime() + localEndDate.getTimezoneOffset() * 60000;
       return (
         <div className={`${styles.root} ${animationClass}`}>
           <div className={styles.nameLabel}>{`#${this.props.activity.id}: ${this.props.activity.name}`}</div>
           <div className={styles.row}>
             <div className={styles.dateLabel}>Start:</div>
-            <div className={styles.dateValue}>{dateFormat(this.props.activity.start_date, "d. mmm yyyy")}</div>
+            <div className={styles.dateValue}>{dateFormat(localStartDateTime, "d. mmm yyyy")}</div>
           </div>
           <div className={styles.row}>
             <div className={styles.dateLabel}>End:</div>
-            <div className={styles.dateValue}>{dateFormat(this.props.activity.end_date, "d. mmm yyyy")}</div>
+            <div className={styles.dateValue}>{dateFormat(localEndDateTime, "d. mmm yyyy")}</div>
           </div>
           <textarea
             className={styles.descriptionTextField}
