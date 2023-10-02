@@ -86,8 +86,8 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
           user_id: props.currentUserId,
           name: "",
           description: "",
-          start_date: new Date(),
-          end_date: new Date(),
+          start_date: dateFormat(new Date(), "yyyy-mm-dd"),
+          end_date: dateFormat(new Date(), "yyyy-mm-dd"),
           participants: [],
           resolution_text: "",
         },
@@ -146,17 +146,11 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
           <div className={styles.label}>Start Date</div>
           <input
             type={"date"}
-            value={dateFormat(
-              // This idiotic timezone math is required because Javascript stores dates in UTC, but
-              // a date picker interprets its `value` in local time.  If you don't add the timezone
-              // offset, the displayed date may be wrong by a day.
-              new Date(this.state.activity.start_date).getTime() + new Date().getTimezoneOffset() * 60000,
-              "yyyy-mm-dd"
-            )}
+            value={this.state.activity.start_date}
             onChange={(e) => {
               const activity: ActivityData = {
                 ...this.state.activity,
-                start_date: e.target.valueAsDate ?? new Date(e.target.value),
+                start_date: e.target.value,
               };
               this.setState({ activity });
             }}
@@ -164,19 +158,11 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
           <div className={styles.label}>End Date</div>
           <input
             type={"date"}
-            value={dateFormat(
-              // This idiotic timezone math is required because Javascript stores dates in UTC, but
-              // a date picker interprets its `value` in local time.  If you don't add the timezone
-              // offset, the displayed date may be wrong by a day.
-              new Date(this.state.activity.end_date).getTime() + new Date().getTimezoneOffset() * 60000,
-              "yyyy-mm-dd"
-            )}
+            value={this.state.activity.end_date}
             onChange={(e) => {
-              const end_date = e.target.valueAsDate ?? new Date(e.target.value);
-
               const activity: ActivityData = {
                 ...this.state.activity,
-                end_date,
+                end_date: e.target.value,
               };
               this.setState({ activity });
             }}
@@ -369,8 +355,8 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
         }
         // Would any of those overlap with this new activity?
         return (
-          Math.max(activity.start_date.getTime(), this.state.activity.start_date.getTime()) <=
-          Math.min(activity.end_date.getTime(), this.state.activity.end_date.getTime())
+          Math.max(new Date(activity.start_date).getTime(), new Date(this.state.activity.start_date).getTime()) <=
+          Math.min(new Date(activity.end_date).getTime(), new Date(this.state.activity.end_date).getTime())
         );
       });
       if (this.state.filterStatus === "Busy" && !conflictingActivity) {

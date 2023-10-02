@@ -238,8 +238,8 @@ export interface RequestBody_CreateActivity {
   user_id: number;
   name: string;
   description: string;
-  start_date: Date;
-  end_date: Date;
+  start_date: string;
+  end_date: string;
   participants: string;
 }
 
@@ -248,8 +248,8 @@ export interface RequestBody_EditActivity {
   user_id: number;
   name: string;
   description: string;
-  start_date: Date;
-  end_date: Date;
+  start_date: string;
+  end_date: string;
   participants: string;
   resolution_text: string;
 }

@@ -261,8 +261,8 @@ export interface ActivityData {
   user_id: number;
   name: string;
   description: string;
-  start_date: Date;
-  end_date: Date;
+  start_date: string;
+  end_date: string;
   participants: ActivityParticipant[];
   resolution_text: string;
 }
@@ -464,8 +464,6 @@ class AServerAPI {
         activityData.push({
           ...sActivityData,
           participants: ActivityData_StringToParticipants(sActivityData.participants),
-          start_date: new Date(sActivityData.start_date),
-          end_date: new Date(sActivityData.end_date),
         });
       });
 
