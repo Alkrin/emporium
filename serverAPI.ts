@@ -34,6 +34,8 @@ import {
   RequestBody_CreateActivity,
   RequestBody_EditActivity,
   RequestBody_DeleteActivity,
+  RequestBody_ResolveActivity,
+  RequestBody_KillOrReviveCharacter,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -186,6 +188,9 @@ export interface CharacterData extends CharacterEquipmentData {
   henchmaster_id: number;
   /** Whole gp, decimal sp/cp. */
   money: number;
+  remaining_cxp_deductible: number;
+  cxp_deductible_date: string;
+  dead: boolean;
 }
 
 export interface ProficiencyData {
@@ -326,9 +331,11 @@ export function ActivityData_ParticipantsToString(participants: ActivityParticip
 
 export enum ActivityOutcomeType {
   Invalid = "Invalid",
-  GroupXP = "GroupXP",
-  GroupGold = "GroupGold",
-  GroupItem = "GroupItem",
+  XP = "XP",
+  Gold = "Gold",
+  Item = "Item",
+  CXPDeductible = "CXPDeductible",
+  CXPDeductibleReset = "CXPDeductibleReset",
   InjuryTwoWeeks = "InjuryTwoWeeks",
   InjuryFourWeeks = "InjuryFourWeeks",
   Death = "Death",
@@ -348,12 +355,16 @@ type ServerActivityOutcomeData = Omit<ActivityOutcomeData, "type"> & {
 
 export function ActivityOutcomeData_StringToType(s: string): ActivityOutcomeType {
   switch (s) {
-    case ActivityOutcomeType.GroupXP:
-      return ActivityOutcomeType.GroupXP;
-    case ActivityOutcomeType.GroupGold:
-      return ActivityOutcomeType.GroupGold;
-    case ActivityOutcomeType.GroupItem:
-      return ActivityOutcomeType.GroupItem;
+    case ActivityOutcomeType.XP:
+      return ActivityOutcomeType.XP;
+    case ActivityOutcomeType.Gold:
+      return ActivityOutcomeType.Gold;
+    case ActivityOutcomeType.Item:
+      return ActivityOutcomeType.Item;
+    case ActivityOutcomeType.CXPDeductible:
+      return ActivityOutcomeType.CXPDeductible;
+    case ActivityOutcomeType.CXPDeductibleReset:
+      return ActivityOutcomeType.CXPDeductibleReset;
     case ActivityOutcomeType.InjuryTwoWeeks:
       return ActivityOutcomeType.InjuryTwoWeeks;
     case ActivityOutcomeType.InjuryFourWeeks:
@@ -539,6 +550,7 @@ class AServerAPI {
       // so we have to convert before passing the results along.
       const itemData: ItemDefData[] = [];
       data.forEach((sItemData) => {
+        sItemData.storage_filters = sItemData.storage_filters.trim();
         itemData.push({
           ...sItemData,
           tags: sItemData.tags.length > 0 ? sItemData.tags.split(",") : [],
@@ -1157,6 +1169,50 @@ class AServerAPI {
       activityId,
     };
     const res = await fetch("/api/deleteActivity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async resolveActivity(
+    activity_id: number,
+    resolution_text: string,
+    outcomes: ActivityOutcomeData[]
+  ): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_ResolveActivity = { activity_id, resolution_text, outcomes };
+    const res = await fetch("/api/resolveActivity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async reviveCharacter(characterId: number): Promise<EditRowResult> {
+    const requestBody: RequestBody_KillOrReviveCharacter = {
+      characterId,
+    };
+    const res = await fetch("/api/reviveCharacter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async killCharacter(characterId: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_KillOrReviveCharacter = {
+      characterId,
+    };
+    const res = await fetch("/api/killCharacter", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

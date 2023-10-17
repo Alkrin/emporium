@@ -581,6 +581,12 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         ) : null}
 
         <div className={styles.buttonRow}>
+          {this.props.isEditMode && (
+            <div className={styles.killOrReviveButton} onClick={this.onKillOrReviveClicked.bind(this)}>
+              {this.props.selectedCharacter?.dead ? "Revive" : "Kill"}
+            </div>
+          )}
+
           <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
             {this.props.isEditMode ? "Save Changes" : "Save Character"}
           </div>
@@ -600,6 +606,33 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         <SubPanelCloseButton />
       </div>
     );
+  }
+
+  private async onKillOrReviveClicked(): Promise<void> {
+    if (this.state.isSaving) {
+      return;
+    }
+    this.setState({ isSaving: true });
+
+    if (this.props.selectedCharacter?.dead) {
+      // They were dead.  Revive them!
+      await ServerAPI.reviveCharacter(this.props.selectedCharacter?.id ?? 0);
+    } else {
+      // They were alive.  Kill them!
+      await ServerAPI.killCharacter(this.props.selectedCharacter?.id ?? 0);
+    }
+
+    if (this.props.dispatch) {
+      await refetchCharacters(this.props.dispatch);
+    }
+
+    this.setState({ isSaving: false });
+    // Close the subPanel.
+    this.props.dispatch?.(hideSubPanel());
+    // De-select the character (after the subPanel disappears).
+    setTimeout(() => {
+      this.props.dispatch?.(setActiveCharacterId(0));
+    }, 500);
   }
 
   private async onSaveClicked(): Promise<void> {
@@ -683,6 +716,10 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       hit_dice: this.state.hitDice,
       henchmaster_id: 0,
       money: 0,
+      // CXP Deductible is handled by the Activity resolution flow.
+      remaining_cxp_deductible: 0,
+      cxp_deductible_date: "",
+      dead: false,
       // EquipmentData values are ignored when editing a character.
       ...emptyEquipmentData,
     };
@@ -699,6 +736,17 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         this.state.selectableValues,
         this.generateStartingEquipmentData()
       );
+      if ("error" in res) {
+        console.log("Failed to create character.");
+      } else {
+        // First output is the insert query.  Select that character.
+        if ("insertId" in res[0]) {
+          const iid = res[0].insertId;
+          requestAnimationFrame(() => {
+            this.props.dispatch?.(setActiveCharacterId(iid));
+          });
+        }
+      }
     }
     this.setState({ isSaving: false });
     // Refetch characters.

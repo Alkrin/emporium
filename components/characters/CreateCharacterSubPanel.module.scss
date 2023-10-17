@@ -363,6 +363,26 @@
   justify-content: center;
 }
 
+.killOrReviveButton {
+  position: relative;
+  margin-right: 2vmin;
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+}
+
 .saveButton {
   position: relative;
   padding: 0.5vmin;

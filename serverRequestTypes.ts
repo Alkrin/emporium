@@ -1,4 +1,10 @@
-import { CharacterEquipmentData, EquipmentSetData, EquipmentSetItemData, ProficiencyData } from "./serverAPI";
+import {
+  ActivityOutcomeData,
+  CharacterEquipmentData,
+  EquipmentSetData,
+  EquipmentSetItemData,
+  ProficiencyData,
+} from "./serverAPI";
 import { SpellType } from "./staticData/types/characterClasses";
 
 export interface RequestBody_AddToRepertoire {
@@ -256,4 +262,14 @@ export interface RequestBody_EditActivity {
 
 export interface RequestBody_DeleteActivity {
   activityId: number;
+}
+
+export interface RequestBody_ResolveActivity {
+  activity_id: number;
+  resolution_text: string;
+  outcomes: ActivityOutcomeData[];
+}
+
+export interface RequestBody_KillOrReviveCharacter {
+  characterId: number;
 }

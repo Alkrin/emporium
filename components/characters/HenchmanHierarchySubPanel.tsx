@@ -270,8 +270,10 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
 
   private getSortedIndependents(): CharacterData[] {
     const independents: CharacterData[] = Object.values(this.props.allCharacters).filter((character) => {
+      const hasNoMaster = character.henchmaster_id === 0;
+      const isAlive = !character.dead;
       // TODO: Filter for current player and active role?
-      return character.henchmaster_id === 0;
+      return hasNoMaster && isAlive;
     });
 
     independents.sort((a, b) => {
@@ -286,8 +288,10 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
 
   private getSortedMinions(): CharacterData[] {
     const minions: CharacterData[] = Object.values(this.props.allCharacters).filter((character) => {
+      const isMinion = character.henchmaster_id !== 0;
+      const isAlive = !character.dead;
       // TODO: Filter for current player and active role?
-      return character.henchmaster_id !== 0;
+      return isMinion && isAlive;
     });
 
     minions.sort((a, b) => {

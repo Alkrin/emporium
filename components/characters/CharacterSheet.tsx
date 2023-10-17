@@ -100,7 +100,7 @@ class ACharacterSheet extends React.Component<Props> {
         <div className={styles.repertoireScroller}>
           {characterClass.spellcasting.map((spellCapability, scIndex) => {
             const repertoireBonus = spellCapability.repertoireStat
-              ? getBonusForStat(getCharacterStat(this.props.character, spellCapability.repertoireStat))
+              ? Math.max(getBonusForStat(getCharacterStat(this.props.character, spellCapability.repertoireStat)), 0)
               : 0;
             const slots = spellCapability.spellSlots[this.props.character.level - 1];
             return (

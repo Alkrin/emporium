@@ -14,6 +14,7 @@ import { ProficiencyCombatTrickery } from "../proficiencies/ProficiencyCombatTri
 import { ProficiencyCommand } from "../proficiencies/ProficiencyCommand";
 import { ProficiencyDungeonBashing } from "../proficiencies/ProficiencyDungeonBashing";
 import { ProficiencyEndurance } from "../proficiencies/ProficiencyEndurance";
+import { ProficiencyFightingStyle } from "../proficiencies/ProficiencyFightingStyle";
 import { ProficiencyGambling } from "../proficiencies/ProficiencyGambling";
 import { ProficiencyIntimidation } from "../proficiencies/ProficiencyIntimidation";
 import { ProficiencyLanguage } from "../proficiencies/ProficiencyLanguage";
@@ -76,6 +77,10 @@ export const ClassBattlegoatGatecrasher: CharacterClass = {
     { def: ProficiencyCommand },
     { def: ProficiencyDungeonBashing },
     { def: ProficiencyEndurance },
+    {
+      def: ProficiencyFightingStyle,
+      subtypes: ["Single Weapon"],
+    },
     { def: ProficiencyGambling },
     { def: ProficiencyIntimidation },
     { def: ProficiencyLeadership },
@@ -88,7 +93,6 @@ export const ClassBattlegoatGatecrasher: CharacterClass = {
     { def: ProficiencySkirmishing },
     { def: ProficiencySurvival },
     { def: ProficiencySwashbuckling },
-    { def: ProficiencyWeaponFinesse },
     { def: ProficiencyWeaponFocus },
   ],
   spellcasting: [],

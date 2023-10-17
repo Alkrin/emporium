@@ -21,6 +21,7 @@ import TooltipSource from "../TooltipSource";
 import styles from "./EditProficienciesSubPanel.module.scss";
 import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
+import { AllInjuries } from "../../staticData/injuries/AllInjuries";
 
 const DropTypeClassProficiency = "ClassProficiency";
 const DropTypeGeneralProficiency = "GeneralProficiency";
@@ -246,6 +247,9 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     let def = AllProficiencies[pData.feature_id];
     if (!def) {
       def = AllClassFeatures[pData.feature_id];
+    }
+    if (!def) {
+      def = AllInjuries[pData.feature_id];
     }
     let displayName: string = def.name;
     if (pData.subtype && pData.subtype.length > 0) {
@@ -558,6 +562,9 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       if (!def) {
         def = AllClassFeatures[selection[0].feature_id];
       }
+      if (!def) {
+        def = AllInjuries[selection[0].feature_id];
+      }
 
       features.push({
         name: def.name,
@@ -639,7 +646,8 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       oldClassKeys.forEach((key) => {
         hasChanges =
           hasChanges ||
-          this.originalClassProficiencies[key].def.id !== this.state.assignedClassProficiencies[key].def.id;
+          this.originalClassProficiencies[key].def.id !== this.state.assignedClassProficiencies[key].def.id ||
+          this.originalClassProficiencies[key].subtype !== this.state.assignedClassProficiencies[key].subtype;
       });
     }
     if (!hasChanges) {
@@ -647,13 +655,16 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       oldGeneralKeys.forEach((key) => {
         hasChanges =
           hasChanges ||
-          this.originalGeneralProficiencies[key].def.id !== this.state.assignedGeneralProficiencies[key].def.id;
+          this.originalGeneralProficiencies[key].def.id !== this.state.assignedGeneralProficiencies[key].def.id ||
+          this.originalGeneralProficiencies[key].subtype !== this.state.assignedGeneralProficiencies[key].subtype;
       });
     }
 
     // Check Extra assignments.
     for (let i = 0; !hasChanges && i < this.originalExtraProficiencies.length; ++i) {
-      hasChanges = this.originalExtraProficiencies[i].def.id !== this.state.assignedExtraProficiencies[i].def.id;
+      hasChanges =
+        this.originalExtraProficiencies[i].def.id !== this.state.assignedExtraProficiencies[i].def.id ||
+        this.originalExtraProficiencies[i].subtype !== this.state.assignedExtraProficiencies[i].subtype;
     }
 
     // If nothing changed, do nothing.
@@ -686,7 +697,6 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     });
 
     const res = await ServerAPI.updateProficiencies(this.props.character.id, pData);
-    console.log(res);
 
     this.setState({ isSaving: false });
     // // Refetch proficiencies.
@@ -704,7 +714,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     return {
       character_id: this.props.character.id,
       feature_id: displayData.def.id,
-      subtype: displayData.def.subTypes?.[0] ?? "",
+      subtype: displayData.subtype ?? "",
       source,
     };
   }

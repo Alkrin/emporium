@@ -38,6 +38,7 @@ interface State {
 
 interface ReactProps {
   isEditMode?: boolean;
+  isClone?: boolean;
 }
 
 interface InjectedProps {
@@ -56,13 +57,14 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    if (props.isEditMode) {
+    if (props.isEditMode || props.isClone) {
       if (props.activeActivityId > 0) {
         // Load the selected activity.
         const a = props.activities[props.activeActivityId];
         this.state = {
           activity: {
-            id: a.id,
+            // When cloning, we copy everything except the id.
+            id: props.isClone ? -1 : a.id,
             user_id: a.user_id,
             name: a.name,
             description: a.description,
@@ -327,6 +329,10 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
 
   private getSortedAdventurers(): CharacterData[] {
     const p: CharacterData[] = Object.values(this.props.allCharacters).filter((character) => {
+      // Exclude the dead.
+      if (character.dead) {
+        return false;
+      }
       // Exclude characters that are already participants.
       if (
         !!this.state.activity.participants.find((p) => {
@@ -499,12 +505,17 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
     } else {
       // Send it to the server!
       const res = await ServerAPI.createActivity(this.state.activity);
+      // Select the newly created activity.
+      if ("insertId" in res) {
+        this.props.dispatch?.(setActiveActivityId(res.insertId));
+      }
     }
     this.setState({ isSaving: false });
     // Refetch activities.
     if (this.props.dispatch) {
       await refetchActivities(this.props.dispatch);
     }
+
     // Close the subPanel.
     this.props.dispatch?.(hideSubPanel());
   }

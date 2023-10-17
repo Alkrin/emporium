@@ -52,7 +52,7 @@ class AItemTooltip extends React.Component<Props> {
           {<div className={styles.slot}>{equipmentSlotTags.join(", ")}</div>}
         </div>
         <div className={styles.row}>
-          {itemDef.ac > 0 && <div className={styles.segment}>{`AC: ${itemDef.ac}`}</div>}
+          {itemDef.ac > 0 && <div className={styles.segment}>{`AC: ${itemDef.ac + itemDef.magic_bonus}`}</div>}
           {itemDef.range_increment > 0 && (
             <div className={styles.segment}>{`Range: ${itemDef.range_increment}' / ${itemDef.range_increment * 2}' / ${
               itemDef.range_increment * 3

@@ -33,7 +33,7 @@ export const ClassThief: CharacterClass = {
   name: "Thief",
   hitDieSize: 4,
   hpStep: 2,
-  primeRequisites: [CharacterStat.Strength],
+  primeRequisites: [CharacterStat.Dexterity],
   statRequirements: {},
   xpToLevel: [0, 1250, 2500, 5000, 10000, 20000, 40000, 80000, 180000, 280000, 380000, 480000, 580000, 680000],
   weaponStyles: [WeaponStyle.OneHandOnly, WeaponStyle.DualWield],
