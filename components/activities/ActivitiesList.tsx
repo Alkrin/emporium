@@ -159,9 +159,10 @@ class AActivitiesList extends React.Component<Props, State> {
     const localEndDate = new Date(activity.end_date);
     let localEndDateTime = localEndDate.getTime() + localEndDate.getTimezoneOffset() * 60000;
     const readyClass = new Date(activity.end_date).getTime() < new Date().getTime() ? styles.ready : "";
+    const resolvedClass = activity.resolution_text.length > 0 ? styles.resolved : "";
     return (
       <div
-        className={`${styles.listRow} ${selectedClass} ${readyClass}`}
+        className={`${styles.listRow} ${selectedClass} ${readyClass} ${resolvedClass}`}
         key={`activityRow${index}`}
         onClick={this.onActivityRowClick.bind(this, activity.id)}
       >
@@ -169,7 +170,10 @@ class AActivitiesList extends React.Component<Props, State> {
           #{activity.id}: {activity.name}
         </div>
         <div className={styles.listEndDate}>{dateFormat(localEndDateTime, "d. mmm yyyy")}</div>
-        <div className={styles.editButton} onClick={this.onActivityEditClick.bind(this, activity.id)} />
+        <div
+          className={`${styles.editButton} ${resolvedClass}`}
+          onClick={this.onActivityEditClick.bind(this, activity.id)}
+        />
       </div>
     );
   }

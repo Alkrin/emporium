@@ -1,5 +1,7 @@
+import store from "../redux/store";
 import { CharacterData, CharacterEquipmentSlots, ItemData, ItemDefData } from "../serverAPI";
 import { Dictionary } from "./dictionary";
+import { EquipmentSlotTag, WeaponCategoryTag, WeaponTypeTag } from "./tags";
 
 const kAccuracy = 10000;
 
@@ -188,4 +190,19 @@ export function getTotalEquippedWeight(
   });
 
   return weight;
+}
+
+export function doesItemGrantMagicDamageBonus(itemId: number): boolean {
+  const redux = store.getState();
+  const item = redux.items.allItems[itemId];
+  const def = redux.gameDefs.items[item.def_id];
+
+  // Magic weapons that use ammo only provide a to-hit bonus.
+  if (def.tags.includes(EquipmentSlotTag.Ranged)) {
+    if (def.tags.includes(WeaponCategoryTag.BowCrossbow) || def.tags.includes(WeaponTypeTag.Sling)) {
+      return false;
+    }
+  }
+
+  return true;
 }

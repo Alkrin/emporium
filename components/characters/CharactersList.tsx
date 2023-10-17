@@ -10,9 +10,12 @@ import { CharacterData, UserData } from "../../serverAPI";
 import styles from "./CharactersList.module.scss";
 import { CreateCharacterSubPanel } from "./CreateCharacterSubPanel";
 
+type AliveOrDead = "Alive" | "Dead";
+
 interface State {
   filterOwnerId: number;
   filterLocationId: number; // Location or Activity?
+  filterAliveOrDead: AliveOrDead;
 }
 
 interface ReactProps {}
@@ -35,6 +38,7 @@ class ACharactersList extends React.Component<Props, State> {
     this.state = {
       filterOwnerId: -1,
       filterLocationId: -1,
+      filterAliveOrDead: "Alive",
     };
   }
 
@@ -75,6 +79,19 @@ class ACharactersList extends React.Component<Props, State> {
               }}
             >
               <option value={-1}>Any</option>
+            </select>
+          </div>
+          <div className={styles.filtersContainer}>
+            <div className={styles.filterText}>Status</div>
+            <select
+              className={styles.filterSelector}
+              value={this.state.filterAliveOrDead}
+              onChange={(e) => {
+                this.setState({ filterAliveOrDead: e.target.value as AliveOrDead });
+              }}
+            >
+              <option value={"Alive"}>Alive</option>
+              <option value={"Dead"}>Dead</option>
             </select>
           </div>
         </div>
@@ -145,11 +162,14 @@ class ACharactersList extends React.Component<Props, State> {
 
     const filteredCharacters = permittedCharacters.filter((character) => {
       const matchesOwner = this.state.filterOwnerId === -1 || character.user_id === this.state.filterOwnerId;
+      const matchesAliveOrDead =
+        (this.state.filterAliveOrDead === "Alive" && !character.dead) ||
+        (this.state.filterAliveOrDead === "Dead" && character.dead);
 
       // TODO: Update this once locations are implemented.
       const matchesLocation = this.state.filterLocationId === -1 || true;
 
-      return matchesOwner && matchesLocation;
+      return matchesOwner && matchesAliveOrDead && matchesLocation;
     });
 
     filteredCharacters.sort((charA, charB) => {

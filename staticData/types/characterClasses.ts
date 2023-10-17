@@ -1,4 +1,3 @@
-import { Dictionary } from "../../lib/dictionary";
 import { AbilityFilter } from "./abilitiesAndProficiencies";
 import { WeaponType, WeaponCategory } from "./items";
 

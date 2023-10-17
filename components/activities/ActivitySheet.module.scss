@@ -46,6 +46,12 @@
   }
 }
 
+.label {
+  position: relative;
+  color: wheat;
+  font-size: 1.2rem;
+}
+
 .placeholder {
   position: absolute;
   top: 1vmin;
@@ -101,7 +107,7 @@
 
 .descriptionTextField {
   position: relative;
-  font-size: 1rem;
+  font-size: 0.8rem;
   color: black;
   resize: none;
   height: 10vmin;
@@ -121,8 +127,7 @@
 .participantsList {
   @extend .column;
   position: relative;
-  max-height: 50vmin;
-  min-height: 10vmin;
+  height: 30vmin;
   width: 24vmin;
   color: rgb(226, 226, 226);
   font-size: 0.8rem;
@@ -156,4 +161,66 @@
 .preparednessContainer {
   position: relative;
   margin-left: 1vmin;
+}
+
+.summaryLabel {
+  @extend .label;
+  width: 20vmin;
+  font-size: 1rem;
+  text-align: right;
+  margin-right: 1vmin;
+}
+
+.resolutionRow {
+  @extend .row;
+  margin-top: 1vmin;
+  align-items: flex-start;
+}
+
+.summaryValue {
+  position: relative;
+  color: yellow;
+  font-size: 1rem;
+}
+
+.outcomesList {
+  position: relative;
+  height: 20vmin;
+  width: 24vmin;
+}
+
+.resolutionTextField {
+  position: relative;
+  margin-right: 1vmin;
+  font-size: 0.8rem;
+  color: black;
+  resize: none;
+  height: 20vmin;
+  width: 24vmin;
+}
+
+.buttonRow {
+  @extend .row;
+  margin-top: 1vmin;
+  justify-content: center;
+}
+
+.actionButton {
+  position: relative;
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
 }

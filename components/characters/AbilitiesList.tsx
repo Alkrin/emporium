@@ -13,6 +13,7 @@ import styles from "./AbilitiesList.module.scss";
 import { isProficiencyUnlockedForCharacter } from "../../lib/characterUtils";
 import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
 import { AbilityDisplayData } from "./EditProficienciesSubPanel";
+import { AllInjuries } from "../../staticData/injuries/AllInjuries";
 
 interface ReactProps {
   characterId: number;
@@ -92,6 +93,9 @@ class AAbilitiesList extends React.Component<Props> {
       let def = AllProficiencies[proficiency.feature_id];
       if (!def) {
         def = AllClassFeatures[proficiency.feature_id];
+      }
+      if (!def) {
+        def = AllInjuries[proficiency.feature_id];
       }
       const identifyingName = this.buildIdentifyingName(def, proficiency.subtype);
 

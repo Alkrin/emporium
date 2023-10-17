@@ -100,6 +100,10 @@
   &.ready {
     background-color: rgba(0, 255, 0, 0.3);
   }
+
+  &.resolved {
+    background-color: rgba(245, 222, 179, 0.3);
+  }
 }
 
 .listName {
@@ -138,5 +142,11 @@
 
   &:active {
     opacity: 1;
+  }
+
+  &.resolved {
+    opacity: 0;
+    pointer-events: none;
+    cursor: unset;
   }
 }

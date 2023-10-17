@@ -24,7 +24,7 @@ import { GeneralProficienciesAt, ProficiencySource } from "../staticData/types/a
 import { WeaponStyle, CharacterStat, SpellType } from "../staticData/types/characterClasses";
 import { WeaponCategory, WeaponType } from "../staticData/types/items";
 import { Dictionary } from "./dictionary";
-import { Stones } from "./itemUtils";
+import { Stones, doesItemGrantMagicDamageBonus } from "./itemUtils";
 import { EquipmentSlotTag, Tag } from "./tags";
 import { DwarvenFuryFleshRunes } from "../staticData/classFeatures/DwarvenFuryFleshRunes";
 import { SharedMeleeAccuracyBonus } from "../staticData/classFeatures/SharedMeleeAccuracyBonus";
@@ -39,6 +39,7 @@ import { ProficiencyMysticAura } from "../staticData/proficiencies/ProficiencyMy
 import { MysticCommandOfVoice } from "../staticData/classFeatures/MysticCommandOfVoice";
 import { ProficiencySeduction } from "../staticData/proficiencies/ProficiencySeduction";
 import { ProficiencyLayOnHands } from "../staticData/proficiencies/ProficiencyLayOnHands";
+import { ProficiencyFamiliar } from "../staticData/proficiencies/ProficiencyFamiliar";
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
 export function getBonusForStat(value: number): StatBonus {
@@ -51,6 +52,25 @@ export function getBonusForStat(value: number): StatBonus {
   if (value <= 18) return 3;
 
   return 0;
+}
+
+export function getCharacterXPMultiplier(character: CharacterData): number {
+  let smallestPrimaryStat = 18;
+  const characterClass = AllClasses[character.class_name];
+  characterClass.primeRequisites.forEach((pr) => {
+    const prValue = getCharacterStat(character, pr);
+    smallestPrimaryStat = Math.min(smallestPrimaryStat, prValue);
+  });
+  const bonus = getBonusForStat(smallestPrimaryStat);
+  switch (bonus) {
+    case 1:
+      return 1.05;
+    case 2:
+    case 3:
+      return 1.1;
+    default:
+      return 1;
+  }
 }
 
 export function getCharacterMaxHP(character: CharacterData): number {
@@ -578,6 +598,10 @@ export function getSavingThrowBonusForCharacter(characterId: number): BonusCalcu
       calc.conditionalSources.push(["Is Mediative Focus active?", 1]);
     }
 
+    if (isProficiencyUnlockedForCharacter(characterId, ProficiencyFamiliar.id)) {
+      calc.conditionalSources.push(["Is Familiar nearby?", 1]);
+    }
+
     return calc;
   }
 }
@@ -762,7 +786,7 @@ export function getMeleeDamageCalculationsForCharacter(characterId: number): Wea
     // If one weapon equipped, show single attack data.
     else if (def1 || def2) {
       const def = def1 ?? def2;
-      if (def.damage_dice_2h) {
+      if (def.damage_dice_2h && character.slot_shield === 0) {
         calc.numDice = def.damage_dice_2h;
         calc.sizeDice = def.damage_die_2h;
         // Fighting Style (Two-handed Weapon) gives +1 damage.
@@ -868,7 +892,7 @@ export function getRangedDamageCalculationsForCharacter(characterId: number): We
     if (def) {
       calc.numDice = def.damage_dice;
       calc.sizeDice = def.damage_die;
-      if (def.magic_bonus !== 0) {
+      if (def.magic_bonus !== 0 && doesItemGrantMagicDamageBonus(weapon.id)) {
         calc.bonuses.push([def.name, def.magic_bonus]);
       }
       calc.weaponName = def.name;
@@ -930,7 +954,7 @@ export function getRecruitmentRollBonusForCharacter(characterId: number): BonusC
     }
 
     if (isProficiencyUnlockedForCharacter(characterId, ProficiencySeduction.id)) {
-      calc.conditionalSources.push(["Is henchman of opposite gender?", 1]);
+      calc.conditionalSources.push(["Is henchman of opposite gender?", 2]);
     }
 
     return calc;
@@ -1152,4 +1176,27 @@ export function doesCharacterHaveSilverWeapons(characterId: number): boolean {
     return def.tags.includes(Tag.Silver);
   });
   return !!magicWeapon;
+}
+
+export function getCampaignXPDeductibleCapForLevel(level: number): number {
+  // Index = character level, value = deductible cap.
+  const CXPDeductibles = [
+    0, // No deductible for L0 characters.
+    25,
+    75,
+    150,
+    300,
+    650, // L5
+    1250,
+    2500,
+    5000,
+    12000,
+    18000, // L10
+    40000,
+    60000,
+    150000,
+    425000,
+  ];
+
+  return CXPDeductibles[level] ?? 0;
 }
