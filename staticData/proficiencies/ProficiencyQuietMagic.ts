@@ -8,5 +8,4 @@ export const ProficiencyQuietMagic: AbilityOrProficiency = {
       "throw to hear noise is required to hear the character cast spells. Full gagging is necessary " +
       "to prevent the character from working magic.",
   ],
-  minLevel: 1,
 };

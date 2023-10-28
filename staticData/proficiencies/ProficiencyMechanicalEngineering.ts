@@ -17,5 +17,4 @@ export const ProficiencyMechanicalEngineering: AbilityOrProficiency = {
       "a +3 bonus on proficiency throws to build, design, and repair automatons and increases his " +
       "construction rate by 15%.",
   ],
-  minLevel: 1,
 };

@@ -14,5 +14,4 @@ export const ProficiencySiegeEngineering: AbilityOrProficiency = {
       "rams, bores, and siege towers.  The character has the knowledge to construct heavy war machines, " +
       "siege engines, and siege towers as well as use them.",
   ],
-  minLevel: 1,
 };

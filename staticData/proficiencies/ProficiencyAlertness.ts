@@ -8,5 +8,4 @@ export const ProficiencyAlertness: AbilityOrProficiency = {
       "secret doors. With a proficiency throw of 18+ he can notice secret doors with just " +
       "casual observation. He gains a +1 bonus to avoid surprise.",
   ],
-  minLevel: 1,
 };

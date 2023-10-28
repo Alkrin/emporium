@@ -9,5 +9,4 @@ export const BardArcaneScrollUse: AbilityOrProficiency = {
       "failed throw means the spell does not function as expected, and " +
       "can create a horrible effect at the Judge's discretion.",
   ],
-  minLevel: 10,
 };

@@ -24,6 +24,6 @@ export const ProficiencyCeremonialMagic: AbilityOrProficiency = {
       "he already knows by 4; learn another tradition; or add one ceremony (of any level he can cast) to " +
       "his repertoire.",
   ],
-  minLevel: 1,
+
   subTypes: ["Antiquarian", "Chthonic", "Shamanic", "Sylvan", "Theurgical"],
 };

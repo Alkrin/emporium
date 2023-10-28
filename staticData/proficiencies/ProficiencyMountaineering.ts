@@ -9,5 +9,4 @@ export const ProficiencyMountaineering: AbilityOrProficiency = {
       "thief of their class level. This proficiency does not allow the character to climb " +
       "sheer surfaces during combat or without extensive gear.",
   ],
-  minLevel: 1,
 };

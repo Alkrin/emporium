@@ -10,7 +10,6 @@ export const ProficiencyLanguage: AbilityOrProficiency = {
       "by a character with a low Intelligence (8 or less) in order to become literate in a language the " +
       "character already speaks.",
   ],
-  minLevel: 1,
   subTypes: [
     "Common",
     "Draconic",

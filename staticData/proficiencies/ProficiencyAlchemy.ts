@@ -17,5 +17,4 @@ export const ProficiencyAlchemy: AbilityOrProficiency = {
       "level may add his Alchemy ranks to his Magic Research throws when brewing potions, and " +
       "can brew potions at half the usual base time and cost.",
   ],
-  minLevel: 1,
 };

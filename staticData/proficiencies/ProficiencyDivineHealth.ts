@@ -7,5 +7,4 @@ export const ProficiencyDivineHealth: AbilityOrProficiency = {
     "The character knows how to purify his body and soul. He is immune to all forms " +
       "of disease, including magical diseases caused by spells, mummies, or lycanthropes.",
   ],
-  minLevel: 1,
 };

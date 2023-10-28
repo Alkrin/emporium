@@ -20,5 +20,4 @@ export const ProficiencyMagicalEngineering: AbilityOrProficiency = {
       "trapped or cursed items from safe ones, or to assess the specific bonus or number of charges remaining " +
       "in an item.",
   ],
-  minLevel: 1,
 };

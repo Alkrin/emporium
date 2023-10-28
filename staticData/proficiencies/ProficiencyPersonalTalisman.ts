@@ -35,7 +35,6 @@ export const ProficiencyPersonalTalisman: AbilityOrProficiency = {
       "reductions in time, special components, and workshop requirements. Any magic research " +
       "throws to make the personal talisman are always successful. ",
   ],
-  minLevel: 1,
   subTypes: [
     "Death & Necromancy",
     "Detection",

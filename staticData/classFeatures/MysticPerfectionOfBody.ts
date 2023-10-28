@@ -9,5 +9,4 @@ export const MysticPerfectionOfBody: AbilityOrProficiency = {
       "three times longer than normal. He also becomes immune to " +
       "ghoul paralysis.",
   ],
-  minLevel: 14,
 };

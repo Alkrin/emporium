@@ -10,5 +10,4 @@ export const PaladinHolyFervor: AbilityOrProficiency = {
       "he is present. This bonus stacks with any modifiers from the " +
       "paladin’s Charisma or proficiencies.",
   ],
-  minLevel: 5,
 };

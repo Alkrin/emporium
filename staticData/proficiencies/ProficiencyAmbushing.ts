@@ -8,5 +8,4 @@ export const ProficiencyAmbushing: AbilityOrProficiency = {
       "throws and deals double damage on the attack. This proficiency does not stack " +
       "with the ability of thieves (or related classes) to backstab.",
   ],
-  minLevel: 1,
 };

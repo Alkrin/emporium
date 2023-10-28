@@ -9,5 +9,4 @@ export const ProficiencyBlindFighting: AbilityOrProficiency = {
       "range of his sight. A character with this proficiency suffers only a -2 penalty on " +
       "attack throws when blinded or fighting invisible enemies instead of the base -4 penalty.",
   ],
-  minLevel: 1,
 };

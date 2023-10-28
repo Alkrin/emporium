@@ -9,5 +9,4 @@ export const PaladinAuraOfProtection: AbilityOrProficiency = {
       "Protection appears as a golden halo when viewed with Detect Evil, " +
       "Detect Magic, or True Seeing.",
   ],
-  minLevel: 1,
 };

@@ -8,5 +8,4 @@ export const ProficiencyNavigation: AbilityOrProficiency = {
       "he is. He gains a +4 bonus on proficiency throws to avoid getting lost in the wilderness. " +
       "He can serve as a navigator on a seagoing vessel as described in Specialists.",
   ],
-  minLevel: 1,
 };

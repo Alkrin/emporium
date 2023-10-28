@@ -17,5 +17,4 @@ export const ProficiencyScavenging: AbilityOrProficiency = {
       "remnants of old automatons. As a result, the cost for the character to build or design " +
       "automatons is reduced by 30%.",
   ],
-  minLevel: 1,
 };

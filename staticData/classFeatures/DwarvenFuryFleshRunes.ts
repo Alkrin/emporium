@@ -15,5 +15,4 @@ export const DwarvenFuryFleshRunes: AbilityOrProficiency = {
       "to plate armor!) and decrease damage from non-magical attacks " +
       "by 3 points per die. ",
   ],
-  minLevel: 1,
 };

@@ -9,5 +9,4 @@ export const ProficiencyDisguise: AbilityOrProficiency = {
       "familiar with the subject of the disguise may throw 14+ to see through it, adding their " +
       "Wisdom modifier to their die roll.",
   ],
-  minLevel: 1,
 };

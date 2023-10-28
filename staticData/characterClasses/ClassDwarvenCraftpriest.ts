@@ -1,6 +1,5 @@
 import { DwarfStoneSense } from "../classFeatures/DwarfStoneSense";
 import { DwarfAttentionToDetail } from "../classFeatures/DwarfAttentionToDetail";
-import { DwarvenCraftpriestCreateMagicalConstructs } from "../classFeatures/DwarvenCraftpriestCreateMagicalConstructs";
 import { DwarvenCraftpriestReligiousTraining } from "../classFeatures/DwarvenCraftpriestReligiousTraining";
 import { SharedMajorMagicCreation } from "../classFeatures/SharedMajorMagicCreation";
 import { SharedMinorMagicCreation } from "../classFeatures/SharedMinorMagicCreation";
@@ -39,6 +38,7 @@ import { ProficiencyUnflappableCasting } from "../proficiencies/ProficiencyUnfla
 import { ProficiencyWeaponFocus } from "../proficiencies/ProficiencyWeaponFocus";
 import { WeaponStyle, CharacterClass, CharacterStat, SavingThrowType, SpellType } from "../types/characterClasses";
 import { WeaponType } from "../types/items";
+import { SharedCreateMagicalConstructs } from "../classFeatures/SharedCreateMagicalConstructs";
 
 export const ClassDwarvenCraftpriest: CharacterClass = {
   name: "Dwarven Craftpriest",
@@ -68,18 +68,18 @@ export const ClassDwarvenCraftpriest: CharacterClass = {
   },
   toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
   classFeatures: [
-    { def: ProficiencyAdventuring },
-    { def: DwarfAttentionToDetail },
-    { def: DwarfStoneSense },
-    { def: DwarvenCraftpriestReligiousTraining },
-    { def: SharedMinorMagicCreation },
-    { def: SharedMajorMagicCreation },
-    { def: DwarvenCraftpriestCreateMagicalConstructs },
-    { def: ProficiencyLanguage, subtypes: ["Common"] },
-    { def: ProficiencyLanguage, subtypes: ["Dwarven"] },
-    { def: ProficiencyLanguage, subtypes: ["Goblin"] },
-    { def: ProficiencyLanguage, subtypes: ["Gnome"] },
-    { def: ProficiencyLanguage, subtypes: ["Kobold"] },
+    { def: ProficiencyAdventuring, rank: 1, minLevel: 1 },
+    { def: DwarfAttentionToDetail, rank: 1, minLevel: 1 },
+    { def: DwarfStoneSense, rank: 1, minLevel: 1 },
+    { def: DwarvenCraftpriestReligiousTraining, rank: 1, minLevel: 1 },
+    { def: SharedMinorMagicCreation, rank: 1, minLevel: 5 },
+    { def: SharedMajorMagicCreation, rank: 1, minLevel: 9 },
+    { def: SharedCreateMagicalConstructs, rank: 1, minLevel: 9 },
+    { def: ProficiencyLanguage, subtype: "Common", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Dwarven", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Goblin", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Gnome", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Kobold", rank: 1, minLevel: 1 },
   ],
   selectableClassFeatures: [{ title: "Craft", selections: { def: ProficiencyCraft, rank: 3 } }],
   classProficienciesAt: [1, 4, 8],

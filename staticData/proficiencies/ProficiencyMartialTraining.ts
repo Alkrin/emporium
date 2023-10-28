@@ -7,7 +7,6 @@ export const ProficiencyMartialTraining: AbilityOrProficiency = {
     "As a crusader of the faith, the character has had weapons training that supersedes " +
       "the normal religious strictures of his order and can wield an extra weapon type.",
   ],
-  minLevel: 1,
   subTypes: [
     "BattleAxe",
     "GreatAxe",

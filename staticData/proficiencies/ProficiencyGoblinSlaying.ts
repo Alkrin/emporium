@@ -9,5 +9,4 @@ export const ProficiencyGoblinSlaying: AbilityOrProficiency = {
       "ogres, trolls, and giants. At level 7, this bonus increases to +2, and at level 13 it " +
       "increases to +3.",
   ],
-  minLevel: 1,
 };

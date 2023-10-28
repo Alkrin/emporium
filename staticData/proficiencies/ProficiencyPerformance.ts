@@ -34,6 +34,5 @@ export const ProficiencyPerformance: AbilityOrProficiency = {
       "\n" +
       "Can identify famous performers, masterpieces, and rare instruments with a proficiency throw of 3+",
   ],
-  minLevel: 1,
   subTypes: ["Act", "Chant", "Dance", "Juggle", "Play Instrument", "Recite Poetry", "Sing", "Tell Stories"],
 };

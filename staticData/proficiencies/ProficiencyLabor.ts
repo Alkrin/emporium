@@ -10,6 +10,5 @@ export const ProficiencyLabor: AbilityOrProficiency = {
       "other labor proficiencies by taking this proficiency multiple times. Labor does not require " +
       "enough skill to be able to be improved by taking this proficiency multiple times.",
   ],
-  minLevel: 1,
   subTypes: ["Bricklaying", "Farming", "Mining", "Stonecutting"],
 };

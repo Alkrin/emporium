@@ -10,5 +10,4 @@ export const ProficiencyElvenBloodline: AbilityOrProficiency = {
       "somehow in his appearance (pointed ears, golden eyes, a strange birthmark, or other " +
       "unusual trait.)",
   ],
-  minLevel: 1,
 };

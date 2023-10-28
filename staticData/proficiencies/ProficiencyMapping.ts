@@ -14,5 +14,4 @@ export const ProficiencyMapping: AbilityOrProficiency = {
       "proficiency throw of 3+, the character can interpret or draft complicated layouts " +
       "or map an area by memory.",
   ],
-  minLevel: 1,
 };

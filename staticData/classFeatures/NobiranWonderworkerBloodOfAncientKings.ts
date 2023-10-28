@@ -9,5 +9,4 @@ export const NobiranWonderworkerBloodOfAncientKings: AbilityOrProficiency = {
       "than his Charisma would otherwise permit, and the base morale " +
       "score of any henchmen is increased by 1. ",
   ],
-  minLevel: 1,
 };

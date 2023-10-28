@@ -35,6 +35,8 @@ import { RepertoireDialog } from "./RepertoireDialog";
 import { SpellTooltip } from "../database/SpellTooltip";
 import BonusTooltip from "../BonusTooltip";
 import { EditMoneyDialog } from "./EditMoneyDialog";
+import { FittingView } from "../FittingView";
+import { EditInjuriesDialog } from "./EditInjuriesDialog";
 
 interface ReactProps {
   characterId: number;
@@ -62,22 +64,35 @@ class ACharacterSheet extends React.Component<Props> {
       <div className={`${styles.root} ${animationClass}`}>
         {characterExists ? (
           <>
-            <div
-              className={styles.nameLabel}
-            >{`${this.props.character.name}, L${this.props.character.level} ${this.props.character.class_name}`}</div>
-            {this.renderStatsPanel()}
-            {this.renderSavingThrowsPanel()}
-            {this.renderSpeedPanel()}
-            {this.renderMoneyPanel()}
-            {this.renderInitiativePanel()}
-            {this.renderEquipmentPanel()}
-            {this.renderCombatPanel()}
-            {this.renderXPPanel()}
-            {this.renderHPPanel()}
-            {this.renderAbilitiesPanel()}
-            {this.renderSpellSlotsPanel()}
-            {this.renderSpellRepertoirePanel()}
-            {this.renderLevelBasedSkillsPanel()}
+            <div className={styles.topPanel}>
+              <FittingView className={styles.nameContainer}>
+                <div
+                  className={styles.nameLabel}
+                >{`${this.props.character.name}, L${this.props.character.level} ${this.props.character.class_name}`}</div>
+              </FittingView>
+              <div className={styles.topPanelGrid}>
+                {this.renderStatsPanel()}
+                {this.renderSavingThrowsPanel()}
+                {this.renderSpeedPanel()}
+                {this.renderMoneyPanel()}
+                {this.renderInitiativePanel()}
+                {this.renderXPPanel()}
+                {this.renderHPPanel()}
+                {this.renderEquipmentPanel()}
+                {this.renderCombatPanel()}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <div className={styles.leftPanel}>
+                {this.renderAbilitiesPanel()}
+                {this.renderLevelBasedSkillsPanel()}
+                {this.renderInjuriesPanel()}
+              </div>
+              <div className={styles.rightPanel}>
+                {this.renderSpellSlotsPanel()}
+                {this.renderSpellRepertoirePanel()}
+              </div>
+            </div>
           </>
         ) : (
           <div className={styles.placeholder} />
@@ -323,20 +338,22 @@ class ACharacterSheet extends React.Component<Props> {
       const needsLevelUp = this.props.character.xp >= xpCap;
       const levelUpStyle = needsLevelUp ? styles.levelUp : "";
       return (
-        <div className={`${styles.xpPanel} ${levelUpStyle}`}>
-          <div className={styles.row}>
-            <div className={styles.xpTitle}>XP:</div>
-            <div className={styles.xpNumbers}>
-              <div className={`${styles.xpValue} ${levelUpStyle}`}>{this.props.character.xp}</div>
-              <div className={styles.xpCap}>{`/ ${xpCap}`}</div>
+        <div className={styles.xpPanel}>
+          <div className={`${styles.xpContainer} ${levelUpStyle}`}>
+            <div className={styles.row}>
+              <div className={styles.xpTitle}>XP:</div>
+              <div className={styles.xpNumbers}>
+                <div className={`${styles.xpValue} ${levelUpStyle}`}>{this.props.character.xp}</div>
+                <div className={styles.xpCap}>{`/ ${xpCap}`}</div>
+              </div>
+              <div className={styles.xpEditButton} onClick={this.onXPEditClicked.bind(this)} />
             </div>
-            <div className={styles.xpEditButton} onClick={this.onXPEditClicked.bind(this)} />
+            {needsLevelUp && (
+              <div className={styles.levelUpButton} onClick={this.onLevelUpClicked.bind(this)}>
+                Level Up!
+              </div>
+            )}
           </div>
-          {needsLevelUp && (
-            <div className={styles.levelUpButton} onClick={this.onLevelUpClicked.bind(this)}>
-              Level Up!
-            </div>
-          )}
         </div>
       );
     } else {
@@ -350,14 +367,16 @@ class ACharacterSheet extends React.Component<Props> {
       const isDying = this.props.character.hp <= 0;
       const healthStyle = isDying ? styles.dying : "";
       return (
-        <div className={`${styles.hpPanel} ${healthStyle}`}>
-          <div className={styles.row}>
-            <div className={styles.hpTitle}>HP:</div>
-            <div className={styles.hpNumbers}>
-              <div className={`${styles.hpValue} ${healthStyle}`}>{this.props.character.hp}</div>
-              <div className={styles.hpCap}>{`/ ${maxHP}`}</div>
+        <div className={styles.hpPanel}>
+          <div className={`${styles.hpContainer} ${healthStyle}`}>
+            <div className={styles.row}>
+              <div className={styles.hpTitle}>HP:</div>
+              <div className={styles.hpNumbers}>
+                <div className={`${styles.hpValue} ${healthStyle}`}>{this.props.character.hp}</div>
+                <div className={styles.hpCap}>{`/ ${maxHP}`}</div>
+              </div>
+              <div className={styles.hpEditButton} onClick={this.onHPEditClicked.bind(this)} />
             </div>
-            <div className={styles.hpEditButton} onClick={this.onHPEditClicked.bind(this)} />
           </div>
         </div>
       );
@@ -370,11 +389,13 @@ class ACharacterSheet extends React.Component<Props> {
     if (this.props.character) {
       return (
         <div className={styles.moneyPanel}>
-          <div className={styles.row}>
-            <div className={styles.moneyTitle}>GP:</div>
-            <div className={styles.moneyEditButton} onClick={this.onMoneyEditClicked.bind(this)} />
+          <div className={styles.moneyContainer}>
+            <div className={styles.row}>
+              <div className={styles.moneyTitle}>GP:</div>
+              <div className={styles.moneyEditButton} onClick={this.onMoneyEditClicked.bind(this)} />
+            </div>
+            <div className={styles.moneyValue}>{addCommasToNumber(this.props.character.money, 2)}</div>
           </div>
-          <div className={styles.moneyValue}>{addCommasToNumber(this.props.character.money, 2)}</div>
         </div>
       );
     } else {
@@ -489,23 +510,25 @@ class ACharacterSheet extends React.Component<Props> {
       let calc = getInitiativeBonusForCharacter(this.props.characterId);
       const hasConditionalBonuses = calc.conditionalSources.length > 0;
       return (
-        <TooltipSource
-          tooltipParams={{
-            id: "InitiativeExplanation",
-            content: () => {
-              return <BonusTooltip header={"Initiative"} calc={calc} />;
-            },
-          }}
-          className={styles.initiativePanel}
-        >
-          <div className={styles.row}>
-            <div className={styles.initiativeTitle}>Initiative Bonus</div>
-            <div className={styles.valueText}>
-              {`${calc.totalBonus > 0 ? "+" : ""} ${calc.totalBonus}`}
-              {hasConditionalBonuses ? <span className={styles.infoAsterisk}>*</span> : null}
+        <div className={styles.initiativePanel}>
+          <TooltipSource
+            tooltipParams={{
+              id: "InitiativeExplanation",
+              content: () => {
+                return <BonusTooltip header={"Initiative"} calc={calc} />;
+              },
+            }}
+            className={styles.initiativeContainer}
+          >
+            <div className={styles.row}>
+              <div className={styles.initiativeTitle}>Initiative Bonus</div>
+              <div className={styles.valueText}>
+                {`${calc.totalBonus > 0 ? "+" : ""} ${calc.totalBonus}`}
+                {hasConditionalBonuses ? <span className={styles.infoAsterisk}>*</span> : null}
+              </div>
             </div>
-          </div>
-        </TooltipSource>
+          </TooltipSource>
+        </div>
       );
     } else {
       return null;
@@ -520,25 +543,27 @@ class ACharacterSheet extends React.Component<Props> {
       const speed = this.getBaseSpeedForEncumbrance(encumbrance);
 
       return (
-        <TooltipSource
-          tooltipParams={{
-            id: "SpeedExplanation",
-            content: this.renderSpeedTooltip.bind(this),
-          }}
-          className={styles.speedPanel}
-        >
-          <div className={styles.row}>
-            <div className={styles.speedTitle}>Speed</div>
-            <div className={styles.speedValue}>{`${speed}' / ${speed * 3}'`}</div>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.speedTitle}>Encumbrance</div>
-            <div className={styles.speedValue}>{`${fullStoneEncumbrance}${
-              partialStoneEncumbrance > 0 ? `  ${partialStoneEncumbrance}/6` : ""
-            }`}</div>
-            <div className={styles.speedStone}>stone</div>
-          </div>
-        </TooltipSource>
+        <div className={styles.speedPanel}>
+          <TooltipSource
+            tooltipParams={{
+              id: "SpeedExplanation",
+              content: this.renderSpeedTooltip.bind(this),
+            }}
+            className={styles.speedContainer}
+          >
+            <div className={styles.row}>
+              <div className={styles.speedTitle}>Speed</div>
+              <div className={styles.speedValue}>{`${speed}' / ${speed * 3}'`}</div>
+            </div>
+            <div className={styles.row}>
+              <div className={styles.speedTitle}>Encumbrance</div>
+              <div className={styles.speedValue}>{`${fullStoneEncumbrance}${
+                partialStoneEncumbrance > 0 ? `  ${partialStoneEncumbrance}/6` : ""
+              }`}</div>
+              <div className={styles.speedStone}>stone</div>
+            </div>
+          </TooltipSource>
+        </div>
       );
     } else {
       return null;
@@ -550,26 +575,28 @@ class ACharacterSheet extends React.Component<Props> {
 
     return (
       <div className={styles.equipmentPanel}>
-        <div className={styles.row}>
-          <div className={styles.abilitiesTitle}>{"Equipment"}</div>
-          <div className={styles.equipmentEditButton} onClick={this.onEditEquipmentClicked.bind(this)} />
-        </div>
-        <div className={styles.horizontalLine} />
-        <TooltipSource
-          tooltipParams={{
-            id: "ACExplanation",
-            content: () => {
-              return <BonusTooltip header={"AC"} calc={calc} isFlatValue={true} />;
-            },
-          }}
-          className={styles.row}
-        >
-          <div className={styles.acTitle}>AC:</div>
-          <div className={styles.valueText}>
-            {calc.totalBonus}
-            {calc.conditionalSources.length > 0 ? <span className={styles.infoAsterisk}>*</span> : null}
+        <div className={styles.equipmentContainer}>
+          <div className={styles.row}>
+            <div className={styles.equipmentTitle}>{"Equipment"}</div>
+            <div className={styles.equipmentEditButton} onClick={this.onEditEquipmentClicked.bind(this)} />
           </div>
-        </TooltipSource>
+          <div className={styles.horizontalLine} />
+          <TooltipSource
+            tooltipParams={{
+              id: "ACExplanation",
+              content: () => {
+                return <BonusTooltip header={"AC"} calc={calc} isFlatValue={true} />;
+              },
+            }}
+            className={styles.row}
+          >
+            <div className={styles.acTitle}>AC:</div>
+            <div className={styles.valueText}>
+              {calc.totalBonus}
+              {calc.conditionalSources.length > 0 ? <span className={styles.infoAsterisk}>*</span> : null}
+            </div>
+          </TooltipSource>
+        </div>
       </div>
     );
   }
@@ -577,10 +604,12 @@ class ACharacterSheet extends React.Component<Props> {
   private renderCombatPanel(): React.ReactNode {
     return (
       <div className={styles.combatPanel}>
-        <div className={styles.combatTitle}>{"Combat"}</div>
-        <div className={styles.horizontalLine} />
-        {this.renderMeleeCombatSection()}
-        {this.renderRangedCombatSection()}
+        <div className={styles.combatContainer}>
+          <div className={styles.combatTitle}>{"Combat"}</div>
+          <div className={styles.horizontalLine} />
+          {this.renderMeleeCombatSection()}
+          {this.renderRangedCombatSection()}
+        </div>
       </div>
     );
   }
@@ -816,13 +845,15 @@ class ACharacterSheet extends React.Component<Props> {
   private renderSavingThrowsPanel(): React.ReactNode {
     return (
       <div className={styles.savingThrowsPanel}>
-        <div className={styles.savingThrowsText}>Saves</div>
-        <div className={styles.horizontalLine} />
-        {this.renderSavingThrowsRow("Pet & Par", SavingThrowType.PetrificationAndParalysis)}
-        {this.renderSavingThrowsRow("Psn & Dth", SavingThrowType.PoisonAndDeath)}
-        {this.renderSavingThrowsRow("Blst & Br", SavingThrowType.BlastAndBreath)}
-        {this.renderSavingThrowsRow("Stf & Wnd", SavingThrowType.StaffsAndWands)}
-        {this.renderSavingThrowsRow("Spells", SavingThrowType.Spells)}
+        <div className={styles.savingThrowsContainer}>
+          <div className={styles.savingThrowsText}>Saves</div>
+          <div className={styles.horizontalLine} />
+          {this.renderSavingThrowsRow("Pet & Par", SavingThrowType.PetrificationAndParalysis)}
+          {this.renderSavingThrowsRow("Psn & Dth", SavingThrowType.PoisonAndDeath)}
+          {this.renderSavingThrowsRow("Blst & Br", SavingThrowType.BlastAndBreath)}
+          {this.renderSavingThrowsRow("Stf & Wnd", SavingThrowType.StaffsAndWands)}
+          {this.renderSavingThrowsRow("Spells", SavingThrowType.Spells)}
+        </div>
       </div>
     );
   }
@@ -862,12 +893,14 @@ class ACharacterSheet extends React.Component<Props> {
     return (
       this.props.character && (
         <div className={styles.statsPanel}>
-          {this.renderStatPane("STR", this.props.character.strength, this.renderStrengthTooltip.bind(this))}
-          {this.renderStatPane("INT", this.props.character.intelligence, this.renderIntelligenceTooltip.bind(this))}
-          {this.renderStatPane("WIS", this.props.character.wisdom, this.renderWisdomTooltip.bind(this))}
-          {this.renderStatPane("DEX", this.props.character.dexterity, this.renderDexterityTooltip.bind(this))}
-          {this.renderStatPane("CON", this.props.character.constitution, this.renderConstitutionTooltip.bind(this))}
-          {this.renderStatPane("CHA", this.props.character.charisma, this.renderCharismaTooltip.bind(this))}
+          <div className={styles.statsContainer}>
+            {this.renderStatPane("STR", this.props.character.strength, this.renderStrengthTooltip.bind(this))}
+            {this.renderStatPane("INT", this.props.character.intelligence, this.renderIntelligenceTooltip.bind(this))}
+            {this.renderStatPane("WIS", this.props.character.wisdom, this.renderWisdomTooltip.bind(this))}
+            {this.renderStatPane("DEX", this.props.character.dexterity, this.renderDexterityTooltip.bind(this))}
+            {this.renderStatPane("CON", this.props.character.constitution, this.renderConstitutionTooltip.bind(this))}
+            {this.renderStatPane("CHA", this.props.character.charisma, this.renderCharismaTooltip.bind(this))}
+          </div>
         </div>
       )
     );
@@ -908,6 +941,32 @@ class ACharacterSheet extends React.Component<Props> {
 
   private renderCharismaTooltip(): React.ReactNode {
     return "Charisma";
+  }
+
+  private renderInjuriesPanel(): React.ReactNode {
+    return (
+      <div className={styles.injuriesPanel}>
+        <div className={styles.row}>
+          <div className={styles.injuriesTitle}>{"Injuries"}</div>
+          <div className={styles.injuriesEditButton} onClick={this.onEditInjuriesClicked.bind(this)} />
+        </div>
+        <div className={styles.horizontalLine} />
+        <AbilitiesList characterId={this.props.character?.id ?? 0} injuries={true} />
+      </div>
+    );
+  }
+
+  private onEditInjuriesClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "injuriesEdit",
+        content: () => {
+          return <EditInjuriesDialog character={this.props.character} />;
+        },
+        escapable: true,
+        widthVmin: 45,
+      })
+    );
   }
 }
 

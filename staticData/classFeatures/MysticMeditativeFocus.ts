@@ -13,5 +13,4 @@ export const MysticMeditativeFocus: AbilityOrProficiency = {
       "does his ability to maintain their focus. Mystic can go into focus " +
       "once per day per level of experience.",
   ],
-  minLevel: 1,
 };

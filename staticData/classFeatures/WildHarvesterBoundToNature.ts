@@ -7,5 +7,4 @@ export const WildHarvesterBoundToNature: AbilityOrProficiency = {
     "At level 9, Wild Harvesters are so tightly Bound to Nature that they " +
       "gain the ability to communicate freely with natural animals.",
   ],
-  minLevel: 9,
 };

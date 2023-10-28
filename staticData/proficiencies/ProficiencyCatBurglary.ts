@@ -9,5 +9,4 @@ export const ProficiencyCatBurglary: AbilityOrProficiency = {
       "If the thief falls while climbing, the player may make a second proficiency throw " +
       "with a -4 penalty in order to catch himself and prevent any damage.",
   ],
-  minLevel: 1,
 };

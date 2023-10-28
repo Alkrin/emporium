@@ -10,7 +10,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     // First we clean out the old proficiency data for this character.
     queries.push({
-      query: "DELETE FROM proficiencies WHERE character_id=? AND source NOT LIKE 'Selectable%'",
+      query: "DELETE FROM proficiencies WHERE character_id=? AND source NOT LIKE 'Selectable%' AND source<>'Injury'",
       values: [b.character_id],
     });
 

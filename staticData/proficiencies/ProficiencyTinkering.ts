@@ -8,5 +8,4 @@ export const ProficiencyTinkering: AbilityOrProficiency = {
       "as if he were two class levels higher than actual. The time required for the character " +
       "to build an automaton is reduced by 20%.",
   ],
-  minLevel: 1,
 };

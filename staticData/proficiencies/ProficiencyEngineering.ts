@@ -31,5 +31,4 @@ export const ProficiencyEngineering: AbilityOrProficiency = {
       "\n" +
       "Is the equivalent of the engineer specialist described in the Specialists section.",
   ],
-  minLevel: 1,
 };

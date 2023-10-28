@@ -15,5 +15,4 @@ export const ProficiencyAcrobatics: AbilityOrProficiency = {
       "with an encumbrance of 6 stone or more may not tumble. Note that elven nightblades automatically " +
       "begin play with this ability as part of their class.",
   ],
-  minLevel: 1,
 };

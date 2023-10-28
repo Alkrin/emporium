@@ -10,5 +10,4 @@ export const ProficiencyVerminSlaying: AbilityOrProficiency = {
       "throws against special attacks by vermin (e.g. a carcass scavenger's paralyzing stinger or " +
       "yellow mold's spores).",
   ],
-  minLevel: 1,
 };

@@ -1,4 +1,4 @@
-import { AbilityFilter } from "./abilitiesAndProficiencies";
+import { AbilityFilter, AbilityInstance } from "./abilitiesAndProficiencies";
 import { WeaponType, WeaponCategory } from "./items";
 
 export enum CharacterStat {
@@ -94,7 +94,7 @@ export interface CharacterClass {
   savingThrows: { [type in SavingThrowType]: number[] };
   /** Array contains to hit bonuses by level in order, starting from level 1. */
   toHitBonus: number[];
-  classFeatures: AbilityFilter[];
+  classFeatures: AbilityInstance[];
   /** Lists features/proficiencies that must be selected during character creation (i.e. Bards pick a Perform type, Craftpriests pick a Craft, etc.). */
   selectableClassFeatures: SelectableClassFeature[];
   /** The levels at which this class gains a Class Proficiency. */

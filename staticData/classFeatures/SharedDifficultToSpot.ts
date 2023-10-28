@@ -10,5 +10,4 @@ export const SharedDifficultToSpot: AbilityOrProficiency = {
       "In dungeons, if the character is motionless and quiet in cover, " +
       "they can escape detection with a proficiency throw of 14+ on 1d20.",
   ],
-  minLevel: 1,
 };

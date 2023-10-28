@@ -10,5 +10,4 @@ export const ProficiencySurvival: AbilityOrProficiency = {
       "more than one person, he must make a proficiency throw (as described in Wilderness Adventures), " +
       "but gains a +4 bonus on the roll.",
   ],
-  minLevel: 1,
 };

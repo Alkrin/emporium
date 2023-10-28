@@ -9,5 +9,4 @@ export const SharedFriendOfBirdsAndBeasts: AbilityOrProficiency = {
       "normal animals, and allows the character to take animals as henchmen. They also can identify flora " +
       "and fauna with a proficiency throw of 11+.",
   ],
-  minLevel: 1,
 };

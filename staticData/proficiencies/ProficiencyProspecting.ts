@@ -9,5 +9,4 @@ export const ProficiencyProspecting: AbilityOrProficiency = {
       "day and requires a successful proficiency throw of 18+. A character who also has " +
       "the Land Surveying proficiency gains an additional +4 bonus to prospecting throws.",
   ],
-  minLevel: 1,
 };

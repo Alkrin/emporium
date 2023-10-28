@@ -11,5 +11,4 @@ export const ProficiencySecondSight: AbilityOrProficiency = {
       "creatures or objects hidden through cover and concealment, but does provide a +4 bonus " +
       "to saving throws to disbelieve illusions.",
   ],
-  minLevel: 1,
 };

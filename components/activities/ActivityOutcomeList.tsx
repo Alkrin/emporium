@@ -43,6 +43,14 @@ class AActivityOutcomeList extends React.Component<Props> {
         outcomeText = `${recipient.name} paid ${outcome.quantity.toFixed(2)}gp into their CXP deductible`;
         break;
       }
+      case ActivityOutcomeType.Injury: {
+        outcomeText = `${recipient.name} was injured.`;
+        break;
+      }
+      case ActivityOutcomeType.Death: {
+        outcomeText = `${recipient.name} was killed.`;
+        break;
+      }
       // Some outcomes don't need to be rendered.
       case ActivityOutcomeType.Invalid:
       case ActivityOutcomeType.CXPDeductibleReset: {

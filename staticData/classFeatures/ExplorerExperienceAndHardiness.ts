@@ -10,5 +10,4 @@ export const ExplorerExperienceAndHardiness: AbilityOrProficiency = {
       "a +1 bonus to their morale score. This bonus stacks with any " +
       "modifiers from the explorer's Charisma or proficiencies.",
   ],
-  minLevel: 5,
 };

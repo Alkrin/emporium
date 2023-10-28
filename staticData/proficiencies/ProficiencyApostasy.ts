@@ -12,5 +12,4 @@ export const ProficiencyApostasy: AbilityOrProficiency = {
       "are above the level that the character is permitted to know, he will add them to his repertoire " +
       "when he reaches the appropriate level.",
   ],
-  minLevel: 1,
 };

@@ -9,5 +9,4 @@ export const MysticStrengthOfSpirit: AbilityOrProficiency = {
       "effects. He knows that fear is only an illusion, and lets " +
       "it pass through him.",
   ],
-  minLevel: 2,
 };

@@ -6,5 +6,4 @@ export const SharedMeleeDamageBonus: AbilityOrProficiency = {
   description: [
     "Increases damage from all melee attacks by +1 at 1st level, +2 at 3rd, +3 at 6th, +4 at 9th, and +5 at 12th.",
   ],
-  minLevel: 1,
 };

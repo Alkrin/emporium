@@ -11,5 +11,4 @@ export const ProficiencyBlackLoreOfZahar: AbilityOrProficiency = {
       "are calculated as if he were two class levels higher than his actual level of experience. " +
       "He may also conduct necromantic research as if he were two class levels higher than actual.",
   ],
-  minLevel: 1,
 };

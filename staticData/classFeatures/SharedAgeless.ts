@@ -8,5 +8,4 @@ export const SharedAgeless: AbilityOrProficiency = {
       "longer than that of normal men. Like elves, they are immune " +
       "to ghoul paralysis.",
   ],
-  minLevel: 1,
 };

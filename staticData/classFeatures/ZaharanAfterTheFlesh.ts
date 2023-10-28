@@ -8,5 +8,4 @@ export const ZaharanAfterTheFlesh: AbilityOrProficiency = {
       "continue to gain xp and level up, even past its original level cap!  After the " +
       "original level cap, class abilities do not continue to progress, only HP increases.",
   ],
-  minLevel: 1,
 };

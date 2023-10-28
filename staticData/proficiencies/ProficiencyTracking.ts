@@ -23,5 +23,4 @@ export const ProficiencyTracking: AbilityOrProficiency = {
       "lighting; -1 per 12 hours of good weather since trail was made; -4 per hour of rain/snow since " +
       "trail was made. Characters move at half speed while tracking.",
   ],
-  minLevel: 1,
 };

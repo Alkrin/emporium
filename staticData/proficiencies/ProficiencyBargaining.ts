@@ -31,5 +31,4 @@ export const ProficiencyBargaining: AbilityOrProficiency = {
       "\n" +
       "Receives +6 on opposed Bargaining rolls.",
   ],
-  minLevel: 1,
 };

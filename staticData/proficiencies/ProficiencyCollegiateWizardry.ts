@@ -25,5 +25,4 @@ export const ProficiencyCollegiateWizardry: AbilityOrProficiency = {
       "throw of 1+. Rare or esoteric traditions may be harder to recognize (Judge's discretion). " +
       "A character may select this proficiency additional times.",
   ],
-  minLevel: 1,
 };

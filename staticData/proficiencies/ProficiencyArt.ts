@@ -67,6 +67,5 @@ export const ProficiencyArt: AbilityOrProficiency = {
       "Can identify masterwork items, rare materials, and famous artisans with a proficiency " +
       "throw of 5+",
   ],
-  minLevel: 1,
   subTypes: ["Mosaic", "Painting", "Pottery", "Sculpture"],
 };

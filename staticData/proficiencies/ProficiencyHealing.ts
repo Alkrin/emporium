@@ -42,5 +42,4 @@ export const ProficiencyHealing: AbilityOrProficiency = {
       "\n" +
       "May treat animals as if he had the Animal Husbandry proficiency at rank 2.",
   ],
-  minLevel: 1,
 };

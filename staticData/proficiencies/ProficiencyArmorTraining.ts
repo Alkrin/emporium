@@ -9,5 +9,4 @@ export const ProficiencyArmorTraining: AbilityOrProficiency = {
       "ability to cast spells in armor, use thief skills in armor heavier than leather, or benefit " +
       "from proficiencies or class powers that forbid use of certain armor.",
   ],
-  minLevel: 1,
 };

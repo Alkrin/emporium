@@ -30,6 +30,7 @@ export interface AbilityDisplayData {
   name: string;
   rank: number;
   subtype?: string;
+  minLevel: number;
   def: AbilityOrProficiency;
 }
 
@@ -260,6 +261,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       name: displayName,
       rank: 1,
       subtype: pData.subtype,
+      minLevel: 1,
       def: AllProficiencies[pData.feature_id],
     };
     return data;
@@ -349,6 +351,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       name: displayName,
       def,
       rank: 1,
+      minLevel: 1,
       subtype,
     };
     return data;
@@ -360,11 +363,11 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
     // Check if it is granted by the class at the current level.
     const characterClass = AllClasses[this.props.character.class_name];
     if (
-      characterClass.classFeatures.find((filter) => {
+      characterClass.classFeatures.find((abilityInstance) => {
         return (
-          filter.def.id === feature_id &&
-          (!subtype || filter.subtypes?.[0] === subtype) &&
-          filter.def.minLevel <= this.props.character.level
+          abilityInstance.def.id === feature_id &&
+          (!subtype || abilityInstance.subtype == subtype) &&
+          abilityInstance.minLevel <= this.props.character.level
         );
       })
     ) {
@@ -548,7 +551,8 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
       features.push({
         name: feature.def.name,
         rank: feature.rank ?? 1,
-        subtype: feature.subtypes?.[0] ?? "",
+        subtype: feature.subtype ?? "",
+        minLevel: feature.minLevel,
         def: feature.def,
       });
     });
@@ -570,14 +574,15 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
         name: def.name,
         rank: selection.length,
         subtype: selection[0].subtype ?? "",
+        minLevel: 1,
         def,
       });
     });
 
     features.sort((dataA, dataB) => {
       // Sort in order the features are granted.
-      if (dataA.def.minLevel !== dataB.def.minLevel) {
-        return dataA.def.minLevel - dataB.def.minLevel;
+      if (dataA.minLevel !== dataB.minLevel) {
+        return dataA.minLevel - dataB.minLevel;
       }
 
       // Then sort by name.
@@ -597,7 +602,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
   }
 
   private renderFeatureRow(ability: AbilityDisplayData, index: number): React.ReactNode {
-    const readyClass = ability.def.minLevel > this.props.character.level ? styles.notReady : "";
+    const readyClass = ability.minLevel > this.props.character.level ? styles.notReady : "";
     let featureName = ability.name;
     if (ability.subtype) {
       featureName += ` (${ability.subtype})`;
@@ -614,7 +619,7 @@ class AEditProficienciesSubPanel extends React.Component<Props, State> {
           content: this.renderAbilityTooltip.bind(this, ability, ability.rank),
         }}
       >
-        <div className={`${styles.listRequiredLevel} ${readyClass}`}>@ L{ability.def.minLevel} </div>
+        <div className={`${styles.listRequiredLevel} ${readyClass}`}>@ L{ability.minLevel} </div>
         <div className={styles.listName}>{featureName}</div>
       </TooltipSource>
     );

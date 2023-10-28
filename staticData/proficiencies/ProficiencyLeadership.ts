@@ -8,5 +8,4 @@ export const ProficiencyLeadership: AbilityOrProficiency = {
       "may hire one more henchman than his Charisma would otherwise permit, and the base morale score " +
       "of any domain he rules is increased by 1. Domain morale is explained in the Campaign chapter.",
   ],
-  minLevel: 1,
 };

@@ -17,6 +17,5 @@ export const ProficiencyNaturalism: AbilityOrProficiency = {
       "and signs of unnatural danger (such as unusual quiet, atypical animal behavior, etc.) in " +
       "his known terrain with a proficiency throw of 3+.",
   ],
-  minLevel: 1,
   subTypes: ["Arctic", "Desert", "Forest", "Plains", "Subterranean", "Swamp"],
 };

@@ -1,7 +1,7 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { showModal } from "../../redux/modalsSlice";
+import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
 import ServerAPI, { ActivityData, ActivityOutcomeData, ActivityOutcomeType, CharacterData } from "../../serverAPI";
@@ -13,6 +13,7 @@ import { getCampaignXPDeductibleCapForLevel, getCharacterXPMultiplier } from "..
 import { ActivityOutcomesList } from "./ActivityOutcomeList";
 import { refetchCharacters } from "../../dataSources/CharactersDataSource";
 import { refetchItems } from "../../dataSources/ItemsDataSource";
+import { AllInjuriesArray } from "../../staticData/injuries/AllInjuries";
 
 enum Distro {
   // Even distribution to all participants.  Henchman hierarchy is ignored, and only local participants get a share.
@@ -33,6 +34,10 @@ interface State {
   gpWithXp: number;
   gpWithoutXp: number;
   gpDistro: Distro;
+  // Injuries state.  Key: characterId, value: injuryIds.
+  injuries: Dictionary<string[]>;
+  // Deaths state
+  deaths: number[];
 
   isSaving: boolean;
 }
@@ -66,6 +71,8 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
       gpWithXp: 0,
       gpWithoutXp: 0,
       gpDistro: Distro.Hench,
+      injuries: {},
+      deaths: [],
       isSaving: false,
     };
   }
@@ -329,7 +336,7 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
 
     // As the data is valid, move on to the next page.
     this.pages.push(() => {
-      return this.renderInjuriesPage();
+      return this.renderDeathsPage();
     });
     this.setState({ pageIndex: this.state.pageIndex + 1 });
   }
@@ -337,7 +344,15 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
   private renderInjuriesPage(): React.ReactNode {
     return (
       <div className={styles.contentColumn}>
-        <div className={styles.centerLabel}>TODO: Injuries?</div>
+        <div className={styles.centerLabel}>{"Were any characters injured?"}</div>
+        <div className={styles.label}>{"Participants"}</div>
+        <div className={styles.characterListContainer}>
+          {this.getInjurableCharacters().map(this.renderInjurableCharacterRow.bind(this))}
+        </div>
+        <div className={styles.label}>{"Injured"}</div>
+        <div className={styles.characterListContainer}>
+          {Object.entries(this.state.injuries).map(this.renderInjuredCharacterRow.bind(this))}
+        </div>
         <div className={styles.buttonRow}>
           <div className={styles.actionButton} onClick={this.onPrevPageClick.bind(this)}>
             {"Prev"}
@@ -350,12 +365,139 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private onInjuriesPageNextClick(): void {
-    // TODO: Valid data?
+  private getInjurableCharacters(): CharacterData[] {
+    const activity = this.props.activities[this.props.activeActivityId];
+    const alive = activity.participants
+      .filter((p) => {
+        return !this.state.deaths.includes(p.characterId);
+      })
+      .sort((a, b) => {
+        const charA = this.props.allCharacters[a.characterId];
+        const charB = this.props.allCharacters[b.characterId];
+        return charA.name.localeCompare(charB.name);
+      })
+      .map((p) => {
+        return this.props.allCharacters[p.characterId];
+      });
+    return alive;
+  }
 
+  private renderInjurableCharacterRow(character: CharacterData, index: number): React.ReactNode {
+    return (
+      <div className={styles.listRow} key={`adventurerRow${index}`}>
+        <div className={styles.listLevel}>L{character.level}</div>
+        <div className={styles.listClass}>{character.class_name}</div>
+        <div className={styles.listName}>{character.name}</div>
+        <div className={styles.addInjuryButton} onClick={this.onAddInjury.bind(this, character)}>
+          +
+        </div>
+      </div>
+    );
+  }
+
+  private renderInjuredCharacterRow(entry: [string, string[]], index: number): React.ReactNode {
+    const characterId = +entry[0];
+    const injuryIds = entry[1];
+    const character = this.props.allCharacters[characterId];
+    return (
+      <div className={styles.listRow} key={`adventurerRow${index}`}>
+        <div className={styles.injuredCharacterData}>
+          <div className={styles.row}>
+            <div className={styles.listLevel}>L{character.level}</div>
+            <div className={styles.listClass}>{character.class_name}</div>
+            <div className={styles.listName}>{character.name}</div>
+          </div>
+          {injuryIds.map((iid) => {
+            return (
+              <div className={styles.injuryLabel} key={iid}>
+                {this.injuryOptions[iid]}
+              </div>
+            );
+          })}
+        </div>
+        <div className={styles.cancelButton} onClick={this.onRemoveInjury.bind(this, character)}>
+          -
+        </div>
+      </div>
+    );
+  }
+
+  private modalInjuryType: string = "";
+  private injuryOptions: Dictionary<string> = AllInjuriesArray.reduce(
+    (options, injury) => {
+      options[injury.id] = injury.name;
+      return options;
+    },
+    {
+      ["OneDay"]: "Minimal: One Day Bed Rest",
+      ["OneWeek"]: "Minor: One Week Bed Rest",
+      ["TwoWeeks"]: "Moderate: Two Weeks Bed Rest",
+      ["FourWeeks"]: "Major: Four Weeks Bed Rest",
+    } as Dictionary<string>
+  );
+  private onAddInjury(character: CharacterData): void {
+    // Injury selection dialog.
+    this.modalInjuryType = "OneDay";
+    this.props.dispatch?.(
+      showModal({
+        id: "InjurySelector",
+        content: () => {
+          return (
+            <div className={styles.injurySelectorContainer}>
+              <div className={styles.centerLabel}>{`What injury occurred to ${character.name}?`}</div>
+              <select
+                className={styles.injurySelector}
+                onChange={(e) => {
+                  this.modalInjuryType = e.target.value;
+                }}
+              >
+                {Object.entries(this.injuryOptions).map(([id, name]) => {
+                  return (
+                    <option value={id} key={`injury${id}`}>
+                      {name}
+                    </option>
+                  );
+                })}
+              </select>
+              <div
+                className={styles.assignInjuryButton}
+                onClick={() => {
+                  const injuries = { ...this.state.injuries };
+                  if (!injuries[character.id]) {
+                    injuries[character.id] = [];
+                  }
+                  injuries[character.id].push(this.modalInjuryType);
+                  this.setState({ injuries });
+                  this.props.dispatch?.(hideModal());
+                }}
+              >
+                Assign Injury
+              </div>
+              <div
+                className={styles.closeDialogButton}
+                onClick={() => {
+                  this.props.dispatch?.(hideModal());
+                }}
+              >
+                Cancel
+              </div>
+            </div>
+          );
+        },
+      })
+    );
+  }
+
+  private onRemoveInjury(character: CharacterData): void {
+    const injuries = { ...this.state.injuries };
+    delete injuries[character.id];
+    this.setState({ injuries });
+  }
+
+  private onInjuriesPageNextClick(): void {
     // As the data is valid, move on to the next page.
     this.pages.push(() => {
-      return this.renderDeathsPage();
+      return this.renderOutcomesConfirmationPage();
     });
     this.setState({ pageIndex: this.state.pageIndex + 1 });
   }
@@ -363,7 +505,15 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
   private renderDeathsPage(): React.ReactNode {
     return (
       <div className={styles.contentColumn}>
-        <div className={styles.centerLabel}>TODO: Deaths?</div>
+        <div className={styles.centerLabel}>{"Were any characters killed?"}</div>
+        <div className={styles.label}>{"Living"}</div>
+        <div className={styles.characterListContainer}>
+          {this.getKillableCharacters().map(this.renderKillableCharacterRow.bind(this))}
+        </div>
+        <div className={styles.label}>{"Dead"}</div>
+        <div className={styles.characterListContainer}>
+          {this.state.deaths.map(this.renderDeadCharacterRow.bind(this))}
+        </div>
         <div className={styles.buttonRow}>
           <div className={styles.actionButton} onClick={this.onPrevPageClick.bind(this)}>
             {"Prev"}
@@ -376,12 +526,72 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private onDeathsPageNextClick(): void {
-    // TODO: Valid data?
+  private getKillableCharacters(): CharacterData[] {
+    const activity = this.props.activities[this.props.activeActivityId];
+    const alive = activity.participants
+      .filter((p) => {
+        return !this.state.deaths.includes(p.characterId);
+      })
+      .sort((a, b) => {
+        const charA = this.props.allCharacters[a.characterId];
+        const charB = this.props.allCharacters[b.characterId];
+        return charA.name.localeCompare(charB.name);
+      })
+      .map((p) => {
+        return this.props.allCharacters[p.characterId];
+      });
+    return alive;
+  }
 
+  private renderKillableCharacterRow(character: CharacterData, index: number): React.ReactNode {
+    return (
+      <div className={styles.listRow} key={`adventurerRow${index}`}>
+        <div className={styles.listLevel}>L{character.level}</div>
+        <div className={styles.listClass}>{character.class_name}</div>
+        <div className={styles.listName}>{character.name}</div>
+        <div
+          className={styles.addDeathButton}
+          onClick={() => {
+            this.setState({ deaths: [...this.state.deaths, character.id] });
+          }}
+        >
+          +
+        </div>
+      </div>
+    );
+  }
+
+  private renderDeadCharacterRow(characterId: number, index: number): React.ReactNode {
+    const character = this.props.allCharacters[characterId];
+    return (
+      <div className={styles.listRow} key={`adventurerRow${index}`}>
+        <div className={styles.deadCharacterData}>
+          <div className={styles.row}>
+            <div className={styles.listLevel}>L{character.level}</div>
+            <div className={styles.listClass}>{character.class_name}</div>
+            <div className={styles.listName}>{character.name}</div>
+          </div>
+        </div>
+        <div
+          className={styles.cancelButton}
+          onClick={() => {
+            this.setState({
+              deaths: this.state.deaths.filter((cid) => {
+                return cid !== characterId;
+              }),
+            });
+          }}
+        >
+          -
+        </div>
+      </div>
+    );
+  }
+
+  private onDeathsPageNextClick(): void {
     // As the data is valid, move on to the next page.
     this.pages.push(() => {
-      return this.renderOutcomesConfirmationPage();
+      return this.renderInjuriesPage();
     });
     this.setState({ pageIndex: this.state.pageIndex + 1 });
   }
@@ -410,13 +620,26 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
     const allCharacters = this.props.allCharacters;
     const { gpDistro } = this.state;
 
-    // Only surviving participants get stuff.
-    const survivingParticipants = [...activity.participants];
+    // Deaths.
+    // We make a copy so it can be captured by inline functions properly.
+    const deadCharacterIds: number[] = [...this.state.deaths];
+    // Create "death" outcomes for the dead.
+    deadCharacterIds.forEach((did) => {
+      const o: ActivityOutcomeData = {
+        id: 0, // Will be overwritten by the server.
+        activity_id: activity.id,
+        target_id: did,
+        type: ActivityOutcomeType.Death,
+        quantity: 0,
+        extra: "",
+      };
+      outcomes.push(o);
+    });
 
-    // TODO: Deaths.
-    const deadCharacterIds: number[] = [];
-    // TODO: Create "death" outcomes for the dead.
-    // TODO: Remove the dead from the list of survivingParticipants.
+    // Only surviving participants get stuff.
+    const survivingParticipants = activity.participants.filter((p) => {
+      return !deadCharacterIds.includes(p.characterId);
+    });
 
     // Gold and XP distribution.
     interface RecipientData {
@@ -536,6 +759,7 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
             target_id: r.characterId,
             type: ActivityOutcomeType.CXPDeductibleReset,
             quantity: remainingDeductible,
+            extra: "",
           };
           outcomes.push(o);
         }
@@ -558,6 +782,7 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
           target_id: r.characterId,
           type: ActivityOutcomeType.Gold,
           quantity: r.gold + r.campaignGold,
+          extra: "",
         };
         outcomes.push(o);
       }
@@ -569,6 +794,7 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
           target_id: r.characterId,
           type: ActivityOutcomeType.XP,
           quantity: r.xp,
+          extra: "",
         };
         outcomes.push(o);
       }
@@ -580,13 +806,28 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
           target_id: r.characterId,
           type: ActivityOutcomeType.CXPDeductible,
           quantity: r.campaignDeductiblePayment,
+          extra: "",
         };
         outcomes.push(o);
       }
     });
 
     // TODO: Item distribution.
-    // TODO: Injuries.
+
+    // Injuries.
+    Object.entries(this.state.injuries).forEach(([characterId, injuryIds]) => {
+      injuryIds.forEach((iid) => {
+        const o: ActivityOutcomeData = {
+          id: 0, // Will be overwritten by the server.
+          activity_id: activity.id,
+          target_id: +characterId,
+          type: ActivityOutcomeType.Injury,
+          quantity: 0,
+          extra: iid,
+        };
+        outcomes.push(o);
+      });
+    });
 
     return outcomes;
   }
@@ -603,7 +844,11 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
 
     // Send it to the server!
     const outcomes = this.buildOutcomes();
-    const res = await ServerAPI.resolveActivity(this.props.activeActivityId, this.state.resolutionText, outcomes);
+    const res = await ServerAPI.resolveActivity(
+      this.props.activities[this.props.activeActivityId],
+      this.state.resolutionText,
+      outcomes
+    );
 
     this.setState({ isSaving: false });
     // Refetch anything that might be altered by an activity resolution.  So... almost everything.

@@ -9,5 +9,4 @@ export const MysticSpeedOfThought: AbilityOrProficiency = {
       "gains a +1 bonus to all initiative rolls and a further +1 bonus " +
       "to surprise rolls. ",
   ],
-  minLevel: 3,
 };

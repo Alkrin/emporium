@@ -17,5 +17,4 @@ export const ProficiencyMagicalMusic: AbilityOrProficiency = {
       "this proficiency gains an additional two spell points and can add one additional spell (of " +
       "any level he can cast) to his repertoire.",
   ],
-  minLevel: 1,
 };

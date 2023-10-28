@@ -9,5 +9,4 @@ export const VenturerAvoidGettingLost: AbilityOrProficiency = {
       "time the venturer's party is in terrain familiar to the venturer, " +
       "they get a +4 bonus on proficiency throws to Avoid Getting Lost.",
   ],
-  minLevel: 1,
 };

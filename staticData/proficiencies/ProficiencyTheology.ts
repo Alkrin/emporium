@@ -9,5 +9,4 @@ export const ProficiencyTheology: AbilityOrProficiency = {
       "signatures, trappings, and holy days of his own faith, and can recognize those of other faiths " +
       "with a proficiency throw of 11+. Rare or occult cults may be harder to recognize (Judge's discretion).",
   ],
-  minLevel: 1,
 };

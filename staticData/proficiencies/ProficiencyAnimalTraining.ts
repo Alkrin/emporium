@@ -17,6 +17,6 @@ export const ProficiencyAnimalTraining: AbilityOrProficiency = {
       "animal can be taught a maximum of 2d4 different tasks or tricks. The animal trainer " +
       "will only learn the animal's limit when he reaches it.",
   ],
-  minLevel: 1,
+
   subTypes: ["Bear", "Horse", "Owlbear", "Pegasus"],
 };

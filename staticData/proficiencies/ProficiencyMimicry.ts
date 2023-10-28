@@ -17,5 +17,4 @@ export const ProficiencyMimicry: AbilityOrProficiency = {
       "from some other animal) is so authentic as to fool listeners into believing they have heard " +
       "the actual animal. This proficiency can be selected multiple times.",
   ],
-  minLevel: 1,
 };

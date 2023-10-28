@@ -8,5 +8,4 @@ export const MysticWholenessOfBody: AbilityOrProficiency = {
       "Of Body that makes him immune to all forms of poison, " +
       "including magical poisons.",
   ],
-  minLevel: 7,
 };

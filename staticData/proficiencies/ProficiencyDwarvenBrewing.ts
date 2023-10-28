@@ -9,5 +9,4 @@ export const ProficiencyDwarvenBrewing: AbilityOrProficiency = {
       "magical properties of a potion or oil on taste. He gains a +4 bonus to proficiency throws " +
       "to craft alcoholic beverages.",
   ],
-  minLevel: 1,
 };

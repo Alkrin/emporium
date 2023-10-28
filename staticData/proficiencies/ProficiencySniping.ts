@@ -7,5 +7,4 @@ export const ProficiencySniping: AbilityOrProficiency = {
     "If otherwise eligible to ambush or backstab his opponent, the character may do so " +
       "using ranged weapons at up to short range.",
   ],
-  minLevel: 1,
 };

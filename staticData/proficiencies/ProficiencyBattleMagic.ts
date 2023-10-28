@@ -8,5 +8,4 @@ export const ProficiencyBattleMagic: AbilityOrProficiency = {
       "2 class levels higher than his actual level of experience for purposes of dispelling " +
       "magic or penetrating a target's magic resistance.",
   ],
-  minLevel: 1,
 };

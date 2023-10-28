@@ -14,5 +14,4 @@ export const ProficiencySeafaring: AbilityOrProficiency = {
       "reduced by only one category rather than by two (as described in the Wilderness Adventures " +
       "section), and his ship's chance to evade is increased by +5.",
   ],
-  minLevel: 1,
 };

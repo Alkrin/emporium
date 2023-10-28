@@ -13,5 +13,4 @@ export const ProficiencyMasteryOfCharmsAndIllusions: AbilityOrProficiency = {
       "three (rather than two) caster levels higher than his actual caster level, and targets " +
       "suffer a -3 penalty to their saving throws.",
   ],
-  minLevel: 1,
 };

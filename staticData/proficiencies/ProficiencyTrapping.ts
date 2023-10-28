@@ -23,5 +23,4 @@ export const ProficiencyTrapping: AbilityOrProficiency = {
       "level. This proficiency provides no abilities with regard to mechanical traps in a " +
       "dungeon, or magical traps of any sort.",
   ],
-  minLevel: 1,
 };

@@ -27,5 +27,4 @@ export const ProficiencyManualOfArms: AbilityOrProficiency = {
       "\n" +
       "With Riding and Weapon Focus (bows & crossbows), he can train horse archers in 6 months, and cataphract cavalry in 12 months.",
   ],
-  minLevel: 1,
 };

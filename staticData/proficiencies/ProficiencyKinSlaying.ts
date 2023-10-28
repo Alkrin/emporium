@@ -8,5 +8,4 @@ export const ProficiencyKinSlaying: AbilityOrProficiency = {
       "receives +1 on attack throws against humans, elves, dwarves, halflings, gnomes, and " +
       "Nobiran. At level 7, this bonus increases to +2, and at level 13 it increases to +3.",
   ],
-  minLevel: 1,
 };
