@@ -10,7 +10,6 @@ export const ProficiencyWeaponFocus: AbilityOrProficiency = {
       "selecting an additional Weapon Focus each time. Weapon Focus does not allow a character " +
       "to use weapons not available to his class.",
   ],
-  minLevel: 1,
   subTypes: [
     "Axes",
     "Bows/Crossbows",

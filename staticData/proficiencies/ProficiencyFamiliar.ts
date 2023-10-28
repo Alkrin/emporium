@@ -18,6 +18,6 @@ export const ProficiencyFamiliar: AbilityOrProficiency = {
       "maximum total hit points. A character does not gain a new familiar if it is slain until " +
       "he has gained a level of experience.",
   ],
-  minLevel: 1,
+
   subTypes: ["Bat", "Bird", "Cat", "Dog", "Rat", "Snake", "Squirrel", "Toad"],
 };

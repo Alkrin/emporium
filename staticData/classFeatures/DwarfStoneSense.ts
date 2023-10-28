@@ -8,5 +8,4 @@ export const DwarfStoneSense: AbilityOrProficiency = {
       "false walls, hidden construction, or sloped passages when actively " +
       "checking with a proficiency roll of 14+.",
   ],
-  minLevel: 1,
 };

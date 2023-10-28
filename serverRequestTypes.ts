@@ -1,4 +1,6 @@
+import { Dictionary } from "./lib/dictionary";
 import {
+  ActivityData,
   ActivityOutcomeData,
   CharacterEquipmentData,
   EquipmentSetData,
@@ -265,11 +267,16 @@ export interface RequestBody_DeleteActivity {
 }
 
 export interface RequestBody_ResolveActivity {
-  activity_id: number;
+  activity: ActivityData;
   resolution_text: string;
   outcomes: ActivityOutcomeData[];
 }
 
 export interface RequestBody_KillOrReviveCharacter {
   characterId: number;
+}
+
+export interface RequestBody_AddOrRemoveInjury {
+  characterId: number;
+  injuryId: string;
 }

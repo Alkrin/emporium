@@ -1,7 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { Dictionary } from "../lib/dictionary";
-import { ProficiencyData, UserData } from "../serverAPI";
+import { ProficiencyData } from "../serverAPI";
+import { ProficiencySource } from "../staticData/types/abilitiesAndProficiencies";
+
+export interface AddRemoveInjuryParams {
+  characterId: number;
+  injuryId: string;
+}
 
 interface ProficienciesReduxState {
   proficienciesByCharacterId: Dictionary<ProficiencyData[]>;
@@ -37,7 +43,29 @@ export const proficienciesSlice = createSlice({
         delete state.proficienciesByCharacterId[action.payload];
       }
     },
+    addInjury: (state: ProficienciesReduxState, action: PayloadAction<AddRemoveInjuryParams>) => {
+      const { characterId, injuryId } = action.payload;
+      const injuryData: ProficiencyData = {
+        character_id: characterId,
+        feature_id: injuryId,
+        subtype: "",
+        source: ProficiencySource.Injury,
+      };
+      if (!state.proficienciesByCharacterId[characterId]) {
+        state.proficienciesByCharacterId[characterId] = [];
+      }
+      state.proficienciesByCharacterId[characterId].push(injuryData);
+    },
+    removeInjury: (state: ProficienciesReduxState, action: PayloadAction<AddRemoveInjuryParams>) => {
+      const { characterId, injuryId } = action.payload;
+      if (state.proficienciesByCharacterId[characterId]) {
+        state.proficienciesByCharacterId[characterId] = state.proficienciesByCharacterId[characterId].filter((p) => {
+          return p.feature_id !== injuryId;
+        });
+      }
+    },
   },
 });
 
-export const { updateProficiencies, deleteProficienciesForCharacter } = proficienciesSlice.actions;
+export const { updateProficiencies, deleteProficienciesForCharacter, addInjury, removeInjury } =
+  proficienciesSlice.actions;

@@ -12,5 +12,4 @@ export const MysticCommandOfVoice: AbilityOrProficiency = {
       "mystic’s CHA are immune to this power (and the " +
       "mystic will know they are immune).",
   ],
-  minLevel: 6,
 };

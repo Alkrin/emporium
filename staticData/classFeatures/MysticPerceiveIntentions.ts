@@ -13,5 +13,4 @@ export const MysticPerceiveIntentions: AbilityOrProficiency = {
       "the mystic’s WIS are immune to this power (and the mystic will " +
       "know they are immune).",
   ],
-  minLevel: 8,
 };

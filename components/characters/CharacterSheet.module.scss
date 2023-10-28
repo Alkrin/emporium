@@ -86,20 +86,91 @@
   cursor: pointer;
 }
 
+.nameContainer {
+  position: relative;
+  height: 3.2vmin;
+}
+
 .nameLabel {
   @extend .normalText;
-  position: absolute;
-  top: 1vmin;
-  left: 1vmin;
-  right: 1vmin;
+  position: relative;
   font-size: 2rem;
-  text-align: center;
+  white-space: nowrap;
+}
+
+.topPanel {
+  @extend .column;
+  margin: 1vmin;
+}
+
+.leftPanel {
+  @extend .column;
+  position: relative;
+  align-self: flex-start;
+  margin-left: 1vmin;
+}
+
+.rightPanel {
+  @extend .column;
+  position: relative;
+  align-self: flex-start;
+  margin-left: 1vmin;
+}
+
+.topPanelGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, max-content);
+  gap: 0.5vmin;
+  grid-auto-rows: auto;
 }
 
 .statsPanel {
-  position: absolute;
-  top: 5vmin;
-  left: 1.5vmin;
+  grid-column: 1;
+  grid-row: 1 / 5;
+}
+
+.xpPanel {
+  grid-column: 1 / 3;
+  grid-row: 5;
+}
+
+.savingThrowsPanel {
+  grid-column: 2;
+  grid-row: 1 / 5;
+}
+
+.speedPanel {
+  grid-column: 3;
+  grid-row: 1 / 2;
+}
+
+.initiativePanel {
+  grid-column: 3;
+  grid-row: 2 / 3;
+}
+
+.combatPanel {
+  grid-column: 3;
+  grid-row: 3 / 6;
+}
+
+.moneyPanel {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+.hpPanel {
+  grid-column: 4;
+  grid-row: 2 / 4;
+}
+
+.equipmentPanel {
+  grid-column: 4;
+  grid-row: 4;
+}
+
+.statsContainer {
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -129,10 +200,8 @@
   text-align: center;
 }
 
-.savingThrowsPanel {
-  position: absolute;
-  top: 5vmin;
-  left: 12.5vmin;
+.savingThrowsContainer {
+  width: 8vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -161,10 +230,8 @@
   margin-bottom: 0.5vmin;
 }
 
-.speedPanel {
-  position: absolute;
-  top: 5vmin;
-  left: 22.5vmin;
+.speedContainer {
+  width: 17vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -187,10 +254,7 @@
   margin-left: 0.3rem;
 }
 
-.initiativePanel {
-  position: absolute;
-  top: 17.2vmin;
-  right: 19vmin;
+.initiativeContainer {
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -200,14 +264,11 @@
 
 .initiativeTitle {
   @extend .normalText;
-  width: 11.5vmin;
+  flex-grow: 1;
 }
 
-.xpPanel {
+.xpContainer {
   @extend .column;
-  position: absolute;
-  top: 20vmin;
-  left: 1.5vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -227,14 +288,12 @@
 
 .xpTitle {
   @extend .normalText;
-  width: 3vmin;
+  flex-grow: 1;
 }
 
 .xpNumbers {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
-  width: 13.4vmin;
 }
 
 .xpValue {
@@ -300,11 +359,8 @@
   }
 }
 
-.hpPanel {
+.hpContainer {
   @extend .column;
-  position: absolute;
-  top: 20vmin;
-  left: 22.5vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -368,9 +424,8 @@
 
 .spellRepertoirePanel {
   @extend .column;
-  position: absolute;
-  top: 35vmin;
-  left: 23.5vmin;
+  position: relative;
+  margin-top: 1vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -478,9 +533,7 @@
 
 .spellSlotsPanel {
   @extend .column;
-  position: absolute;
-  top: 24vmin;
-  left: 23.5vmin;
+  position: relative;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -516,9 +569,7 @@
 
 .abilitiesPanel {
   @extend .column;
-  position: absolute;
-  top: 27vmin;
-  left: 1.5vmin;
+  position: relative;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -526,6 +577,7 @@
 
 .abilitiesTitle {
   @extend .normalText;
+  flex-grow: 1;
 }
 
 .abilitiesEditButton {
@@ -547,15 +599,17 @@
   }
 }
 
-.equipmentPanel {
-  position: absolute;
-  top: 10vmin;
-  left: 22.5vmin;
+.equipmentContainer {
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
   display: flex;
   flex-direction: column;
+}
+
+.equipmentTitle {
+  @extend .normalText;
+  flex-grow: 1;
 }
 
 .equipmentEditButton {
@@ -668,12 +722,9 @@
   max-width: 45vmin;
 }
 
-.combatPanel {
+.combatContainer {
   @extend .column;
-  position: absolute;
-  top: 10vmin;
-  left: 34.5vmin;
-  width: 16vmin;
+  width: 17vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -711,10 +762,9 @@
 
 .levelBasedSkillsPanel {
   @extend .column;
-  position: absolute;
-  top: 51.5vmin;
-  left: 1.5vmin;
-  width: 20vmin;
+  position: relative;
+  margin-top: 1vmin;
+  width: 21vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -725,7 +775,7 @@
   position: relative;
   margin-top: 0.5vmin;
   margin-bottom: 0.5vmin;
-  height: 20vmin;
+  max-height: 17.5vmin;
   background-color: black;
 
   overflow-y: scroll;
@@ -784,11 +834,8 @@
   color: wheat;
 }
 
-.moneyPanel {
+.moneyContainer {
   @extend .column;
-  position: absolute;
-  top: 5vmin;
-  left: 40.5vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
@@ -796,7 +843,7 @@
 
 .moneyTitle {
   @extend .normalText;
-  width: 7.5vmin;
+  flex-grow: 1;
 }
 
 .moneyValue {
@@ -806,6 +853,67 @@
 }
 
 .moneyEditButton {
+  @extend .editIcon;
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.injuriesPanel {
+  @extend .column;
+  position: relative;
+  margin-top: 1vmin;
+  width: 21vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.injuriesContainer {
+  @extend .column;
+  position: relative;
+  margin-top: 0.5vmin;
+  margin-bottom: 0.5vmin;
+  height: 5vmin;
+  background-color: black;
+
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.injuriesTitle {
+  @extend .normalText;
+  flex-grow: 1;
+}
+
+.injuriesEditButton {
   @extend .editIcon;
   margin-left: 0.5vmin;
   margin-top: 0vmin;

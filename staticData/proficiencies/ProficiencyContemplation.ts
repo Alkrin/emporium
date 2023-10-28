@@ -9,5 +9,4 @@ export const ProficiencyContemplation: AbilityOrProficiency = {
       "undisturbed meditation. A character may not regain the same level of spell more than " +
       "once per day through contemplation.",
   ],
-  minLevel: 1,
 };

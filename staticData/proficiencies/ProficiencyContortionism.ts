@@ -9,5 +9,4 @@ export const ProficiencyContortionism: AbilityOrProficiency = {
       "He may make a proficiency throw of 18+ each round to escape from bonds or to slip between " +
       "the bars of a portcullis.",
   ],
-  minLevel: 1,
 };

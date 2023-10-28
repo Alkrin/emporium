@@ -10,5 +10,4 @@ export const ProficiencyPrestidigitation: AbilityOrProficiency = {
       "and gesture. He may use magical sleight-of-hand to pick pockets as a thief of one half " +
       "his class level.",
   ],
-  minLevel: 1,
 };

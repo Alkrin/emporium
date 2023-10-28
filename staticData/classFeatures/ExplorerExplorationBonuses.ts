@@ -13,5 +13,4 @@ export const ExplorerExplorationBonuses: AbilityOrProficiency = {
       "A party guided by an explorer can evade wilderness encounters " +
       "even when surprised on a proficiency throw of 19+.",
   ],
-  minLevel: 1,
 };

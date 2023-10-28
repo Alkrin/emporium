@@ -10,5 +10,4 @@ export const AntiPaladinUnholyFanaticism: AbilityOrProficiency = {
       "morale score whenever he is present. This bonus stacks with any " +
       "modifiers from the anti-paladin's Charisma or proficiencies.",
   ],
-  minLevel: 5,
 };

@@ -8,5 +8,4 @@ export const MysticPurityOfBodyAndSoul: AbilityOrProficiency = {
       "as made him immune to all forms of disease, including magical " +
       "diseases caused by spells, mummies, and lycanthropes.",
   ],
-  minLevel: 5,
 };

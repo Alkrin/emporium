@@ -11,5 +11,4 @@ export const ProficiencyJuryRigging: AbilityOrProficiency = {
       "lost when the duration ends. The Judge should make the determination of how long the " +
       "repairs will last in secret.",
   ],
-  minLevel: 1,
 };

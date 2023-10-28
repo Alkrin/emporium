@@ -18,5 +18,4 @@ export const MysticProbabilityTrance: AbilityOrProficiency = {
       "enter a probability trance no more than once per day, with a " +
       "night’s rest required in between. ",
   ],
-  minLevel: 4,
 };

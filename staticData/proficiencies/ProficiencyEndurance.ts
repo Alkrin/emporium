@@ -8,5 +8,4 @@ export const ProficiencyEndurance: AbilityOrProficiency = {
       "force march for one day without penalty, plus one additional day for each point of " +
       "Constitution bonus.",
   ],
-  minLevel: 1,
 };

@@ -9,5 +9,4 @@ export const ProficiencyCaving: AbilityOrProficiency = {
       "will be able to automatically know the route he has taken to get where he is, if he was conscious " +
       "at the time.",
   ],
-  minLevel: 1,
 };

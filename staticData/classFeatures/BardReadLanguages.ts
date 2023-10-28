@@ -11,5 +11,4 @@ export const BardReadLanguages: AbilityOrProficiency = {
       "not try to read that particular piece of writing until he reaches a " +
       "higher level of experience.",
   ],
-  minLevel: 4,
 };

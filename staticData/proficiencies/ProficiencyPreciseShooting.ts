@@ -14,5 +14,4 @@ export const ProficiencyPreciseShooting: AbilityOrProficiency = {
       "no penalty to his attack throw. Characters without this proficiency cannot attack " +
       "opponents engaged in melee with missile attacks.",
   ],
-  minLevel: 1,
 };

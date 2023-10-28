@@ -11,5 +11,4 @@ export const BarbarianAnimalMagnetism: AbilityOrProficiency = {
       "This bonus stacks with any modifiers from the barbarian's " +
       "Charisma or proficiencies.",
   ],
-  minLevel: 5,
 };

@@ -36,6 +36,7 @@ import {
   RequestBody_DeleteActivity,
   RequestBody_ResolveActivity,
   RequestBody_KillOrReviveCharacter,
+  RequestBody_AddOrRemoveInjury,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -311,20 +312,23 @@ export function ActivityData_StringToParticipants(s: string): ActivityParticipan
   });
 }
 
+export function ActivityData_ParticipantToString(participant: ActivityParticipant): string {
+  return (
+    `${participant.characterId}:` +
+    `${participant.characterLevel}:` +
+    `${participant.isArcane ? "T" : "F"}:` +
+    `${participant.isDivine ? "T" : "F"}:` +
+    `${participant.canTurnUndead ? "T" : "F"}:` +
+    `${participant.canSneak ? "T" : "F"}:` +
+    `${participant.canFindTraps ? "T" : "F"}:` +
+    `${participant.hasMagicWeapons ? "T" : "F"}:` +
+    `${participant.hasSilverWeapons ? "T" : "F"}`
+  );
+}
 export function ActivityData_ParticipantsToString(participants: ActivityParticipant[]): string {
   return participants
     .map((p) => {
-      return (
-        `${p.characterId}:` +
-        `${p.characterLevel}:` +
-        `${p.isArcane ? "T" : "F"}:` +
-        `${p.isDivine ? "T" : "F"}:` +
-        `${p.canTurnUndead ? "T" : "F"}:` +
-        `${p.canSneak ? "T" : "F"}:` +
-        `${p.canFindTraps ? "T" : "F"}:` +
-        `${p.hasMagicWeapons ? "T" : "F"}:` +
-        `${p.hasSilverWeapons ? "T" : "F"}`
-      );
+      return ActivityData_ParticipantToString(p);
     })
     .join(",");
 }
@@ -336,8 +340,7 @@ export enum ActivityOutcomeType {
   Item = "Item",
   CXPDeductible = "CXPDeductible",
   CXPDeductibleReset = "CXPDeductibleReset",
-  InjuryTwoWeeks = "InjuryTwoWeeks",
-  InjuryFourWeeks = "InjuryFourWeeks",
+  Injury = "Injury",
   Death = "Death",
   Relocate = "Relocate", // Character changed to a new location.
 }
@@ -347,6 +350,7 @@ export interface ActivityOutcomeData {
   type: ActivityOutcomeType;
   target_id: number;
   quantity: number;
+  extra: string;
 }
 
 type ServerActivityOutcomeData = Omit<ActivityOutcomeData, "type"> & {
@@ -365,10 +369,8 @@ export function ActivityOutcomeData_StringToType(s: string): ActivityOutcomeType
       return ActivityOutcomeType.CXPDeductible;
     case ActivityOutcomeType.CXPDeductibleReset:
       return ActivityOutcomeType.CXPDeductibleReset;
-    case ActivityOutcomeType.InjuryTwoWeeks:
-      return ActivityOutcomeType.InjuryTwoWeeks;
-    case ActivityOutcomeType.InjuryFourWeeks:
-      return ActivityOutcomeType.InjuryFourWeeks;
+    case ActivityOutcomeType.Injury:
+      return ActivityOutcomeType.Injury;
     case ActivityOutcomeType.Death:
       return ActivityOutcomeType.Death;
     case ActivityOutcomeType.Relocate:
@@ -1179,11 +1181,11 @@ class AServerAPI {
   }
 
   async resolveActivity(
-    activity_id: number,
+    activity: ActivityData,
     resolution_text: string,
     outcomes: ActivityOutcomeData[]
   ): Promise<MultiModifyResult> {
-    const requestBody: RequestBody_ResolveActivity = { activity_id, resolution_text, outcomes };
+    const requestBody: RequestBody_ResolveActivity = { activity, resolution_text, outcomes };
     const res = await fetch("/api/resolveActivity", {
       method: "POST",
       headers: {
@@ -1213,6 +1215,36 @@ class AServerAPI {
       characterId,
     };
     const res = await fetch("/api/killCharacter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async addInjury(characterId: number, injuryId: string): Promise<InsertRowResult> {
+    const requestBody: RequestBody_AddOrRemoveInjury = {
+      characterId,
+      injuryId,
+    };
+    const res = await fetch("/api/addInjury", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async removeInjury(characterId: number, injuryId: string): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_AddOrRemoveInjury = {
+      characterId,
+      injuryId,
+    };
+    const res = await fetch("/api/removeInjury", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

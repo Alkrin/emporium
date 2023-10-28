@@ -8,5 +8,4 @@ export const ProficiencyPassingWithoutTrace: AbilityOrProficiency = {
       "be tracked. For every 3 levels of experience, the character may cover the tracks " +
       "of an additional traveling companion.",
   ],
-  minLevel: 1,
 };

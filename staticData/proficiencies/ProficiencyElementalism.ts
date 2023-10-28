@@ -9,6 +9,5 @@ export const ProficiencyElementalism: AbilityOrProficiency = {
       "Hit Die. The character's magic missiles can be considered to be of this element, " +
       "if he desires.",
   ],
-  minLevel: 1,
   subTypes: ["Air", "Earth", "Fire", "Lightning", "Water"],
 };

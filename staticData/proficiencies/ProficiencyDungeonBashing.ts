@@ -8,5 +8,4 @@ export const ProficiencyDungeonBashing: AbilityOrProficiency = {
       "exploration. The character receives a +4 bonus on throws to open doors and similar acts " +
       "of brute strength.",
   ],
-  minLevel: 1,
 };

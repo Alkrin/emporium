@@ -2,9 +2,9 @@ import { ElfAttunementToNature } from "../classFeatures/ElfAttunementToNature";
 import { ElfConnectionToNature } from "../classFeatures/ElfConnectionToNature";
 import { ElfKeenEyes } from "../classFeatures/ElfKeenEyes";
 import { ElvenCourtierEnchantingPerformance } from "../classFeatures/ElvenCourtierEnchantingPerformance";
-import { SharedHalfMinorMagicCreation } from "../classFeatures/SharedHalfMinorMagicCreation";
 import { SharedInspireCourage } from "../classFeatures/SharedInspireCourage";
 import { SharedMeleeAccuracyBonus } from "../classFeatures/SharedMeleeAccuracyBonus";
+import { SharedMinorMagicCreation } from "../classFeatures/SharedMinorMagicCreation";
 import { SharedRangedAccuracyBonus } from "../classFeatures/SharedRangedAccuracyBonus";
 import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyBeastFriendship } from "../proficiencies/ProficiencyBeastFriendship";
@@ -69,19 +69,19 @@ export const ClassElvenCourtier: CharacterClass = {
   },
   toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5],
   classFeatures: [
-    { def: ProficiencyAdventuring },
-    { def: ElfAttunementToNature },
-    { def: ElfConnectionToNature },
-    { def: ElfKeenEyes },
-    { def: ElvenCourtierEnchantingPerformance },
-    { def: ProficiencyDiplomacy },
-    { def: SharedHalfMinorMagicCreation },
-    { def: SharedInspireCourage },
-    { def: ProficiencyLanguage, subtypes: ["Common"] },
-    { def: ProficiencyLanguage, subtypes: ["Elven"] },
-    { def: ProficiencyLanguage, subtypes: ["Gnoll"] },
-    { def: ProficiencyLanguage, subtypes: ["Hobgoblin"] },
-    { def: ProficiencyLanguage, subtypes: ["Orc"] },
+    { def: ProficiencyAdventuring, rank: 1, minLevel: 1 },
+    { def: ElfAttunementToNature, rank: 1, minLevel: 1 },
+    { def: ElfConnectionToNature, rank: 1, minLevel: 1 },
+    { def: ElfKeenEyes, rank: 1, minLevel: 1 },
+    { def: ElvenCourtierEnchantingPerformance, rank: 1, minLevel: 1 },
+    { def: ProficiencyDiplomacy, rank: 1, minLevel: 1 },
+    { def: SharedMinorMagicCreation, rank: 1, minLevel: 10 },
+    { def: SharedInspireCourage, rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Common", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Elven", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Gnoll", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Hobgoblin", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Orc", rank: 1, minLevel: 1 },
   ],
   selectableClassFeatures: [
     { title: "Accuracy Bonus", selections: [{ def: SharedMeleeAccuracyBonus }, { def: SharedRangedAccuracyBonus }] },

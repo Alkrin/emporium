@@ -1,16 +1,9 @@
-import { AntiPaladinAuraOfProtection } from "../classFeatures/AntiPaladinAuraOfProtection";
-import { AntiPaladinDetectGood } from "../classFeatures/AntiPaladinDetectGood";
-import { AntiPaladinUnholyFanaticism } from "../classFeatures/AntiPaladinUnholyFanaticism";
-import { FighterBattlefieldProwess } from "../classFeatures/FighterBattlefieldProwess";
 import { PaladinAuraOfProtection } from "../classFeatures/PaladinAuraOfProtection";
 import { PaladinHolyFervor } from "../classFeatures/PaladinHolyFervor";
 import { SharedMeleeDamageBonus } from "../classFeatures/SharedMeleeDamageBonus";
 import { SharedRangedDamageBonus } from "../classFeatures/SharedRangedDamageBonus";
-import { ZaharanAfterTheFlesh } from "../classFeatures/ZaharanAfterTheFlesh";
 import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyAlertness } from "../proficiencies/ProficiencyAlertness";
-import { ProficiencyAmbushing } from "../proficiencies/ProficiencyAmbushing";
-import { ProficiencyBerserkergang } from "../proficiencies/ProficiencyBerserkergang";
 import { ProficiencyBlindFighting } from "../proficiencies/ProficiencyBlindFighting";
 import { ProficiencyCombatReflexes } from "../proficiencies/ProficiencyCombatReflexes";
 import { ProficiencyCombatTrickery } from "../proficiencies/ProficiencyCombatTrickery";
@@ -23,8 +16,6 @@ import { ProficiencyEndurance } from "../proficiencies/ProficiencyEndurance";
 import { ProficiencyFightingStyle } from "../proficiencies/ProficiencyFightingStyle";
 import { ProficiencyGoblinSlaying } from "../proficiencies/ProficiencyGoblinSlaying";
 import { ProficiencyHealing } from "../proficiencies/ProficiencyHealing";
-import { ProficiencyIntimidation } from "../proficiencies/ProficiencyIntimidation";
-import { ProficiencyKinSlaying } from "../proficiencies/ProficiencyKinSlaying";
 import { ProficiencyKnowledge } from "../proficiencies/ProficiencyKnowledge";
 import { ProficiencyLanguage } from "../proficiencies/ProficiencyLanguage";
 import { ProficiencyLayOnHands } from "../proficiencies/ProficiencyLayOnHands";
@@ -73,15 +64,15 @@ export const ClassPaladin: CharacterClass = {
   },
   toHitBonus: [0, 1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7, 8, 9],
   classFeatures: [
-    { def: ProficiencyAdventuring },
-    { def: SharedMeleeDamageBonus },
-    { def: SharedRangedDamageBonus },
-    { def: PaladinAuraOfProtection },
-    { def: PaladinHolyFervor },
-    { def: ProficiencySensingEvil },
-    { def: ProficiencyDivineHealth },
-    { def: ProficiencyLayOnHands },
-    { def: ProficiencyLanguage, subtypes: ["Common"] },
+    { def: ProficiencyAdventuring, rank: 1, minLevel: 1 },
+    { def: SharedMeleeDamageBonus, rank: 1, minLevel: 1 },
+    { def: SharedRangedDamageBonus, rank: 1, minLevel: 1 },
+    { def: PaladinAuraOfProtection, rank: 1, minLevel: 1 },
+    { def: PaladinHolyFervor, rank: 1, minLevel: 5 },
+    { def: ProficiencySensingEvil, rank: 1, minLevel: 1 },
+    { def: ProficiencyDivineHealth, rank: 1, minLevel: 1 },
+    { def: ProficiencyLayOnHands, rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Common", rank: 1, minLevel: 1 },
   ],
   selectableClassFeatures: [],
   classProficienciesAt: [1, 3, 6, 9, 12],

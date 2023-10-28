@@ -53,5 +53,4 @@ export const ProficiencyGambling: AbilityOrProficiency = {
       "the game can be for higher stakes. This can be as simple as multiplying the total rolled " +
       "by 5, 10, or even 1,000+, or as complex as requiring the loser to turn  over domains and castles.",
   ],
-  minLevel: 1,
 };

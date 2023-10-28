@@ -11,5 +11,4 @@ export const AntiPaladinDetectGood: AbilityOrProficiency = {
       "good intentions. Pinnacles of good and magic items harmful " +
       "to those of Chaotic alignment will also be detected by the antipaladin's power.)",
   ],
-  minLevel: 1,
 };

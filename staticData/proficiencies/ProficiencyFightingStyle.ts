@@ -28,6 +28,6 @@ export const ProficiencyFightingStyle: AbilityOrProficiency = {
       "fighting style proficiencies, he must choose between +1 initiative rolls or +1 " +
       "to AC, but not both.",
   ],
-  minLevel: 1,
+
   subTypes: ["Pole Weapon", "Missile Weapon", "Single Weapon", "Two Weapons", "Two-handed Weapon", "Weapon and Shield"],
 };

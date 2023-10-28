@@ -8,5 +8,4 @@ export const ProficiencyProphecy: AbilityOrProficiency = {
       "make these visions both cryptic and useful. Once per day, the character may cast Divination " +
       "(as the spell). The casting time is 10 minutes (1 turn).",
   ],
-  minLevel: 1,
 };

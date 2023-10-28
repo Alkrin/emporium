@@ -26,7 +26,6 @@ export const ProficiencyKnowledge: AbilityOrProficiency = {
       "books on the topic.  He could work as a sage of the subject (as described in Specialists " +
       "in Chapter 3).",
   ],
-  minLevel: 1,
   subTypes: [
     "Architecture",
     "Astrology",

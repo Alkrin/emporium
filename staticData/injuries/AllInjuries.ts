@@ -5,3 +5,7 @@ import { InjuryBlind } from "./InjuryBlind";
 export const AllInjuries: Dictionary<AbilityOrProficiency> = {
   [InjuryBlind.id]: InjuryBlind,
 };
+
+export const AllInjuriesArray = Object.values(AllInjuries).sort((injuryA, injuryB) => {
+  return injuryA.name.localeCompare(injuryB.name);
+});

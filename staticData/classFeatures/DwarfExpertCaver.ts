@@ -9,5 +9,4 @@ export const DwarfExpertCaver: AbilityOrProficiency = {
       "proficiency throw of 9+, they will be able to automatically know the " +
       "route taken to get where they are, if they were conscious at the time. ",
   ],
-  minLevel: 1,
 };

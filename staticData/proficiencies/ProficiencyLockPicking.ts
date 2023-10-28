@@ -8,5 +8,4 @@ export const ProficiencyLockPicking: AbilityOrProficiency = {
       "to open locks. He may open a lock in one round (rather than one turn) by making a successful " +
       "proficiency throw to open locks with a -4 penalty.",
   ],
-  minLevel: 1,
 };

@@ -14,5 +14,4 @@ export const ProficiencyMilitaryStrategy: AbilityOrProficiency = {
       "He can recognize famous historical battles, generals, and weapons with a proficiency " +
       "throw of 3+. Forces under his command receive a +3 bonus to initiative rolls in mass combat.",
   ],
-  minLevel: 1,
 };

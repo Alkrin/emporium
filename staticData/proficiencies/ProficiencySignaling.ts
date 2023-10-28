@@ -9,6 +9,5 @@ export const ProficiencySignaling: AbilityOrProficiency = {
       "learning an additional language. The character must specify the style and culture of " +
       "signals that he has learned when he takes this proficiency.",
   ],
-  minLevel: 1,
   subTypes: ["Cavalry Trumpets", "Naval Flags", "Smoke Signals"],
 };

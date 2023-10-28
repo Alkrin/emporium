@@ -7,5 +7,4 @@ export const ProficiencyWeaponFinesse: AbilityOrProficiency = {
     "When attacking with one-handed melee weapons, the character may use his Dexterity modifier " +
       "instead of his Strength modifier on his attack throw.",
   ],
-  minLevel: 1,
 };

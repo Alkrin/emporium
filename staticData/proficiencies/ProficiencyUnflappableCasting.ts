@@ -9,5 +9,4 @@ export const ProficiencyUnflappableCasting: AbilityOrProficiency = {
       "and attack normally. Characters without this proficiency lose the opportunity to act at all " +
       "if they are interrupted while casting a spell. See Casting Spells in Chapter 5 and Chapter 6.",
   ],
-  minLevel: 1,
 };

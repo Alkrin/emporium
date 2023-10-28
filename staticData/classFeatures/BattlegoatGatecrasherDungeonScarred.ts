@@ -8,5 +8,4 @@ export const BattlegoatGatecrasherDungeonScarred: AbilityOrProficiency = {
       "been smashed, been burned, etc. by everything dungeons have to offer.  Their extensive, " +
       "hard-earned experience allows them to Detect Traps on a proficiency roll of 14+.",
   ],
-  minLevel: 9,
 };

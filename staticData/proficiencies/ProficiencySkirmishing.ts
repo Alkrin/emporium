@@ -9,5 +9,4 @@ export const ProficiencySkirmishing: AbilityOrProficiency = {
       "must declare defensive movement before initiative dice are rolled. See Defensive " +
       "Movement in Chapter 6.",
   ],
-  minLevel: 1,
 };

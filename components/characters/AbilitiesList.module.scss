@@ -1,9 +1,12 @@
 .root {
-  width: 20vmin;
-  height: 20vmin;
+  position: relative;
+  width: 21vmin;
+  min-height: 5vmin;
+  max-height: 17vmin;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  user-select: none;
 
   /* width */
   &::-webkit-scrollbar {
@@ -29,7 +32,6 @@
   font-size: 1rem;
   display: flex;
   flex-direction: row;
-  cursor: pointer;
 
   &:hover {
     box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);

@@ -622,6 +622,7 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
       name: displayName,
       def,
       rank: 1,
+      minLevel: 1,
       subtype,
     };
     return data;

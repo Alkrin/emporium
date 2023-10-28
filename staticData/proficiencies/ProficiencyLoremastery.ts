@@ -9,5 +9,4 @@ export const ProficiencyLoremastery: AbilityOrProficiency = {
       "identify a historic artifact. The proficiency throw required reduces by 1 per level. Note " +
       "that bards automatically begin play with this proficiency as part of their class.",
   ],
-  minLevel: 1,
 };

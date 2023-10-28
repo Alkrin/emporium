@@ -29,7 +29,6 @@ export const ProficiencyProfession: AbilityOrProficiency = {
       "\n" +
       "Can make expert commentary on subjects pertaining to his profession with a proficiency throw of 3+.",
   ],
-  minLevel: 1,
   subTypes: [
     "Actuary",
     "Banker",

@@ -11,6 +11,5 @@ export const ProficiencyCombatTrickery: AbilityOrProficiency = {
       "A character may take Combat Trickery multiple times, selecting an additional special " +
       "maneuver to learn each time.",
   ],
-  minLevel: 1,
   subTypes: ["Disarm", "Force Back", "Incapacitate", "Knock Down", "Overrun", "Sunder", "Wrestle"],
 };

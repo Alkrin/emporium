@@ -47,7 +47,10 @@ export const ClassThief: CharacterClass = {
     [SavingThrowType.Spells]: [15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9],
   },
   toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6],
-  classFeatures: [{ def: ProficiencyAdventuring }, { def: ProficiencyLanguage, subtypes: ["Common"] }],
+  classFeatures: [
+    { def: ProficiencyAdventuring, rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Common", rank: 1, minLevel: 1 },
+  ],
   selectableClassFeatures: [],
   classProficienciesAt: [1, 4, 8, 12],
   classProficiencies: [

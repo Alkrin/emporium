@@ -11,5 +11,4 @@ export const ProficiencyLipReading: AbilityOrProficiency = {
       "to carousing and spying hijinks. See Hideouts and Hijinks in Chapter 7 for more information " +
       "on carousing and spying.",
   ],
-  minLevel: 1,
 };

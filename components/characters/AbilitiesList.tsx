@@ -7,7 +7,7 @@ import { UserRole } from "../../redux/userSlice";
 import { CharacterData, ProficiencyData } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import { AllProficiencies } from "../../staticData/proficiencies/AllProficiencies";
-import { AbilityOrProficiency } from "../../staticData/types/abilitiesAndProficiencies";
+import { AbilityOrProficiency, ProficiencySource } from "../../staticData/types/abilitiesAndProficiencies";
 import TooltipSource from "../TooltipSource";
 import styles from "./AbilitiesList.module.scss";
 import { isProficiencyUnlockedForCharacter } from "../../lib/characterUtils";
@@ -17,6 +17,7 @@ import { AllInjuries } from "../../staticData/injuries/AllInjuries";
 
 interface ReactProps {
   characterId: number;
+  injuries?: boolean;
 }
 
 interface InjectedProps {
@@ -30,7 +31,7 @@ type Props = ReactProps & InjectedProps;
 
 class AAbilitiesList extends React.Component<Props> {
   render(): React.ReactNode {
-    const abilities = this.sortAbilities();
+    const abilities = this.props.injuries ? this.sortInjuries() : this.sortAbilities();
 
     return (
       <div className={styles.root}>
@@ -70,21 +71,27 @@ class AAbilitiesList extends React.Component<Props> {
     // Class abilities/proficiencies.
     characterClass.classFeatures.forEach((classFeature) => {
       // Only include abilities this character has unlocked.
-      if (this.props.character.level < classFeature.def.minLevel) {
+      if (this.props.character.level < classFeature.minLevel) {
         return;
       }
 
-      const identifyingName = this.buildIdentifyingName(classFeature.def, classFeature.subtypes?.[0]);
+      const identifyingName = this.buildIdentifyingName(classFeature.def, classFeature.subtype);
       displayDataByName[identifyingName] = {
         name: identifyingName,
         rank: classFeature.rank ?? 1,
-        subtype: classFeature.subtypes?.[0],
+        subtype: classFeature.subtype,
+        minLevel: classFeature.minLevel,
         def: classFeature.def,
       };
     });
 
     // Chosen proficiencies.
     this.props.proficiencies.forEach((proficiency) => {
+      // Exclude injuries.
+      if (proficiency.source === ProficiencySource.Injury) {
+        return;
+      }
+
       // Only include abilities this character has unlocked.
       if (!isProficiencyUnlockedForCharacter(this.props.character.id, proficiency.feature_id, proficiency.subtype)) {
         return;
@@ -108,12 +115,51 @@ class AAbilitiesList extends React.Component<Props> {
           name: identifyingName,
           rank: 1,
           subtype: proficiency.subtype,
+          minLevel: 1,
           def,
         };
       }
     });
 
     // TODO: Special treatment for Languages?
+
+    Object.values(displayDataByName).forEach((datum) => {
+      // Build the display names at the end, once ranks are finalized.
+      datum.name = this.buildDisplayName(datum.def, datum.rank, datum.subtype);
+    });
+
+    // Sort the abilities alphabetically.
+    const displayData = Object.values(displayDataByName).sort((dataA, dataB) => {
+      return dataA.name.localeCompare(dataB.name);
+    });
+
+    return displayData;
+  }
+
+  private sortInjuries(): AbilityDisplayData[] {
+    const displayDataByName: Dictionary<AbilityDisplayData> = {};
+
+    // Injuries.
+    this.props.proficiencies.forEach((proficiency) => {
+      if (proficiency.source === ProficiencySource.Injury) {
+        const def = AllInjuries[proficiency.feature_id];
+        const identifyingName = this.buildIdentifyingName(def, proficiency.subtype);
+
+        if (displayDataByName[identifyingName]) {
+          // If we already had this proficiency, increase its rank by one.
+          displayDataByName[identifyingName].rank += 1;
+        } else {
+          // If this is the first instance of this proficiency, create it at rank one.
+          displayDataByName[identifyingName] = {
+            name: identifyingName,
+            rank: 1,
+            subtype: proficiency.subtype,
+            minLevel: 1,
+            def,
+          };
+        }
+      }
+    });
 
     Object.values(displayDataByName).forEach((datum) => {
       // Build the display names at the end, once ranks are finalized.

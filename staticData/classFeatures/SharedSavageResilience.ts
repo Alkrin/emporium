@@ -10,5 +10,4 @@ export const SharedSavageResilience: AbilityOrProficiency = {
       "the character's class level from the number of days of " +
       "bed rest required to recover.",
   ],
-  minLevel: 1,
 };

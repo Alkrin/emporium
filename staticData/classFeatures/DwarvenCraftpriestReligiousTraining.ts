@@ -8,5 +8,4 @@ export const DwarvenCraftpriestReligiousTraining: AbilityOrProficiency = {
       "days of the dwarven faith, and recognizes those of other faiths with a proficiency " +
       "throw of 8+ on 1d20.",
   ],
-  minLevel: 1,
 };

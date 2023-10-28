@@ -9,5 +9,4 @@ export const ProficiencyMysticAura: AbilityOrProficiency = {
       "to impress and intimidate people he encounters. If this bonus results in a total of " +
       "12 or more, the subjects act as if charmed while in his presence.",
   ],
-  minLevel: 1,
 };

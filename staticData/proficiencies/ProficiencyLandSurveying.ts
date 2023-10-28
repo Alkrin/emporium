@@ -9,5 +9,4 @@ export const ProficiencyLandSurveying: AbilityOrProficiency = {
       "when the character enters the area. In dungeons, an explorer with Land Surveying gains " +
       "a +4 bonus to his throws to escape detection due to his ability to find the best cover.",
   ],
-  minLevel: 1,
 };

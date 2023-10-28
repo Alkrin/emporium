@@ -40,6 +40,7 @@ import { MysticCommandOfVoice } from "../staticData/classFeatures/MysticCommandO
 import { ProficiencySeduction } from "../staticData/proficiencies/ProficiencySeduction";
 import { ProficiencyLayOnHands } from "../staticData/proficiencies/ProficiencyLayOnHands";
 import { ProficiencyFamiliar } from "../staticData/proficiencies/ProficiencyFamiliar";
+import { InjuryBlind } from "../staticData/injuries/InjuryBlind";
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
 export function getBonusForStat(value: number): StatBonus {
@@ -363,11 +364,11 @@ export function isProficiencyUnlockedForCharacter(
     const characterLevel = levelOverride ?? character.level;
 
     // Is this an unlocked class feature?
-    const feature = characterClass.classFeatures.find((abilityFilter) => {
-      const isSameBaseAbility = abilityFilter.def.id === proficiencyId;
-      const isMatchingSubtype = !subtype || abilityFilter.subtypes?.includes(subtype);
+    const feature = characterClass.classFeatures.find((abilityInstance) => {
+      const isSameBaseAbility = abilityInstance.def.id === proficiencyId;
+      const isMatchingSubtype = !subtype || abilityInstance.subtype === subtype;
       // TODO: The minLevel should be part of the filter, not the def.
-      const meetsMinimumLevel = characterLevel >= abilityFilter.def.minLevel;
+      const meetsMinimumLevel = characterLevel >= abilityInstance.minLevel;
       return isSameBaseAbility && isMatchingSubtype && meetsMinimumLevel;
     });
     if (feature) {
@@ -397,6 +398,7 @@ export function isProficiencyUnlockedForCharacter(
         [ProficiencySource.Class3]: characterClass.classProficienciesAt[2] ?? 99,
         [ProficiencySource.Class4]: characterClass.classProficienciesAt[3] ?? 99,
         [ProficiencySource.Class5]: characterClass.classProficienciesAt[4] ?? 99,
+        [ProficiencySource.Injury]: 1,
       };
 
       if (characterLevel >= minLevelForSource[pdata.source]) {
@@ -711,6 +713,11 @@ export function getMeleeHitCalculationsForCharacter(characterId: number): BonusC
       calc.totalBonus += 1;
     }
 
+    if (isProficiencyUnlockedForCharacter(characterId, InjuryBlind.id)) {
+      calc.sources.push(["Blind", -4]);
+      calc.totalBonus -= 4;
+    }
+
     if (isProficiencyUnlockedForCharacter(characterId, MysticMeditativeFocus.id)) {
       calc.conditionalSources.push(["Is Mediative Focus active?", 1]);
     }
@@ -850,6 +857,11 @@ export function getRangedHitCalculationsForCharacter(characterId: number): Bonus
     if (isProficiencyUnlockedForCharacter(characterId, SharedRangedAccuracyBonus.id)) {
       calc.sources.push(["Class Ranged Accuracy Bonus", 1]);
       calc.totalBonus += 1;
+    }
+
+    if (isProficiencyUnlockedForCharacter(characterId, InjuryBlind.id)) {
+      calc.sources.push(["Blind", -4]);
+      calc.totalBonus -= 4;
     }
 
     if (isProficiencyUnlockedForCharacter(characterId, MysticMeditativeFocus.id)) {

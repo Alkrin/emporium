@@ -7,5 +7,4 @@ export const BattlegoatGatecrasherMightyKidneys: AbilityOrProficiency = {
     "A battlegoat's guts are as sturdy as its exterior.  Their kidneys can filter almost anything, " +
       "making battlegoats immune to all natural and magical poisons.",
   ],
-  minLevel: 1,
 };

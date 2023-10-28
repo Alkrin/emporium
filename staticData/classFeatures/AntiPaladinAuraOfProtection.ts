@@ -9,5 +9,4 @@ export const AntiPaladinAuraOfProtection: AbilityOrProficiency = {
       "Protection appears as a writhing, tenebrous shroud when viewed with " +
       "Detect Evil, Detect Magic, or True Seeing.",
   ],
-  minLevel: 1,
 };

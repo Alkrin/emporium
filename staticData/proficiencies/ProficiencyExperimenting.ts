@@ -10,5 +10,4 @@ export const ProficiencyExperimenting: AbilityOrProficiency = {
       "higher than actual. He only suffers automatic failure when " +
       "experimenting on an unmodified roll of 1-2 (instead of 1-3).",
   ],
-  minLevel: 1,
 };

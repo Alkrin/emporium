@@ -79,7 +79,6 @@ export const ProficiencyCraft: AbilityOrProficiency = {
       "\n" +
       "Can identify masterwork items, rare materials, and famous artisans with a proficiency roll of 1+.",
   ],
-  minLevel: 1,
   subTypes: [
     "Armorer",
     "Bowyer",

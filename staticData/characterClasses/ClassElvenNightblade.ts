@@ -1,7 +1,7 @@
 import { ElfAttunementToNature } from "../classFeatures/ElfAttunementToNature";
 import { ElfConnectionToNature } from "../classFeatures/ElfConnectionToNature";
 import { ElfKeenEyes } from "../classFeatures/ElfKeenEyes";
-import { SharedHalfMinorMagicCreation } from "../classFeatures/SharedHalfMinorMagicCreation";
+import { SharedMinorMagicCreation } from "../classFeatures/SharedMinorMagicCreation";
 import { ProficiencyAcrobatics } from "../proficiencies/ProficiencyAcrobatics";
 import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyAlchemy } from "../proficiencies/ProficiencyAlchemy";
@@ -57,17 +57,17 @@ export const ClassElvenNightblade: CharacterClass = {
   },
   toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5],
   classFeatures: [
-    { def: ProficiencyAdventuring },
-    { def: ProficiencyAcrobatics },
-    { def: SharedHalfMinorMagicCreation },
-    { def: ElfAttunementToNature },
-    { def: ElfConnectionToNature },
-    { def: ElfKeenEyes },
-    { def: ProficiencyLanguage, subtypes: ["Common"] },
-    { def: ProficiencyLanguage, subtypes: ["Elven"] },
-    { def: ProficiencyLanguage, subtypes: ["Gnoll"] },
-    { def: ProficiencyLanguage, subtypes: ["Hobgoblin"] },
-    { def: ProficiencyLanguage, subtypes: ["Orc"] },
+    { def: ProficiencyAdventuring, rank: 1, minLevel: 1 },
+    { def: ProficiencyAcrobatics, rank: 1, minLevel: 1 },
+    { def: SharedMinorMagicCreation, rank: 1, minLevel: 10 },
+    { def: ElfAttunementToNature, rank: 1, minLevel: 1 },
+    { def: ElfConnectionToNature, rank: 1, minLevel: 1 },
+    { def: ElfKeenEyes, rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Common", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Elven", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Gnoll", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Hobgoblin", rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Orc", rank: 1, minLevel: 1 },
   ],
   selectableClassFeatures: [],
   classProficienciesAt: [1, 4, 8],

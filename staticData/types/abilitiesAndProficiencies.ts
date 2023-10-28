@@ -2,8 +2,6 @@ export interface AbilityOrProficiency {
   id: string;
   name: string;
   description: string[]; // One entry per rank, in order.
-  /** The character level at which this ability/proficiency becomes active. */
-  minLevel: number;
   /** If present, lists approved subtypes.  Each subtype acquired costs one proficiency slot. */
   subTypes?: string[];
   // TODO: toHitEffect?: (characterData) => number; // Function that alters toHit chance based on the character's data.  i.e. elven ranger precision bonus.
@@ -24,6 +22,13 @@ export interface AbilityFilter {
   subtypes?: string[];
 }
 
+export interface AbilityInstance {
+  def: AbilityOrProficiency;
+  rank: number;
+  subtype?: string;
+  minLevel: number;
+}
+
 export enum ProficiencySource {
   Class1 = "Class1",
   Class2 = "Class2",
@@ -39,6 +44,7 @@ export enum ProficiencySource {
   Selectable2 = "Selectable2",
   Selectable3 = "Selectable3",
   Selectable4 = "Selectable4",
+  Injury = "Injury",
 }
 
 export const GeneralProficienciesAt = [1, 5, 9, 13];

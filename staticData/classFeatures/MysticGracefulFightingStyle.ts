@@ -7,5 +7,4 @@ export const MysticGracefulFightingStyle: AbilityOrProficiency = {
     "The character gains a +1 bonus to Armor Class. At level 7, this bonus increases to +2, " +
       "and at level 13 the bonus increases to +3. This bonus stacks with Swashbuckling.",
   ],
-  minLevel: 1,
 };

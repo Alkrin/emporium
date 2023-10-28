@@ -10,5 +10,4 @@ export const DwarvenMachinistPersonalAutomaton: AbilityOrProficiency = {
       "reduction in both Library and Machine Shop requirements.  A Personal Automaton can be broken down for " +
       "parts equal to half its original value, but those parts can only be used to build another Personal Automaton.",
   ],
-  minLevel: 1,
 };

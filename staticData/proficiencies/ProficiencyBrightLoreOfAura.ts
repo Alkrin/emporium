@@ -14,5 +14,4 @@ export const ProficiencyBrightLoreOfAura: AbilityOrProficiency = {
       "calculated as if he were three (rather than two) caster levels higher than his actual " +
       "caster level.",
   ],
-  minLevel: 1,
 };

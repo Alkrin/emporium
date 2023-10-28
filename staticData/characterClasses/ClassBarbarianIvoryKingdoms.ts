@@ -9,7 +9,6 @@ import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring"
 import { ProficiencyAlertness } from "../proficiencies/ProficiencyAlertness";
 import { ProficiencyBerserkergang } from "../proficiencies/ProficiencyBerserkergang";
 import { ProficiencyBlindFighting } from "../proficiencies/ProficiencyBlindFighting";
-import { ProficiencyClimbing } from "../proficiencies/ProficiencyClimbing";
 import { ProficiencyCombatReflexes } from "../proficiencies/ProficiencyCombatReflexes";
 import { ProficiencyCombatTrickery } from "../proficiencies/ProficiencyCombatTrickery";
 import { ProficiencyCommand } from "../proficiencies/ProficiencyCommand";
@@ -65,13 +64,13 @@ export const ClassBarbarianIvoryKingdoms: CharacterClass = {
   },
   toHitBonus: [0, 1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7, 8, 9],
   classFeatures: [
-    { def: ProficiencyAdventuring },
-    { def: ProficiencyRunning },
-    { def: SharedAnimalReflexes },
-    { def: SharedNaturallyStealthy },
-    { def: SharedSavageResilience },
-    { def: BarbarianAnimalMagnetism },
-    { def: ProficiencyLanguage, subtypes: ["Common"] },
+    { def: ProficiencyAdventuring, rank: 1, minLevel: 1 },
+    { def: ProficiencyRunning, rank: 1, minLevel: 1 },
+    { def: SharedAnimalReflexes, rank: 1, minLevel: 1 },
+    { def: SharedNaturallyStealthy, rank: 1, minLevel: 1 },
+    { def: SharedSavageResilience, rank: 1, minLevel: 1 },
+    { def: BarbarianAnimalMagnetism, rank: 1, minLevel: 5 },
+    { def: ProficiencyLanguage, subtype: "Common", rank: 1, minLevel: 1 },
   ],
   selectableClassFeatures: [
     { title: "Damage Bonus", selections: [{ def: SharedMeleeDamageBonus }, { def: SharedRangedDamageBonus }] },

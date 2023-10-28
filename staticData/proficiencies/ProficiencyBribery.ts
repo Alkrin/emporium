@@ -11,5 +11,4 @@ export const ProficiencyBribery: AbilityOrProficiency = {
       "and a month's pay provides a +3 bonus. Only one bribe can be attempted per target in " +
       "any given situation.",
   ],
-  minLevel: 1,
 };

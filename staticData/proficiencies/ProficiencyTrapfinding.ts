@@ -8,5 +8,4 @@ export const ProficiencyTrapfinding: AbilityOrProficiency = {
       "and remove traps. He may find a trap in one round (rather than one turn) by making a successful " +
       "proficiency throw with a -4 penalty.",
   ],
-  minLevel: 1,
 };

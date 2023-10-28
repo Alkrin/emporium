@@ -7,5 +7,4 @@ export const BattlegoatGatecrasherInvincibleDigestion: AbilityOrProficiency = {
     "A battlegoat's stomach can digest anything it can get down its throat.  The powerful stomach acid " +
       "makes battlegoats immune to all natural and magical diseases.",
   ],
-  minLevel: 3,
 };

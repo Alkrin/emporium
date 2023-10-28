@@ -9,5 +9,4 @@ export const VenturerMercantileNetwork: AbilityOrProficiency = {
       "they treat the market as if it were one market class larger than its " +
       "actual size. (Class I markets remain Class I markets.)",
   ],
-  minLevel: 1,
 };

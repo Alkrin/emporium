@@ -12,5 +12,4 @@ export const ProficiencyBeastFriendship: AbilityOrProficiency = {
       "and fauna with a throw of 7+ and can take one more henchman than his Charisma would otherwise " +
       "permit, as long as at least one is an animal.",
   ],
-  minLevel: 1,
 };

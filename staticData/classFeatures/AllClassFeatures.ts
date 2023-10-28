@@ -13,7 +13,6 @@ import { BladeDancerMobility } from "./BladeDancerDefensiveMobility";
 import { DwarfExpertCaver } from "./DwarfExpertCaver";
 import { DwarfStoneSense } from "./DwarfStoneSense";
 import { DwarfAttentionToDetail } from "./DwarfAttentionToDetail";
-import { DwarvenCraftpriestCreateMagicalConstructs } from "./DwarvenCraftpriestCreateMagicalConstructs";
 import { DwarvenCraftpriestReligiousTraining } from "./DwarvenCraftpriestReligiousTraining";
 import { ElfAttunementToNature } from "./ElfAttunementToNature";
 import { ElfConnectionToNature } from "./ElfConnectionToNature";
@@ -27,7 +26,6 @@ import { SharedCreateMagicalConstructs } from "./SharedCreateMagicalConstructs";
 import { SharedCreateMagicalCrossbreeds } from "./SharedCreateMagicalCrossbreeds";
 import { SharedCreateUndead } from "./SharedCreateUndead";
 import { SharedDifficultToSpot } from "./SharedDifficultToSpot";
-import { SharedHalfMinorMagicCreation } from "./SharedHalfMinorMagicCreation";
 import { SharedMajorMagicCreation } from "./SharedMajorMagicCreation";
 import { SharedMeleeDamageBonus } from "./SharedMeleeDamageBonus";
 import { SharedMinorMagicCreation } from "./SharedMinorMagicCreation";
@@ -91,7 +89,6 @@ export const AllClassFeatures: Dictionary<AbilityOrProficiency> = {
   [DwarfAttentionToDetail.id]: DwarfAttentionToDetail,
   [DwarfExpertCaver.id]: DwarfExpertCaver,
   [DwarfStoneSense.id]: DwarfStoneSense,
-  [DwarvenCraftpriestCreateMagicalConstructs.id]: DwarvenCraftpriestCreateMagicalConstructs,
   [DwarvenCraftpriestReligiousTraining.id]: DwarvenCraftpriestReligiousTraining,
   [DwarvenFuryFightingFury.id]: DwarvenFuryFightingFury,
   [DwarvenFuryFleshRunes.id]: DwarvenFuryFleshRunes,
@@ -124,7 +121,6 @@ export const AllClassFeatures: Dictionary<AbilityOrProficiency> = {
   [SharedCreateUndead.id]: SharedCreateUndead,
   [SharedDifficultToSpot.id]: SharedDifficultToSpot,
   [SharedFriendOfBirdsAndBeasts.id]: SharedFriendOfBirdsAndBeasts,
-  [SharedHalfMinorMagicCreation.id]: SharedHalfMinorMagicCreation,
   [SharedInspireCourage.id]: SharedInspireCourage,
   [SharedMajorMagicCreation.id]: SharedMajorMagicCreation,
   [SharedMeleeAccuracyBonus.id]: SharedMeleeAccuracyBonus,

@@ -9,5 +9,4 @@ export const ProficiencySensingPower: AbilityOrProficiency = {
       "hours within the same vicinity. (The character cannot necessarily sense whether an " +
       "item is magic, unless it has been used in the last 24 hours.) Each use takes a turn.",
   ],
-  minLevel: 1,
 };

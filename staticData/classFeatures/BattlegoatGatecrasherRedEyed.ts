@@ -7,5 +7,4 @@ export const BattlegoatGatecrasherRedEyed: AbilityOrProficiency = {
     "By level 11, a battlegoat's patience has run out.  They will put up with no nonsense. " +
       "Accordingly, they now completely ignore all natural and magical fear effects.",
   ],
-  minLevel: 11,
 };

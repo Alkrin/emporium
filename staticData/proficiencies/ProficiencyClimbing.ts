@@ -7,5 +7,4 @@ export const ProficiencyClimbing: AbilityOrProficiency = {
     "The character can climb cliffs, branchless trees, walls, and other sheer surfaces, " +
       "without climbing aids, as a thief of his class level.",
   ],
-  minLevel: 1,
 };

@@ -9,6 +9,5 @@ export const ProficiencyRiding: AbilityOrProficiency = {
       "For each type of animal, this proficiency must be selected separately. This proficiency " +
       "is not required to simply ride a domesticated animal under non-combat conditions.",
   ],
-  minLevel: 1,
   subTypes: ["Dragon", "Giant Eagle", "Griffon", "Horse", "Pegasus"],
 };

@@ -9,5 +9,4 @@ export const ProficiencyBerserkergang: AbilityOrProficiency = {
       "to AC and cannot retreat from combat. Once it has begun, a berserker rage cannot " +
       "be ended until combat ends.",
   ],
-  minLevel: 1,
 };

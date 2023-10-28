@@ -10,5 +10,4 @@ export const FighterBattlefieldProwess: AbilityOrProficiency = {
       "score whenever he personally leads them. This bonus stacks " +
       "with any modifiers from the fighter's Charisma or proficiencies.",
   ],
-  minLevel: 5,
 };

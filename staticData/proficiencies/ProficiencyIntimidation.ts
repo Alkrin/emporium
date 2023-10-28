@@ -9,5 +9,4 @@ export const ProficiencyIntimidation: AbilityOrProficiency = {
       "The targets must be 5 HD or less, or the character and his allies must outnumber or grossly " +
       "outrank the targets.",
   ],
-  minLevel: 1,
 };

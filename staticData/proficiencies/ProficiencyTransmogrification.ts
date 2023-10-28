@@ -10,5 +10,4 @@ export const ProficiencyTransmogrification: AbilityOrProficiency = {
       "crossbreeds (see Crossbreeds in Chapter 7) as if he were two class levels higher than actual. " +
       "Targets of his polymorph other spells suffer a -2 penalty to their saving throw.",
   ],
-  minLevel: 1,
 };

@@ -11,5 +11,4 @@ export const BardChroniclesOfBattle: AbilityOrProficiency = {
       "bonus stacks with any modifiers from the bard's Charisma or " +
       "proficiencies.",
   ],
-  minLevel: 5,
 };

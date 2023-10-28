@@ -9,5 +9,4 @@ export const ElvenCourtierEnchantingPerformance: AbilityOrProficiency = {
       "only functions on ordinary and giant animals of 4 HD or less). These abilities require one minute " +
       "(6 rounds) of performance and may not be used if combat has already begun.",
   ],
-  minLevel: 1,
 };

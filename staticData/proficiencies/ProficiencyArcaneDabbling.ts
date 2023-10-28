@@ -10,5 +10,4 @@ export const ProficiencyArcaneDabbling: AbilityOrProficiency = {
       "level, to a minimum of 3+. Note that bards automatically begin play with this " +
       "ability as part of their class.",
   ],
-  minLevel: 1,
 };

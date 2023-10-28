@@ -8,5 +8,4 @@ export const ProficiencyUnarmedFighting: AbilityOrProficiency = {
       "he may deal lethal damage. He can punch or kick characters in metal armor without himself " +
       "taking damage.",
   ],
-  minLevel: 1,
 };

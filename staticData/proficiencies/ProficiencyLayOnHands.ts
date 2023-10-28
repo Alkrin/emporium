@@ -13,5 +13,4 @@ export const ProficiencyLayOnHands: AbilityOrProficiency = {
     "The character can heal himself or another by laying on hands four times per day. The character " +
       "healed recovers hp as if he had rested for one day per two levels of the healer (rounded up).",
   ],
-  minLevel: 1,
 };

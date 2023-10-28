@@ -13,5 +13,4 @@ export const SharedInspireCourage: AbilityOrProficiency = {
       "twice in the same day.) This ability cannot inspire courage on characters who are already " +
       "engaged in combat.",
   ],
-  minLevel: 1,
 };

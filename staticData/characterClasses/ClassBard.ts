@@ -1,5 +1,6 @@
 import { BardArcaneScrollUse } from "../classFeatures/BardArcaneScrollUse";
 import { BardChroniclesOfBattle } from "../classFeatures/BardChroniclesOfBattle";
+import { BardReadLanguages } from "../classFeatures/BardReadLanguages";
 import { SharedInspireCourage } from "../classFeatures/SharedInspireCourage";
 import { ProficiencyAcrobatics } from "../proficiencies/ProficiencyAcrobatics";
 import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
@@ -53,13 +54,14 @@ export const ClassBard: CharacterClass = {
   },
   toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6],
   classFeatures: [
-    { def: ProficiencyAdventuring },
-    { def: ProficiencyLoremastery },
-    { def: ProficiencyArcaneDabbling },
-    { def: SharedInspireCourage },
-    { def: BardChroniclesOfBattle },
-    { def: BardArcaneScrollUse },
-    { def: ProficiencyLanguage, subtypes: ["Common"] },
+    { def: ProficiencyAdventuring, rank: 1, minLevel: 1 },
+    { def: ProficiencyLoremastery, rank: 1, minLevel: 1 },
+    { def: ProficiencyArcaneDabbling, rank: 1, minLevel: 1 },
+    { def: SharedInspireCourage, rank: 1, minLevel: 1 },
+    { def: BardReadLanguages, rank: 1, minLevel: 4 },
+    { def: BardChroniclesOfBattle, rank: 1, minLevel: 5 },
+    { def: BardArcaneScrollUse, rank: 1, minLevel: 10 },
+    { def: ProficiencyLanguage, subtype: "Common", rank: 1, minLevel: 1 },
   ],
   selectableClassFeatures: [{ title: "Performance", selections: { def: ProficiencyPerformance, rank: 1 } }],
   classProficienciesAt: [1, 4, 8, 12],

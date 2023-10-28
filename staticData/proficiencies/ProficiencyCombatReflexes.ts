@@ -7,5 +7,4 @@ export const ProficiencyCombatReflexes: AbilityOrProficiency = {
     "True warriors never hesitate in combat. The character gains a +1 bonus on surprise " +
       "rolls and initiative rolls. This bonus does not apply when casting spells.",
   ],
-  minLevel: 1,
 };
