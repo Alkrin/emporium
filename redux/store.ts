@@ -15,6 +15,7 @@ import { userSlice } from "./userSlice";
 import { spellbooksSlice } from "./spellbooksSlice";
 import { repertoiresSlice } from "./repertoiresSlice";
 import { activitiesSlice } from "./activitiesSlice";
+import { mapsSlice } from "./mapsSlice";
 
 const store = configureStore({
   reducer: {
@@ -25,6 +26,7 @@ const store = configureStore({
     gameDefs: gameDefsSlice.reducer,
     hud: hudSlice.reducer,
     items: itemsSlice.reducer,
+    maps: mapsSlice.reducer,
     modals: modalsSlice.reducer,
     proficiencies: proficienciesSlice.reducer,
     repertoires: repertoiresSlice.reducer,

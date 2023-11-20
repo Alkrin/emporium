@@ -97,6 +97,19 @@
   &.selected {
     box-shadow: inset 0 0 0 2px red;
   }
+
+  &.levelUp {
+    background-color: #49f;
+    animation: cllrluHueRotate 1s alternate infinite;
+    @keyframes cllrluHueRotate {
+      0% {
+        filter: hue-rotate(180deg);
+      }
+      100% {
+        filter: hue-rotate(360deg);
+      }
+    }
+  }
 }
 
 .listName {

@@ -463,12 +463,11 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           />
         </div>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>Magical Bonus +</div>
+          <div className={styles.firstLabel}>{`Magical Bonus +`}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
             value={this.state.magic_bonus}
-            min={0}
             tabIndex={this.nextTabIndex++}
             onChange={(e) => {
               this.setState({ magic_bonus: +e.target.value });

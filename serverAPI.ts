@@ -37,6 +37,12 @@ import {
   RequestBody_ResolveActivity,
   RequestBody_KillOrReviveCharacter,
   RequestBody_AddOrRemoveInjury,
+  RequestBody_CreateMap,
+  RequestBody_EditMap,
+  RequestBody_DeleteMap,
+  RequestBody_CreateMapHex,
+  RequestBody_EditMapHex,
+  RequestBody_DeleteMapHex,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -353,6 +359,23 @@ export interface ActivityOutcomeData {
   extra: string;
 }
 
+export interface MapData {
+  id: number;
+  name: string;
+  min_x: number;
+  max_x: number;
+  min_y: number;
+  max_y: number;
+}
+
+export interface MapHexData {
+  id: number;
+  map_id: number;
+  x: number;
+  y: number;
+  type: string;
+}
+
 type ServerActivityOutcomeData = Omit<ActivityOutcomeData, "type"> & {
   type: string;
 };
@@ -418,6 +441,8 @@ export type SpellDefsResult = ServerError | SpellDefData[];
 export type ProficienciesResult = ServerError | ProficiencyData[];
 export type SpellbooksResult = ServerError | SpellbookEntryData[];
 export type RepertoiresResult = ServerError | RepertoireEntryData[];
+export type MapsResult = ServerError | MapData[];
+export type MapHexesResult = ServerError | MapHexData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetMoneyResult = ServerError | MoneyChange;
 export type SetXPResult = ServerError | XPChange;
@@ -898,6 +923,26 @@ class AServerAPI {
     return await res.json();
   }
 
+  async fetchMaps(): Promise<MapsResult> {
+    const res = await fetch("/api/fetchMaps", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
+  async fetchMapHexes(): Promise<MapHexesResult> {
+    const res = await fetch("/api/fetchMapHexes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
   async setHP(characterId: number, hp: number): Promise<SetHPResult> {
     const requestBody: RequestBody_SetHP = {
       characterId,
@@ -1245,6 +1290,90 @@ class AServerAPI {
       injuryId,
     };
     const res = await fetch("/api/removeInjury", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createMap(map: MapData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateMap = {
+      ...map,
+    };
+    const res = await fetch("/api/createMap", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editMap(map: MapData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditMap = {
+      ...map,
+    };
+    const res = await fetch("/api/editMap", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteMap(mapId: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteMap = {
+      mapId,
+    };
+    const res = await fetch("/api/deleteMap", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createMapHex(hex: MapHexData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateMapHex = {
+      ...hex,
+    };
+    const res = await fetch("/api/createMapHex", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editMapHex(hex: MapHexData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditMapHex = {
+      ...hex,
+    };
+    const res = await fetch("/api/editMapHex", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteMapHex(hexId: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteMapHex = {
+      hexId,
+    };
+    const res = await fetch("/api/deleteMapHex", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

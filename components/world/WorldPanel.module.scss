@@ -5,3 +5,92 @@
   bottom: 6.8vmin;
   right: 8.4vmin;
 }
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.mapSelectorRoot {
+  position: absolute;
+  top: 0.25vmin;
+  left: 0.25vmin;
+  width: 25vmin;
+  box-sizing: border-box;
+  border-radius: 0.5vmin;
+  border: solid 2px wheat;
+  box-shadow: 0 0 1.5vmin 0px wheat;
+  background-color: black;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 0.5vmin;
+}
+
+.mapSelectorTitle {
+  color: wheat;
+  text-align: center;
+  font-size: 1.3rem;
+}
+
+.mapSelector {
+  position: relative;
+  margin-top: 0.5vmin;
+  resize: none;
+}
+
+.editIcon {
+  background-image: url("/images/EditIcon.png");
+  background-size: contain;
+  cursor: pointer;
+}
+
+.mapEditButton {
+  @extend .editIcon;
+  position: absolute;
+  top: 0.5vmin;
+  right: 0.5vmin;
+  width: 2vmin;
+  height: 2vmin;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.hexDataRoot {
+  position: absolute;
+  top: 0.25vmin;
+  right: 2.25vmin;
+  width: 25vmin;
+  box-sizing: border-box;
+  border-radius: 0.5vmin;
+  border: solid 2px wheat;
+  box-shadow: 0 0 1.5vmin 0px wheat;
+  background-color: black;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 0.5vmin;
+}
+
+.typeSelectorTitle {
+  color: white;
+  text-align: center;
+  font-size: 1rem;
+  width: 8vmin;
+}
+
+.typeSelector {
+  position: relative;
+  resize: none;
+  width: 15vmin;
+}

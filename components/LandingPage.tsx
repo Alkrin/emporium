@@ -16,6 +16,7 @@ import { StoragesDataSource } from "../dataSources/StoragesDataSource";
 import { SpellbooksDataSource } from "../dataSources/SpellbooksDataSource";
 import { RepertoiresDataSource } from "../dataSources/RepertoiresDataSource";
 import { ActivitiesDataSource } from "../dataSources/ActivitiesDataSource";
+import { MapsDataSource } from "../dataSources/MapsDataSource";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -52,6 +53,7 @@ class ALandingPage extends React.Component<Props> {
         <StoragesDataSource />
         <UsersDataSource />
         <ProficienciesDataSource />
+        <MapsDataSource />
         {this.props.currentUserId ? <MainPage /> : <Login />}
       </div>
     );
