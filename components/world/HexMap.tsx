@@ -1,0 +1,145 @@
+import { Dispatch } from "@reduxjs/toolkit";
+import * as React from "react";
+import { connect } from "react-redux";
+import { RootState } from "../../redux/store";
+import { MapData, MapHexData } from "../../serverAPI";
+import styles from "./HexMap.module.scss";
+import { Dictionary } from "../../lib/dictionary";
+import { MapHexTypes } from "./MapHexConstants";
+
+interface State {
+  zoomLevel: number;
+  hexLookup: Dictionary<Dictionary<MapHexData>>;
+  selectedX: number;
+  selectedY: number;
+}
+
+const defaultState: State = {
+  zoomLevel: 1,
+  hexLookup: {},
+  selectedX: Number.MIN_SAFE_INTEGER,
+  selectedY: Number.MIN_SAFE_INTEGER,
+};
+
+interface ReactProps {
+  mapID: number;
+  onHexSelected: (x: number, y: number) => void;
+}
+
+interface InjectedProps {
+  map?: MapData;
+  hexes?: MapHexData[];
+  dispatch?: Dispatch;
+}
+
+type Props = ReactProps & InjectedProps;
+
+class AHexMap extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    this.state = defaultState;
+    requestAnimationFrame(() => {
+      this.buildSparseHexLookup();
+    });
+  }
+
+  render(): React.ReactNode {
+    return (
+      <div className={styles.root}>
+        {this.props.map ? (
+          <div
+            className={styles.mapRoot}
+            // Have to manually calculate width or else the mapRoot maxWidth matches parent width.
+            style={{ width: `${20 + (this.props.map.max_x - this.props.map.min_x + 1) * 5.3}vmin` }}
+          >
+            {this.renderHexes()}
+          </div>
+        ) : (
+          <img className={styles.mapPlaceholder} src={"/images/MapPlaceholder.png"} />
+        )}
+      </div>
+    );
+  }
+
+  private renderHexes(): React.ReactNode[] {
+    const columns: React.ReactNode[] = [];
+
+    const map = this.props.map;
+    if (map) {
+      for (let x = map.min_x; x <= map.max_x; ++x) {
+        const columnHexes: React.ReactNode[] = [];
+        for (let y = map.min_y; y <= map.max_y; ++y) {
+          columnHexes.push(this.renderHex(x, y));
+        }
+
+        columns.push(
+          <div key={x} className={`${styles.hexColumn} ${x % 2 ? styles.odd : ""}`}>
+            {columnHexes}
+          </div>
+        );
+      }
+    }
+
+    return columns;
+  }
+
+  private renderHex(x: number, y: number): React.ReactNode {
+    const hex = this.state.hexLookup[x]?.[y];
+    const type = styles[hex?.type ?? MapHexTypes.Undefined];
+    const selectedStyle = x === this.state.selectedX && y === this.state.selectedY ? styles.selected : "";
+
+    return (
+      <div
+        key={y}
+        className={`${styles.hexRoot} ${type} ${selectedStyle}`}
+        onClick={this.onHexClicked.bind(this, x, y)}
+      >
+        {x},{y}
+      </div>
+    );
+  }
+
+  private onHexClicked(x: number, y: number): void {
+    this.setState({ selectedX: x, selectedY: y });
+    this.props.onHexSelected?.(x, y);
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+    if (this.props.hexes !== prevProps.hexes) {
+      requestAnimationFrame(() => {
+        this.buildSparseHexLookup();
+      });
+    }
+  }
+
+  private buildSparseHexLookup(): void {
+    // Using dictionaries to support negative indices.
+    const data: Dictionary<Dictionary<MapHexData>> = {};
+    const hexes = this.props.hexes;
+    if (hexes) {
+      this.props.hexes.forEach((hex) => {
+        // Make sure the column exists.
+        if (!data[hex.x]) {
+          data[hex.x] = {};
+        }
+        data[hex.x][hex.y] = hex;
+      });
+    }
+
+    this.setState({ hexLookup: data });
+    console.log(data);
+  }
+}
+
+function mapStateToProps(state: RootState, props: ReactProps): Props {
+  const map = state.maps.maps[props.mapID];
+  const hexes = state.maps.mapHexesByMap[props.mapID];
+  return {
+    ...props,
+    map,
+    hexes,
+  };
+}
+
+export const HexMap = connect(mapStateToProps)(AHexMap);

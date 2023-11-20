@@ -17,6 +17,21 @@ import TooltipSource from "./TooltipSource";
 import { WorldPanel } from "./world/WorldPanel";
 import { setActiveCharacterId } from "../redux/charactersSlice";
 import { setActiveActivityId } from "../redux/activitiesSlice";
+import { refetchActivities, refetchActivityOutcomes } from "../dataSources/ActivitiesDataSource";
+import { refetchCharacters } from "../dataSources/CharactersDataSource";
+import {
+  refetchEquipmentSetItems,
+  refetchEquipmentSets,
+  refetchItemDefs,
+  refetchSpellDefs,
+} from "../dataSources/GameDefsDataSource";
+import { refetchItems } from "../dataSources/ItemsDataSource";
+import { refetchProficiencies } from "../dataSources/ProficienciesDataSource";
+import { refetchRepertoires } from "../dataSources/RepertoiresDataSource";
+import { refetchSpellbooks } from "../dataSources/SpellbooksDataSource";
+import { refetchStorages } from "../dataSources/StoragesDataSource";
+import { refetchUsers } from "../dataSources/UsersDataSource";
+import { refetchMapHexes, refetchMaps } from "../dataSources/MapsDataSource";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -30,13 +45,15 @@ type MainPanelId = "Characters" | "World" | "Activities" | "Database";
 
 interface State {
   activePanel: MainPanelId;
+  isLoading: boolean;
+  nowLoading: string;
 }
 
 class AMainPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { activePanel: "Characters" };
+    this.state = { activePanel: "Characters", isLoading: false, nowLoading: "" };
   }
 
   render(): React.ReactNode {
@@ -115,6 +132,45 @@ class AMainPage extends React.Component<Props, State> {
 
           <AuthControl />
           <RoleSelector />
+          <TooltipSource
+            className={styles.reloadButton}
+            tooltipParams={{ id: "ReloadButton", content: "Reload" }}
+            onMouseDown={async () => {
+              if (this.props.dispatch) {
+                this.setState({ isLoading: true, nowLoading: "Activities" });
+                await refetchActivities(this.props.dispatch);
+                this.setState({ nowLoading: "Activity Outcomes" });
+                await refetchActivityOutcomes(this.props.dispatch);
+                this.setState({ nowLoading: "Characters" });
+                await refetchCharacters(this.props.dispatch);
+                this.setState({ nowLoading: "Equipment Set Items" });
+                await refetchEquipmentSetItems(this.props.dispatch);
+                this.setState({ nowLoading: "Equipment Sets" });
+                await refetchEquipmentSets(this.props.dispatch);
+                this.setState({ nowLoading: "Item Defs" });
+                await refetchItemDefs(this.props.dispatch);
+                this.setState({ nowLoading: "Items" });
+                await refetchItems(this.props.dispatch);
+                this.setState({ nowLoading: "Maps" });
+                await refetchMaps(this.props.dispatch);
+                this.setState({ nowLoading: "Map Hexes" });
+                await refetchMapHexes(this.props.dispatch);
+                this.setState({ nowLoading: "Proficiencies" });
+                await refetchProficiencies(this.props.dispatch);
+                this.setState({ nowLoading: "Repertoires" });
+                await refetchRepertoires(this.props.dispatch);
+                this.setState({ nowLoading: "Spell Defs" });
+                await refetchSpellDefs(this.props.dispatch);
+                this.setState({ nowLoading: "Spellbooks" });
+                await refetchSpellbooks(this.props.dispatch);
+                this.setState({ nowLoading: "Storages" });
+                await refetchStorages(this.props.dispatch);
+                this.setState({ nowLoading: "Users" });
+                await refetchUsers(this.props.dispatch);
+                this.setState({ isLoading: false });
+              }
+            }}
+          />
         </div>
 
         <ModalPane />
@@ -122,6 +178,13 @@ class AMainPage extends React.Component<Props, State> {
         <DragAndDropPane />
         <ToasterPane />
         <TooltipPane />
+
+        {this.state.isLoading && (
+          <div className={styles.loadingVeil}>
+            <div className={styles.loadingTitle}>{"LOADING"}</div>
+            <div className={styles.loadingMessage}>{this.state.nowLoading}...</div>
+          </div>
+        )}
       </div>
     );
   }

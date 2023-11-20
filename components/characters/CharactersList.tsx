@@ -9,6 +9,7 @@ import { UserRole } from "../../redux/userSlice";
 import { CharacterData, UserData } from "../../serverAPI";
 import styles from "./CharactersList.module.scss";
 import { CreateCharacterSubPanel } from "./CreateCharacterSubPanel";
+import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 
 type AliveOrDead = "Alive" | "Dead";
 
@@ -106,9 +107,15 @@ class ACharactersList extends React.Component<Props, State> {
 
   private renderCharacterRow(character: CharacterData, index: number): React.ReactNode {
     const selectedClass = character.id === this.props.activeCharacterId ? styles.selected : "";
+
+    const characterClass = AllClasses[character.class_name];
+    const xpCap = characterClass.xpToLevel[character.level] ?? "∞";
+    const needsLevelUp = character.xp >= xpCap;
+    const levelUpClass = needsLevelUp ? styles.levelUp : "";
+
     return (
       <div
-        className={`${styles.listRow} ${selectedClass}`}
+        className={`${styles.listRow} ${selectedClass} ${levelUpClass}`}
         key={`charRow${index}`}
         onClick={this.onCharacterRowClick.bind(this, character.id)}
       >

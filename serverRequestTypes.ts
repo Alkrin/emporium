@@ -280,3 +280,43 @@ export interface RequestBody_AddOrRemoveInjury {
   characterId: number;
   injuryId: string;
 }
+
+export interface RequestBody_CreateMap {
+  name: string;
+  min_x: number;
+  max_x: number;
+  min_y: number;
+  max_y: number;
+}
+
+export interface RequestBody_EditMap {
+  id: number;
+  name: string;
+  min_x: number;
+  max_x: number;
+  min_y: number;
+  max_y: number;
+}
+
+export interface RequestBody_DeleteMap {
+  mapId: number;
+}
+
+export interface RequestBody_CreateMapHex {
+  map_id: number;
+  x: number;
+  y: number;
+  type: string;
+}
+
+export interface RequestBody_EditMapHex {
+  id: number;
+  map_id: number;
+  x: number;
+  y: number;
+  type: string;
+}
+
+export interface RequestBody_DeleteMapHex {
+  hexId: number;
+}
