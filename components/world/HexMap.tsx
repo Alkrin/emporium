@@ -118,7 +118,7 @@ class AHexMap extends React.Component<Props, State> {
     const data: Dictionary<Dictionary<MapHexData>> = {};
     const hexes = this.props.hexes;
     if (hexes) {
-      this.props.hexes.forEach((hex) => {
+      hexes.forEach((hex) => {
         // Make sure the column exists.
         if (!data[hex.x]) {
           data[hex.x] = {};
