@@ -32,6 +32,7 @@ import { refetchSpellbooks } from "../dataSources/SpellbooksDataSource";
 import { refetchStorages } from "../dataSources/StoragesDataSource";
 import { refetchUsers } from "../dataSources/UsersDataSource";
 import { refetchMapHexes, refetchMaps } from "../dataSources/MapsDataSource";
+import { refetchLocationCities, refetchLocationLairs, refetchLocations } from "../dataSources/LocationsDataSource";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -151,6 +152,12 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchItemDefs(this.props.dispatch);
                 this.setState({ nowLoading: "Items" });
                 await refetchItems(this.props.dispatch);
+                this.setState({ nowLoading: "Locations" });
+                await refetchLocations(this.props.dispatch);
+                this.setState({ nowLoading: "Locations: Cities" });
+                await refetchLocationCities(this.props.dispatch);
+                this.setState({ nowLoading: "Locations: Lairs" });
+                await refetchLocationLairs(this.props.dispatch);
                 this.setState({ nowLoading: "Maps" });
                 await refetchMaps(this.props.dispatch);
                 this.setState({ nowLoading: "Map Hexes" });

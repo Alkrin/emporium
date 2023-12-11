@@ -359,23 +359,6 @@ export interface ActivityOutcomeData {
   extra: string;
 }
 
-export interface MapData {
-  id: number;
-  name: string;
-  min_x: number;
-  max_x: number;
-  min_y: number;
-  max_y: number;
-}
-
-export interface MapHexData {
-  id: number;
-  map_id: number;
-  x: number;
-  y: number;
-  type: string;
-}
-
 type ServerActivityOutcomeData = Omit<ActivityOutcomeData, "type"> & {
   type: string;
 };
@@ -401,6 +384,58 @@ export function ActivityOutcomeData_StringToType(s: string): ActivityOutcomeType
     default:
       return ActivityOutcomeType.Invalid;
   }
+}
+
+export interface MapData {
+  id: number;
+  name: string;
+  min_x: number;
+  max_x: number;
+  min_y: number;
+  max_y: number;
+}
+
+export interface MapHexData {
+  id: number;
+  map_id: number;
+  x: number;
+  y: number;
+  type: string;
+}
+
+export interface LocationData {
+  id: number;
+  name: string;
+  description: string;
+  map_id: number;
+  hex_id: number;
+  is_public: boolean;
+  viewer_ids: number[];
+  type: string;
+  icon_url: string;
+}
+
+type ServerLocationData = Omit<LocationData, "viewer_ids"> & {
+  viewer_ids: string;
+};
+
+export interface LocationCityData {
+  id: number;
+  location_id: number;
+  market_class: number;
+}
+
+export interface LocationLairData {
+  id: number;
+  location_id: number;
+  monster_level: number;
+  num_encounters: number;
+}
+
+export function StringToNumbers(s: string): number[] {
+  return s.split(",").map((s2) => {
+    return +s2;
+  });
 }
 
 export interface XPChange {
@@ -443,6 +478,9 @@ export type SpellbooksResult = ServerError | SpellbookEntryData[];
 export type RepertoiresResult = ServerError | RepertoireEntryData[];
 export type MapsResult = ServerError | MapData[];
 export type MapHexesResult = ServerError | MapHexData[];
+export type LocationsResult = ServerError | ServerLocationData[];
+export type LocationCitiesResult = ServerError | LocationCityData[];
+export type LocationLairsResult = ServerError | LocationLairData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetMoneyResult = ServerError | MoneyChange;
 export type SetXPResult = ServerError | XPChange;
@@ -935,6 +973,36 @@ class AServerAPI {
 
   async fetchMapHexes(): Promise<MapHexesResult> {
     const res = await fetch("/api/fetchMapHexes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
+  async fetchLocations(): Promise<LocationsResult> {
+    const res = await fetch("/api/fetchLocations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
+  async fetchLocationCities(): Promise<LocationCitiesResult> {
+    const res = await fetch("/api/fetchLocationCities", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
+  async fetchLocationLairs(): Promise<LocationLairsResult> {
+    const res = await fetch("/api/fetchLocationLairs", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
