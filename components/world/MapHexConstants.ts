@@ -9,11 +9,13 @@ export interface MapHexType {
 export enum MapHexTypes {
   Undefined = "Undefined",
   Ashland = "Ashland",
+  Desert = "Desert",
   Forest = "Forest",
   Grassland = "Grassland",
   Hills = "Hills",
   Marsh = "Marsh",
   Mountain = "Mountain",
+  MountainSnowy = "MountainSnowy",
   Ocean = "Ocean",
   Scrubland = "Scrubland",
 }

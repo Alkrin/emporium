@@ -89,13 +89,19 @@ class AHexMap extends React.Component<Props, State> {
     const type = styles[hex?.type ?? MapHexTypes.Undefined];
     const selectedStyle = x === this.state.selectedX && y === this.state.selectedY ? styles.selected : "";
 
+    const shouldShowCoords = true;
+
     return (
       <div
         key={y}
         className={`${styles.hexRoot} ${type} ${selectedStyle}`}
         onClick={this.onHexClicked.bind(this, x, y)}
       >
-        {x},{y}
+        {shouldShowCoords ? (
+          <div className={styles.hexCoordinates}>
+            {x},{y}
+          </div>
+        ) : null}
       </div>
     );
   }
