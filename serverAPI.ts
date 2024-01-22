@@ -43,6 +43,9 @@ import {
   RequestBody_CreateMapHex,
   RequestBody_EditMapHex,
   RequestBody_DeleteMapHex,
+  RequestBody_CreateLocation,
+  RequestBody_EditLocation,
+  RequestBody_DeleteLocation,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -484,6 +487,7 @@ export type LocationLairsResult = ServerError | LocationLairData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetMoneyResult = ServerError | MoneyChange;
 export type SetXPResult = ServerError | XPChange;
+export type GetURLsResult = ServerError | string[];
 export type MultiModifyResult = ServerError | (ServerError | EditRowResult | InsertRowResult | DeleteRowResult)[];
 export type InsertRowResult = ServerError | RowAdded;
 export type EditRowResult = ServerError | RowEdited;
@@ -1449,6 +1453,62 @@ class AServerAPI {
       body: JSON.stringify(requestBody),
     });
     return await res.json();
+  }
+
+  async createLocation(location: LocationData): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_CreateLocation = {
+      ...location,
+    };
+    const res = await fetch("/api/createLocation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editLocation(location: LocationData): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_EditLocation = {
+      ...location,
+    };
+    const res = await fetch("/api/editLocation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteLocation(locationId: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteLocation = {
+      locationId,
+    };
+    const res = await fetch("/api/deleteLocation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async getMapIconURLs(): Promise<GetURLsResult> {
+    const res = await fetch("/api/getMapIconURLs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+    if (res.status === 200) {
+      return await res.json();
+    }
+    return [];
   }
 }
 

@@ -70,7 +70,6 @@ class TooltipPane extends React.Component<Props, State> {
         }}
         style={this.calculateTooltipStyle()}
       >
-        {this.props.tooltipState.disableBackground ? null : <div className={styles.tooltipBackground} />}
         {typeof this.props.tooltipState.content === "string" ? (
           <div className={styles.textWrapper}>{content}</div>
         ) : (
@@ -83,6 +82,7 @@ class TooltipPane extends React.Component<Props, State> {
   private calculateTooltipStyle(): React.CSSProperties {
     const finalStyle: React.CSSProperties = {
       position: "absolute",
+      backgroundColor: this.props.tooltipState.disableBackground ? "inherit" : "#222",
     };
 
     if (this.state.xAnchor === HUDHorizontalAnchor.Left) {

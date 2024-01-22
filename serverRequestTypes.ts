@@ -320,3 +320,30 @@ export interface RequestBody_EditMapHex {
 export interface RequestBody_DeleteMapHex {
   hexId: number;
 }
+
+export interface RequestBody_CreateLocation {
+  name: string;
+  description: string;
+  map_id: number;
+  hex_id: number;
+  is_public: boolean;
+  viewer_ids: number[];
+  type: string;
+  icon_url: string;
+}
+
+export interface RequestBody_EditLocation {
+  id: number;
+  name: string;
+  description: string;
+  map_id: number;
+  hex_id: number;
+  is_public: boolean;
+  viewer_ids: number[];
+  type: string;
+  icon_url: string;
+}
+
+export interface RequestBody_DeleteLocation {
+  locationId: number;
+}

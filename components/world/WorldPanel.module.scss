@@ -11,6 +11,11 @@
   flex-direction: row;
 }
 
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
 .mapSelectorRoot {
   position: absolute;
   top: 0.25vmin;
@@ -66,10 +71,16 @@
 }
 
 .hexDataRoot {
+  @extend .column;
   position: absolute;
-  top: 0.25vmin;
+  top: 0;
   right: 2.25vmin;
   width: 25vmin;
+}
+
+.hexDataSection {
+  position: relative;
+  margin-top: 0.25vmin;
   box-sizing: border-box;
   border-radius: 0.5vmin;
   border: solid 2px wheat;
@@ -93,4 +104,117 @@
   position: relative;
   resize: none;
   width: 15vmin;
+}
+
+.locationsTitle {
+  color: wheat;
+  text-align: center;
+  font-size: 1.3rem;
+}
+
+.locationsAddButton {
+  position: absolute;
+  top: 0.7vmin;
+  right: 0.5vmin;
+  width: 2vmin;
+  height: 2vmin;
+  box-sizing: border-box;
+  border-radius: 0.25vmin;
+  font-size: 1.65rem;
+  text-align: center;
+  line-height: 1.85vmin;
+  color: wheat;
+  border: 2px solid wheat;
+  border-radius: 0.5vmin;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.locationsDivider {
+  position: relative;
+  background-color: gray;
+  height: 2px;
+  margin-top: 0.25vmin;
+}
+
+.locationsList {
+  position: relative;
+  margin: 0.75vmin 0.25vmin 0.25vmin;
+  height: 10vmin;
+  box-sizing: border-box;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  background-color: black;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.locationRow {
+  @extend .row;
+  margin-bottom: 0.5vmin;
+  padding: 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.locationDataRow {
+  @extend .row;
+  flex-grow: 1;
+}
+
+.locationName {
+  font-size: 1rem;
+  color: white;
+}
+
+.locationEditButton {
+  @extend .editIcon;
+  position: relative;
+  width: 2vmin;
+  height: 2vmin;
+  flex-shrink: 0;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
 }

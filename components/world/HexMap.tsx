@@ -2,14 +2,18 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
-import { MapData, MapHexData } from "../../serverAPI";
+import { LocationData, MapData, MapHexData } from "../../serverAPI";
 import styles from "./HexMap.module.scss";
 import { Dictionary } from "../../lib/dictionary";
 import { MapHexTypes } from "./MapHexConstants";
 
+interface MapHexDataEx extends MapHexData {
+  locations: LocationData[];
+}
+
 interface State {
   zoomLevel: number;
-  hexLookup: Dictionary<Dictionary<MapHexData>>;
+  hexLookup: Dictionary<Dictionary<MapHexDataEx>>;
   selectedX: number;
   selectedY: number;
 }
@@ -29,6 +33,7 @@ interface ReactProps {
 interface InjectedProps {
   map?: MapData;
   hexes?: MapHexData[];
+  locations: Dictionary<LocationData>;
   dispatch?: Dispatch;
 }
 
@@ -90,6 +95,7 @@ class AHexMap extends React.Component<Props, State> {
     const selectedStyle = x === this.state.selectedX && y === this.state.selectedY ? styles.selected : "";
 
     const shouldShowCoords = true;
+    const shouldShowIcons = hex?.locations?.length > 0 && true;
 
     return (
       <div
@@ -97,6 +103,7 @@ class AHexMap extends React.Component<Props, State> {
         className={`${styles.hexRoot} ${type} ${selectedStyle}`}
         onClick={this.onHexClicked.bind(this, x, y)}
       >
+        {shouldShowIcons ? this.renderHexIcon(hex) : null}
         {shouldShowCoords ? (
           <div className={styles.hexCoordinates}>
             {x},{y}
@@ -106,13 +113,24 @@ class AHexMap extends React.Component<Props, State> {
     );
   }
 
+  private renderHexIcon(hex: MapHexDataEx): React.ReactNode {
+    const locationsWithIcons = hex.locations.filter((loc) => {
+      return loc.icon_url.length > 0;
+    });
+    if (locationsWithIcons.length === 0) {
+      return null;
+    }
+
+    return <img className={styles.hexIcon} src={locationsWithIcons[0].icon_url} />;
+  }
+
   private onHexClicked(x: number, y: number): void {
     this.setState({ selectedX: x, selectedY: y });
     this.props.onHexSelected?.(x, y);
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-    if (this.props.hexes !== prevProps.hexes) {
+    if (this.props.hexes !== prevProps.hexes || this.props.locations !== prevProps.locations) {
       requestAnimationFrame(() => {
         this.buildSparseHexLookup();
       });
@@ -121,7 +139,8 @@ class AHexMap extends React.Component<Props, State> {
 
   private buildSparseHexLookup(): void {
     // Using dictionaries to support negative indices.
-    const data: Dictionary<Dictionary<MapHexData>> = {};
+    const locs = Object.values(this.props.locations) ?? [];
+    const data: Dictionary<Dictionary<MapHexDataEx>> = {};
     const hexes = this.props.hexes;
     if (hexes) {
       hexes.forEach((hex) => {
@@ -129,22 +148,39 @@ class AHexMap extends React.Component<Props, State> {
         if (!data[hex.x]) {
           data[hex.x] = {};
         }
-        data[hex.x][hex.y] = hex;
+        const locations = locs.filter((location) => {
+          return location.hex_id === hex.id;
+        });
+        locations.sort(this.sortLocations);
+        data[hex.x][hex.y] = { ...hex, locations };
       });
     }
 
     this.setState({ hexLookup: data });
-    console.log(data);
+  }
+
+  private sortLocations(a: LocationData, b: LocationData): number {
+    // Sort by location type first.
+    const typeSort = a.type.localeCompare(b.type);
+    if (typeSort !== 0) {
+      return typeSort;
+    }
+
+    // Sort  by name second.
+    const nameSort = a.name.localeCompare(b.name);
+    return nameSort;
   }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const map = state.maps.maps[props.mapID];
   const hexes = state.maps.mapHexesByMap[props.mapID];
+  const locations = state.locations.locations;
   return {
     ...props,
     map,
     hexes,
+    locations,
   };
 }
 

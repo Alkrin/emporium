@@ -1,10 +1,7 @@
 import { IncomingMessage, ServerResponse } from "http";
 import xorCipher from "../../lib/xorCipher";
 
-export default async function handler(
-  req: IncomingMessage & any,
-  res: ServerResponse & any
-): Promise<void> {
+export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
     if (process.env.CIPHER) {
       res.status(200).json({

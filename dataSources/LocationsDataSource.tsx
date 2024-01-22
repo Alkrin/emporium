@@ -25,6 +25,7 @@ export async function refetchLocations(dispatch: Dispatch): Promise<void> {
     result.forEach((l) => {
       dict[l.id] = {
         ...l,
+        is_public: !!l.is_public, // Converts from 1/0 to a true/false.
         viewer_ids: StringToNumbers(l.viewer_ids),
       };
     });
