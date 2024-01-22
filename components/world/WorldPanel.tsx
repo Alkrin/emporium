@@ -2,7 +2,7 @@ import * as React from "react";
 import styles from "./WorldPanel.module.scss";
 import { Dispatch } from "@reduxjs/toolkit";
 import { RootState } from "../../redux/store";
-import ServerAPI, { MapData, MapHexData } from "../../serverAPI";
+import ServerAPI, { LocationData, MapData, MapHexData } from "../../serverAPI";
 import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
 import { showSubPanel } from "../../redux/subPanelsSlice";
@@ -12,6 +12,8 @@ import { HexMap } from "./HexMap";
 import { MapHexTypes, MapHexTypesArray } from "./MapHexConstants";
 import { showModal } from "../../redux/modalsSlice";
 import { updateMapHex } from "../../redux/mapsSlice";
+import { LocationEditSubPanel } from "./LocationEditSubPanel";
+import TooltipSource from "../TooltipSource";
 
 interface State {
   mapID: number;
@@ -24,6 +26,7 @@ interface ReactProps {}
 interface InjectedProps {
   maps: Dictionary<MapData>;
   mapHexesByMap: Dictionary<MapHexData[]>;
+  locations: Dictionary<LocationData>;
   dispatch?: Dispatch;
 }
 
@@ -79,26 +82,111 @@ class AWorldPanel extends React.Component<Props, State> {
 
     return (
       <div className={styles.hexDataRoot}>
-        <div className={styles.mapSelectorTitle}>
-          {this.state.selectedX > Number.MIN_SAFE_INTEGER
-            ? `${this.state.selectedX}, ${this.state.selectedY}`
-            : "No Hex Selected"}
+        <div className={styles.hexDataSection}>
+          <div className={styles.mapSelectorTitle}>
+            {this.state.selectedX > Number.MIN_SAFE_INTEGER
+              ? `${this.state.selectedX}, ${this.state.selectedY}`
+              : "No Hex Selected"}
+          </div>
+          {this.state.selectedX > Number.MIN_SAFE_INTEGER ? (
+            <div>
+              <div className={styles.row}>
+                <div className={styles.typeSelectorTitle}>{"Terrain"}</div>
+                <select
+                  className={styles.typeSelector}
+                  value={hex.type}
+                  onChange={this.onTerrainTypeSelected.bind(this)}
+                >
+                  {MapHexTypesArray.map((type: string) => {
+                    return (
+                      <option value={type} key={`type${type}`}>
+                        {type}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
+          ) : null}
         </div>
         {this.state.selectedX > Number.MIN_SAFE_INTEGER ? (
-          <div className={styles.row}>
-            <div className={styles.typeSelectorTitle}>{"Terrain"}</div>
-            <select className={styles.typeSelector} value={hex.type} onChange={this.onTerrainTypeSelected.bind(this)}>
-              {MapHexTypesArray.map((type: string) => {
+          <div className={styles.hexDataSection}>
+            <div className={styles.locationsTitle}>{"Locations"}</div>
+            <div className={styles.locationsAddButton} onClick={this.onAddLocationClicked.bind(this)}>
+              {"+"}
+            </div>
+            <div className={styles.locationsDivider} />
+            <div className={styles.locationsList}>
+              {this.getLocationsForSelectedHex().map((data) => {
                 return (
-                  <option value={type} key={`type${type}`}>
-                    {type}
-                  </option>
+                  <TooltipSource
+                    className={styles.locationRow}
+                    key={data.id}
+                    tooltipParams={{ id: `Location${data.id}`, content: this.renderLocationTooltip.bind(this, data) }}
+                  >
+                    <div className={styles.locationDataRow}>
+                      <div className={styles.locationName}>{data.name}</div>
+                    </div>
+                    <div className={styles.locationEditButton} onClick={this.onEditLocationClicked.bind(this, data)} />
+                  </TooltipSource>
                 );
               })}
-            </select>
+            </div>
           </div>
         ) : null}
       </div>
+    );
+  }
+
+  private renderLocationTooltip(data: LocationData): React.ReactNode {
+    return data.name;
+  }
+
+  private onEditLocationClicked(data: LocationData): void {
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "Locations",
+        content: () => {
+          return <LocationEditSubPanel mapId={this.state.mapID} hexId={data.hex_id} locationId={data.id} />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private getLocationsForSelectedHex(): LocationData[] {
+    const hexData = this.getSelectedHexData();
+    // If no hex record, then there are no locations for it either.
+    if (hexData.id === 0) {
+      return [];
+    }
+
+    return Object.values(this.props.locations).filter((data) => {
+      return data.hex_id === hexData.id;
+    });
+  }
+
+  private async onAddLocationClicked(): Promise<void> {
+    // If there is no hex record for the selected hex yet, create one.
+    const hexData = this.getSelectedHexData();
+    if (hexData.id === 0) {
+      const created = await this.applyHexChanges(hexData);
+      if (!created) {
+        // applyHexChanges() generates its own error messages, so we just need to make sure
+        // we don't try to do anything with an invalid hex.
+        return;
+      }
+    }
+
+    // Summon Add/Edit Location dialog.
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "Locations",
+        content: () => {
+          return <LocationEditSubPanel mapId={this.state.mapID} hexId={hexData.id} />;
+        },
+        escapable: true,
+      })
     );
   }
 
@@ -119,7 +207,7 @@ class AWorldPanel extends React.Component<Props, State> {
     return currentHex ? { ...currentHex } : emptyHex;
   }
 
-  private async applyHexChanges(hex: MapHexData): Promise<void> {
+  private async applyHexChanges(hex: MapHexData): Promise<boolean> {
     if (hex.id === 0) {
       const res = await ServerAPI.createMapHex(hex);
       if ("error" in res) {
@@ -129,7 +217,7 @@ class AWorldPanel extends React.Component<Props, State> {
             content: { message: "An error occurred while attempting to create this hex.  Please try again." },
           })
         );
-        return;
+        return false;
       } else {
         hex.id = res.insertId;
       }
@@ -142,12 +230,13 @@ class AWorldPanel extends React.Component<Props, State> {
             content: { message: "An error occurred while attempting to update this hex.  Please try again." },
           })
         );
-        return;
+        return false;
       }
     }
 
     // If we get here, then the server has successfully saved the data.
     this.props.dispatch?.(updateMapHex(hex));
+    return true;
   }
 
   private onTerrainTypeSelected(e: React.ChangeEvent<HTMLSelectElement>): void {
@@ -184,10 +273,12 @@ class AWorldPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { maps, mapHexesByMap } = state.maps;
+  const { locations } = state.locations;
   return {
     ...props,
     maps,
     mapHexesByMap,
+    locations,
   };
 }
 

@@ -1,0 +1,159 @@
+.root {
+  width: 50vmin;
+  border-radius: 1vmin;
+  border: 2px solid white;
+  background-color: #222;
+}
+
+.labelText {
+  font-size: 1rem;
+  color: wheat;
+  user-select: none;
+}
+
+.firstLabel {
+  @extend .labelText;
+  margin-top: 0.2vmin;
+}
+
+.secondLabel {
+  @extend .firstLabel;
+  margin-left: 0.5vmin;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.textInput {
+  position: relative;
+  resize: none;
+}
+
+.panelTitle {
+  font-size: 3rem;
+  color: wheat;
+  position: relative;
+  margin-top: 1vmin;
+  margin-left: 2vmin;
+  margin-right: 2vmin;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+  user-select: none;
+}
+
+.footerSection {
+  @extend .row;
+  align-items: center;
+  justify-content: space-around;
+  position: relative;
+  padding-bottom: 1vmin;
+}
+
+.footerButton {
+  position: relative;
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  user-select: none;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.3;
+  }
+}
+
+.dataPanelRoot {
+  position: relative;
+  margin: 1vmin;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.idField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.nameField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  flex-grow: 1;
+}
+
+.descriptionField {
+  @extend .textInput;
+  height: 5vmin;
+}
+
+.savingVeil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  pointer-events: all;
+}
+
+.savingLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: wheat;
+  font-size: 3rem;
+}
+
+.sizeField {
+  @extend .textInput;
+  margin-left: 0.5vmin;
+  width: 5vmin;
+}
+
+.typeSelector {
+  margin-left: 0.5vmin;
+  width: 8vmin;
+}
+
+.iconPicker {
+  margin: 0.5vmin;
+  width: 4vmin;
+  height: 4vmin;
+  object-fit: contain;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px gray;
+  background-color: white;
+  color: black;
+  text-align: center;
+  line-height: 4vmin;
+
+  &:hover {
+    box-shadow: 0 0 0 2px #880000;
+  }
+
+  &:active {
+    box-shadow: 0 0 0 2px red;
+  }
+}
