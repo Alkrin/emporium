@@ -34,7 +34,23 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       values: [b.id],
     });
 
-    // TODO: Generate new type-specific record(s).
+    // Generate new type-specific record(s).
+    switch (b.type) {
+      case "City": {
+        queries.push({
+          query: `INSERT INTO location_cities (location_id,market_class) VALUES (?,?)`,
+          values: [b.id, b.city.market_class],
+        });
+        break;
+      }
+      case "Lair": {
+        queries.push({
+          query: `INSERT INTO location_lairs (location_id,monster_level,num_encounters) VALUES (?,?,?)`,
+          values: [b.id, b.lair.monster_level, b.lair.num_encounters],
+        });
+        break;
+      }
+    }
 
     const results = await executeTransaction<any>(queries);
 

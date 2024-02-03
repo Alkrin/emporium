@@ -14,6 +14,7 @@ import { isProficiencyUnlockedForCharacter } from "../../lib/characterUtils";
 import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
 import { AbilityDisplayData } from "./EditProficienciesSubPanel";
 import { AllInjuries } from "../../staticData/injuries/AllInjuries";
+import { getRomanNumerals } from "../../lib/stringUtils";
 
 interface ReactProps {
   characterId: number;
@@ -188,7 +189,7 @@ class AAbilitiesList extends React.Component<Props> {
     let displayName = def.name;
 
     if (def.description.length > 1) {
-      displayName = `${displayName} ${this.getRomanNumerals(rank)}`;
+      displayName = `${displayName} ${getRomanNumerals(rank)}`;
     }
 
     if (subtype && subtype.length > 0) {
@@ -196,11 +197,6 @@ class AAbilitiesList extends React.Component<Props> {
     }
 
     return displayName;
-  }
-
-  private getRomanNumerals(num: number): string {
-    const numerals = ["0", "I", "II", "III", "IV", "V"];
-    return numerals[num] ?? "";
   }
 }
 

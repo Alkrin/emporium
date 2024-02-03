@@ -1455,9 +1455,15 @@ class AServerAPI {
     return await res.json();
   }
 
-  async createLocation(location: LocationData): Promise<MultiModifyResult> {
+  async createLocation(
+    location: LocationData,
+    city: LocationCityData,
+    lair: LocationLairData
+  ): Promise<MultiModifyResult> {
     const requestBody: RequestBody_CreateLocation = {
       ...location,
+      city,
+      lair,
     };
     const res = await fetch("/api/createLocation", {
       method: "POST",
@@ -1469,9 +1475,15 @@ class AServerAPI {
     return await res.json();
   }
 
-  async editLocation(location: LocationData): Promise<MultiModifyResult> {
+  async editLocation(
+    location: LocationData,
+    city: LocationCityData,
+    lair: LocationLairData
+  ): Promise<MultiModifyResult> {
     const requestBody: RequestBody_EditLocation = {
       ...location,
+      city,
+      lair,
     };
     const res = await fetch("/api/editLocation", {
       method: "POST",
