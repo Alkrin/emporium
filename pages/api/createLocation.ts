@@ -20,7 +20,23 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       values: [],
     });
 
-    // TODO: Create type-specific records.
+    // Only insert the matching record.
+    switch (b.type) {
+      case "City": {
+        queries.push({
+          query: `INSERT INTO location_cities (location_id,market_class) VALUES (@id,?)`,
+          values: [b.city.market_class],
+        });
+        break;
+      }
+      case "Lair": {
+        queries.push({
+          query: `INSERT INTO location_lairs (location_id,monster_level,num_encounters) VALUES (@id,?,?)`,
+          values: [b.lair.monster_level, b.lair.num_encounters],
+        });
+        break;
+      }
+    }
 
     const results = await executeTransaction<any>(queries);
 

@@ -218,3 +218,57 @@
     opacity: 1;
   }
 }
+
+.locationTooltipRoot {
+  @extend .column;
+  width: 30vmin;
+}
+
+.locationTooltipHeader {
+  @extend .row;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5vmin;
+  border-bottom: 1px solid wheat;
+}
+
+.locationTooltipTitle {
+  position: relative;
+  color: white;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.locationTooltipType {
+  position: relative;
+  margin-left: 1vmin;
+  color: gray;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.locationTooltipDescription {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  font-size: 0.8rem;
+  color: #888855;
+}
+
+.locationTooltipData {
+  @extend .row;
+  position: relative;
+  margin-bottom: 0.5vmin;
+}
+
+.locationTooltipDataName {
+  position: relative;
+  font-size: 0.8rem;
+  color: gray;
+}
+
+.locationTooltipDataValue {
+  position: relative;
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: #558855;
+}

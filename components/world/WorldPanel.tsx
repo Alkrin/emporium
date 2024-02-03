@@ -2,7 +2,7 @@ import * as React from "react";
 import styles from "./WorldPanel.module.scss";
 import { Dispatch } from "@reduxjs/toolkit";
 import { RootState } from "../../redux/store";
-import ServerAPI, { LocationData, MapData, MapHexData } from "../../serverAPI";
+import ServerAPI, { LocationCityData, LocationData, LocationLairData, MapData, MapHexData } from "../../serverAPI";
 import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
 import { showSubPanel } from "../../redux/subPanelsSlice";
@@ -14,6 +14,7 @@ import { showModal } from "../../redux/modalsSlice";
 import { updateMapHex } from "../../redux/mapsSlice";
 import { LocationEditSubPanel } from "./LocationEditSubPanel";
 import TooltipSource from "../TooltipSource";
+import { getRomanNumerals } from "../../lib/stringUtils";
 
 interface State {
   mapID: number;
@@ -27,6 +28,8 @@ interface InjectedProps {
   maps: Dictionary<MapData>;
   mapHexesByMap: Dictionary<MapHexData[]>;
   locations: Dictionary<LocationData>;
+  cities: Dictionary<LocationCityData>;
+  lairs: Dictionary<LocationLairData>;
   dispatch?: Dispatch;
 }
 
@@ -139,7 +142,57 @@ class AWorldPanel extends React.Component<Props, State> {
   }
 
   private renderLocationTooltip(data: LocationData): React.ReactNode {
-    return data.name;
+    return (
+      <div className={styles.locationTooltipRoot}>
+        <div className={styles.locationTooltipHeader}>
+          <div className={styles.locationTooltipTitle}>{data.name}</div>
+          <div className={styles.locationTooltipType}>{data.type}</div>
+        </div>
+        <div className={styles.locationTooltipDescription}>{data.description}</div>
+        {data.type === "City" ? this.renderCityTooltipData(data.id) : null}
+        {data.type === "Lair" ? this.renderLairTooltipData(data.id) : null}
+      </div>
+    );
+  }
+
+  private renderCityTooltipData(locationID: number): React.ReactNode {
+    const data = Object.values(this.props.cities).find((c) => {
+      return c.location_id === locationID;
+    });
+    if (data) {
+      return (
+        <>
+          <div className={styles.locationTooltipData}>
+            <div className={styles.locationTooltipDataName}>{"Market Class:"}</div>
+            <div className={styles.locationTooltipDataValue}>{getRomanNumerals(data.market_class)}</div>
+          </div>
+        </>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  private renderLairTooltipData(locationID: number): React.ReactNode {
+    const data = Object.values(this.props.lairs).find((l) => {
+      return l.location_id === locationID;
+    });
+    if (data) {
+      return (
+        <>
+          <div className={styles.locationTooltipData}>
+            <div className={styles.locationTooltipDataName}>{"Monster Level:"}</div>
+            <div className={styles.locationTooltipDataValue}>{data.monster_level}</div>
+          </div>
+          <div className={styles.locationTooltipData}>
+            <div className={styles.locationTooltipDataName}>{"Num Encounters:"}</div>
+            <div className={styles.locationTooltipDataValue}>{data.num_encounters}</div>
+          </div>
+        </>
+      );
+    } else {
+      return null;
+    }
   }
 
   private onEditLocationClicked(data: LocationData): void {
@@ -273,12 +326,14 @@ class AWorldPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { maps, mapHexesByMap } = state.maps;
-  const { locations } = state.locations;
+  const { locations, cities, lairs } = state.locations;
   return {
     ...props,
     maps,
     mapHexesByMap,
     locations,
+    cities,
+    lairs,
   };
 }
 

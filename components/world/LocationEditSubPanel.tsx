@@ -3,15 +3,34 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
-import ServerAPI, { LocationData } from "../../serverAPI";
+import ServerAPI, { LocationCityData, LocationData, LocationLairData } from "../../serverAPI";
 import styles from "./LocationEditSubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { deleteLocation } from "../../redux/locationsSlice";
 import { refetchLocationCities, refetchLocationLairs, refetchLocations } from "../../dataSources/LocationsDataSource";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
 import { ImagePickerDialog } from "../ImagePickerDialog";
+import { Dictionary } from "../../lib/dictionary";
 
 type LocationType = "---" | "City" | "Lair";
+
+interface CityState {
+  market_class: number;
+}
+
+const defaultCityState: CityState = {
+  market_class: 0,
+};
+
+interface LairState {
+  monster_level: number;
+  num_encounters: number;
+}
+
+const defaultLairState: LairState = {
+  monster_level: 0,
+  num_encounters: 0,
+};
 
 interface State {
   isSaving: boolean;
@@ -19,6 +38,8 @@ interface State {
   description: string;
   icon_url: string;
   type: LocationType;
+  cityData: CityState;
+  lairData: LairState;
 }
 
 const defaultState: State = {
@@ -27,6 +48,8 @@ const defaultState: State = {
   description: "",
   icon_url: "",
   type: "---",
+  cityData: defaultCityState,
+  lairData: defaultLairState,
 };
 
 interface ReactProps {
@@ -37,6 +60,8 @@ interface ReactProps {
 
 interface InjectedProps {
   location?: LocationData;
+  cities: Dictionary<LocationCityData>;
+  lairs: Dictionary<LocationLairData>;
   dispatch?: Dispatch;
 }
 
@@ -53,6 +78,9 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
       initialState.description = props.location.description;
       initialState.icon_url = props.location.icon_url;
       initialState.type = props.location.type as LocationType;
+
+      initialState.cityData = this.getOldCityData() ?? defaultCityState;
+      initialState.lairData = this.getOldLairData() ?? defaultLairState;
     }
     this.state = initialState;
   }
@@ -70,6 +98,7 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
           {this.renderDescriptionSection()}
           {this.renderIconSection()}
           {this.renderTypeSection()}
+          {this.renderTypeSpecificSection()}
         </div>
         <div className={styles.footerSection}>
           <div className={`${styles.footerButton} ${deletableClass}`} onClick={this.onDeleteClicked.bind(this)}>
@@ -192,9 +221,14 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
             className={styles.typeSelector}
             value={this.state.type}
             onChange={(e) => {
-              this.setState({
-                type: e.target.value as LocationType,
-              });
+              const newType = e.target.value as LocationType;
+              if (newType !== this.state.type) {
+                this.setState({
+                  type: e.target.value as LocationType,
+                  cityData: defaultCityState,
+                  lairData: defaultLairState,
+                });
+              }
             }}
             tabIndex={this.nextTabIndex++}
           >
@@ -204,6 +238,107 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
           </select>
         </div>
       </>
+    );
+  }
+
+  private renderTypeSpecificSection(): React.ReactNode {
+    switch (this.state.type) {
+      case "City": {
+        return this.renderCitySection();
+      }
+      case "Lair": {
+        return this.renderLairSection();
+      }
+    }
+    return null;
+  }
+
+  private renderCitySection(): React.ReactNode {
+    return (
+      <div className={styles.typeSpecificSection}>
+        <div className={styles.row}>
+          <div className={styles.labelText}>{"Market Class"}</div>
+          <select
+            className={styles.typeSelector}
+            value={this.state.cityData.market_class}
+            onChange={(e) => {
+              const newData: CityState = {
+                ...this.state.cityData,
+                market_class: +e.target.value,
+              };
+              this.setState({
+                cityData: newData,
+              });
+            }}
+            tabIndex={this.nextTabIndex++}
+          >
+            <option value={0}>---</option>
+            <option value={1}>I</option>
+            <option value={2}>II</option>
+            <option value={3}>III</option>
+            <option value={4}>IV</option>
+            <option value={5}>V</option>
+            <option value={6}>VI</option>
+          </select>
+        </div>
+      </div>
+    );
+  }
+
+  private renderLairSection(): React.ReactNode {
+    return (
+      <div className={styles.typeSpecificSection}>
+        <div className={styles.row}>
+          <div className={styles.labelText}>{"Monster Level"}</div>
+          <select
+            className={styles.typeSelector}
+            value={this.state.lairData.monster_level}
+            onChange={(e) => {
+              const newData: LairState = {
+                ...this.state.lairData,
+                monster_level: +e.target.value,
+              };
+              this.setState({
+                lairData: newData,
+              });
+            }}
+            tabIndex={this.nextTabIndex++}
+          >
+            <option value={0}>---</option>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+            <option value={4}>4</option>
+            <option value={5}>5</option>
+            <option value={6}>6</option>
+          </select>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.labelText}>{"Num Encounters"}</div>
+          <select
+            className={styles.typeSelector}
+            value={this.state.lairData.num_encounters}
+            onChange={(e) => {
+              const newData: LairState = {
+                ...this.state.lairData,
+                num_encounters: +e.target.value,
+              };
+              this.setState({
+                lairData: newData,
+              });
+            }}
+            tabIndex={this.nextTabIndex++}
+          >
+            <option value={0}>0</option>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+            <option value={4}>4</option>
+            <option value={5}>5</option>
+            <option value={6}>6</option>
+          </select>
+        </div>
+      </div>
     );
   }
 
@@ -237,11 +372,24 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
       icon_url: this.state.icon_url,
     };
 
-    // TODO: Type-specific data.
+    // Type-specific data.
+    const cityData: LocationCityData = {
+      id: 0,
+      location_id: this.props.locationId ?? 0,
+      ...(this.getOldCityData() ?? {}),
+      ...this.state.cityData,
+    };
+
+    const lairData: LocationLairData = {
+      id: 0,
+      location_id: this.props.locationId ?? 0,
+      ...(this.getOldLairData() ?? {}),
+      ...this.state.lairData,
+    };
 
     if (!this.props.locationId) {
       // Brand new location.
-      const res = await ServerAPI.createLocation(data);
+      const res = await ServerAPI.createLocation(data, cityData, lairData);
 
       if (
         "error" in res ||
@@ -267,7 +415,7 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
       }
     } else {
       // Editing old location.
-      const res = await ServerAPI.editLocation(data);
+      const res = await ServerAPI.editLocation(data, cityData, lairData);
 
       if (
         "error" in res ||
@@ -294,6 +442,22 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
     }
 
     this.setState({ isSaving: false });
+  }
+
+  private getOldCityData(): LocationCityData | undefined {
+    const data = Object.values(this.props.cities).find((c) => {
+      return c.location_id === this.props.locationId;
+    });
+
+    return data;
+  }
+
+  private getOldLairData(): LocationLairData | undefined {
+    const data = Object.values(this.props.lairs).find((l) => {
+      return l.location_id === this.props.locationId;
+    });
+
+    return data;
   }
 
   private onDeleteClicked(): void {
@@ -341,9 +505,12 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const location = state.locations.locations[props.locationId ?? -1];
+  const { cities, lairs } = state.locations;
   return {
     ...props,
     location,
+    cities,
+    lairs,
   };
 }
 

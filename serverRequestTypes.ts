@@ -5,6 +5,8 @@ import {
   CharacterEquipmentData,
   EquipmentSetData,
   EquipmentSetItemData,
+  LocationCityData,
+  LocationLairData,
   ProficiencyData,
 } from "./serverAPI";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -330,6 +332,8 @@ export interface RequestBody_CreateLocation {
   viewer_ids: number[];
   type: string;
   icon_url: string;
+  city: LocationCityData;
+  lair: LocationLairData;
 }
 
 export interface RequestBody_EditLocation {
@@ -342,6 +346,8 @@ export interface RequestBody_EditLocation {
   viewer_ids: number[];
   type: string;
   icon_url: string;
+  city: LocationCityData;
+  lair: LocationLairData;
 }
 
 export interface RequestBody_DeleteLocation {
