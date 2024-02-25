@@ -1,10 +1,10 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { SQLQuery, executeTransaction } from "../../lib/db";
-import { RequestBody_EditLocation } from "../../serverRequestTypes";
+import { RequestBody_DeleteSingleEntry } from "../../serverRequestTypes";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
-    const b = req.body as RequestBody_EditLocation;
+    const b = req.body as RequestBody_DeleteSingleEntry;
 
     const queries: SQLQuery[] = [];
 

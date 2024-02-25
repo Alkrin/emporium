@@ -1,13 +1,13 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { executeQuery } from "../../lib/db";
-import { RequestBody_DeleteSpellDef } from "../../serverRequestTypes";
+import { RequestBody_DeleteSingleEntry } from "../../serverRequestTypes";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
-    const b = req.body as RequestBody_DeleteSpellDef;
+    const b = req.body as RequestBody_DeleteSingleEntry;
 
     let q: string = `DELETE FROM spell_defs WHERE id=?`;
-    const values = [b.spellDefId];
+    const values = [b.id];
 
     const results = await executeQuery<any>(q, values);
 

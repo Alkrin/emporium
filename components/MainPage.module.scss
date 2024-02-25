@@ -137,70 +137,17 @@
   background-repeat: repeat-y;
 }
 
-.panelSelectorCharacters {
+.panelSelectors {
   position: absolute;
   top: 7vmin;
   left: 3.5vmin;
-  width: 7vmin;
-  height: 7vmin;
-  border-radius: 3.5vmin;
-  opacity: 0.5;
-  cursor: pointer;
-
-  &:hover {
-    box-shadow: inset 0 0 0 3px #999;
-  }
-
-  &.selected {
-    opacity: 1;
-    box-shadow: inset 0 0 0 3px red;
-  }
+  display: flex;
+  flex-direction: column;
 }
 
-.panelSelectorWorld {
-  position: absolute;
-  top: 25vmin;
-  left: 3.5vmin;
-  width: 7vmin;
-  height: 7vmin;
-  border-radius: 3.5vmin;
-  opacity: 0.5;
-  cursor: pointer;
-
-  &:hover {
-    box-shadow: inset 0 0 0 3px #999;
-  }
-
-  &.selected {
-    opacity: 1;
-    box-shadow: inset 0 0 0 3px red;
-  }
-}
-
-.panelSelectorActivities {
-  position: absolute;
-  top: 16vmin;
-  left: 3.5vmin;
-  width: 7vmin;
-  height: 7vmin;
-  border-radius: 3.5vmin;
-  opacity: 0.5;
-  cursor: pointer;
-
-  &:hover {
-    box-shadow: inset 0 0 0 3px #999;
-  }
-
-  &.selected {
-    opacity: 1;
-    box-shadow: inset 0 0 0 3px red;
-  }
-}
-
-.panelSelectorDatabase {
-  position: absolute;
-  top: 34vmin;
-  left: 3.5vmin;
+.panelSelector {
+  position: relative;
+  margin-bottom: 2vmin;
   width: 7vmin;
   height: 7vmin;
   border-radius: 3.5vmin;

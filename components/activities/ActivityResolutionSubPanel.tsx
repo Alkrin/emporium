@@ -14,6 +14,7 @@ import { ActivityOutcomesList } from "./ActivityOutcomeList";
 import { refetchCharacters } from "../../dataSources/CharactersDataSource";
 import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { AllInjuriesArray } from "../../staticData/injuries/AllInjuries";
+import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../../dataSources/ArmiesDataSource";
 
 enum Distro {
   // Even distribution to all participants.  Henchman hierarchy is ignored, and only local participants get a share.
@@ -735,7 +736,7 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
     const mxpPerShare = this.state.mxp / totalXPShares;
     Object.values(recipients).forEach((r) => {
       const mxp = Math.ceil(mxpPerShare * r.xpShares * r.xpMultiplier);
-      r.xp += Math.ceil(r.xp + mxp);
+      r.xp = Math.ceil(r.xp + mxp);
     });
 
     // In theory, we have now distributed XP and GP into recipient structs.  Next we should look at campaignGold
@@ -850,14 +851,19 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
       outcomes
     );
 
-    this.setState({ isSaving: false });
     // Refetch anything that might be altered by an activity resolution.  So... almost everything.
     if (this.props.dispatch) {
       await refetchCharacters(this.props.dispatch);
       await refetchActivities(this.props.dispatch);
       await refetchActivityOutcomes(this.props.dispatch);
       await refetchItems(this.props.dispatch);
+      await refetchArmies(this.props.dispatch);
+      await refetchTroops(this.props.dispatch);
+      await refetchTroopInjuries(this.props.dispatch);
     }
+
+    this.setState({ isSaving: false });
+
     // Close the subPanel.
     this.props.dispatch?.(hideSubPanel());
   }

@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { Dictionary } from "../lib/dictionary";
-import { EquipmentSetData, EquipmentSetItemData, ItemDefData, SpellDefData } from "../serverAPI";
+import { EquipmentSetData, EquipmentSetItemData, ItemDefData, SpellDefData, TroopDefData } from "../serverAPI";
 
 export interface UpdateItemsForEquipmentSetParams {
   set_id: number;
@@ -14,6 +14,7 @@ interface GameDefsReduxState {
   equipmentSetItemsBySet: Dictionary<EquipmentSetItemData[]>;
   items: Dictionary<ItemDefData>;
   spells: Dictionary<SpellDefData>;
+  troops: Dictionary<TroopDefData>;
 }
 
 function buildDefaultGameDefsReduxState(): GameDefsReduxState {
@@ -23,6 +24,7 @@ function buildDefaultGameDefsReduxState(): GameDefsReduxState {
     equipmentSetItemsBySet: {},
     items: {},
     spells: {},
+    troops: {},
   };
   return defaults;
 }
@@ -121,6 +123,18 @@ export const gameDefsSlice = createSlice({
         });
       });
     },
+    updateTroopDefs: (state: GameDefsReduxState, action: PayloadAction<TroopDefData[]>) => {
+      state.troops = {};
+      action.payload.forEach((tdd) => {
+        state.troops[tdd.id] = tdd;
+      });
+    },
+    updateTroopDef: (state: GameDefsReduxState, action: PayloadAction<TroopDefData>) => {
+      state.troops[action.payload.id] = action.payload;
+    },
+    deleteTroopDef: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.troops[action.payload];
+    },
   },
 });
 
@@ -136,4 +150,7 @@ export const {
   updateEquipmentSet,
   updateItemsForEquipmentSet,
   deleteEquipmentSet,
+  updateTroopDefs,
+  updateTroopDef,
+  deleteTroopDef,
 } = gameDefsSlice.actions;

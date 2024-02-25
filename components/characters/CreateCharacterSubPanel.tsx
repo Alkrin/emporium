@@ -11,6 +11,7 @@ import ServerAPI, {
   EquipmentSetItemData,
   Gender,
   ItemDefData,
+  LocationData,
   ProficiencyData,
   emptyEquipmentData,
 } from "../../serverAPI";
@@ -29,6 +30,8 @@ import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
 import { RequestField_StartingEquipmentData } from "../../serverRequestTypes";
 import { refetchItems } from "../../dataSources/ItemsDataSource";
+import { EditButton } from "../EditButton";
+import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
 
 interface State {
   nameText: string;
@@ -44,6 +47,7 @@ interface State {
   constitution: number;
   charisma: number;
   hitDice: number[];
+  locationId: number;
   /** Feature id, subtype, rank. */
   selectableValues: [string, string, number][];
   isSaving: boolean;
@@ -60,6 +64,7 @@ interface InjectedProps {
   equipmentSetsByClass: Dictionary<EquipmentSetData[]>;
   equipmentSetItemsBySet: Dictionary<EquipmentSetItemData[]>;
   allItemDefs: Dictionary<ItemDefData>;
+  allLocations: Dictionary<LocationData>;
   dispatch?: Dispatch;
 }
 
@@ -101,6 +106,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           constitution: props.selectedCharacter.constitution,
           charisma: props.selectedCharacter.charisma,
           hitDice: props.selectedCharacter.hit_dice,
+          locationId: props.selectedCharacter.location_id,
           selectableValues,
           isSaving: false,
         };
@@ -121,6 +127,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         constitution: 9,
         charisma: 9,
         hitDice: [4],
+        locationId: 0,
         selectableValues: [
           ["---", "", 0],
           ["---", "", 0],
@@ -580,6 +587,13 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           </div>
         ) : null}
 
+        <div className={styles.centeredContentRow}>
+          <div className={styles.label}>{`Location: ${
+            this.props.allLocations[this.state.locationId]?.name ?? "---"
+          }\xa0\xa0`}</div>
+          <EditButton onClick={this.onEditLocationClicked.bind(this)} />
+        </div>
+
         <div className={styles.buttonRow}>
           {this.props.isEditMode && (
             <div className={styles.killOrReviveButton} onClick={this.onKillOrReviveClicked.bind(this)}>
@@ -720,6 +734,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       remaining_cxp_deductible: 0,
       cxp_deductible_date: "",
       dead: false,
+      location_id: this.state.locationId,
       // EquipmentData values are ignored when editing a character.
       ...emptyEquipmentData,
     };
@@ -748,7 +763,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         }
       }
     }
-    this.setState({ isSaving: false });
+
     // Refetch characters.
     if (this.props.dispatch) {
       // The character itself.
@@ -760,6 +775,9 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         await refetchItems(this.props.dispatch);
       }
     }
+
+    this.setState({ isSaving: false });
+
     // Close the subPanel.
     this.props.dispatch?.(hideSubPanel());
   }
@@ -905,12 +923,32 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     }
     return result;
   }
+
+  private onEditLocationClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "SelectLocation",
+        widthVmin: 61,
+        content: () => {
+          return (
+            <SelectLocationDialog
+              preselectedLocationId={this.state.locationId}
+              onSelectionConfirmed={async (locationId) => {
+                this.setState({ locationId });
+              }}
+            />
+          );
+        },
+      })
+    );
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const selectedCharacter = state.characters.characters[state.characters.activeCharacterId];
   const selectedCharacterProficiencies = state.proficiencies.proficienciesByCharacterId[selectedCharacter?.id];
   const { equipmentSetsByClass, equipmentSetItemsBySet, items: allItemDefs } = state.gameDefs;
+  const allLocations = state.locations.locations;
   return {
     ...props,
     currentUserId: state.user.currentUser.id,
@@ -919,6 +957,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     equipmentSetsByClass,
     equipmentSetItemsBySet,
     allItemDefs,
+    allLocations,
   };
 }
 

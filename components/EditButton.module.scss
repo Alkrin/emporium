@@ -1,0 +1,18 @@
+.root {
+  position: relative;
+  width: 2vmin;
+  height: 2vmin;
+  background-image: url("/images/EditIcon.png");
+  background-size: contain;
+  cursor: pointer;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}

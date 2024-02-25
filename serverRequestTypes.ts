@@ -2,12 +2,22 @@ import { Dictionary } from "./lib/dictionary";
 import {
   ActivityData,
   ActivityOutcomeData,
+  ArmyData,
   CharacterEquipmentData,
   EquipmentSetData,
   EquipmentSetItemData,
   LocationCityData,
+  LocationData,
   LocationLairData,
+  MapData,
+  MapHexData,
   ProficiencyData,
+  ServerActivityData,
+  ServerItemDefData,
+  ServerSpellDefData,
+  TroopData,
+  TroopDefData,
+  TroopInjuryData,
 } from "./serverAPI";
 import { SpellType } from "./staticData/types/characterClasses";
 
@@ -31,10 +41,6 @@ export interface RequestBody_RemoveFromSpellbook {
   entry_id: number;
 }
 
-export interface RequestBody_DeleteSpellbook {
-  spellbook_id: number;
-}
-
 export interface RequestField_StartingEquipmentData extends EquipmentSetItemData {
   count: number;
 }
@@ -55,6 +61,7 @@ export interface RequestBody_CreateOrEditCharacter {
   xp: number;
   hp: number;
   hit_dice: string;
+  location_id: number;
   /** Feature id, subtype, rank. */
   selected_class_features: [string, string, number][];
   equipment?: RequestField_StartingEquipmentData[];
@@ -70,34 +77,6 @@ export interface RequestBody_SetHenchmaster {
   minionCharacterId: number;
 }
 
-export interface RequestBody_CreateItemDef {
-  name: string;
-  description: string;
-  stones: number;
-  sixth_stones: number;
-  storage_stones: number;
-  storage_sixth_stones: number;
-  storage_filters: string;
-  bundleable: boolean;
-  number_per_stone: number;
-  ac: number;
-  damage_die: number;
-  damage_dice: number;
-  damage_die_2h: number;
-  damage_dice_2h: number;
-  range_increment: number;
-  fixed_weight: boolean;
-  magic_bonus: number;
-  conditional_magic_bonus: number;
-  conditional_magic_bonus_type: string;
-  max_cleaves: number;
-  tags: string;
-  purchase_quantity: number;
-  cost_gp: number;
-  cost_sp: number;
-  cost_cp: number;
-}
-
 export interface RequestBody_CreateItem {
   def_id: number;
   count: number;
@@ -111,64 +90,6 @@ export interface RequestBody_CreateStorage {
   location_id: number;
   owner_id: number;
   group_ids: number[];
-}
-
-export interface RequestBody_EditItemDef {
-  id: number;
-  name: string;
-  description: string;
-  stones: number;
-  sixth_stones: number;
-  storage_stones: number;
-  storage_sixth_stones: number;
-  storage_filters: string;
-  bundleable: boolean;
-  number_per_stone: number;
-  ac: number;
-  damage_die: number;
-  damage_dice: number;
-  damage_die_2h: number;
-  damage_dice_2h: number;
-  range_increment: number;
-  fixed_weight: boolean;
-  magic_bonus: number;
-  conditional_magic_bonus: number;
-  conditional_magic_bonus_type: string;
-  max_cleaves: number;
-  tags: string;
-  purchase_quantity: number;
-  cost_gp: number;
-  cost_sp: number;
-  cost_cp: number;
-}
-
-export interface RequestBody_DeleteItemDef {
-  itemDefId: number;
-}
-
-export interface RequestBody_CreateSpellDef {
-  name: string;
-  description: string;
-  spell_range: string;
-  duration: string;
-  tags: string;
-  type_levels: string;
-  table_image: string;
-}
-
-export interface RequestBody_EditSpellDef {
-  id: number;
-  name: string;
-  description: string;
-  spell_range: string;
-  duration: string;
-  tags: string;
-  type_levels: string;
-  table_image: string;
-}
-
-export interface RequestBody_DeleteSpellDef {
-  spellDefId: number;
 }
 
 export interface RequestBody_EncryptString {
@@ -193,6 +114,11 @@ export interface RequestBody_SetHP {
 export interface RequestBody_SetMoney {
   characterId: number;
   gp: number;
+}
+
+export interface RequestBody_SetCharacterLocation {
+  characterId: number;
+  locationId: number;
 }
 
 export interface RequestBody_UpdateProficiencies {
@@ -240,34 +166,6 @@ export interface RequestBody_CreateOrEditEquipmentSet {
   itemData: EquipmentSetItemData[];
 }
 
-export interface RequestBody_DeleteEquipmentSet {
-  setId: number;
-}
-
-export interface RequestBody_CreateActivity {
-  user_id: number;
-  name: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  participants: string;
-}
-
-export interface RequestBody_EditActivity {
-  id: number;
-  user_id: number;
-  name: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  participants: string;
-  resolution_text: string;
-}
-
-export interface RequestBody_DeleteActivity {
-  activityId: number;
-}
-
 export interface RequestBody_ResolveActivity {
   activity: ActivityData;
   resolution_text: string;
@@ -283,73 +181,46 @@ export interface RequestBody_AddOrRemoveInjury {
   injuryId: string;
 }
 
-export interface RequestBody_CreateMap {
-  name: string;
-  min_x: number;
-  max_x: number;
-  min_y: number;
-  max_y: number;
-}
-
-export interface RequestBody_EditMap {
+export interface RequestBody_DeleteArmy {
   id: number;
-  name: string;
-  min_x: number;
-  max_x: number;
-  min_y: number;
-  max_y: number;
+  troop_ids: number[];
 }
 
-export interface RequestBody_DeleteMap {
-  mapId: number;
-}
-
-export interface RequestBody_CreateMapHex {
-  map_id: number;
-  x: number;
-  y: number;
-  type: string;
-}
-
-export interface RequestBody_EditMapHex {
+export interface RequestBody_DeleteSingleEntry {
   id: number;
-  map_id: number;
-  x: number;
-  y: number;
-  type: string;
 }
 
-export interface RequestBody_DeleteMapHex {
-  hexId: number;
-}
-
-export interface RequestBody_CreateLocation {
-  name: string;
-  description: string;
-  map_id: number;
-  hex_id: number;
-  is_public: boolean;
-  viewer_ids: number[];
-  type: string;
-  icon_url: string;
+// Activity
+export type RequestBody_CreateActivity = Omit<ServerActivityData, "id" | "resolution_text">;
+export type RequestBody_EditActivity = ServerActivityData;
+// Army
+export type RequestBody_CreateArmy = Omit<ArmyData, "id">;
+export type RequestBody_EditArmy = ArmyData;
+// ItemDef
+export type RequestBody_CreateItemDef = Omit<ServerItemDefData, "id">;
+export type RequestBody_EditItemDef = ServerItemDefData;
+// Location
+interface LocationEx {
   city: LocationCityData;
   lair: LocationLairData;
 }
-
-export interface RequestBody_EditLocation {
-  id: number;
-  name: string;
-  description: string;
-  map_id: number;
-  hex_id: number;
-  is_public: boolean;
-  viewer_ids: number[];
-  type: string;
-  icon_url: string;
-  city: LocationCityData;
-  lair: LocationLairData;
-}
-
-export interface RequestBody_DeleteLocation {
-  locationId: number;
-}
+export type RequestBody_CreateLocation = Omit<LocationData, "id"> & LocationEx;
+export type RequestBody_EditLocation = LocationData & LocationEx;
+// Map
+export type RequestBody_CreateMap = Omit<MapData, "id">;
+export type RequestBody_EditMap = MapData;
+// MapHex
+export type RequestBody_CreateMapHex = Omit<MapHexData, "id">;
+export type RequestBody_EditMapHex = MapHexData;
+// SpellDef
+export type RequestBody_CreateSpellDef = Omit<ServerSpellDefData, "id">;
+export type RequestBody_EditSpellDef = ServerSpellDefData;
+// Troop
+export type RequestBody_CreateTroop = Omit<TroopData, "id">;
+export type RequestBody_EditTroop = TroopData;
+// TroopDef
+export type RequestBody_CreateTroopDef = Omit<TroopDefData, "id">;
+export type RequestBody_EditTroopDef = TroopDefData;
+// TroopInjury
+export type RequestBody_CreateTroopInjury = Omit<TroopInjuryData, "id">;
+export type RequestBody_EditTroopInjury = TroopInjuryData;

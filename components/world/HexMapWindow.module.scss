@@ -1,0 +1,134 @@
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.root {
+  position: relative;
+  background-color: #222;
+
+  overflow: hidden;
+
+  --hexSize: 6vmin;
+  --hexMargin: 0.1vmin;
+}
+
+.mapPlaceholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+}
+
+.mapRoot {
+  @extend .row;
+  position: relative;
+  background-color: black;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 10vmin;
+}
+
+.hexRoot {
+  position: relative;
+  flex-shrink: 0;
+  height: var(--hexSize);
+  width: calc(var(--hexSize) * 1.1547);
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+
+  margin-bottom: var(--hexMargin);
+  pointer-events: all;
+
+  display: flex;
+  user-select: none;
+  background-size: 95% 95%;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  /**
+   *  Start of Hex Types. (see MapHexConstants.ts)
+   */
+  &.Undefined {
+    background-color: #222;
+  }
+  &.Ashland {
+    background-color: #7f7f7f;
+    background-image: url("/images/TerrainAshland.png");
+  }
+  &.Desert {
+    background-color: #f5f186;
+    background-image: url("/images/TerrainDesert.png");
+  }
+  &.Forest {
+    background-color: #6b872c;
+    background-image: url("/images/TerrainForest.png");
+  }
+  &.Grassland {
+    background-color: #99cc66;
+  }
+  &.Hills {
+    background-color: #e4ce5d;
+    background-image: url("/images/TerrainHills.png");
+  }
+  &.Marsh {
+    background-color: #b2dda5;
+    background-image: url("/images/TerrainMarsh.png");
+  }
+  &.Mountain {
+    background-color: #ad7f10;
+    background-image: url("/images/TerrainMountain.png");
+  }
+  &.MountainSnowy {
+    background-color: #ad7f10;
+    background-image: url("/images/TerrainMountainSnowy.png");
+  }
+  &.Ocean {
+    background-color: #0f3365;
+  }
+  &.Scrubland {
+    background-color: #d7db81;
+    background-image: url("/images/TerrainScrubland.png");
+  }
+  /**
+   *  End of Hex Types. (see MapHexConstants.ts)
+   */
+}
+
+.hexColumn {
+  @extend .column;
+  position: relative;
+  margin-left: calc(var(--hexSize) * -0.29 + var(--hexMargin));
+  pointer-events: none;
+
+  &.odd {
+    margin-top: calc(var(--hexSize) * 0.5 + var(--hexMargin) * 0.5);
+  }
+}
+
+.hexCoordinates {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.5vmin;
+  text-align: center;
+  color: white;
+  text-shadow: 1px 1px 0px black, -1px -1px 0px black, 1px -1px 0px black, -1px 1px 0px black;
+  font-size: 0.6rem;
+}
+
+.hexIcon {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}

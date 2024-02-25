@@ -6,7 +6,7 @@ import { setActiveCharacterId } from "../../redux/charactersSlice";
 import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
 import { UserRole } from "../../redux/userSlice";
-import { CharacterData, UserData } from "../../serverAPI";
+import { CharacterData, LocationData, UserData } from "../../serverAPI";
 import styles from "./CharactersList.module.scss";
 import { CreateCharacterSubPanel } from "./CreateCharacterSubPanel";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
@@ -27,6 +27,7 @@ interface InjectedProps {
   currentUserId: number;
   users: Dictionary<UserData>;
   activeCharacterId: number;
+  allLocations: Dictionary<LocationData>;
   dispatch?: Dispatch;
 }
 
@@ -80,6 +81,13 @@ class ACharactersList extends React.Component<Props, State> {
               }}
             >
               <option value={-1}>Any</option>
+              {this.getSortedLocations().map(({ id, name }) => {
+                return (
+                  <option value={id} key={`location${name}`}>
+                    {name}
+                  </option>
+                );
+              })}
             </select>
           </div>
           <div className={styles.filtersContainer}>
@@ -168,15 +176,24 @@ class ACharactersList extends React.Component<Props, State> {
     });
 
     const filteredCharacters = permittedCharacters.filter((character) => {
-      const matchesOwner = this.state.filterOwnerId === -1 || character.user_id === this.state.filterOwnerId;
-      const matchesAliveOrDead =
-        (this.state.filterAliveOrDead === "Alive" && !character.dead) ||
-        (this.state.filterAliveOrDead === "Dead" && character.dead);
+      // Apply Owner filter.
+      if (this.state.filterOwnerId > -1 && character.user_id !== this.state.filterOwnerId) {
+        return false;
+      }
+      // Apply Alive/Dead filter.
+      if (
+        (this.state.filterAliveOrDead === "Alive" && character.dead) ||
+        (this.state.filterAliveOrDead === "Dead" && !character.dead)
+      ) {
+        return false;
+      }
 
-      // TODO: Update this once locations are implemented.
-      const matchesLocation = this.state.filterLocationId === -1 || true;
+      // Apply Location filter.
+      if (this.state.filterLocationId > -1 && character.location_id !== this.state.filterLocationId) {
+        return false;
+      }
 
-      return matchesOwner && matchesAliveOrDead && matchesLocation;
+      return true;
     });
 
     filteredCharacters.sort((charA, charB) => {
@@ -197,12 +214,20 @@ class ACharactersList extends React.Component<Props, State> {
       })
     );
   }
+
+  private getSortedLocations(): LocationData[] {
+    const locations = Object.values(this.props.allLocations).sort(({ name: nameA }, { name: nameB }) => {
+      return nameA.localeCompare(nameB);
+    });
+    return locations;
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { activeRole } = state.hud;
   const { users } = state.user;
   const { activeCharacterId } = state.characters;
+  const allLocations = state.locations.locations;
   return {
     ...props,
     characters: state.characters.characters,
@@ -210,6 +235,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     currentUserId: state.user.currentUser.id,
     users,
     activeCharacterId,
+    allLocations,
   };
 }
 

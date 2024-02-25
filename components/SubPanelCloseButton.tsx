@@ -8,8 +8,7 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../redux/store";
-import { hideSubPanel, SubPanelParams } from "../redux/subPanelsSlice";
-import Escapable from "./Escapable";
+import { hideSubPanel } from "../redux/subPanelsSlice";
 import styles from "./SubPanelCloseButton.module.scss";
 
 interface ReactProps {}
