@@ -36,6 +36,11 @@
   margin-right: 1vmin;
 }
 
+.centeredContentRow {
+  @extend .contentRow;
+  justify-content: center;
+}
+
 .radioGroup {
   font-size: 1rem;
   color: white;

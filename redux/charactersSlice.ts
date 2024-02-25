@@ -23,6 +23,11 @@ export interface SetMoneyParams {
   money: number;
 }
 
+export interface SetLocationParams {
+  characterId: number;
+  locationId: number;
+}
+
 export interface SetEquipmentParams {
   characterId: number;
   itemId: number;
@@ -67,6 +72,11 @@ export const charactersSlice = createSlice({
         state.characters[action.payload.characterId].money = action.payload.money;
       }
     },
+    setCharacterLocation: (state: CharactersReduxState, action: PayloadAction<SetLocationParams>) => {
+      if (state.characters[action.payload.characterId]) {
+        state.characters[action.payload.characterId].location_id = action.payload.locationId;
+      }
+    },
     setCharacterXP: (state: CharactersReduxState, action: PayloadAction<SetXPParams>) => {
       if (state.characters[action.payload.characterId]) {
         state.characters[action.payload.characterId].xp = action.payload.xp;
@@ -98,6 +108,7 @@ export const {
   setActiveCharacterId,
   setCharacterHP,
   setCharacterMoney,
+  setCharacterLocation,
   setCharacterXP,
   setEquipment,
   setHenchmaster,

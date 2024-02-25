@@ -24,6 +24,7 @@ import {
   refetchEquipmentSets,
   refetchItemDefs,
   refetchSpellDefs,
+  refetchTroopDefs,
 } from "../dataSources/GameDefsDataSource";
 import { refetchItems } from "../dataSources/ItemsDataSource";
 import { refetchProficiencies } from "../dataSources/ProficienciesDataSource";
@@ -33,6 +34,10 @@ import { refetchStorages } from "../dataSources/StoragesDataSource";
 import { refetchUsers } from "../dataSources/UsersDataSource";
 import { refetchMapHexes, refetchMaps } from "../dataSources/MapsDataSource";
 import { refetchLocationCities, refetchLocationLairs, refetchLocations } from "../dataSources/LocationsDataSource";
+import { ToolsPanel } from "./tools/ToolsPanel";
+import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../dataSources/ArmiesDataSource";
+import { setActiveArmyId } from "../redux/armiesSlice";
+import { ArmiesPanel } from "./armies/ArmiesPanel";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -42,7 +47,7 @@ interface InjectedProps {
 
 type Props = ReactProps & InjectedProps;
 
-type MainPanelId = "Characters" | "World" | "Activities" | "Database";
+type MainPanelId = "Characters" | "Armies" | "World" | "Activities" | "Tools" | "Database";
 
 interface State {
   activePanel: MainPanelId;
@@ -63,8 +68,10 @@ class AMainPage extends React.Component<Props, State> {
       <div className={styles.root}>
         <div className={`${styles.contentWrapper} ${sizeClass}`}>
           {this.state.activePanel === "Characters" && <CharactersPanel />}
+          {this.state.activePanel === "Armies" && <ArmiesPanel />}
           {this.state.activePanel === "World" && <WorldPanel />}
           {this.state.activePanel === "Activities" && <ActivitiesPanel />}
+          {this.state.activePanel === "Tools" && <ToolsPanel />}
           {this.state.activePanel === "Database" && <DatabasePanel />}
 
           <div className={styles.consoleRoot}>
@@ -80,56 +87,73 @@ class AMainPage extends React.Component<Props, State> {
             <div className={styles.consoleRightInner} />
           </div>
 
-          <TooltipSource
-            className={`${styles.panelSelectorCharacters} ${
-              this.state.activePanel === "Characters" ? styles.selected : ""
-            }`}
-            tooltipParams={{ id: "CharactersPanel", content: "Characters" }}
-            onMouseDown={() => {
-              this.props.dispatch?.(setActiveCharacterId(0));
-              requestAnimationFrame(() => {
-                this.setState({ activePanel: "Characters" });
-              });
-            }}
-          >
-            <img className={styles.panelSelectorImage} src={"/images/Characters.png"} />
-          </TooltipSource>
-          <TooltipSource
-            className={`${styles.panelSelectorActivities} ${
-              this.state.activePanel === "Activities" ? styles.selected : ""
-            }`}
-            tooltipParams={{ id: "ActivitiesPanel", content: "Activities" }}
-            onMouseDown={() => {
-              this.props.dispatch?.(setActiveActivityId(0));
-              requestAnimationFrame(() => {
-                this.setState({ activePanel: "Activities" });
-              });
-            }}
-          >
-            <img className={styles.panelSelectorImage} src={"/images/Activities.png"} />
-          </TooltipSource>
-          <TooltipSource
-            className={`${styles.panelSelectorWorld} ${this.state.activePanel === "World" ? styles.selected : ""}`}
-            tooltipParams={{ id: "WorldPanel", content: "World" }}
-            onMouseDown={() => {
-              this.setState({ activePanel: "World" });
-            }}
-          >
-            <img className={styles.panelSelectorImage} src={"/images/World.png"} />
-          </TooltipSource>
-          {this.props.activeRole !== "player" && (
+          <div className={styles.panelSelectors}>
             <TooltipSource
-              className={`${styles.panelSelectorDatabase} ${
-                this.state.activePanel === "Database" ? styles.selected : ""
-              }`}
-              tooltipParams={{ id: "DatabasePanel", content: "Database" }}
+              className={`${styles.panelSelector} ${this.state.activePanel === "Characters" ? styles.selected : ""}`}
+              tooltipParams={{ id: "CharactersPanel", content: "Characters" }}
               onMouseDown={() => {
-                this.setState({ activePanel: "Database" });
+                this.props.dispatch?.(setActiveCharacterId(0));
+                requestAnimationFrame(() => {
+                  this.setState({ activePanel: "Characters" });
+                });
               }}
             >
-              <img className={styles.panelSelectorImage} src={"/images/Database.png"} />
+              <img className={styles.panelSelectorImage} src={"/images/Characters.png"} />
             </TooltipSource>
-          )}
+            <TooltipSource
+              className={`${styles.panelSelector} ${this.state.activePanel === "Armies" ? styles.selected : ""}`}
+              tooltipParams={{ id: "ArmiesPanel", content: "Armies" }}
+              onMouseDown={() => {
+                this.props.dispatch?.(setActiveArmyId(0));
+                requestAnimationFrame(() => {
+                  this.setState({ activePanel: "Armies" });
+                });
+              }}
+            >
+              <img className={styles.panelSelectorImage} src={"/images/Armies.png"} />
+            </TooltipSource>
+            <TooltipSource
+              className={`${styles.panelSelector} ${this.state.activePanel === "Activities" ? styles.selected : ""}`}
+              tooltipParams={{ id: "ActivitiesPanel", content: "Activities" }}
+              onMouseDown={() => {
+                this.props.dispatch?.(setActiveActivityId(0));
+                requestAnimationFrame(() => {
+                  this.setState({ activePanel: "Activities" });
+                });
+              }}
+            >
+              <img className={styles.panelSelectorImage} src={"/images/Activities.png"} />
+            </TooltipSource>
+            <TooltipSource
+              className={`${styles.panelSelector} ${this.state.activePanel === "World" ? styles.selected : ""}`}
+              tooltipParams={{ id: "WorldPanel", content: "World" }}
+              onMouseDown={() => {
+                this.setState({ activePanel: "World" });
+              }}
+            >
+              <img className={styles.panelSelectorImage} src={"/images/World.png"} />
+            </TooltipSource>
+            <TooltipSource
+              className={`${styles.panelSelector} ${this.state.activePanel === "Tools" ? styles.selected : ""}`}
+              tooltipParams={{ id: "ToolsPanel", content: "Tools" }}
+              onMouseDown={() => {
+                this.setState({ activePanel: "Tools" });
+              }}
+            >
+              <img className={styles.panelSelectorImage} src={"/images/Tools.png"} />
+            </TooltipSource>
+            {this.props.activeRole !== "player" && (
+              <TooltipSource
+                className={`${styles.panelSelector} ${this.state.activePanel === "Database" ? styles.selected : ""}`}
+                tooltipParams={{ id: "DatabasePanel", content: "Database" }}
+                onMouseDown={() => {
+                  this.setState({ activePanel: "Database" });
+                }}
+              >
+                <img className={styles.panelSelectorImage} src={"/images/Database.png"} />
+              </TooltipSource>
+            )}
+          </div>
 
           <AuthControl />
           <RoleSelector />
@@ -142,6 +166,8 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchActivities(this.props.dispatch);
                 this.setState({ nowLoading: "Activity Outcomes" });
                 await refetchActivityOutcomes(this.props.dispatch);
+                this.setState({ nowLoading: "Armies" });
+                await refetchArmies(this.props.dispatch);
                 this.setState({ nowLoading: "Characters" });
                 await refetchCharacters(this.props.dispatch);
                 this.setState({ nowLoading: "Equipment Set Items" });
@@ -172,6 +198,12 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchSpellbooks(this.props.dispatch);
                 this.setState({ nowLoading: "Storages" });
                 await refetchStorages(this.props.dispatch);
+                this.setState({ nowLoading: "Troop Defs" });
+                await refetchTroopDefs(this.props.dispatch);
+                this.setState({ nowLoading: "Troops" });
+                await refetchTroops(this.props.dispatch);
+                this.setState({ nowLoading: "Troop Injuries" });
+                await refetchTroopInjuries(this.props.dispatch);
                 this.setState({ nowLoading: "Users" });
                 await refetchUsers(this.props.dispatch);
                 this.setState({ isLoading: false });

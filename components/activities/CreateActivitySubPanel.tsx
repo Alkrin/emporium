@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
-import ServerAPI, { ActivityData, ActivityParticipant, CharacterData, UserData } from "../../serverAPI";
+import ServerAPI, { ActivityData, ActivityParticipant, CharacterData, LocationData, UserData } from "../../serverAPI";
 import styles from "./CreateActivitySubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
@@ -48,6 +48,7 @@ interface InjectedProps {
   allCharacters: Dictionary<CharacterData>;
   activeRole: UserRole;
   users: Dictionary<UserData>;
+  allLocations: Dictionary<LocationData>;
   dispatch?: Dispatch;
 }
 
@@ -223,6 +224,13 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
                   }}
                 >
                   <option value={-1}>Any</option>
+                  {this.getSortedLocations().map(({ id, name }) => {
+                    return (
+                      <option value={id} key={`location${name}`}>
+                        {name}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
               <div className={styles.row}>
@@ -347,7 +355,10 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
         return false;
       }
 
-      // TODO: Apply Location filter.
+      // Apply Location filter.
+      if (this.state.filterLocationId > -1 && character.location_id !== this.state.filterLocationId) {
+        return false;
+      }
 
       // Apply Status filter.
       const conflictingActivity = Object.values(this.props.activities).find((activity) => {
@@ -510,11 +521,13 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
         this.props.dispatch?.(setActiveActivityId(res.insertId));
       }
     }
-    this.setState({ isSaving: false });
+
     // Refetch activities.
     if (this.props.dispatch) {
       await refetchActivities(this.props.dispatch);
     }
+
+    this.setState({ isSaving: false });
 
     // Close the subPanel.
     this.props.dispatch?.(hideSubPanel());
@@ -627,6 +640,13 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
     };
     return data;
   }
+
+  private getSortedLocations(): LocationData[] {
+    const locations = Object.values(this.props.allLocations).sort(({ name: nameA }, { name: nameB }) => {
+      return nameA.localeCompare(nameB);
+    });
+    return locations;
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
@@ -634,6 +654,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allCharacters = state.characters.characters;
   const { activeRole } = state.hud;
   const { users } = state.user;
+  const allLocations = state.locations.locations;
   return {
     ...props,
     currentUserId: state.user.currentUser.id,
@@ -642,6 +663,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     allCharacters,
     activeRole,
     users,
+    allLocations,
   };
 }
 

@@ -10,7 +10,6 @@ import {
   RequestBody_UpdateProficiencies,
   RequestBody_CreateItemDef,
   RequestBody_EditItemDef,
-  RequestBody_DeleteItemDef,
   RequestBody_CreateStorage,
   RequestBody_CreateItem,
   ItemMoveParams,
@@ -19,33 +18,37 @@ import {
   RequestBody_SplitBundleItems,
   RequestBody_CreateSpellDef,
   RequestBody_EditSpellDef,
-  RequestBody_DeleteSpellDef,
   RequestBody_AddToSpellbook,
   RequestBody_RemoveFromSpellbook,
-  RequestBody_DeleteSpellbook,
   RequestBody_DeleteCharacter,
   RequestBody_AddToRepertoire,
   RequestBody_RemoveFromRepertoire,
   RequestBody_SetHenchmaster,
   RequestBody_SetMoney,
   RequestBody_CreateOrEditEquipmentSet,
-  RequestBody_DeleteEquipmentSet,
   RequestField_StartingEquipmentData,
   RequestBody_CreateActivity,
   RequestBody_EditActivity,
-  RequestBody_DeleteActivity,
   RequestBody_ResolveActivity,
   RequestBody_KillOrReviveCharacter,
   RequestBody_AddOrRemoveInjury,
   RequestBody_CreateMap,
   RequestBody_EditMap,
-  RequestBody_DeleteMap,
   RequestBody_CreateMapHex,
   RequestBody_EditMapHex,
-  RequestBody_DeleteMapHex,
   RequestBody_CreateLocation,
   RequestBody_EditLocation,
-  RequestBody_DeleteLocation,
+  RequestBody_CreateTroopDef,
+  RequestBody_EditTroopDef,
+  RequestBody_CreateTroop,
+  RequestBody_EditTroop,
+  RequestBody_DeleteSingleEntry,
+  RequestBody_CreateTroopInjury,
+  RequestBody_EditTroopInjury,
+  RequestBody_CreateArmy,
+  RequestBody_EditArmy,
+  RequestBody_DeleteArmy,
+  RequestBody_SetCharacterLocation,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -89,7 +92,7 @@ export interface ItemDefData {
   cost_cp: number;
 }
 
-type ServerItemDefData = Omit<ItemDefData, "storage_filters" | "tags"> & {
+export type ServerItemDefData = Omit<ItemDefData, "storage_filters" | "tags"> & {
   storage_filters: string;
   tags: string;
 };
@@ -110,7 +113,7 @@ export interface StorageData {
   owner_id: number;
   group_ids: number[];
 }
-type ServerStorageData = Omit<StorageData, "group_ids"> & {
+export type ServerStorageData = Omit<StorageData, "group_ids"> & {
   group_ids: string;
 };
 
@@ -201,6 +204,7 @@ export interface CharacterData extends CharacterEquipmentData {
   remaining_cxp_deductible: number;
   cxp_deductible_date: string;
   dead: boolean;
+  location_id: number;
 }
 
 export interface ProficiencyData {
@@ -264,12 +268,12 @@ export function SpellDefData_StringToTypeLevels(text: string): { [type in SpellT
   return type_levels;
 }
 
-type ServerSpellDefData = Omit<SpellDefData, "tags" | "type_levels"> & {
+export type ServerSpellDefData = Omit<SpellDefData, "tags" | "type_levels"> & {
   tags: string;
   type_levels: string;
 };
 
-type ServerCharacterData = Omit<CharacterData, "hit_dice"> & { hit_dice: string };
+export type ServerCharacterData = Omit<CharacterData, "hit_dice"> & { hit_dice: string };
 
 export interface ActivityData {
   id: number;
@@ -282,7 +286,7 @@ export interface ActivityData {
   resolution_text: string;
 }
 
-type ServerActivityData = Omit<ActivityData, "participants"> & {
+export type ServerActivityData = Omit<ActivityData, "participants"> & {
   participants: string;
 };
 
@@ -352,6 +356,8 @@ export enum ActivityOutcomeType {
   Injury = "Injury",
   Death = "Death",
   Relocate = "Relocate", // Character changed to a new location.
+  ArmyDeath = "ArmyDeath",
+  ArmyInjury = "ArmyInjury",
 }
 export interface ActivityOutcomeData {
   id: number;
@@ -384,6 +390,10 @@ export function ActivityOutcomeData_StringToType(s: string): ActivityOutcomeType
       return ActivityOutcomeType.Death;
     case ActivityOutcomeType.Relocate:
       return ActivityOutcomeType.Relocate;
+    case ActivityOutcomeType.ArmyDeath:
+      return ActivityOutcomeType.ArmyDeath;
+    case ActivityOutcomeType.ArmyInjury:
+      return ActivityOutcomeType.ArmyInjury;
     default:
       return ActivityOutcomeType.Invalid;
   }
@@ -435,6 +445,40 @@ export interface LocationLairData {
   num_encounters: number;
 }
 
+export interface TroopDefData {
+  id: number;
+  name: string;
+  description: string;
+  ac: number;
+  move: number;
+  morale: number;
+  individual_br: number;
+  platoon_br: number;
+  platoon_size: number;
+  wage: number;
+}
+
+export interface ArmyData {
+  id: number;
+  name: string;
+  location_id: number;
+  user_id: number;
+}
+
+export interface TroopData {
+  id: number;
+  army_id: number;
+  def_id: number;
+  count: number;
+}
+
+export interface TroopInjuryData {
+  id: number;
+  troop_id: number;
+  count: number;
+  recovery_date: string;
+}
+
 export function StringToNumbers(s: string): number[] {
   return s.split(",").map((s2) => {
     return +s2;
@@ -484,6 +528,10 @@ export type MapHexesResult = ServerError | MapHexData[];
 export type LocationsResult = ServerError | ServerLocationData[];
 export type LocationCitiesResult = ServerError | LocationCityData[];
 export type LocationLairsResult = ServerError | LocationLairData[];
+export type TroopDefsResult = ServerError | TroopDefData[];
+export type ArmiesResult = ServerError | ArmyData[];
+export type TroopsResult = ServerError | TroopData[];
+export type TroopInjuriesResult = ServerError | TroopInjuryData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetMoneyResult = ServerError | MoneyChange;
 export type SetXPResult = ServerError | XPChange;
@@ -883,9 +931,9 @@ class AServerAPI {
     return await res.json();
   }
 
-  async deleteItemDef(itemDefId: number): Promise<DeleteRowResult> {
-    const requestBody: RequestBody_DeleteItemDef = {
-      itemDefId,
+  async deleteItemDef(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
     };
     const res = await fetch("/api/deleteItemDef", {
       method: "POST",
@@ -931,9 +979,9 @@ class AServerAPI {
     return await res.json();
   }
 
-  async deleteSpellDef(spellDefId: number): Promise<DeleteRowResult> {
-    const requestBody: RequestBody_DeleteSpellDef = {
-      spellDefId,
+  async deleteSpellDef(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
     };
     const res = await fetch("/api/deleteSpellDef", {
       method: "POST",
@@ -1015,6 +1063,46 @@ class AServerAPI {
     return await res.json();
   }
 
+  async fetchTroopDefs(): Promise<TroopDefsResult> {
+    const res = await fetch("/api/fetchTroopDefs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
+  async fetchArmies(): Promise<ArmiesResult> {
+    const res = await fetch("/api/fetchArmies", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
+  async fetchTroops(): Promise<TroopsResult> {
+    const res = await fetch("/api/fetchTroops", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
+  async fetchTroopInjuries(): Promise<TroopInjuriesResult> {
+    const res = await fetch("/api/fetchTroopInjuries", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
   async setHP(characterId: number, hp: number): Promise<SetHPResult> {
     const requestBody: RequestBody_SetHP = {
       characterId,
@@ -1036,6 +1124,21 @@ class AServerAPI {
       gp,
     };
     const res = await fetch("/api/setMoney", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async setCharacterLocation(characterId: number, locationId: number): Promise<EditRowResult> {
+    const requestBody: RequestBody_SetCharacterLocation = {
+      characterId,
+      locationId,
+    };
+    const res = await fetch("/api/setCharacterLocation", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1159,9 +1262,9 @@ class AServerAPI {
     return await res.json();
   }
 
-  async deleteSpellbook(spellbook_id: number): Promise<DeleteRowResult> {
-    const requestBody: RequestBody_DeleteSpellbook = {
-      spellbook_id,
+  async deleteSpellbook(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
     };
     const res = await fetch("/api/deleteSpellbook", {
       method: "POST",
@@ -1239,9 +1342,9 @@ class AServerAPI {
     return await res.json();
   }
 
-  async deleteEquipmentSet(setId: number): Promise<MultiModifyResult> {
-    const requestBody: RequestBody_DeleteEquipmentSet = {
-      setId,
+  async deleteEquipmentSet(id: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
     };
     const res = await fetch("/api/deleteEquipmentSet", {
       method: "POST",
@@ -1283,9 +1386,9 @@ class AServerAPI {
     return await res.json();
   }
 
-  async deleteActivity(activityId: number): Promise<MultiModifyResult> {
-    const requestBody: RequestBody_DeleteActivity = {
-      activityId,
+  async deleteActivity(id: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
     };
     const res = await fetch("/api/deleteActivity", {
       method: "POST",
@@ -1399,9 +1502,9 @@ class AServerAPI {
     return await res.json();
   }
 
-  async deleteMap(mapId: number): Promise<MultiModifyResult> {
-    const requestBody: RequestBody_DeleteMap = {
-      mapId,
+  async deleteMap(id: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
     };
     const res = await fetch("/api/deleteMap", {
       method: "POST",
@@ -1441,9 +1544,9 @@ class AServerAPI {
     return await res.json();
   }
 
-  async deleteMapHex(hexId: number): Promise<MultiModifyResult> {
-    const requestBody: RequestBody_DeleteMapHex = {
-      hexId,
+  async deleteMapHex(id: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
     };
     const res = await fetch("/api/deleteMapHex", {
       method: "POST",
@@ -1495,9 +1598,9 @@ class AServerAPI {
     return await res.json();
   }
 
-  async deleteLocation(locationId: number): Promise<MultiModifyResult> {
-    const requestBody: RequestBody_DeleteLocation = {
-      locationId,
+  async deleteLocation(id: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
     };
     const res = await fetch("/api/deleteLocation", {
       method: "POST",
@@ -1521,6 +1624,175 @@ class AServerAPI {
       return await res.json();
     }
     return [];
+  }
+
+  async createTroopDef(def: TroopDefData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateTroopDef = {
+      ...def,
+    };
+    const res = await fetch("/api/createTroopDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editTroopDef(def: TroopDefData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditTroopDef = {
+      ...def,
+    };
+    const res = await fetch("/api/editTroopDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteTroopDef(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteTroopDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createArmy(data: ArmyData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateArmy = {
+      ...data,
+    };
+    const res = await fetch("/api/createArmy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editArmy(data: ArmyData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditArmy = {
+      ...data,
+    };
+    const res = await fetch("/api/editArmy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteArmy(id: number, troop_ids: number[]): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteArmy = {
+      id,
+      troop_ids,
+    };
+    const res = await fetch("/api/deleteArmy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createTroop(data: TroopData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateTroop = {
+      ...data,
+    };
+    const res = await fetch("/api/createTroop", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editTroop(data: TroopData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditTroop = {
+      ...data,
+    };
+    const res = await fetch("/api/editTroop", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteTroop(id: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteTroop", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createTroopInjury(data: TroopInjuryData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateTroopInjury = {
+      ...data,
+    };
+    const res = await fetch("/api/createTroopInjury", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editTroopInjury(data: TroopInjuryData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditTroopInjury = {
+      ...data,
+    };
+    const res = await fetch("/api/editTroopInjury", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteTroopInjury(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteTroopInjury", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
   }
 }
 

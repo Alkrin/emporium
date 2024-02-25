@@ -17,10 +17,12 @@ import { repertoiresSlice } from "./repertoiresSlice";
 import { activitiesSlice } from "./activitiesSlice";
 import { mapsSlice } from "./mapsSlice";
 import { locationsSlice } from "./locationsSlice";
+import { armiesSlice } from "./armiesSlice";
 
 const store = configureStore({
   reducer: {
     activities: activitiesSlice.reducer,
+    armies: armiesSlice.reducer,
     characters: charactersSlice.reducer,
     contextMenu: contextMenuSlice.reducer,
     dragAndDrop: dragAndDropSlice.reducer,

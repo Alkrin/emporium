@@ -19,23 +19,27 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       return 0;
     });
 
+    const isAnonymous = b.activity.id === 0;
+
     const queries: SQLQuery[] = [];
 
-    // Update the activity with resolution text.
-    queries.push({
-      query: `UPDATE activities SET resolution_text=? WHERE id=?`,
-      values: [b.resolution_text, b.activity.id],
-    });
-
-    // Create the Outcome records.
-    b.outcomes.forEach((o) => {
+    if (!isAnonymous) {
+      // Update the activity with resolution text.
       queries.push({
-        query: `INSERT INTO activity_outcomes (activity_id,type,target_id,quantity) VALUES (?,?,?,?)`,
-        values: [o.activity_id, o.type, o.target_id, o.quantity],
+        query: `UPDATE activities SET resolution_text=? WHERE id=?`,
+        values: [b.resolution_text, b.activity.id],
       });
-    });
 
-    // Injuries.  Grouped by injury type.
+      // Create the Outcome records.
+      b.outcomes.forEach((o) => {
+        queries.push({
+          query: `INSERT INTO activity_outcomes (activity_id,type,target_id,quantity) VALUES (?,?,?,?)`,
+          values: [o.activity_id, o.type, o.target_id, o.quantity],
+        });
+      });
+    }
+
+    // Adventurer Injuries.  Grouped by injury type.
     const oneDayInjuries: ActivityOutcomeData[] = [];
     const oneWeekInjuries: ActivityOutcomeData[] = [];
     const twoWeekInjuries: ActivityOutcomeData[] = [];
@@ -118,6 +122,20 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
           queries.push({
             query: `UPDATE characters SET dead=true,henchmaster_id=0 WHERE id=?`,
             values: [o.target_id],
+          });
+          break;
+        }
+        case ActivityOutcomeType.ArmyDeath: {
+          queries.push({
+            query: `UPDATE troops SET count=count-? WHERE id=?`,
+            values: [o.quantity, o.target_id],
+          });
+          break;
+        }
+        case ActivityOutcomeType.ArmyInjury: {
+          queries.push({
+            query: "INSERT INTO troop_injuries (troop_id,count,recovery_date) VALUES(?,?,?)",
+            values: [o.target_id, o.quantity, o.extra],
           });
           break;
         }
@@ -237,8 +255,6 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     }
 
     const results = await executeTransaction<any>(queries);
-
-    res.status(200).json(results);
 
     res.status(200).json(results);
   } catch (error) {

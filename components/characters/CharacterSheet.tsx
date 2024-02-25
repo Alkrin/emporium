@@ -1,10 +1,17 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { showModal } from "../../redux/modalsSlice";
+import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
-import { CharacterData, ItemData, ItemDefData, RepertoireEntryData, SpellDefData } from "../../serverAPI";
+import ServerAPI, {
+  CharacterData,
+  ItemData,
+  ItemDefData,
+  LocationData,
+  RepertoireEntryData,
+  SpellDefData,
+} from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import { SavingThrowType, SpellType } from "../../staticData/types/characterClasses";
 import TooltipSource from "../TooltipSource";
@@ -37,6 +44,9 @@ import BonusTooltip from "../BonusTooltip";
 import { EditMoneyDialog } from "./EditMoneyDialog";
 import { FittingView } from "../FittingView";
 import { EditInjuriesDialog } from "./EditInjuriesDialog";
+import { EditButton } from "../EditButton";
+import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
+import { setCharacterLocation } from "../../redux/charactersSlice";
 
 interface ReactProps {
   characterId: number;
@@ -49,6 +59,7 @@ interface InjectedProps {
   allSpells: Dictionary<SpellDefData>;
   character: CharacterData;
   repertoire: RepertoireEntryData[];
+  allLocations: Dictionary<LocationData>;
   dispatch?: Dispatch;
 }
 
@@ -80,6 +91,7 @@ class ACharacterSheet extends React.Component<Props> {
                 {this.renderHPPanel()}
                 {this.renderEquipmentPanel()}
                 {this.renderCombatPanel()}
+                {this.renderLocationPanel()}
               </div>
             </div>
             <div className={styles.row}>
@@ -968,12 +980,67 @@ class ACharacterSheet extends React.Component<Props> {
       })
     );
   }
+
+  private renderLocationPanel(): React.ReactNode {
+    return (
+      <div className={styles.locationPanel}>
+        <div className={styles.locationContainer}>
+          <div className={styles.row}>
+            <div className={styles.equipmentTitle}>{"Location"}</div>
+            <EditButton className={styles.equipmentEditButton} onClick={this.onEditLocationClicked.bind(this)} />
+          </div>
+          <div className={styles.horizontalLine} />
+          <div className={styles.row}>
+            <div className={styles.valueText}>
+              {this.props.allLocations[this.props.character?.location_id]?.name ?? "---"}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  private onEditLocationClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "SelectLocation",
+        widthVmin: 61,
+        content: () => {
+          return (
+            <SelectLocationDialog
+              preselectedLocationId={this.props.character.location_id}
+              onSelectionConfirmed={async (locationId) => {
+                const result = await ServerAPI.setCharacterLocation(this.props.character.id, locationId);
+
+                if ("error" in result) {
+                  this.props.dispatch?.(
+                    showModal({
+                      id: "setLocation Error",
+                      content: {
+                        title: "Error!",
+                        message: "Failed to update Location.  Please check your network connection and try again.",
+                      },
+                      escapable: true,
+                    })
+                  );
+                } else {
+                  this.props.dispatch?.(setCharacterLocation({ characterId: this.props.character.id, locationId }));
+                  this.props.dispatch?.(hideModal());
+                }
+              }}
+            />
+          );
+        },
+      })
+    );
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allItems } = state.items;
   const { spells: allSpells, items: allItemDefs } = state.gameDefs;
   const repertoire = state.repertoires.repertoiresByCharacter[props.characterId] ?? [];
+  const allLocations = state.locations.locations;
   return {
     ...props,
     allItems,
@@ -981,6 +1048,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     allSpells,
     character: state.characters.characters[props.characterId ?? 1] ?? null,
     repertoire,
+    allLocations,
   };
 }
 

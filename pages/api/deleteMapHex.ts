@@ -1,10 +1,10 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { SQLQuery, executeTransaction } from "../../lib/db";
-import { RequestBody_DeleteMapHex } from "../../serverRequestTypes";
+import { RequestBody_DeleteSingleEntry } from "../../serverRequestTypes";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
-    const b = req.body as RequestBody_DeleteMapHex;
+    const b = req.body as RequestBody_DeleteSingleEntry;
 
     const queries: SQLQuery[] = [];
 
@@ -16,7 +16,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     // The actual map gets deleted last, after all of its dependent data is gone.
     queries.push({
       query: `DELETE FROM map_hexes WHERE id=?`,
-      values: [b.hexId],
+      values: [b.id],
     });
 
     const results = await executeTransaction<any>(queries);

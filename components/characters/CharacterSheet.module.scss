@@ -170,6 +170,11 @@
   grid-row: 4;
 }
 
+.locationPanel {
+  grid-column: 4;
+  grid-row: 5;
+}
+
 .statsContainer {
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
@@ -930,4 +935,23 @@
   &:active {
     opacity: 1;
   }
+}
+
+.locationContainer {
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.locationTitle {
+  @extend .normalText;
+  flex-grow: 1;
+}
+
+.locationEditButton {
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
 }

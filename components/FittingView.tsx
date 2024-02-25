@@ -4,11 +4,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import * as React from 'react';
-import { ResizeDetector } from './ResizeDetector';
+import * as React from "react";
+import { ResizeDetector } from "./ResizeDetector";
+
+export type FittingViewHorizontalAlignment = "left" | "center" | "right";
+export type FittingViewVerticalAlignment = "top" | "middle" | "bottom";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   contentClassName?: string;
+  horizontalAlignment?: FittingViewHorizontalAlignment;
+  verticalAlignment?: FittingViewVerticalAlignment;
 }
 
 interface State {
@@ -24,30 +29,71 @@ export class FittingView extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      sizeMultiplier: 1
+      sizeMultiplier: 1,
     };
   }
 
   public render() {
-    const { className, contentClassName, children, ...otherProps } = this.props;
+    const { className, contentClassName, children, style, horizontalAlignment, verticalAlignment, ...otherProps } =
+      this.props;
+    let containerStyle: React.CSSProperties = { position: "relative" };
+    if (style) {
+      containerStyle = { ...containerStyle, ...style };
+    }
     return (
-      <div className={className} {...otherProps}>
+      <div style={containerStyle} className={className} {...otherProps}>
         <ResizeDetector onResize={this.onContainerResize.bind(this)} />
-        <div
-          className={contentClassName}
-          style={{
-            transform: `scale(${this.state.sizeMultiplier}) translate(-50%,-50%)`,
-            transformOrigin: 'top left',
-            position: 'absolute',
-            left: '50%',
-            top: '50%'
-          }}
-        >
+        <div className={contentClassName} style={this.getContentStyle()}>
           <ResizeDetector onResize={this.onContentResize.bind(this)} />
           {children}
         </div>
       </div>
     );
+  }
+
+  private getContentStyle(): React.CSSProperties {
+    const style: React.CSSProperties = {
+      transform: `scale(${this.state.sizeMultiplier}) translate(-50%,-50%)`,
+      transformOrigin: "top left",
+      position: "absolute",
+    };
+    const horizontalAlignment = this.props.horizontalAlignment ?? "center";
+    const pxWidth = (this.containerWidth - this.contentWidth * this.state.sizeMultiplier) / 2;
+    switch (horizontalAlignment) {
+      case "center": {
+        style.left = "50%";
+        break;
+      }
+      case "left": {
+        style.left = `calc(50% - ${pxWidth}px)`;
+        break;
+      }
+      case "right": {
+        style.left = `calc(50% + ${pxWidth}px)`;
+        break;
+      }
+    }
+    const verticalAlignment = this.props.verticalAlignment ?? "middle";
+    const pxHeight = (this.containerHeight - this.contentHeight * this.state.sizeMultiplier) / 2;
+    switch (verticalAlignment) {
+      case "middle":
+        style.top = "50%";
+        break;
+      case "top": {
+        style.top = `calc(50% - ${pxHeight}px)`;
+        break;
+      }
+      case "bottom": {
+        style.top = `calc(50% + ${pxHeight}px)`;
+        break;
+      }
+    }
+
+    if (this.containerHeight < 0 || this.containerWidth < 0 || this.contentHeight < 0 || this.contentWidth < 0) {
+      style.opacity = 0;
+    }
+
+    return style;
   }
 
   private onContainerResize(newWidth: number, newHeight: number, oldWidth: number, oldHeight: number): void {

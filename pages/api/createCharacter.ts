@@ -10,7 +10,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     // Create the new character.
     queries.push({
-      query: `INSERT INTO characters (user_id,name,gender,portrait_url,class_name,level,strength,intelligence,wisdom,dexterity,constitution,charisma,xp,hp,hit_dice) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      query: `INSERT INTO characters (user_id,name,gender,portrait_url,class_name,level,strength,intelligence,wisdom,dexterity,constitution,charisma,xp,hp,hit_dice,location_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       values: [
         b.user_id,
         b.name,
@@ -27,6 +27,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         b.xp,
         b.hp,
         b.hit_dice,
+        b.location_id,
       ],
     });
     queries.push({
@@ -104,8 +105,6 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     }
 
     const results = await executeTransaction<any>(queries);
-
-    res.status(200).json(results);
 
     res.status(200).json(results);
   } catch (error) {
