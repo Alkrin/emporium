@@ -1,6 +1,22 @@
 import store from "../redux/store";
-import { ActivityData, ActivityOutcomeData, ActivityOutcomeType, CharacterData } from "../serverAPI";
-import { getCampaignXPDeductibleCapForLevel, getCharacterXPMultiplier } from "./characterUtils";
+import {
+  ActivityData,
+  ActivityOutcomeData,
+  ActivityOutcomeType,
+  ActivityParticipant,
+  CharacterData,
+} from "../serverAPI";
+import {
+  canCharacterFindTraps,
+  canCharacterSneak,
+  canCharacterTurnUndead,
+  doesCharacterHaveMagicWeapons,
+  doesCharacterHaveSilverWeapons,
+  getCampaignXPDeductibleCapForLevel,
+  getCharacterXPMultiplier,
+  isCharacterArcane,
+  isCharacterDivine,
+} from "./characterUtils";
 import { Dictionary } from "./dictionary";
 import dateFormat from "dateformat";
 
@@ -296,7 +312,7 @@ export function generateActivityOutcomes(
   return outcomes;
 }
 
-export function generateAnonymousActivity(endDate: string): ActivityData {
+export function generateAnonymousActivity(endDate: string, participants: ActivityParticipant[]): ActivityData {
   const redux = store.getState();
 
   const activity: ActivityData = {
@@ -306,8 +322,26 @@ export function generateAnonymousActivity(endDate: string): ActivityData {
     description: "",
     start_date: endDate,
     end_date: endDate,
-    participants: [],
+    participants,
     resolution_text: "",
   };
   return activity;
+}
+
+export function createActivityParticipant(characterId: number): ActivityParticipant {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+
+  const newParticipant: ActivityParticipant = {
+    characterId: character.id,
+    characterLevel: character.level,
+    isArcane: isCharacterArcane(character.id),
+    isDivine: isCharacterDivine(character.id),
+    canTurnUndead: canCharacterTurnUndead(character.id),
+    canSneak: canCharacterSneak(character.id),
+    canFindTraps: canCharacterFindTraps(character.id),
+    hasMagicWeapons: doesCharacterHaveMagicWeapons(character.id),
+    hasSilverWeapons: doesCharacterHaveSilverWeapons(character.id),
+  };
+  return newParticipant;
 }

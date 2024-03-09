@@ -5,7 +5,13 @@ import { RootState } from "../../redux/store";
 import styles from "./ToolsHexClearingSubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
-import ServerAPI, { CharacterData, TroopData, TroopDefData, TroopInjuryData } from "../../serverAPI";
+import ServerAPI, {
+  ActivityParticipant,
+  CharacterData,
+  TroopData,
+  TroopDefData,
+  TroopInjuryData,
+} from "../../serverAPI";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
 import { SelectArmiesDialog } from "../dialogs/SelectArmiesDialog";
@@ -21,12 +27,14 @@ import {
   AdventurerParticipant,
   ArmyParticipant,
   RewardDistro,
+  createActivityParticipant,
   generateActivityOutcomes,
   generateAnonymousActivity,
 } from "../../lib/activityUtils";
 import { refetchCharacters } from "../../dataSources/CharactersDataSource";
 import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../../dataSources/ArmiesDataSource";
+import { refetchActivities } from "../../dataSources/ActivitiesDataSource";
 
 interface State {
   isSaving: boolean;
@@ -224,7 +232,12 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
 
     this.setState({ isSaving: true });
 
-    const activity = generateAnonymousActivity(this.state.currentDate);
+    const activity = generateAnonymousActivity(
+      this.state.currentDate,
+      this.state.adventurerParticipants.map((adventurer) => {
+        return createActivityParticipant(adventurer.characterId);
+      })
+    );
     const outcomes = generateActivityOutcomes(
       activity,
       this.state.currentDate,
@@ -259,6 +272,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     } else {
       // Refetch anything that might be altered by an activity resolution.  So... almost everything.
       if (this.props.dispatch) {
+        await refetchActivities(this.props.dispatch);
         await refetchCharacters(this.props.dispatch);
         await refetchItems(this.props.dispatch);
         await refetchArmies(this.props.dispatch);
