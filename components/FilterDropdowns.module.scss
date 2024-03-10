@@ -1,0 +1,60 @@
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+.filterColumn {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+
+  &:not(:first-child) {
+    margin-left: 0.5vmin;
+  }
+}
+
+.nameColumn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.dropdownColumn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.filterRow {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin-top: 0.2vmin;
+  height: 2vmin;
+  align-items: center;
+
+  &:not(:first-child) {
+    margin-top: 0.5vmin;
+  }
+}
+
+.filterTitle {
+  position: relative;
+  font-size: 0.9rem;
+  color: wheat;
+  text-align: left;
+  text-wrap: nowrap;
+}
+
+.filterDropdown {
+  position: relative;
+  margin-left: 0.5vmin;
+  width: 100%;
+  font-size: 0.8rem;
+  height: 100%;
+  flex-shrink: 1;
+}

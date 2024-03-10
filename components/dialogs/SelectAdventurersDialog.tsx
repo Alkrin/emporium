@@ -5,22 +5,26 @@ import { hideModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import styles from "./SelectAdventurersDialog.module.scss";
 import { Dictionary } from "../../lib/dictionary";
-import { ActivityData, CharacterData, LocationData, UserData } from "../../serverAPI";
+import { ActivityData, CharacterData, UserData } from "../../serverAPI";
 import { UserRole } from "../../redux/userSlice";
-import { AbilityOrProficiency } from "../../staticData/types/abilitiesAndProficiencies";
-import { AbilityDisplayData } from "../characters/EditProficienciesSubPanel";
-import { AllProficiencies } from "../../staticData/proficiencies/AllProficiencies";
-import { isProficiencyUnlockedForCharacter } from "../../lib/characterUtils";
 import dateFormat from "dateformat";
+import {
+  FilterDropdowns,
+  FilterType,
+  FilterValueAny,
+  FilterValueBusyStatus,
+  FilterValues,
+  isFilterMetBusyStatus,
+  isFilterMetLocation,
+  isFilterMetOwner,
+  isFilterMetProficiency,
+} from "../FilterDropdowns";
 
 interface State {
   startDate: string;
   endDate: string;
   selectedAdventurerIDs: number[];
-  filterOwnerId: number;
-  filterLocationId: number;
-  filterStatus: string;
-  filterProficiencyId: string;
+  filters: FilterValues;
 }
 
 interface ReactProps {
@@ -32,10 +36,7 @@ interface ReactProps {
 interface InjectedProps {
   currentUserID: number;
   allCharacters: Dictionary<CharacterData>;
-  allLocations: Dictionary<LocationData>;
   activeRole: UserRole;
-  activities: Dictionary<ActivityData>;
-  users: Dictionary<UserData>;
   dispatch?: Dispatch;
 }
 
@@ -51,10 +52,12 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
       startDate: currentDate,
       endDate: currentDate,
       selectedAdventurerIDs: [...props.preselectedAdventurerIDs],
-      filterOwnerId: -1,
-      filterLocationId: -1,
-      filterStatus: "Available",
-      filterProficiencyId: "",
+      filters: {
+        [FilterType.Owner]: FilterValueAny,
+        [FilterType.Location]: FilterValueAny,
+        [FilterType.BusyStatus]: FilterValueBusyStatus.Available,
+        [FilterType.Proficiency]: FilterValueAny,
+      },
     };
   }
 
@@ -81,76 +84,13 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
           />
         </div>
         <div className={styles.filtersContainer}>
-          <div className={styles.row}>
-            <div className={styles.filterText}>Status</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterStatus}
-              onChange={(e) => {
-                this.setState({ filterStatus: e.target.value });
-              }}
-            >
-              <option value={"Available"}>Available</option>
-              <option value={"Busy"}>Busy</option>
-            </select>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.filterText}>Owner</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterOwnerId}
-              onChange={(e) => {
-                this.setState({ filterOwnerId: +e.target.value });
-              }}
-            >
-              <option value={-1}>Any</option>
-              {this.sortPermittedUsers().map(({ id, name }) => {
-                return (
-                  <option value={id} key={`user${name}`}>
-                    {name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.filterText}>Location</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterLocationId}
-              onChange={(e) => {
-                this.setState({ filterLocationId: +e.target.value });
-              }}
-            >
-              <option value={-1}>Any</option>
-              {this.getSortedLocations().map(({ id, name }) => {
-                return (
-                  <option value={id} key={`location${name}`}>
-                    {name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.filterText}>Proficiency</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterProficiencyId}
-              onChange={(e) => {
-                this.setState({ filterProficiencyId: e.target.value });
-              }}
-            >
-              <option value={""}>Any</option>
-              {this.getSortedProficiencies().map((prof) => {
-                return (
-                  <option value={prof.name} key={`prof${prof.name}`}>
-                    {prof.name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+          <FilterDropdowns
+            filterOrder={[[FilterType.Owner, FilterType.BusyStatus, FilterType.Location, FilterType.Proficiency]]}
+            filterValues={this.state.filters}
+            onFilterChanged={(filters) => {
+              this.setState({ filters });
+            }}
+          />
         </div>
         <div className={styles.participantsSection}>
           <div className={styles.participantsContainer}>
@@ -215,20 +155,6 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
     this.setState({ selectedAdventurerIDs });
   }
 
-  private sortPermittedUsers(): UserData[] {
-    const permittedUsers = Object.values(this.props.users)
-      .filter((user) => {
-        if (this.props.activeRole !== "player") {
-          return true;
-        } else {
-          return user.id === this.props.currentUserID;
-        }
-      })
-      .sort();
-
-    return permittedUsers;
-  }
-
   private onCloseClicked(): void {
     this.props.dispatch?.(hideModal());
   }
@@ -254,52 +180,12 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
     return p;
   }
 
-  private getSortedProficiencies(): AbilityDisplayData[] {
-    const data: AbilityDisplayData[] = [];
-
-    Object.values(AllProficiencies).forEach((def) => {
-      // If the filter lists subtypes, iterate those.
-      // If the filter doesn't list subtypes but the def does, iterate those.
-      // If the def has no subtypes, just make a single displayData.
-      let subtypesToIterate: string[] = def.subTypes ?? [];
-
-      if (subtypesToIterate.length === 0) {
-        // Single standard proficiency, no subtypes.
-        data.push(this.buildDisplayDataForProficiency(def));
-      } else {
-        // Has subtype(s).  One entry for each.
-        subtypesToIterate.forEach((subtype) => {
-          data.push(this.buildDisplayDataForProficiency(def, subtype));
-        });
-      }
-    });
-
-    // Sort the proficiencies by name.
-    data.sort((dataA, dataB) => {
-      return dataA.name.localeCompare(dataB.name);
-    });
-
-    return data;
-  }
-
-  private buildDisplayDataForProficiency(def: AbilityOrProficiency, subtype?: string): AbilityDisplayData {
-    let displayName: string = def.name;
-    if (subtype && subtype.length > 0) {
-      displayName = `${def.name} (${subtype})`;
-    }
-
-    const data: AbilityDisplayData = {
-      name: displayName,
-      def,
-      rank: 1,
-      minLevel: 1,
-      subtype,
-    };
-    return data;
-  }
-
   private getSortedAdventurers(): CharacterData[] {
-    const p: CharacterData[] = Object.values(this.props.allCharacters).filter((character) => {
+    const permittedCharacters = Object.values(this.props.allCharacters).filter((character) => {
+      return this.props.activeRole !== "player" || character.user_id === this.props.currentUserID;
+    });
+
+    const p: CharacterData[] = permittedCharacters.filter((character) => {
       // Exclude the dead.
       if (character.dead) {
         return false;
@@ -314,58 +200,23 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
       }
 
       // Apply Owner filter.
-      if (this.state.filterOwnerId > -1 && character.user_id !== this.state.filterOwnerId) {
+      if (!isFilterMetOwner(this.state.filters, character.user_id)) {
         return false;
       }
 
       // Apply Location filter.
-      if (this.state.filterLocationId > -1 && character.location_id !== this.state.filterLocationId) {
+      if (!isFilterMetLocation(this.state.filters, character.location_id)) {
         return false;
       }
 
       // Apply Status filter.
-      const conflictingActivity = Object.values(this.props.activities).find((activity) => {
-        // Look at other activities this character is/was part of.
-        if (
-          !activity.participants.find((p) => {
-            return character.id === p.characterId;
-          })
-        ) {
-          return false;
-        }
-        // Would any of those overlap with the date we are checking?
-        const startTime = new Date(this.state.startDate).getTime();
-        const endTime = new Date(this.state.endDate).getTime();
-        const activityStartTime = new Date(activity.start_date).getTime();
-        const activityEndTime = new Date(activity.end_date).getTime();
-
-        return Math.max(startTime, activityStartTime) <= Math.min(endTime, activityEndTime);
-      });
-      if (this.state.filterStatus === "Busy" && !conflictingActivity) {
-        return false;
-      }
-      if (this.state.filterStatus === "Available" && !!conflictingActivity) {
+      if (!isFilterMetBusyStatus(this.state.filters, character.id, this.state.startDate, this.state.endDate)) {
         return false;
       }
 
       // Apply Proficiency filter.
-      if (this.state.filterProficiencyId.length > 0) {
-        let subtype: string | undefined = undefined;
-        const subtypeMatch = this.state.filterProficiencyId.match(/\(([^)]+)\)/);
-        if (subtypeMatch) {
-          subtype = subtypeMatch[1];
-        }
-
-        let profId: string = "";
-        if ((subtype?.length ?? 0) > 0) {
-          profId = this.state.filterProficiencyId.slice(0, this.state.filterProficiencyId.indexOf("(")).trim();
-        } else {
-          profId = this.state.filterProficiencyId;
-        }
-
-        if (!isProficiencyUnlockedForCharacter(character.id, profId, subtype)) {
-          return false;
-        }
+      if (!isFilterMetProficiency(this.state.filters, character.id)) {
+        return false;
       }
 
       return true;
@@ -381,29 +232,16 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
 
     return p;
   }
-
-  private getSortedLocations(): LocationData[] {
-    const locations = Object.values(this.props.allLocations).sort(({ name: nameA }, { name: nameB }) => {
-      return nameA.localeCompare(nameB);
-    });
-    return locations;
-  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const { activities } = state.activities;
   const allCharacters = state.characters.characters;
-  const allLocations = state.locations.locations;
   const { activeRole } = state.hud;
-  const { users } = state.user;
   return {
     ...props,
     currentUserID: state.user.currentUser.id,
     allCharacters,
-    allLocations,
     activeRole,
-    activities,
-    users,
   };
 }
 
