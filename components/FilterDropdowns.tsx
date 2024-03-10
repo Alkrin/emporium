@@ -166,7 +166,18 @@ type Props = ReactProps & InjectedProps;
 
 class AFilterDropdowns extends React.Component<Props> {
   public render(): React.ReactNode {
-    const { dispatch, filterOrder, filterValues, allLocations, users, className, ...otherProps } = this.props;
+    const {
+      filterOrder,
+      filterValues,
+      onFilterChanged,
+      allLocations,
+      users,
+      activeRole,
+      currentUserID,
+      dispatch,
+      className,
+      ...otherProps
+    } = this.props;
     return (
       <div className={`${styles.root} ${className}`} {...otherProps}>
         {filterOrder.map(this.renderFilterColumn.bind(this))}
@@ -174,9 +185,9 @@ class AFilterDropdowns extends React.Component<Props> {
     );
   }
 
-  private renderFilterColumn(filters: FilterType[]): React.ReactNode {
+  private renderFilterColumn(filters: FilterType[], index: number): React.ReactNode {
     return (
-      <div className={styles.filterColumn}>
+      <div className={styles.filterColumn} key={`filterColumn${index}`}>
         <div className={styles.nameColumn}>
           {filters.map((f, i) => {
             return (
