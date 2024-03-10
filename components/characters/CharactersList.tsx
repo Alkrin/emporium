@@ -6,17 +6,23 @@ import { setActiveCharacterId } from "../../redux/charactersSlice";
 import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
 import { UserRole } from "../../redux/userSlice";
-import { CharacterData, LocationData, UserData } from "../../serverAPI";
+import { CharacterData } from "../../serverAPI";
 import styles from "./CharactersList.module.scss";
 import { CreateCharacterSubPanel } from "./CreateCharacterSubPanel";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
-
-type AliveOrDead = "Alive" | "Dead";
+import {
+  FilterDropdowns,
+  FilterType,
+  FilterValueAliveStatus,
+  FilterValueAny,
+  FilterValues,
+  isFilterMetAliveStatus,
+  isFilterMetLocation,
+  isFilterMetOwner,
+} from "../FilterDropdowns";
 
 interface State {
-  filterOwnerId: number;
-  filterLocationId: number; // Location or Activity?
-  filterAliveOrDead: AliveOrDead;
+  filters: FilterValues;
 }
 
 interface ReactProps {}
@@ -25,9 +31,7 @@ interface InjectedProps {
   activeRole: UserRole;
   characters: Dictionary<CharacterData>;
   currentUserId: number;
-  users: Dictionary<UserData>;
   activeCharacterId: number;
-  allLocations: Dictionary<LocationData>;
   dispatch?: Dispatch;
 }
 
@@ -38,9 +42,11 @@ class ACharactersList extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      filterOwnerId: -1,
-      filterLocationId: -1,
-      filterAliveOrDead: "Alive",
+      filters: {
+        [FilterType.Owner]: FilterValueAny,
+        [FilterType.Location]: FilterValueAny,
+        [FilterType.AliveStatus]: FilterValueAliveStatus.Alive,
+      },
     };
   }
 
@@ -55,53 +61,13 @@ class ACharactersList extends React.Component<Props, State> {
           </div>
           Filters
           <div className={styles.filtersContainer}>
-            <div className={styles.filterText}>Owner</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterOwnerId}
-              onChange={(e) => {
-                this.setState({ filterOwnerId: +e.target.value });
+            <FilterDropdowns
+              filterOrder={[[FilterType.Owner, FilterType.AliveStatus], [FilterType.Location]]}
+              filterValues={this.state.filters}
+              onFilterChanged={(filters) => {
+                this.setState({ filters });
               }}
-            >
-              <option value={-1}>Any</option>
-              {this.sortPermittedUsers().map(({ id, name }) => {
-                return (
-                  <option value={id} key={`user${name}`}>
-                    {name}
-                  </option>
-                );
-              })}
-            </select>
-            <div className={styles.filterText}>Location</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterLocationId}
-              onChange={(e) => {
-                this.setState({ filterLocationId: +e.target.value });
-              }}
-            >
-              <option value={-1}>Any</option>
-              {this.getSortedLocations().map(({ id, name }) => {
-                return (
-                  <option value={id} key={`location${name}`}>
-                    {name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div className={styles.filtersContainer}>
-            <div className={styles.filterText}>Status</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterAliveOrDead}
-              onChange={(e) => {
-                this.setState({ filterAliveOrDead: e.target.value as AliveOrDead });
-              }}
-            >
-              <option value={"Alive"}>Alive</option>
-              <option value={"Dead"}>Dead</option>
-            </select>
+            />
           </div>
         </div>
         <div className={styles.listContainer}>
@@ -156,20 +122,6 @@ class ACharactersList extends React.Component<Props, State> {
     );
   }
 
-  private sortPermittedUsers(): UserData[] {
-    const permittedUsers = Object.values(this.props.users)
-      .filter((user) => {
-        if (this.props.activeRole !== "player") {
-          return true;
-        } else {
-          return user.id === this.props.currentUserId;
-        }
-      })
-      .sort();
-
-    return permittedUsers;
-  }
-
   private sortPermittedCharacters(): CharacterData[] {
     const permittedCharacters = Object.values(this.props.characters).filter((character) => {
       return this.props.activeRole !== "player" || character.user_id === this.props.currentUserId;
@@ -177,19 +129,17 @@ class ACharactersList extends React.Component<Props, State> {
 
     const filteredCharacters = permittedCharacters.filter((character) => {
       // Apply Owner filter.
-      if (this.state.filterOwnerId > -1 && character.user_id !== this.state.filterOwnerId) {
+      if (!isFilterMetOwner(this.state.filters, character.user_id)) {
         return false;
       }
+
       // Apply Alive/Dead filter.
-      if (
-        (this.state.filterAliveOrDead === "Alive" && character.dead) ||
-        (this.state.filterAliveOrDead === "Dead" && !character.dead)
-      ) {
+      if (!isFilterMetAliveStatus(this.state.filters, character)) {
         return false;
       }
 
       // Apply Location filter.
-      if (this.state.filterLocationId > -1 && character.location_id !== this.state.filterLocationId) {
+      if (!isFilterMetLocation(this.state.filters, character.location_id)) {
         return false;
       }
 
@@ -214,28 +164,18 @@ class ACharactersList extends React.Component<Props, State> {
       })
     );
   }
-
-  private getSortedLocations(): LocationData[] {
-    const locations = Object.values(this.props.allLocations).sort(({ name: nameA }, { name: nameB }) => {
-      return nameA.localeCompare(nameB);
-    });
-    return locations;
-  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { activeRole } = state.hud;
-  const { users } = state.user;
   const { activeCharacterId } = state.characters;
-  const allLocations = state.locations.locations;
+
   return {
     ...props,
     characters: state.characters.characters,
     activeRole,
     currentUserId: state.user.currentUser.id,
-    users,
     activeCharacterId,
-    allLocations,
   };
 }
 

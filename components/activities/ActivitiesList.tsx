@@ -6,14 +6,14 @@ import { Dictionary } from "../../lib/dictionary";
 import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
 import { UserRole } from "../../redux/userSlice";
-import { ActivityData, UserData } from "../../serverAPI";
+import { ActivityData } from "../../serverAPI";
 import styles from "./ActivitiesList.module.scss";
 import { setActiveActivityId } from "../../redux/activitiesSlice";
 import { CreateActivitySubPanel } from "./CreateActivitySubPanel";
+import { FilterDropdowns, FilterType, FilterValueAny, FilterValues, isFilterMetOwner } from "../FilterDropdowns";
 
 interface State {
-  filterOwnerId: number;
-  filterLocationId: number; // Location or Activity?
+  filters: FilterValues;
 }
 
 interface ReactProps {}
@@ -22,7 +22,6 @@ interface InjectedProps {
   activeRole: UserRole;
   activities: Dictionary<ActivityData>;
   currentUserId: number;
-  users: Dictionary<UserData>;
   activeActivityId: number;
   dispatch?: Dispatch;
 }
@@ -34,8 +33,9 @@ class AActivitiesList extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      filterOwnerId: -1,
-      filterLocationId: -1,
+      filters: {
+        [FilterType.Owner]: FilterValueAny,
+      },
     };
   }
 
@@ -50,33 +50,13 @@ class AActivitiesList extends React.Component<Props, State> {
           </div>
           Filters
           <div className={styles.filtersContainer}>
-            <div className={styles.filterText}>Owner</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterOwnerId}
-              onChange={(e) => {
-                this.setState({ filterOwnerId: +e.target.value });
+            <FilterDropdowns
+              filterOrder={[[FilterType.Owner]]}
+              filterValues={this.state.filters}
+              onFilterChanged={(filters) => {
+                this.setState({ filters });
               }}
-            >
-              <option value={-1}>Any</option>
-              {this.sortPermittedUsers().map(({ id, name }) => {
-                return (
-                  <option value={id} key={`user${name}`}>
-                    {name}
-                  </option>
-                );
-              })}
-            </select>
-            <div className={styles.filterText}>Location</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterLocationId}
-              onChange={(e) => {
-                this.setState({ filterLocationId: +e.target.value });
-              }}
-            >
-              <option value={-1}>Any</option>
-            </select>
+            />
           </div>
         </div>
         <div className={styles.listContainer}>
@@ -90,68 +70,64 @@ class AActivitiesList extends React.Component<Props, State> {
 
   private sortActivities(): ActivityData[] {
     const todayTime: number = new Date().getTime();
-    const activities = Object.values(this.props.activities)
-      .filter((activity) => {
-        if (this.props.activeRole !== "player") {
-          return true;
-        } else {
-          return activity.user_id === this.props.currentUserId;
-        }
-      })
-      .sort((a, b) => {
-        // Unresolved, then in progress, then resolved.
 
-        // Activities that need resolved should go first.
-        const aEnd = new Date(a.end_date).getTime();
-        const bEnd = new Date(b.end_date).getTime();
-        const aCompleted = aEnd <= todayTime;
-        const bCompleted = bEnd <= todayTime;
-        const aResolved = a.resolution_text.length > 0;
-        const bResolved = b.resolution_text.length > 0;
+    const permittedActivities = Object.values(this.props.activities).filter((activity) => {
+      if (this.props.activeRole !== "player") {
+        return true;
+      } else {
+        return activity.user_id === this.props.currentUserId;
+      }
+    });
 
-        const aCompletedUnresolved = aCompleted && !aResolved;
-        const bCompletedUnresolved = bCompleted && !bResolved;
+    const filteredActivities = permittedActivities.filter((activity) => {
+      // Apply Owner filter.
+      if (!isFilterMetOwner(this.state.filters, activity.user_id)) {
+        return false;
+      }
 
-        // Completed, unresolved activities show first.
-        let dateOrder = 1;
-        if (aCompletedUnresolved !== bCompletedUnresolved) {
-          return aCompletedUnresolved ? -1 : 1;
-        }
+      return true;
+    });
 
-        // Uncompleted activities show second.
-        if (aCompleted !== bCompleted) {
-          return aCompleted ? 1 : -1;
-        }
+    const activities = filteredActivities.sort((a, b) => {
+      // Unresolved, then in progress, then resolved.
 
-        // Completed, resolved activities show last.
-        if (aResolved && bResolved) {
-          dateOrder = -1;
-        }
+      // Activities that need resolved should go first.
+      const aEnd = new Date(a.end_date).getTime();
+      const bEnd = new Date(b.end_date).getTime();
+      const aCompleted = aEnd <= todayTime;
+      const bCompleted = bEnd <= todayTime;
+      const aResolved = a.resolution_text.length > 0;
+      const bResolved = b.resolution_text.length > 0;
 
-        // After that, sort by end date, so you can see what's coming up.
-        if (aEnd - bEnd !== 0) {
-          return (aEnd - bEnd) * dateOrder;
-        }
+      const aCompletedUnresolved = aCompleted && !aResolved;
+      const bCompletedUnresolved = bCompleted && !bResolved;
 
-        // After that, sort by name.
-        return a.name.localeCompare(b.name);
-      });
+      // Completed, unresolved activities show first.
+      let dateOrder = 1;
+      if (aCompletedUnresolved !== bCompletedUnresolved) {
+        return aCompletedUnresolved ? -1 : 1;
+      }
+
+      // Uncompleted activities show second.
+      if (aCompleted !== bCompleted) {
+        return aCompleted ? 1 : -1;
+      }
+
+      // Completed, resolved activities show last.
+      if (aResolved && bResolved) {
+        dateOrder = -1;
+      }
+
+      // After that, sort by end date, so you can see what's coming up.
+      if (aEnd - bEnd !== 0) {
+        return (aEnd - bEnd) * dateOrder;
+      }
+
+      // After that, sort by name.
+      return a.name.localeCompare(b.name);
+    });
 
     return activities;
-  }
-
-  private sortPermittedUsers(): UserData[] {
-    const permittedUsers = Object.values(this.props.users)
-      .filter((user) => {
-        if (this.props.activeRole !== "player") {
-          return true;
-        } else {
-          return user.id === this.props.currentUserId;
-        }
-      })
-      .sort();
-
-    return permittedUsers;
   }
 
   private renderActivityRow(activity: ActivityData, index: number): React.ReactNode {
@@ -214,14 +190,13 @@ class AActivitiesList extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { activeRole } = state.hud;
-  const { users } = state.user;
   const { activeActivityId } = state.activities;
+
   return {
     ...props,
     activities: state.activities.activities,
     activeRole,
     currentUserId: state.user.currentUser.id,
-    users,
     activeActivityId,
   };
 }

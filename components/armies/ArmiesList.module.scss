@@ -42,22 +42,9 @@
 .filtersContainer {
   position: relative;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   background-color: #222;
   padding: 0.5vmin;
-}
-
-.filterText {
-  margin-left: 0.5vmin;
-  margin-right: 0.5vmin;
-  font-size: 1rem;
-  color: wheat;
-  text-align: left;
-  align-self: center;
-}
-
-.filterSelector {
-  width: 11vmin;
 }
 
 .listContainer {

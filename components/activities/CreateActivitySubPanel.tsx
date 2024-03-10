@@ -26,13 +26,21 @@ import {
   isProficiencyUnlockedForCharacter,
 } from "../../lib/characterUtils";
 import { ActivityPreparednessDisplay } from "./ActivityPreparednessDisplay";
+import {
+  FilterDropdowns,
+  FilterType,
+  FilterValueAny,
+  FilterValueBusyStatus,
+  FilterValues,
+  isFilterMetBusyStatus,
+  isFilterMetLocation,
+  isFilterMetOwner,
+  isFilterMetProficiency,
+} from "../FilterDropdowns";
 
 interface State {
   activity: ActivityData;
-  filterOwnerId: number;
-  filterLocationId: number;
-  filterStatus: string;
-  filterProficiencyId: string;
+  filters: FilterValues;
   isSaving: boolean;
 }
 
@@ -74,10 +82,12 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
             participants: [...a.participants],
             resolution_text: a.resolution_text,
           },
-          filterOwnerId: -1,
-          filterLocationId: -1,
-          filterStatus: "Available",
-          filterProficiencyId: "",
+          filters: {
+            [FilterType.Owner]: FilterValueAny,
+            [FilterType.Location]: FilterValueAny,
+            [FilterType.BusyStatus]: FilterValueBusyStatus.Available,
+            [FilterType.Proficiency]: FilterValueAny,
+          },
           isSaving: false,
         };
       }
@@ -94,10 +104,12 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
           participants: [],
           resolution_text: "",
         },
-        filterOwnerId: -1,
-        filterLocationId: -1,
-        filterStatus: "Available",
-        filterProficiencyId: "",
+        filters: {
+          [FilterType.Owner]: FilterValueAny,
+          [FilterType.Location]: FilterValueAny,
+          [FilterType.BusyStatus]: FilterValueBusyStatus.Available,
+          [FilterType.Proficiency]: FilterValueAny,
+        },
         isSaving: false,
       };
     }
@@ -182,76 +194,13 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
           <div className={styles.participantsContainer}>
             <div className={styles.participantsHeader}>Adventurers</div>
             <div className={styles.filtersContainer}>
-              <div className={styles.row}>
-                <div className={styles.filterText}>Status</div>
-                <select
-                  className={styles.filterSelector}
-                  value={this.state.filterStatus}
-                  onChange={(e) => {
-                    this.setState({ filterStatus: e.target.value });
-                  }}
-                >
-                  <option value={"Available"}>Available</option>
-                  <option value={"Busy"}>Busy</option>
-                </select>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.filterText}>Owner</div>
-                <select
-                  className={styles.filterSelector}
-                  value={this.state.filterOwnerId}
-                  onChange={(e) => {
-                    this.setState({ filterOwnerId: +e.target.value });
-                  }}
-                >
-                  <option value={-1}>Any</option>
-                  {this.sortPermittedUsers().map(({ id, name }) => {
-                    return (
-                      <option value={id} key={`user${name}`}>
-                        {name}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.filterText}>Location</div>
-                <select
-                  className={styles.filterSelector}
-                  value={this.state.filterLocationId}
-                  onChange={(e) => {
-                    this.setState({ filterLocationId: +e.target.value });
-                  }}
-                >
-                  <option value={-1}>Any</option>
-                  {this.getSortedLocations().map(({ id, name }) => {
-                    return (
-                      <option value={id} key={`location${name}`}>
-                        {name}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.filterText}>Proficiency</div>
-                <select
-                  className={styles.filterSelector}
-                  value={this.state.filterProficiencyId}
-                  onChange={(e) => {
-                    this.setState({ filterProficiencyId: e.target.value });
-                  }}
-                >
-                  <option value={""}>Any</option>
-                  {this.getSortedProficiencies().map((prof) => {
-                    return (
-                      <option value={prof.name} key={`prof${prof.name}`}>
-                        {prof.name}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
+              <FilterDropdowns
+                filterOrder={[[FilterType.Owner, FilterType.BusyStatus, FilterType.Location, FilterType.Proficiency]]}
+                filterValues={this.state.filters}
+                onFilterChanged={(filters) => {
+                  this.setState({ filters });
+                }}
+              />
             </div>
             <div className={styles.adventurersListContainer}>
               {this.getSortedAdventurers().map(this.renderAdventurerRow.bind(this))}
@@ -336,7 +285,11 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
   }
 
   private getSortedAdventurers(): CharacterData[] {
-    const p: CharacterData[] = Object.values(this.props.allCharacters).filter((character) => {
+    const permittedCharacters = Object.values(this.props.allCharacters).filter((character) => {
+      return this.props.activeRole !== "player" || character.user_id === this.props.currentUserId;
+    });
+
+    const filteredCharacters: CharacterData[] = permittedCharacters.filter((character) => {
       // Exclude the dead.
       if (character.dead) {
         return false;
@@ -351,70 +304,44 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
       }
 
       // Apply Owner filter.
-      if (this.state.filterOwnerId > -1 && character.user_id !== this.state.filterOwnerId) {
+      if (!isFilterMetOwner(this.state.filters, character.user_id)) {
         return false;
       }
 
       // Apply Location filter.
-      if (this.state.filterLocationId > -1 && character.location_id !== this.state.filterLocationId) {
+      if (!isFilterMetLocation(this.state.filters, character.location_id)) {
         return false;
       }
 
       // Apply Status filter.
-      const conflictingActivity = Object.values(this.props.activities).find((activity) => {
-        // Look at other activities this character is/was part of.
-        if (
-          !activity.participants.find((p) => {
-            return character.id === p.characterId;
-          })
-        ) {
-          return false;
-        }
-        // Would any of those overlap with this new activity?
-        return (
-          Math.max(new Date(activity.start_date).getTime(), new Date(this.state.activity.start_date).getTime()) <=
-          Math.min(new Date(activity.end_date).getTime(), new Date(this.state.activity.end_date).getTime())
-        );
-      });
-      if (this.state.filterStatus === "Busy" && !conflictingActivity) {
-        return false;
-      }
-      if (this.state.filterStatus === "Available" && !!conflictingActivity) {
+      if (
+        !isFilterMetBusyStatus(
+          this.state.filters,
+          character.id,
+          this.state.activity.start_date,
+          this.state.activity.end_date
+        )
+      ) {
         return false;
       }
 
       // Apply Proficiency filter.
-      if (this.state.filterProficiencyId.length > 0) {
-        let subtype: string | undefined = undefined;
-        const subtypeMatch = this.state.filterProficiencyId.match(/\(([^)]+)\)/);
-        if (subtypeMatch) {
-          subtype = subtypeMatch[1];
-        }
-
-        let profId: string = "";
-        if ((subtype?.length ?? 0) > 0) {
-          profId = this.state.filterProficiencyId.slice(0, this.state.filterProficiencyId.indexOf("(")).trim();
-        } else {
-          profId = this.state.filterProficiencyId;
-        }
-
-        if (!isProficiencyUnlockedForCharacter(character.id, profId, subtype)) {
-          return false;
-        }
+      if (!isFilterMetProficiency(this.state.filters, character.id)) {
+        return false;
       }
 
       return true;
     });
 
     // Sort by level, then by name.
-    p.sort((a, b) => {
+    filteredCharacters.sort((a, b) => {
       if (a.level !== b.level) {
         return b.level - a.level;
       }
       return a.name.localeCompare(b.name);
     });
 
-    return p;
+    return filteredCharacters;
   }
 
   private renderParticipantRow(character: CharacterData, index: number): React.ReactNode {
