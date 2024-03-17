@@ -35,6 +35,13 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       values: [],
     });
 
+    // When creating a character, we also set up their Personal Pile storage.
+    queries.push({
+      query:
+        "INSERT INTO storage (name,capacity,location_id,owner_id,group_ids,money) VALUES(CONCAT('Personal Pile ',CAST(@id AS VARCHAR(32))),?,?,@id,?,?)",
+      values: [999999999, 0, "", 0],
+    });
+
     b.selected_class_features.forEach(([featureName, subtype, rank], index) => {
       if (featureName !== "---") {
         // A selectable may start at a rank higher than 1, so we push one Proficiency for each rank.

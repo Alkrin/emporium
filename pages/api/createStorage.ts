@@ -6,8 +6,8 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
   try {
     const b = req.body as RequestBody_CreateStorage;
     const results = await executeQuery<any>(
-      `INSERT INTO storage (name,capacity,location_id,owner_id,group_ids) VALUES (?,?,?,?,?)`,
-      [b.name, b.capacity, b.location_id, b.owner_id, b.group_ids.join(",")]
+      `INSERT INTO storage (name,capacity,location_id,owner_id,group_ids,money) VALUES (?,?,?,?,?,?)`,
+      [b.name, b.capacity, b.location_id, b.owner_id, b.group_ids.join(","), b.money]
     );
 
     res.status(200).json(results);

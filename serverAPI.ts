@@ -112,6 +112,7 @@ export interface StorageData {
   location_id: number;
   owner_id: number;
   group_ids: number[];
+  money: number;
 }
 export type ServerStorageData = Omit<StorageData, "group_ids"> & {
   group_ids: string;

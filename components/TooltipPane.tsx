@@ -61,6 +61,10 @@ class TooltipPane extends React.Component<Props, State> {
         ? this.props.tooltipState.content()
         : this.props.tooltipState.content;
 
+    if (!content) {
+      return null;
+    }
+
     return (
       <div
         className={styles.tooltipWrapper}

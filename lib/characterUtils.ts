@@ -1212,3 +1212,7 @@ export function getCampaignXPDeductibleCapForLevel(level: number): number {
 
   return CXPDeductibles[level] ?? 0;
 }
+
+export function getPersonalPileName(characterId: number): string {
+  return `Personal Pile ${characterId}`;
+}

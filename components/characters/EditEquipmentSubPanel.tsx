@@ -43,6 +43,7 @@ import {
   canCharacterEquipShields,
   canCharacterEquipWeapon,
   getMaxBaseArmorForCharacter,
+  getPersonalPileName,
   isCharacterDualWielding,
   isCharacterWielding2hWeapon,
   whereIsItemEquipped,
@@ -67,12 +68,6 @@ interface InjectedProps {
 type Props = ReactProps & InjectedProps;
 
 class AEditEquipmentSubPanel extends React.Component<Props> {
-  constructor(props: Props) {
-    super(props);
-
-    this.preparePersonalPile();
-  }
-
   render(): React.ReactNode {
     const personalPile = this.getPersonalPile();
     const characterClass = AllClasses[this.props.character.class_name];
@@ -1007,40 +1002,13 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     );
   }
 
-  private getPersonalPileName(): string {
-    return `Personal Pile ${this.props.character.id}`;
-  }
-
   private getPersonalPile(): StorageData | undefined {
-    const personalPileName = this.getPersonalPileName();
+    const personalPileName = getPersonalPileName(this.props.character.id);
     const personalPile = Object.values(this.props.allStorages).find((storage) => {
       return storage.name === personalPileName;
     });
 
     return personalPile;
-  }
-
-  private async preparePersonalPile(): Promise<void> {
-    const personalPile = this.getPersonalPile();
-
-    // If you don't have a Personal Pile yet, generate one!
-    if (!personalPile) {
-      const res = await ServerAPI.createStorage({
-        id: 0, // Will be overridden.
-        name: this.getPersonalPileName(),
-        capacity: 999999999,
-        owner_id: this.props.character.id,
-        location_id: 0, // Personal Pile is always where the character is.
-        group_ids: [],
-      });
-
-      if ("error" in res) {
-        // Failed.  Try again!
-        this.preparePersonalPile();
-      } else if (this.props.dispatch) {
-        refetchStorages(this.props.dispatch);
-      }
-    }
   }
 
   private onCreateItemsClicked(): void {
