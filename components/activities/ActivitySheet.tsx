@@ -11,6 +11,7 @@ import { showSubPanel } from "../../redux/subPanelsSlice";
 import { ActivityResolutionSubPanel } from "./ActivityResolutionSubPanel";
 import { ActivityOutcomesList } from "./ActivityOutcomeList";
 import { CreateActivitySubPanel } from "./CreateActivitySubPanel";
+import { SheetRoot } from "../SheetRoot";
 
 interface ReactProps {
   activityId: number;
@@ -38,7 +39,7 @@ class AActivitySheet extends React.Component<Props> {
       const localEndDate = new Date(this.props.activity.end_date);
       let localEndDateTime = localEndDate.getTime() + localEndDate.getTimezoneOffset() * 60000;
       return (
-        <div className={`${styles.root} ${animationClass}`}>
+        <SheetRoot className={`${styles.root} ${animationClass}`}>
           <div className={styles.nameLabel}>{`#${this.props.activity.id}: ${this.props.activity.name}`}</div>
           <div className={styles.row}>
             <div className={styles.dateLabel}>Start:</div>
@@ -98,13 +99,13 @@ class AActivitySheet extends React.Component<Props> {
               {this.props.activity.resolution_text.length > 0 ? "Clone Activity" : "Resolve Activity"}
             </div>
           </div>
-        </div>
+        </SheetRoot>
       );
     } else {
       return (
-        <div className={`${styles.root} ${animationClass}`}>
+        <SheetRoot className={`${styles.root} ${animationClass}`}>
           <div className={styles.placeholder} />
-        </div>
+        </SheetRoot>
       );
     }
   }

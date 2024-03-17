@@ -4,11 +4,6 @@
   left: 40vmin;
   right: 3vmin;
   bottom: 3vmin;
-  box-sizing: border-box;
-  border-radius: 0.5vmin;
-  border: solid 2px wheat;
-  box-shadow: 0 0 1.5vmin 0px wheat;
-  background-color: black;
 
   &.exit {
     animation: hmpcsSlideOut 1s forwards;
@@ -100,14 +95,13 @@
 
 .topPanel {
   @extend .column;
-  margin: 1vmin;
+  margin-bottom: 1vmin;
 }
 
 .leftPanel {
   @extend .column;
   position: relative;
   align-self: flex-start;
-  margin-left: 1vmin;
 }
 
 .rightPanel {
