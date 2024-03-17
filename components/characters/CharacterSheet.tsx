@@ -47,6 +47,7 @@ import { EditInjuriesDialog } from "./EditInjuriesDialog";
 import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
 import { setCharacterLocation } from "../../redux/charactersSlice";
+import { SheetRoot } from "../SheetRoot";
 
 interface ReactProps {
   characterId: number;
@@ -72,7 +73,7 @@ class ACharacterSheet extends React.Component<Props> {
     const characterExists = this.props.characterId > 0 && !!this.props.character;
 
     return (
-      <div className={`${styles.root} ${animationClass}`}>
+      <SheetRoot className={`${styles.root} ${animationClass}`}>
         {characterExists ? (
           <>
             <div className={styles.topPanel}>
@@ -109,7 +110,7 @@ class ACharacterSheet extends React.Component<Props> {
         ) : (
           <div className={styles.placeholder} />
         )}
-      </div>
+      </SheetRoot>
     );
   }
 

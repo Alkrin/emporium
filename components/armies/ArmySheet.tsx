@@ -21,6 +21,7 @@ import {
   getTroopAvailableBattleRating,
   getTroopTotalBattleRating,
 } from "../../lib/armyUtils";
+import { SheetRoot } from "../SheetRoot";
 
 interface ReactProps {
   armyId: number;
@@ -45,7 +46,7 @@ class AArmySheet extends React.Component<Props> {
     const armyExists = this.props.armyId > 0 && !!this.props.army;
 
     return (
-      <div className={`${styles.root} ${animationClass}`}>
+      <SheetRoot className={`${styles.root} ${animationClass}`}>
         {armyExists ? (
           <>
             <div className={styles.topPanel}>
@@ -63,7 +64,7 @@ class AArmySheet extends React.Component<Props> {
         ) : (
           <div className={styles.placeholder} />
         )}
-      </div>
+      </SheetRoot>
     );
   }
 

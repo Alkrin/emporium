@@ -6,12 +6,6 @@
   left: 40vmin;
   right: 3vmin;
   bottom: 3vmin;
-  box-sizing: border-box;
-  padding: 1vmin;
-  border-radius: 0.5vmin;
-  border: solid 2px wheat;
-  box-shadow: 0 0 1.5vmin 0px wheat;
-  background-color: black;
 
   &.exit {
     animation: ahmpcsSlideOut 1s forwards;

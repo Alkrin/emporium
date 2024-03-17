@@ -1,0 +1,61 @@
+.root {
+  overflow: visible;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.background {
+  position: absolute;
+  top: -0.1vmin;
+  left: 0;
+  right: 0;
+  bottom: -0.2vmin;
+  box-sizing: border-box;
+  border-radius: 0.5vmin;
+  border: solid 2px wheat;
+  box-shadow: 0 0 1.5vmin 0px wheat;
+  background-color: black;
+}
+
+.scroller {
+  @extend .column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: -2.5vmin;
+  bottom: 0;
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.contentWidthSizer {
+  @extend .column;
+  position: relative;
+  box-sizing: border-box;
+  width: calc(100% - 1vmin);
+  min-height: 100%;
+  padding: 1vmin;
+}
