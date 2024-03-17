@@ -1,0 +1,65 @@
+.column {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+.root {
+  @extend .column;
+  width: 30vmin;
+}
+
+.header {
+  @extend .row;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5vmin;
+  border-bottom: 1px solid wheat;
+}
+
+.title {
+  position: relative;
+  color: white;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.type {
+  position: relative;
+  margin-left: 1vmin;
+  color: gray;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.description {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  font-size: 0.8rem;
+  color: #888855;
+}
+
+.data {
+  @extend .row;
+  position: relative;
+  margin-bottom: 0.5vmin;
+}
+
+.dataName {
+  position: relative;
+  font-size: 0.8rem;
+  color: gray;
+}
+
+.dataValue {
+  position: relative;
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: #558855;
+}

@@ -7,6 +7,8 @@ import styles from "./SelectLocationDialog.module.scss";
 import { Dictionary } from "../../lib/dictionary";
 import { LocationData } from "../../serverAPI";
 import { HexMapWindow } from "../world/HexMapWindow";
+import TooltipSource from "../TooltipSource";
+import { LocationTooltip } from "../tooltips/LocationTooltip";
 
 interface State {
   selectedLocationId: number;
@@ -79,15 +81,21 @@ class ASelectLocationDialog extends React.Component<Props, State> {
 
   private renderLocationRow(location: LocationData, index: number): React.ReactNode {
     return (
-      <div
+      <TooltipSource
         className={`${styles.listRow} ${location.id === this.state.selectedLocationId ? styles.selected : ""}`}
         key={`locationRow${index}`}
+        tooltipParams={{
+          id: `Location${location.id}`,
+          content: () => {
+            return location.id === 0 ? null : <LocationTooltip data={location} />;
+          },
+        }}
         onClick={() => {
           this.setState({ selectedLocationId: location.id });
         }}
       >
         <div className={styles.listName}>{location.name}</div>
-      </div>
+      </TooltipSource>
     );
   }
 

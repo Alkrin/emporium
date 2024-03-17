@@ -2,7 +2,7 @@ import * as React from "react";
 import styles from "./WorldPanel.module.scss";
 import { Dispatch } from "@reduxjs/toolkit";
 import { RootState } from "../../redux/store";
-import ServerAPI, { LocationCityData, LocationData, LocationLairData, MapData, MapHexData } from "../../serverAPI";
+import ServerAPI, { LocationData, MapData, MapHexData } from "../../serverAPI";
 import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
 import { showSubPanel } from "../../redux/subPanelsSlice";
@@ -14,7 +14,7 @@ import { showModal } from "../../redux/modalsSlice";
 import { updateMapHex } from "../../redux/mapsSlice";
 import { LocationEditSubPanel } from "./LocationEditSubPanel";
 import TooltipSource from "../TooltipSource";
-import { getRomanNumerals } from "../../lib/stringUtils";
+import { LocationTooltip } from "../tooltips/LocationTooltip";
 
 interface State {
   mapID: number;
@@ -28,8 +28,6 @@ interface InjectedProps {
   maps: Dictionary<MapData>;
   mapHexesByMap: Dictionary<MapHexData[]>;
   locations: Dictionary<LocationData>;
-  cities: Dictionary<LocationCityData>;
-  lairs: Dictionary<LocationLairData>;
   dispatch?: Dispatch;
 }
 
@@ -125,7 +123,7 @@ class AWorldPanel extends React.Component<Props, State> {
                   <TooltipSource
                     className={styles.locationRow}
                     key={data.id}
-                    tooltipParams={{ id: `Location${data.id}`, content: this.renderLocationTooltip.bind(this, data) }}
+                    tooltipParams={{ id: `Location${data.id}`, content: () => <LocationTooltip data={data} /> }}
                   >
                     <div className={styles.locationDataRow}>
                       <div className={styles.locationName}>{data.name}</div>
@@ -139,60 +137,6 @@ class AWorldPanel extends React.Component<Props, State> {
         ) : null}
       </div>
     );
-  }
-
-  private renderLocationTooltip(data: LocationData): React.ReactNode {
-    return (
-      <div className={styles.locationTooltipRoot}>
-        <div className={styles.locationTooltipHeader}>
-          <div className={styles.locationTooltipTitle}>{data.name}</div>
-          <div className={styles.locationTooltipType}>{data.type}</div>
-        </div>
-        <div className={styles.locationTooltipDescription}>{data.description}</div>
-        {data.type === "City" ? this.renderCityTooltipData(data.id) : null}
-        {data.type === "Lair" ? this.renderLairTooltipData(data.id) : null}
-      </div>
-    );
-  }
-
-  private renderCityTooltipData(locationID: number): React.ReactNode {
-    const data = Object.values(this.props.cities).find((c) => {
-      return c.location_id === locationID;
-    });
-    if (data) {
-      return (
-        <>
-          <div className={styles.locationTooltipData}>
-            <div className={styles.locationTooltipDataName}>{"Market Class:"}</div>
-            <div className={styles.locationTooltipDataValue}>{getRomanNumerals(data.market_class)}</div>
-          </div>
-        </>
-      );
-    } else {
-      return null;
-    }
-  }
-
-  private renderLairTooltipData(locationID: number): React.ReactNode {
-    const data = Object.values(this.props.lairs).find((l) => {
-      return l.location_id === locationID;
-    });
-    if (data) {
-      return (
-        <>
-          <div className={styles.locationTooltipData}>
-            <div className={styles.locationTooltipDataName}>{"Monster Level:"}</div>
-            <div className={styles.locationTooltipDataValue}>{data.monster_level}</div>
-          </div>
-          <div className={styles.locationTooltipData}>
-            <div className={styles.locationTooltipDataName}>{"Num Encounters:"}</div>
-            <div className={styles.locationTooltipDataValue}>{data.num_encounters}</div>
-          </div>
-        </>
-      );
-    } else {
-      return null;
-    }
   }
 
   private onEditLocationClicked(data: LocationData): void {
@@ -326,14 +270,12 @@ class AWorldPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { maps, mapHexesByMap } = state.maps;
-  const { locations, cities, lairs } = state.locations;
+  const { locations } = state.locations;
   return {
     ...props,
     maps,
     mapHexesByMap,
     locations,
-    cities,
-    lairs,
   };
 }
 

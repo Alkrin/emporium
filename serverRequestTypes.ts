@@ -90,6 +90,7 @@ export interface RequestBody_CreateStorage {
   location_id: number;
   owner_id: number;
   group_ids: number[];
+  money: number;
 }
 
 export interface RequestBody_EncryptString {

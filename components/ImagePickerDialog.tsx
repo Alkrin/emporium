@@ -5,7 +5,6 @@ import styles from "./ImagePickerDialog.module.scss";
 import { hideModal } from "../redux/modalsSlice";
 import { RootState } from "../redux/store";
 import Escapable from "./Escapable";
-import ServerAPI from "../serverAPI";
 import TooltipSource from "./TooltipSource";
 
 interface State {
@@ -54,11 +53,11 @@ class AImagePickerDialog extends React.Component<Props, State> {
     );
   }
 
-  private renderImageCell(url: string): React.ReactNode {
+  private renderImageCell(url: string, index: number): React.ReactNode {
     const chunks = url.split("\\");
     const name = chunks[chunks.length - 1].split(".")[0];
     return (
-      <TooltipSource tooltipParams={{ id: url, content: name }}>
+      <TooltipSource tooltipParams={{ id: url, content: name }} key={`icon${index}`}>
         <img className={styles.imageCell} src={url} onClick={this.onImageClicked.bind(this, url)} />
       </TooltipSource>
     );
