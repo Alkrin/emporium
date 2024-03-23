@@ -113,7 +113,7 @@ export interface RequestBody_SetHP {
 }
 
 export interface RequestBody_SetMoney {
-  characterId: number;
+  storageId: number;
   gp: number;
 }
 

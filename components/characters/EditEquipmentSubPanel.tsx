@@ -1,7 +1,6 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { refetchStorages } from "../../dataSources/StoragesDataSource";
 import { Dictionary } from "../../lib/dictionary";
 import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
@@ -43,7 +42,7 @@ import {
   canCharacterEquipShields,
   canCharacterEquipWeapon,
   getMaxBaseArmorForCharacter,
-  getPersonalPileName,
+  getPersonalPile,
   isCharacterDualWielding,
   isCharacterWielding2hWeapon,
   whereIsItemEquipped,
@@ -69,7 +68,7 @@ type Props = ReactProps & InjectedProps;
 
 class AEditEquipmentSubPanel extends React.Component<Props> {
   render(): React.ReactNode {
-    const personalPile = this.getPersonalPile();
+    const personalPile = getPersonalPile(this.props.character.id);
     const characterClass = AllClasses[this.props.character.class_name];
     const canUseShield = characterClass.weaponStyles.includes(WeaponStyle.OneHandAndShield);
 
@@ -229,22 +228,19 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
   }
 
   private getPersonalPileItems(): ItemData[] {
-    const personalPile = this.getPersonalPile();
-    if (!personalPile) {
-      return [];
-    } else {
-      const items: ItemData[] = Object.values(this.props.allItems).filter((item) => {
-        return item.storage_id === personalPile.id;
-      });
+    const personalPile = getPersonalPile(this.props.character.id);
 
-      items.sort((itemA, itemB) => {
-        const nameA = this.props.allItemDefs[itemA.def_id]?.name ?? "";
-        const nameB = this.props.allItemDefs[itemB.def_id]?.name ?? "";
-        return nameA.localeCompare(nameB);
-      });
+    const items: ItemData[] = Object.values(this.props.allItems).filter((item) => {
+      return item.storage_id === personalPile.id;
+    });
 
-      return items;
-    }
+    items.sort((itemA, itemB) => {
+      const nameA = this.props.allItemDefs[itemA.def_id]?.name ?? "";
+      const nameB = this.props.allItemDefs[itemB.def_id]?.name ?? "";
+      return nameA.localeCompare(nameB);
+    });
+
+    return items;
   }
 
   private renderPersonalPileItemRow(item: ItemData): React.ReactNode {
@@ -446,11 +442,10 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
 
   private async handleItemDroppedOnPersonalPile(item: ItemData, def: ItemDefData): Promise<void> {
     // Is this item already in the Personal Pile?
-    const personalPile = this.getPersonalPile();
-    if (item.storage_id === personalPile?.id) {
+    const personalPile = getPersonalPile(this.props.character.id);
+    if (item.storage_id === personalPile.id) {
       return;
     }
-    const personalPileId = personalPile?.id ?? 0;
 
     // Either set it or swap it with what was previously in the slot.
     const moves: ItemMoveParams[] = [];
@@ -469,13 +464,13 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
             srcCharacterId: this.props.character.id,
             srcEquipmentSlot: key,
             // Into the personal pile.
-            destStorageId: personalPileId,
+            destStorageId: personalPile.id,
           };
           moves.push(unequipItem);
 
           const itemUpdate: ItemData = {
             ...this.props.allItems[item.id],
-            storage_id: personalPileId,
+            storage_id: personalPile.id,
           };
           itemUpdates.push(itemUpdate);
         }
@@ -487,14 +482,14 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
       const moveItem: ItemMoveParams = {
         itemId: item.id,
         // Into the personal pile.
-        destStorageId: personalPileId,
+        destStorageId: personalPile.id,
       };
       moves.push(moveItem);
 
       const itemUpdate: ItemData = {
         ...this.props.allItems[item.id],
         container_id: 0,
-        storage_id: personalPileId,
+        storage_id: personalPile.id,
       };
       itemUpdates.push(itemUpdate);
     }
@@ -885,7 +880,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     // If the item being equipped already equipped by this character (e.g. swapping between the two pouch slots), remove it from its old spot.
     const previousSlotId = whereIsItemEquipped(this.props.character, item.id);
     if (previousSlotId !== null) {
-      const destStorageId = this.getPersonalPile()?.id ?? 0;
+      const destStorageId = getPersonalPile(this.props.character.id).id;
       const removeThisItem: ItemMoveParams = {
         itemId: item.id,
         // From the character.
@@ -903,7 +898,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     // If the item is being placed into an occupied equipment slot, remove whatever was there and drop it into the Personal Pile.
     if (this.props.character[slotId] !== 0) {
       // Have to swap out the previously worn equipment.
-      const destStorageId = this.getPersonalPile()?.id ?? 0;
+      const destStorageId = getPersonalPile(this.props.character.id).id;
       const oldEquipment = this.props.allItems[this.props.character[slotId]];
       const removeOldEquipment: ItemMoveParams = {
         itemId: oldEquipment.id,
@@ -1000,15 +995,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         content: { title: "Invalid Slot", message: `${def.name} cannot be equipped as ${slot}` },
       })
     );
-  }
-
-  private getPersonalPile(): StorageData | undefined {
-    const personalPileName = getPersonalPileName(this.props.character.id);
-    const personalPile = Object.values(this.props.allStorages).find((storage) => {
-      return storage.name === personalPileName;
-    });
-
-    return personalPile;
   }
 
   private onCreateItemsClicked(): void {

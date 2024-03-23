@@ -222,7 +222,6 @@ export function generateActivityOutcomes(
   });
 
   // Turn "recipients" into Outcomes.
-  console.log("Final Recipients");
   Object.values(recipients).forEach((r) => {
     console.log({ ...r });
     // If there is GP gained, add a GP outcome.

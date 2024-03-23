@@ -200,8 +200,6 @@ export interface CharacterData extends CharacterEquipmentData {
   hp: number;
   hit_dice: number[];
   henchmaster_id: number;
-  /** Whole gp, decimal sp/cp. */
-  money: number;
   remaining_cxp_deductible: number;
   cxp_deductible_date: string;
   dead: boolean;
@@ -1119,9 +1117,9 @@ class AServerAPI {
     return await res.json();
   }
 
-  async setMoney(characterId: number, gp: number): Promise<SetMoneyResult> {
+  async setMoney(storageId: number, gp: number): Promise<SetMoneyResult> {
     const requestBody: RequestBody_SetMoney = {
-      characterId,
+      storageId,
       gp,
     };
     const res = await fetch("/api/setMoney", {

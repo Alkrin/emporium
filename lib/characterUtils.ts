@@ -5,6 +5,7 @@ import {
   CharacterEquipmentSlots,
   ItemDefData,
   SpellDefData,
+  StorageData,
 } from "../serverAPI";
 import { AllClasses } from "../staticData/characterClasses/AllClasses";
 import { AntiPaladinAuraOfProtection } from "../staticData/classFeatures/AntiPaladinAuraOfProtection";
@@ -1215,4 +1216,15 @@ export function getCampaignXPDeductibleCapForLevel(level: number): number {
 
 export function getPersonalPileName(characterId: number): string {
   return `Personal Pile ${characterId}`;
+}
+
+export function getPersonalPile(characterId: number): StorageData {
+  const redux = store.getState();
+
+  const pileName = getPersonalPileName(characterId);
+  const pile = redux.storages.storagesByCharacterId[characterId].find((storage) => {
+    return storage.name === pileName;
+  }) as StorageData;
+
+  return pile;
 }

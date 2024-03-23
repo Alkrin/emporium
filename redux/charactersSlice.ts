@@ -67,11 +67,6 @@ export const charactersSlice = createSlice({
         state.characters[action.payload.characterId].hp = action.payload.hp;
       }
     },
-    setCharacterMoney: (state: CharactersReduxState, action: PayloadAction<SetMoneyParams>) => {
-      if (state.characters[action.payload.characterId]) {
-        state.characters[action.payload.characterId].money = action.payload.money;
-      }
-    },
     setCharacterLocation: (state: CharactersReduxState, action: PayloadAction<SetLocationParams>) => {
       if (state.characters[action.payload.characterId]) {
         state.characters[action.payload.characterId].location_id = action.payload.locationId;
@@ -107,7 +102,6 @@ export const {
   deleteCharacter,
   setActiveCharacterId,
   setCharacterHP,
-  setCharacterMoney,
   setCharacterLocation,
   setCharacterXP,
   setEquipment,

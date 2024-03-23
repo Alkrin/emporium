@@ -3,9 +3,10 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData } from "../../serverAPI";
+import ServerAPI, { CharacterData, StorageData } from "../../serverAPI";
 import styles from "./EditMoneyDialog.module.scss";
-import { setCharacterMoney } from "../../redux/charactersSlice";
+import { getPersonalPile } from "../../lib/characterUtils";
+import { updateStorage } from "../../redux/storageSlice";
 
 interface State {
   gpTotal: number;
@@ -76,7 +77,7 @@ class AEditMoneyDialog extends React.Component<Props, State> {
   }
 
   componentDidMount(): void {
-    this.setState({ gpTotal: this.props.character.money });
+    this.setState({ gpTotal: getPersonalPile(this.props.character.id).money });
   }
 
   private async onSetMoneyTotalClicked(): Promise<void> {
@@ -84,7 +85,10 @@ class AEditMoneyDialog extends React.Component<Props, State> {
       return;
     }
     this.setState({ saving: true });
-    const result = await ServerAPI.setMoney(this.props.character.id, this.state.gpTotal);
+
+    const personalPile = getPersonalPile(this.props.character.id);
+
+    const result = await ServerAPI.setMoney(personalPile.id, this.state.gpTotal);
 
     if ("error" in result) {
       this.props.dispatch?.(
@@ -98,7 +102,11 @@ class AEditMoneyDialog extends React.Component<Props, State> {
         })
       );
     } else {
-      this.props.dispatch?.(setCharacterMoney({ characterId: this.props.character.id, money: result.newMoneyValue }));
+      const data: StorageData = {
+        ...getPersonalPile(this.props.character.id),
+        money: result.newMoneyValue,
+      };
+      this.props.dispatch?.(updateStorage(data));
       this.props.dispatch?.(hideModal());
     }
     this.setState({ saving: false });
@@ -109,10 +117,13 @@ class AEditMoneyDialog extends React.Component<Props, State> {
       return;
     }
     this.setState({ saving: true });
+
+    const personalPile = getPersonalPile(this.props.character.id);
+
     const result = await ServerAPI.setMoney(
-      this.props.character.id,
+      personalPile.id,
       // It is possible to have negative money, for bookkeeping purposes.
-      this.props.character.money + this.state.gpDelta
+      personalPile.money + this.state.gpDelta
     );
 
     if ("error" in result) {
@@ -127,7 +138,11 @@ class AEditMoneyDialog extends React.Component<Props, State> {
         })
       );
     } else {
-      this.props.dispatch?.(setCharacterMoney({ characterId: this.props.character.id, money: result.newMoneyValue }));
+      const data: StorageData = {
+        ...getPersonalPile(this.props.character.id),
+        money: result.newMoneyValue,
+      };
+      this.props.dispatch?.(updateStorage(data));
       this.props.dispatch?.(hideModal());
     }
     this.setState({ saving: false });
