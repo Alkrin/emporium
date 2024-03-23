@@ -729,7 +729,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       hp: 0, // We'll replace this in a moment.
       hit_dice: this.state.hitDice,
       henchmaster_id: 0,
-      money: 0,
       // CXP Deductible is handled by the Activity resolution flow.
       remaining_cxp_deductible: 0,
       cxp_deductible_date: "",
