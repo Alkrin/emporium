@@ -67,12 +67,27 @@
 .row {
   display: flex;
   flex-direction: row;
-  align-items: center;
 }
 
 .column {
   display: flex;
   flex-direction: column;
+}
+
+.centeredRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.verticalSpacer {
+  position: relative;
+  height: 0.5vmin;
+}
+
+.horizontalSpacer {
+  position: relative;
+  width: 0.5vmin;
 }
 
 .editIcon {
@@ -113,60 +128,8 @@
 
 .topPanelGrid {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, max-content);
-  gap: 0.5vmin;
-  grid-auto-rows: auto;
-}
-
-.statsPanel {
-  grid-column: 1;
-  grid-row: 1 / 5;
-}
-
-.xpPanel {
-  grid-column: 1 / 3;
-  grid-row: 5;
-}
-
-.savingThrowsPanel {
-  grid-column: 2;
-  grid-row: 1 / 5;
-}
-
-.speedPanel {
-  grid-column: 3;
-  grid-row: 1 / 2;
-}
-
-.initiativePanel {
-  grid-column: 3;
-  grid-row: 2 / 3;
-}
-
-.combatPanel {
-  grid-column: 3;
-  grid-row: 3 / 6;
-}
-
-.moneyPanel {
-  grid-column: 4;
-  grid-row: 1;
-}
-
-.hpPanel {
-  grid-column: 4;
-  grid-row: 2 / 4;
-}
-
-.equipmentPanel {
-  grid-column: 4;
-  grid-row: 4;
-}
-
-.locationPanel {
-  grid-column: 4;
-  grid-row: 5;
+  display: flex;
+  flex-direction: row;
 }
 
 .statsContainer {
@@ -715,6 +678,47 @@
   width: 100%;
   text-align: center;
   margin-top: 0.5vmin;
+}
+
+.moneyTooltipRoot {
+  max-width: 45vmin;
+}
+
+.moneyTooltipTitle {
+  font-size: 1rem;
+  color: wheat;
+  min-width: 10vmin;
+  flex-grow: 1;
+}
+
+.moneyTooltipValue {
+  margin-left: 1vmin;
+  font-size: 1rem;
+  color: yellow;
+}
+
+.moneyTooltipDivider {
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
+
+.moneyTooltipSourceRow {
+  @extend .row;
+  margin-top: 0.5vmin;
+}
+
+.moneyTooltipSource {
+  flex-grow: 1;
+  font-size: 0.8rem;
+  color: gray;
+  text-align: justify;
+}
+
+.moneyTooltipSourceValue {
+  margin-left: 0.5vmin;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 0, 0.5);
 }
 
 .initiativeTooltipRoot {

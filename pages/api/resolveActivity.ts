@@ -48,9 +48,9 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     b.outcomes.forEach((o) => {
       switch (o.type) {
         case ActivityOutcomeType.Gold: {
-          // Increment player gold.
+          // Increment player gold (goes into their personal pile).
           queries.push({
-            query: `UPDATE characters SET money=money+? WHERE id=?`,
+            query: `UPDATE storage SET money=money+? WHERE name=CONCAT('Personal Pile ',CAST(? AS VARCHAR(32)))`,
             values: [o.quantity, o.target_id],
           });
           break;

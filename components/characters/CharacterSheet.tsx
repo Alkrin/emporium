@@ -11,6 +11,7 @@ import ServerAPI, {
   LocationData,
   RepertoireEntryData,
   SpellDefData,
+  StorageData,
 } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import { SavingThrowType, SpellType } from "../../staticData/types/characterClasses";
@@ -61,6 +62,7 @@ interface InjectedProps {
   character: CharacterData;
   repertoire: RepertoireEntryData[];
   allLocations: Dictionary<LocationData>;
+  storages: StorageData[];
   dispatch?: Dispatch;
 }
 
@@ -83,16 +85,33 @@ class ACharacterSheet extends React.Component<Props> {
                 >{`${this.props.character.name}, L${this.props.character.level} ${this.props.character.class_name}`}</div>
               </FittingView>
               <div className={styles.topPanelGrid}>
-                {this.renderStatsPanel()}
-                {this.renderSavingThrowsPanel()}
-                {this.renderSpeedPanel()}
-                {this.renderMoneyPanel()}
-                {this.renderInitiativePanel()}
-                {this.renderXPPanel()}
-                {this.renderHPPanel()}
-                {this.renderEquipmentPanel()}
-                {this.renderCombatPanel()}
-                {this.renderLocationPanel()}
+                <div className={styles.column}>
+                  <div className={styles.row}>
+                    {this.renderStatsPanel()}
+                    <div className={styles.horizontalSpacer} />
+                    {this.renderSavingThrowsPanel()}
+                  </div>
+                  <div className={styles.verticalSpacer} />
+                  {this.renderXPPanel()}
+                </div>
+                <div className={styles.horizontalSpacer} />
+                <div className={styles.column}>
+                  {this.renderSpeedPanel()}
+                  <div className={styles.verticalSpacer} />
+                  {this.renderInitiativePanel()}
+                  <div className={styles.verticalSpacer} />
+                  {this.renderCombatPanel()}
+                </div>
+                <div className={styles.horizontalSpacer} />
+                <div className={styles.column}>
+                  {this.renderMoneyPanel()}
+                  <div className={styles.verticalSpacer} />
+                  {this.renderHPPanel()}
+                  <div className={styles.verticalSpacer} />
+                  {this.renderEquipmentPanel()}
+                  <div className={styles.verticalSpacer} />
+                  {this.renderLocationPanel()}
+                </div>
               </div>
             </div>
             <div className={styles.row}>
@@ -322,7 +341,7 @@ class ACharacterSheet extends React.Component<Props> {
   private renderAbilitiesPanel(): React.ReactNode {
     return (
       <div className={styles.abilitiesPanel}>
-        <div className={styles.row}>
+        <div className={styles.centeredRow}>
           <div className={styles.abilitiesTitle}>{"Abilities and Proficiencies"}</div>
           <div className={styles.abilitiesEditButton} onClick={this.onEditAbilitiesClicked.bind(this)} />
         </div>
@@ -353,7 +372,7 @@ class ACharacterSheet extends React.Component<Props> {
       return (
         <div className={styles.xpPanel}>
           <div className={`${styles.xpContainer} ${levelUpStyle}`}>
-            <div className={styles.row}>
+            <div className={styles.centeredRow}>
               <div className={styles.xpTitle}>XP:</div>
               <div className={styles.xpNumbers}>
                 <div className={`${styles.xpValue} ${levelUpStyle}`}>{this.props.character.xp}</div>
@@ -382,7 +401,7 @@ class ACharacterSheet extends React.Component<Props> {
       return (
         <div className={styles.hpPanel}>
           <div className={`${styles.hpContainer} ${healthStyle}`}>
-            <div className={styles.row}>
+            <div className={styles.centeredRow}>
               <div className={styles.hpTitle}>HP:</div>
               <div className={styles.hpNumbers}>
                 <div className={`${styles.hpValue} ${healthStyle}`}>{this.props.character.hp}</div>
@@ -400,15 +419,21 @@ class ACharacterSheet extends React.Component<Props> {
 
   private renderMoneyPanel(): React.ReactNode {
     if (this.props.character) {
+      const money = this.props.storages.reduce<number>((m, s) => {
+        return m + s.money;
+      }, 0);
       return (
         <div className={styles.moneyPanel}>
-          <div className={styles.moneyContainer}>
-            <div className={styles.row}>
+          <TooltipSource
+            className={styles.moneyContainer}
+            tooltipParams={{ id: "Money", content: this.renderMoneyTooltip.bind(this) }}
+          >
+            <div className={styles.centeredRow}>
               <div className={styles.moneyTitle}>GP:</div>
               <div className={styles.moneyEditButton} onClick={this.onMoneyEditClicked.bind(this)} />
             </div>
-            <div className={styles.moneyValue}>{addCommasToNumber(this.props.character.money, 2)}</div>
-          </div>
+            <div className={styles.moneyValue}>{addCommasToNumber(money, 2)}</div>
+          </TooltipSource>
         </div>
       );
     } else {
@@ -564,11 +589,11 @@ class ACharacterSheet extends React.Component<Props> {
             }}
             className={styles.speedContainer}
           >
-            <div className={styles.row}>
+            <div className={styles.centeredRow}>
               <div className={styles.speedTitle}>Speed</div>
               <div className={styles.speedValue}>{`${speed}' / ${speed * 3}'`}</div>
             </div>
-            <div className={styles.row}>
+            <div className={styles.centeredRow}>
               <div className={styles.speedTitle}>Encumbrance</div>
               <div className={styles.speedValue}>{`${fullStoneEncumbrance}${
                 partialStoneEncumbrance > 0 ? `  ${partialStoneEncumbrance}/6` : ""
@@ -589,7 +614,7 @@ class ACharacterSheet extends React.Component<Props> {
     return (
       <div className={styles.equipmentPanel}>
         <div className={styles.equipmentContainer}>
-          <div className={styles.row}>
+          <div className={styles.centeredRow}>
             <div className={styles.equipmentTitle}>{"Equipment"}</div>
             <div className={styles.equipmentEditButton} onClick={this.onEditEquipmentClicked.bind(this)} />
           </div>
@@ -601,7 +626,7 @@ class ACharacterSheet extends React.Component<Props> {
                 return <BonusTooltip header={"AC"} calc={calc} isFlatValue={true} />;
               },
             }}
-            className={styles.row}
+            className={styles.centeredRow}
           >
             <div className={styles.acTitle}>AC:</div>
             <div className={styles.valueText}>
@@ -843,6 +868,30 @@ class ACharacterSheet extends React.Component<Props> {
     );
   }
 
+  private renderMoneyTooltip(): React.ReactNode {
+    const money = this.props.storages.reduce<number>((m, s) => {
+      return m + s.money;
+    }, 0);
+    return (
+      <div className={styles.moneyTooltipRoot}>
+        <div className={styles.row}>
+          <div className={styles.moneyTooltipTitle}>{"Total GP"}</div>
+          <div className={styles.moneyTooltipValue}>{addCommasToNumber(money)}</div>
+        </div>
+        <div className={styles.moneyTooltipDivider} />
+        {this.props.storages.map((s) => {
+          const storageName = s.name.includes("Personal Pile") ? "Personal Pile" : s.name;
+          return (
+            <div className={styles.moneyTooltipSourceRow} key={s.id}>
+              <div className={styles.moneyTooltipSource}>{storageName}</div>
+              <div className={styles.moneyTooltipSourceValue}>{addCommasToNumber(s.money)}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   private onEditEquipmentClicked(): void {
     this.props.dispatch?.(
       showSubPanel({
@@ -1041,6 +1090,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allItems } = state.items;
   const { spells: allSpells, items: allItemDefs } = state.gameDefs;
   const repertoire = state.repertoires.repertoiresByCharacter[props.characterId] ?? [];
+  const storages = state.storages.storagesByCharacterId[props.characterId] ?? [];
   const allLocations = state.locations.locations;
   return {
     ...props,
@@ -1050,6 +1100,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     character: state.characters.characters[props.characterId ?? 1] ?? null,
     repertoire,
     allLocations,
+    storages,
   };
 }
 

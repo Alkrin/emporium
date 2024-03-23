@@ -15,6 +15,7 @@ import { refetchCharacters } from "../../dataSources/CharactersDataSource";
 import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { AllInjuriesArray } from "../../staticData/injuries/AllInjuries";
 import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../../dataSources/ArmiesDataSource";
+import { refetchStorages } from "../../dataSources/StoragesDataSource";
 
 enum Distro {
   // Even distribution to all participants.  Henchman hierarchy is ignored, and only local participants get a share.
@@ -854,6 +855,7 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
     // Refetch anything that might be altered by an activity resolution.  So... almost everything.
     if (this.props.dispatch) {
       await refetchCharacters(this.props.dispatch);
+      await refetchStorages(this.props.dispatch);
       await refetchActivities(this.props.dispatch);
       await refetchActivityOutcomes(this.props.dispatch);
       await refetchItems(this.props.dispatch);
