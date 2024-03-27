@@ -837,6 +837,46 @@
   color: wheat;
 }
 
+.deductibleContainer {
+  @extend .column;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.deductibleTitle {
+  @extend .normalText;
+  flex-grow: 1;
+}
+
+.deductibleValue {
+  @extend .valueText;
+  margin-top: -0.5vmin;
+  text-align: center;
+}
+
+.deductibleEditButton {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+}
+
+.deductibleTooltipRoot {
+  max-width: 28vmin;
+}
+
+.deductibleExplanation {
+  position: relative;
+  margin-top: 0.5vmin;
+  font-size: 0.8rem;
+  color: rgb(80, 128, 80);
+  font-style: italic;
+}
+
 .moneyContainer {
   @extend .column;
   padding: 0.5vmin 0.5vmin 0;

@@ -1,4 +1,5 @@
 import store from "../redux/store";
+import dateFormat from "dateformat";
 import {
   CharacterData,
   CharacterEquipmentData,
@@ -1227,4 +1228,24 @@ export function getPersonalPile(characterId: number): StorageData {
   }) as StorageData;
 
   return pile;
+}
+
+export function getCXPDeductibleRemainingForCharacter(characterId: number): number {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+
+  const thisMonth = dateFormat(new Date(), "yyyy-mm-01");
+
+  if (
+    // Never had a deductible before.
+    character.cxp_deductible_date.length === 0 ||
+    // Or we've rolled into a new month.
+    character.cxp_deductible_date !== thisMonth
+  ) {
+    // So they should still need to make a full payment.
+    return getCampaignXPDeductibleCapForLevel(character.level);
+  }
+
+  // Otherwise, whatever number is in the record is correct.
+  return character.remaining_cxp_deductible;
 }

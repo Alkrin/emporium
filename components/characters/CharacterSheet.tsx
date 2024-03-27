@@ -1,5 +1,6 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
+import dateFormat from "dateformat";
 import { connect } from "react-redux";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
@@ -29,6 +30,8 @@ import {
   addCommasToNumber,
   getArmorBonusForCharacter,
   getBonusForStat,
+  getCXPDeductibleRemainingForCharacter,
+  getCampaignXPDeductibleCapForLevel,
   getCharacterMaxEncumbrance,
   getCharacterMaxHP,
   getCharacterStat,
@@ -49,6 +52,7 @@ import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
 import { setCharacterLocation } from "../../redux/charactersSlice";
 import { SheetRoot } from "../SheetRoot";
+import { EditCXPDeductibleDialog } from "./EditCXPDeductibleDialog";
 
 interface ReactProps {
   characterId: number;
@@ -93,6 +97,8 @@ class ACharacterSheet extends React.Component<Props> {
                   </div>
                   <div className={styles.verticalSpacer} />
                   {this.renderXPPanel()}
+                  <div className={styles.verticalSpacer} />
+                  {this.renderDeductiblePanel()}
                 </div>
                 <div className={styles.horizontalSpacer} />
                 <div className={styles.column}>
@@ -439,6 +445,75 @@ class ACharacterSheet extends React.Component<Props> {
     } else {
       return null;
     }
+  }
+
+  private renderDeductiblePanel(): React.ReactNode {
+    if (this.props.character) {
+      const remainingDeductible = getCXPDeductibleRemainingForCharacter(this.props.characterId);
+      const maxDeductible = getCampaignXPDeductibleCapForLevel(this.props.character.level);
+      const paidDeductible = maxDeductible - remainingDeductible;
+      return (
+        <div className={styles.deductiblePanel}>
+          <TooltipSource
+            className={styles.deductibleContainer}
+            tooltipParams={{
+              id: "Deductible",
+              content: this.renderDeductibleTooltip.bind(this, maxDeductible, paidDeductible),
+            }}
+          >
+            <div className={styles.centeredRow}>
+              <div className={styles.deductibleTitle}>CXP Deductible:</div>
+              <EditButton className={styles.deductibleEditButton} onClick={this.onDeductibleEditClicked.bind(this)} />
+            </div>
+            <div className={styles.deductibleValue}>
+              {`${addCommasToNumber(paidDeductible, 0)} / ${addCommasToNumber(maxDeductible, 0)}`}
+            </div>
+          </TooltipSource>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  private renderDeductibleTooltip(maxDeductible: number, paidDeductible: number): React.ReactNode {
+    return (
+      <div className={styles.deductibleTooltipRoot}>
+        <div className={styles.moneyTooltipTitle}>{`${dateFormat(new Date(), "mmmm")} Campaign XP Deductible`}</div>
+        <div className={styles.moneyTooltipDivider} />
+
+        <div className={styles.moneyTooltipSourceRow}>
+          <div className={styles.moneyTooltipSource}>{`L${this.props.character.level} Monthly Deductible`}</div>
+          <div className={styles.moneyTooltipSourceValue}>{addCommasToNumber(maxDeductible)}</div>
+        </div>
+        <div className={styles.moneyTooltipSourceRow}>
+          <div className={styles.moneyTooltipSource}>{`Amount Paid`}</div>
+          <div className={styles.moneyTooltipSourceValue}>{addCommasToNumber(paidDeductible, 0)}</div>
+        </div>
+        <div className={styles.moneyTooltipSourceRow}>
+          <div className={styles.moneyTooltipSource}>{`Amount Remaining`}</div>
+          <div className={styles.moneyTooltipSourceValue}>{addCommasToNumber(maxDeductible - paidDeductible, 0)}</div>
+        </div>
+        <div className={styles.moneyTooltipDivider} />
+        <div className={styles.deductibleExplanation}>
+          {
+            "Campaign XP is XP gained from actions other than adventuring, e.g. research.  The first bit of campaign XP earned each month is deducted."
+          }
+        </div>
+      </div>
+    );
+  }
+
+  private onDeductibleEditClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "deductibleEdit",
+        content: () => {
+          return <EditCXPDeductibleDialog />;
+        },
+        escapable: true,
+      })
+    );
   }
 
   private renderLevelBasedSkillsPanel(): React.ReactNode {

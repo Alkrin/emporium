@@ -19,6 +19,7 @@ import {
   isFilterMetAliveStatus,
   isFilterMetLocation,
   isFilterMetOwner,
+  isFilterMetProficiency,
 } from "../FilterDropdowns";
 
 interface State {
@@ -46,6 +47,7 @@ class ACharactersList extends React.Component<Props, State> {
         [FilterType.Owner]: FilterValueAny,
         [FilterType.Location]: FilterValueAny,
         [FilterType.AliveStatus]: FilterValueAliveStatus.Alive,
+        [FilterType.Proficiency]: FilterValueAny,
       },
     };
   }
@@ -62,7 +64,10 @@ class ACharactersList extends React.Component<Props, State> {
           Filters
           <div className={styles.filtersContainer}>
             <FilterDropdowns
-              filterOrder={[[FilterType.Owner, FilterType.AliveStatus], [FilterType.Location]]}
+              filterOrder={[
+                [FilterType.Owner, FilterType.AliveStatus],
+                [FilterType.Location, FilterType.Proficiency],
+              ]}
               filterValues={this.state.filters}
               onFilterChanged={(filters) => {
                 this.setState({ filters });
@@ -140,6 +145,11 @@ class ACharactersList extends React.Component<Props, State> {
 
       // Apply Location filter.
       if (!isFilterMetLocation(this.state.filters, character.location_id)) {
+        return false;
+      }
+
+      // Apply Proficiency filter.
+      if (!isFilterMetProficiency(this.state.filters, character.id)) {
         return false;
       }
 
