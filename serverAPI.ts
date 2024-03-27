@@ -49,6 +49,7 @@ import {
   RequestBody_EditArmy,
   RequestBody_DeleteArmy,
   RequestBody_SetCharacterLocation,
+  RequestBody_SetCharacterRemainingCXPDeductible,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -1153,6 +1154,24 @@ class AServerAPI {
       xp,
     };
     const res = await fetch("/api/setXP", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async setCharacterRemainingCXPDeductible(
+    characterId: number,
+    remainingCXPDeductible: number
+  ): Promise<EditRowResult> {
+    const requestBody: RequestBody_SetCharacterRemainingCXPDeductible = {
+      characterId,
+      remainingCXPDeductible,
+    };
+    const res = await fetch("/api/setCharacterRemainingCXPDeductible", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

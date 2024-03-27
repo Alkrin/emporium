@@ -122,6 +122,11 @@ export interface RequestBody_SetCharacterLocation {
   locationId: number;
 }
 
+export interface RequestBody_SetCharacterRemainingCXPDeductible {
+  characterId: number;
+  remainingCXPDeductible: number;
+}
+
 export interface RequestBody_UpdateProficiencies {
   character_id: number;
   proficiencies: ProficiencyData[];

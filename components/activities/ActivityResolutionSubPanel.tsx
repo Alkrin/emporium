@@ -1,5 +1,6 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
+import dateFormat from "dateformat";
 import { connect } from "react-redux";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
@@ -747,12 +748,13 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
         const recipient = allCharacters[r.characterId];
 
         // See how much is left on the monthly CXP deductible.  Reset it if needed.
+        const thisMonth = dateFormat(new Date(), "yyyy-mm-01");
         let remainingDeductible = recipient.remaining_cxp_deductible;
         if (
           // Never had a deductible before.
           recipient.cxp_deductible_date.length === 0 ||
           // Or we've rolled into a new month.
-          new Date(recipient.cxp_deductible_date).getTime() <= new Date().getTime()
+          recipient.cxp_deductible_date !== thisMonth
         ) {
           remainingDeductible = getCampaignXPDeductibleCapForLevel(recipient.level);
           const o: ActivityOutcomeData = {
@@ -767,7 +769,7 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
         }
 
         // Apply CGP against the deductible first.
-        r.campaignDeductiblePayment = Math.min(remainingDeductible, r.campaignGold);
+        r.campaignDeductiblePayment = Math.min(remainingDeductible, Math.ceil(r.campaignGold));
         // Apply remaining CGP as CXP.
         const cgpAfterDeductible = r.campaignGold - r.campaignDeductiblePayment;
         r.xp += cgpAfterDeductible * r.xpMultiplier;

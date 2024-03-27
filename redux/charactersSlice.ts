@@ -39,6 +39,11 @@ export interface SetHenchmasterParams {
   minionCharacterId: number;
 }
 
+export interface SetRemainingCXPDeductibleParams {
+  characterId: number;
+  remainingCXPDeductible: number;
+}
+
 function buildDefaultCharactersReduxState(): CharactersReduxState {
   const defaults: CharactersReduxState = {
     characters: {},
@@ -77,6 +82,14 @@ export const charactersSlice = createSlice({
         state.characters[action.payload.characterId].xp = action.payload.xp;
       }
     },
+    setCharacterRemainingCXPDeductible: (
+      state: CharactersReduxState,
+      action: PayloadAction<SetRemainingCXPDeductibleParams>
+    ) => {
+      if (state.characters[action.payload.characterId]) {
+        state.characters[action.payload.characterId].remaining_cxp_deductible = action.payload.remainingCXPDeductible;
+      }
+    },
     setEquipment: (state: CharactersReduxState, action: PayloadAction<SetEquipmentParams>) => {
       if (state.characters[action.payload.characterId]) {
         state.characters[action.payload.characterId][action.payload.slot] = action.payload.itemId;
@@ -106,5 +119,6 @@ export const {
   setCharacterXP,
   setEquipment,
   setHenchmaster,
+  setCharacterRemainingCXPDeductible,
   unsetAllHenchmenForCharacter,
 } = charactersSlice.actions;

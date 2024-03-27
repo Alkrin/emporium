@@ -1,11 +1,5 @@
 import store from "../redux/store";
-import {
-  ActivityData,
-  ActivityOutcomeData,
-  ActivityOutcomeType,
-  ActivityParticipant,
-  CharacterData,
-} from "../serverAPI";
+import { ActivityData, ActivityOutcomeData, ActivityOutcomeType, ActivityParticipant } from "../serverAPI";
 import {
   canCharacterFindTraps,
   canCharacterSneak,
@@ -194,12 +188,13 @@ export function generateActivityOutcomes(
       const recipient = allCharacters[r.characterId];
 
       // See how much is left on the monthly CXP deductible.  Reset it if needed.
+      const thisMonth = dateFormat(new Date(), "yyyy-mm-01");
       let remainingDeductible = recipient.remaining_cxp_deductible;
       if (
         // Never had a deductible before.
         recipient.cxp_deductible_date.length === 0 ||
         // Or we've rolled into a new month.
-        new Date(recipient.cxp_deductible_date).getTime() <= new Date().getTime()
+        recipient.cxp_deductible_date !== thisMonth
       ) {
         remainingDeductible = getCampaignXPDeductibleCapForLevel(recipient.level);
         const o: ActivityOutcomeData = {
@@ -214,7 +209,7 @@ export function generateActivityOutcomes(
       }
 
       // Apply CGP against the deductible first.
-      r.campaignDeductiblePayment = Math.min(remainingDeductible, r.campaignGold);
+      r.campaignDeductiblePayment = Math.min(remainingDeductible, Math.ceil(r.campaignGold));
       // Apply remaining CGP as CXP.
       const cgpAfterDeductible = r.campaignGold - r.campaignDeductiblePayment;
       r.xp += cgpAfterDeductible * r.xpMultiplier;
