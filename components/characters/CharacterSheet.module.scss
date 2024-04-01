@@ -993,3 +993,25 @@
   margin-top: 0vmin;
   margin-bottom: 0.4vmin;
 }
+
+.storageContainer {
+  @extend .column;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.storageTitle {
+  @extend .normalText;
+  flex-grow: 1;
+}
+
+.storageEditButton {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+}

@@ -15,7 +15,7 @@ import ServerAPI, {
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import { ItemTooltip } from "../database/ItemTooltip";
 import Draggable from "../Draggable";
-import DraggableHandle from "../DraggableHandle";
+import { DraggableHandle } from "../DraggableHandle";
 import TooltipSource from "../TooltipSource";
 import { CreateItemDialog } from "./CreateItemDialog";
 import styles from "./EditEquipmentSubPanel.module.scss";
@@ -33,7 +33,7 @@ import {
   getMaxBundleItemsForRoom,
   isContainerAInContainerB,
 } from "../../lib/itemUtils";
-import { setEquipment } from "../../redux/charactersSlice";
+import { setEquipment, updateCharacter } from "../../redux/charactersSlice";
 import { SplitBundleDialog } from "./SplitBundleDialog";
 import { EquipmentSlotTag, Tag } from "../../lib/tags";
 import { SpellbookDialog } from "./SpellbookDialog";
@@ -41,6 +41,7 @@ import {
   canCharacterDualWield,
   canCharacterEquipShields,
   canCharacterEquipWeapon,
+  getAllItemAssociatedItemIds,
   getMaxBaseArmorForCharacter,
   getPersonalPile,
   isCharacterDualWielding,
@@ -52,6 +53,7 @@ import { SubPanelCloseButton } from "../SubPanelCloseButton";
 export const DropTypeItem = "DropTypeItem";
 
 const DropTargetPersonalPile = "PersonalPile";
+const DropTargetTrashCan = "TrashCan";
 
 interface ReactProps {}
 
@@ -111,6 +113,9 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
                 return this.renderPersonalPileItemRow(item);
               })}
             </DropTarget>
+            <div className={styles.trashCanTitle}>{"Trash Can"}</div>
+            <DropTarget dropId={DropTargetTrashCan} dropTypes={[DropTypeItem]} className={styles.trashCanRoot} />
+            <div className={styles.trashCanWarning}>{"Items placed in the Trash Can will be destroyed."}</div>
           </>
         )}
         <div className={styles.inventoriesTitle}>Inventories</div>
@@ -367,6 +372,10 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     if (containerTargetId) {
       const containerId = +containerTargetId.slice(9);
       this.handleItemDroppedOnContainer(containerId, item, def);
+    }
+
+    if (dropTargetIds.includes(DropTargetTrashCan)) {
+      this.handleItemDroppedOnTrashCan(item, def);
     }
   }
 
@@ -979,6 +988,38 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     }
   }
 
+  private async handleItemDroppedOnTrashCan(item: ItemData, def: ItemDefData): Promise<void> {
+    const itemIdsToDelete: number[] = getAllItemAssociatedItemIds(item.id);
+
+    const result = await ServerAPI.deleteItems(itemIdsToDelete);
+    if ("error" in result) {
+      this.showServerErrorToaster(result.error);
+    } else {
+      if (this.props.dispatch) {
+        // Local item update, instead of refetching EVERY ITEM EVER.
+        itemIdsToDelete.forEach((itemId) => {
+          this.props.dispatch?.(deleteItem(itemId));
+        });
+
+        // If the item was equipped, unequip it.
+        let equipSlot: keyof CharacterEquipmentData | null = null;
+        CharacterEquipmentSlots.forEach((key) => {
+          if (!equipSlot) {
+            const equippedItemId: number = this.props.character[key];
+            if (equippedItemId === item.id) {
+              equipSlot = key;
+              const updatedCharacter: CharacterData = {
+                ...this.props.character,
+                [equipSlot]: 0,
+              };
+              this.props.dispatch?.(updateCharacter(updatedCharacter));
+            }
+          }
+        });
+      }
+    }
+  }
+
   private showServerErrorToaster(errorText: string): void {
     this.props.dispatch?.(
       showToaster({
@@ -1000,9 +1041,9 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
   private onCreateItemsClicked(): void {
     this.props.dispatch?.(
       showModal({
-        id: "CreatItemsDialog",
+        id: "CreateItemsDialog",
         content: () => {
-          return <CreateItemDialog />;
+          return <CreateItemDialog storageId={getPersonalPile(this.props.character.id).id} />;
         },
         escapable: true,
       })

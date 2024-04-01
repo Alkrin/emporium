@@ -6,7 +6,7 @@ import { RootState } from "../../redux/store";
 import { CharacterData, ItemData, ItemDefData, StorageData } from "../../serverAPI";
 import styles from "./InventoriesList.module.scss";
 import Draggable from "../Draggable";
-import DraggableHandle from "../DraggableHandle";
+import { DraggableHandle } from "../DraggableHandle";
 import TooltipSource from "../TooltipSource";
 import { ItemTooltip } from "../database/ItemTooltip";
 import { DropTypeItem } from "./EditEquipmentSubPanel";

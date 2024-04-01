@@ -15,6 +15,7 @@ import {
   ServerActivityData,
   ServerItemDefData,
   ServerSpellDefData,
+  StorageData,
   TroopData,
   TroopDefData,
   TroopInjuryData,
@@ -72,6 +73,15 @@ export interface RequestBody_DeleteCharacter {
   item_ids: number[];
 }
 
+export interface RequestBody_DeleteStorage {
+  id: number;
+  item_ids: number[];
+}
+
+export interface RequestBody_DeleteItems {
+  item_ids: number[];
+}
+
 export interface RequestBody_SetHenchmaster {
   masterCharacterId: number;
   minionCharacterId: number;
@@ -82,15 +92,6 @@ export interface RequestBody_CreateItem {
   count: number;
   container_id: number;
   storage_id: number;
-}
-
-export interface RequestBody_CreateStorage {
-  name: string;
-  capacity: number;
-  location_id: number;
-  owner_id: number;
-  group_ids: number[];
-  money: number;
 }
 
 export interface RequestBody_EncryptString {
@@ -221,6 +222,9 @@ export type RequestBody_EditMapHex = MapHexData;
 // SpellDef
 export type RequestBody_CreateSpellDef = Omit<ServerSpellDefData, "id">;
 export type RequestBody_EditSpellDef = ServerSpellDefData;
+// Storage
+export type RequestBody_CreateStorage = Omit<StorageData, "id">;
+export type RequestBody_EditStorage = StorageData;
 // Troop
 export type RequestBody_CreateTroop = Omit<TroopData, "id">;
 export type RequestBody_EditTroop = TroopData;

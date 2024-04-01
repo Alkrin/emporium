@@ -8,6 +8,24 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     const queries: SQLQuery[] = [];
 
+    // Any characters that were in this location need to be de-located.
+    queries.push({
+      query: `UPDATE characters SET location_id=0 WHERE location_id=?`,
+      values: [b.id],
+    });
+
+    // Any storages that were in this location need to be de-located.
+    queries.push({
+      query: `UPDATE storage SET location_id=0 WHERE location_id=?`,
+      values: [b.id],
+    });
+
+    // Any armies that were in this location need to be de-located.
+    queries.push({
+      query: `UPDATE armies SET location_id=0 WHERE location_id=?`,
+      values: [b.id],
+    });
+
     // Erase type-specific data.
     queries.push({
       query: `DELETE FROM location_cities WHERE location_id=?`,

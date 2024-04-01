@@ -6,12 +6,14 @@ import { StorageData } from "../serverAPI";
 interface StorageReduxState {
   allStorages: Dictionary<StorageData>;
   storagesByCharacterId: Dictionary<StorageData[]>;
+  activeStorageId: number;
 }
 
 function buildDefaultStorageReduxState(): StorageReduxState {
   const defaults: StorageReduxState = {
     allStorages: {},
     storagesByCharacterId: {},
+    activeStorageId: -1,
   };
   return defaults;
 }
@@ -60,7 +62,22 @@ export const storagesSlice = createSlice({
         state.storagesByCharacterId[storage.owner_id][index] = storage;
       }
     },
+    setActiveStorageId: (state: StorageReduxState, action: PayloadAction<number>) => {
+      state.activeStorageId = action.payload;
+    },
+    deleteStorage: (state: StorageReduxState, action: PayloadAction<number>) => {
+      if (state.allStorages[action.payload]) {
+        // Take it out of storagesByCharacterId.
+        state.storagesByCharacterId[state.allStorages[action.payload].owner_id] = state.storagesByCharacterId[
+          state.allStorages[action.payload].owner_id
+        ].filter((storage) => {
+          return storage.id !== action.payload;
+        });
+        // Take it out of allStorages.
+        delete state.allStorages[action.payload];
+      }
+    },
   },
 });
 
-export const { updateStorages, updateStorage } = storagesSlice.actions;
+export const { updateStorages, updateStorage, setActiveStorageId, deleteStorage } = storagesSlice.actions;

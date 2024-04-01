@@ -1,0 +1,99 @@
+.root {
+  position: relative;
+  width: 30vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.headerContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-size: 1rem;
+}
+
+.newStorageButton {
+  box-shadow: inset 0 0 0 2px orange;
+  font-size: 1.5rem;
+  padding: 1vmin 0.5vmin;
+  color: wheat;
+  align-self: flex-end;
+  cursor: pointer;
+
+  &:hover {
+    color: red;
+  }
+}
+
+.filtersContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: #222;
+  padding: 0.5vmin;
+}
+
+.listContainer {
+  position: relative;
+  margin-top: 1vmin;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.listRow {
+  margin-bottom: 0.5vmin;
+  padding: 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+
+  &.selected {
+    box-shadow: inset 0 0 0 2px red;
+  }
+
+  &.owned {
+    background-color: rgba(255, 0, 255, 0.1);
+  }
+}
+
+.listName {
+  font-size: 1rem;
+  color: wheat;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.editButton {
+  width: 1.16rem;
+  height: 1.16rem;
+}

@@ -17,7 +17,7 @@ import TooltipSource from "../TooltipSource";
 import { setHenchmaster } from "../../redux/charactersSlice";
 import { showToaster } from "../../redux/toastersSlice";
 import Draggable from "../Draggable";
-import DraggableHandle from "../DraggableHandle";
+import { DraggableHandle } from "../DraggableHandle";
 import BonusTooltip from "../BonusTooltip";
 
 const DropTypeMinion = "Minion";

@@ -10,7 +10,6 @@ import ServerAPI, { CharacterData, ItemData, ItemDefData, StorageData } from "..
 import { ItemTooltip } from "../database/ItemTooltip";
 import { SearchableDefList } from "../database/SearchableDefList";
 import styles from "./CreateItemDialog.module.scss";
-import { getPersonalPile, getPersonalPileName } from "../../lib/characterUtils";
 
 interface State {
   isSaving: boolean;
@@ -18,7 +17,9 @@ interface State {
   numToCreate: number;
 }
 
-interface ReactProps {}
+interface ReactProps {
+  storageId: number;
+}
 
 interface InjectedProps {
   character: CharacterData;
@@ -83,15 +84,13 @@ class ACreateItemDialog extends React.Component<Props, State> {
   private async onCreateClicked(): Promise<void> {
     this.setState({ isSaving: true });
 
-    const personalPile = getPersonalPile(this.props.character.id);
-
     // Create the item.  Add it to the personal pile.  Show a toaster.
     const newItem: ItemData = {
       id: 0,
       def_id: this.state.selectedItemId,
       count: this.state.numToCreate,
       container_id: 0,
-      storage_id: personalPile.id,
+      storage_id: this.props.storageId,
     };
 
     let toasterTitle: string = "";

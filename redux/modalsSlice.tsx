@@ -50,8 +50,8 @@ export const modalsSlice = createSlice({
     },
     hideModal: (state: ModalsState) => {
       if (state.modals.length > 0) {
-        // Removes the first item from the array.
-        state.modals.shift();
+        // Removes the last item from the array.
+        state.modals.pop();
       }
     },
   },

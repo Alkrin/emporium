@@ -32,7 +32,7 @@ interface InjectedProps {
 
 type Props = ReactProps & InjectedProps;
 
-class DraggableHandle extends React.Component<Props> {
+class ADraggableHandle extends React.Component<Props> {
   // Storing these here since consumers only care about the delta.
   private dragStartX: number = 0;
   private dragStartY: number = 0;
@@ -168,4 +168,4 @@ function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
   };
 }
 
-export default connect(mapStateToProps)(DraggableHandle);
+export const DraggableHandle = connect(mapStateToProps)(ADraggableHandle);
