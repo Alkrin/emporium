@@ -38,6 +38,7 @@ import {
   getInitiativeBonusForCharacter,
   getMeleeDamageCalculationsForCharacter,
   getMeleeHitCalculationsForCharacter,
+  getPersonalPile,
   getRangedDamageCalculationsForCharacter,
   getRangedHitCalculationsForCharacter,
   getSavingThrowBonusForCharacter,
@@ -53,6 +54,7 @@ import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
 import { setCharacterLocation } from "../../redux/charactersSlice";
 import { SheetRoot } from "../SheetRoot";
 import { EditCXPDeductibleDialog } from "./EditCXPDeductibleDialog";
+import { EditStoragesSubPanel } from "./EditStoragesSubPanel";
 
 interface ReactProps {
   characterId: number;
@@ -115,6 +117,8 @@ class ACharacterSheet extends React.Component<Props> {
                   {this.renderHPPanel()}
                   <div className={styles.verticalSpacer} />
                   {this.renderEquipmentPanel()}
+                  <div className={styles.verticalSpacer} />
+                  {this.renderStoragePanel()}
                   <div className={styles.verticalSpacer} />
                   {this.renderLocationPanel()}
                 </div>
@@ -447,6 +451,21 @@ class ACharacterSheet extends React.Component<Props> {
     }
   }
 
+  private renderStoragePanel(): React.ReactNode {
+    if (this.props.character) {
+      return (
+        <div className={styles.storageContainer}>
+          <div className={styles.centeredRow}>
+            <div className={styles.storageTitle}>Storage</div>
+            <EditButton className={styles.storageEditButton} onClick={this.onEditStorageClicked.bind(this)} />
+          </div>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   private renderDeductiblePanel(): React.ReactNode {
     if (this.props.character) {
       const remainingDeductible = getCXPDeductibleRemainingForCharacter(this.props.characterId);
@@ -501,6 +520,18 @@ class ACharacterSheet extends React.Component<Props> {
           }
         </div>
       </div>
+    );
+  }
+
+  private onEditStorageClicked(): void {
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "EditStorages",
+        content: () => {
+          return <EditStoragesSubPanel />;
+        },
+        escapable: true,
+      })
     );
   }
 
@@ -579,7 +610,7 @@ class ACharacterSheet extends React.Component<Props> {
       showModal({
         id: "moneyEdit",
         content: () => {
-          return <EditMoneyDialog />;
+          return <EditMoneyDialog storageId={getPersonalPile(this.props.characterId).id} />;
         },
         escapable: true,
       })
@@ -1134,7 +1165,7 @@ class ACharacterSheet extends React.Component<Props> {
           return (
             <SelectLocationDialog
               preselectedLocationId={this.props.character.location_id}
-              onSelectionConfirmed={async (locationId) => {
+              onSelectionConfirmed={async (locationId: number) => {
                 const result = await ServerAPI.setCharacterLocation(this.props.character.id, locationId);
 
                 if ("error" in result) {

@@ -50,6 +50,9 @@ import {
   RequestBody_DeleteArmy,
   RequestBody_SetCharacterLocation,
   RequestBody_SetCharacterRemainingCXPDeductible,
+  RequestBody_EditStorage,
+  RequestBody_DeleteStorage,
+  RequestBody_DeleteItems,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -112,12 +115,8 @@ export interface StorageData {
   capacity: number;
   location_id: number;
   owner_id: number;
-  group_ids: number[];
   money: number;
 }
-export type ServerStorageData = Omit<StorageData, "group_ids"> & {
-  group_ids: string;
-};
 
 export interface SpellbookEntryData {
   id: number;
@@ -723,27 +722,8 @@ class AServerAPI {
       },
     });
 
-    const data: ServerError | ServerStorageData[] = await res.json();
-
-    if ("error" in data) {
-      return data;
-    } else {
-      // group_ids is stored in the db as comma separated strings, but in Redux as a number array,
-      // so we have to convert before passing the results along.
-      const storageData: StorageData[] = [];
-      data.forEach((storage) => {
-        storageData.push({
-          ...storage,
-          group_ids:
-            storage.group_ids.length > 0
-              ? storage.group_ids.split(",").map((str) => {
-                  return +str;
-                })
-              : [],
-        });
-      });
-      return storageData;
-    }
+    const data: ServerError | StorageData[] = await res.json();
+    return data;
   }
 
   async fetchSpellDefs(): Promise<SpellDefsResult> {
@@ -883,6 +863,20 @@ class AServerAPI {
     return await res.json();
   }
 
+  async deleteItems(item_ids: number[]): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteItems = {
+      item_ids,
+    };
+    const res = await fetch("/api/deleteItems", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
   async createItemDef(def: ItemDefData): Promise<InsertRowResult> {
     const requestBody: RequestBody_CreateItemDef = {
       ...def,
@@ -905,6 +899,35 @@ class AServerAPI {
       ...storage,
     };
     const res = await fetch("/api/createStorage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editStorage(storage: StorageData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditStorage = {
+      ...storage,
+    };
+    const res = await fetch("/api/editStorage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteStorage(storageId: number, itemIds: number[]): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteStorage = {
+      id: storageId,
+      item_ids: itemIds,
+    };
+    const res = await fetch("/api/deleteStorage", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

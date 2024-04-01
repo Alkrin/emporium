@@ -118,6 +118,62 @@ export function getCharacterMaxEncumbrance(character: CharacterData): Stones {
   return [20 + getBonusForStat(character.strength), 0];
 }
 
+export function getAllItemAssociatedItemIds(itemId: number): number[] {
+  const redux = store.getState();
+
+  // Start by getting items directly contained in the storage.
+  const finalItemIds: number[] = [itemId];
+
+  // Contained items.
+  // Breadth First Search to find all nested items.
+  let activeItemIds: number[] = [...finalItemIds];
+  while (activeItemIds.length > 0) {
+    // Find all items contained inside the active items.
+    const containedItems = Object.values(redux.items.allItems).filter((item) => {
+      return activeItemIds.includes(item.container_id);
+    });
+    // Save this layer of items and dig down to the next.
+    activeItemIds = containedItems.map((i) => {
+      return i.id;
+    });
+    finalItemIds.push(...activeItemIds);
+  }
+
+  return finalItemIds;
+}
+
+export function getAllStorageAssociatedItemIds(storageId: number): number[] {
+  const redux = store.getState();
+  const storage = redux.storages.allStorages[storageId];
+  if (!storage) {
+    return [];
+  }
+
+  // Start by getting items directly contained in the storage.
+  const finalItemIds: number[] = Object.values(redux.items.allItems)
+    .filter((item) => {
+      return item.storage_id === storageId;
+    })
+    .map((item2) => item2.id);
+
+  // Contained items.
+  // Breadth First Search to find all nested items.
+  let activeItemIds: number[] = [...finalItemIds];
+  while (activeItemIds.length > 0) {
+    // Find all items contained inside the active items.
+    const containedItems = Object.values(redux.items.allItems).filter((item) => {
+      return activeItemIds.includes(item.container_id);
+    });
+    // Save this layer of items and dig down to the next.
+    activeItemIds = containedItems.map((i) => {
+      return i.id;
+    });
+    finalItemIds.push(...activeItemIds);
+  }
+
+  return finalItemIds;
+}
+
 export function getAllCharacterAssociatedItemIds(characterId: number, excludeStorages?: boolean): number[] {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
@@ -135,16 +191,7 @@ export function getAllCharacterAssociatedItemIds(characterId: number, excludeSto
     }
   });
 
-  if (!excludeStorages) {
-    // All items in storages owned by the character.
-    Object.values(redux.items.allItems).forEach((item) => {
-      if (item.storage_id && redux.storages.allStorages[item.storage_id]?.owner_id === characterId) {
-        finalItemIds.push(item.id);
-      }
-    });
-  }
-
-  // Contained items.
+  // Contained items (e.g. arrows in your equipped quiver).
   // Breadth First Search to find all nested items.
   let activeItemIds: number[] = [...finalItemIds];
   while (activeItemIds.length > 0) {
@@ -157,6 +204,14 @@ export function getAllCharacterAssociatedItemIds(characterId: number, excludeSto
       return i.id;
     });
     finalItemIds.push(...activeItemIds);
+  }
+
+  if (!excludeStorages) {
+    // All items in storages owned by the character.
+    redux.storages.storagesByCharacterId[characterId].forEach((storage) => {
+      const containedItemIds = getAllStorageAssociatedItemIds(storage.id);
+      finalItemIds.push(...containedItemIds);
+    });
   }
 
   return finalItemIds;

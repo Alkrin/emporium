@@ -15,7 +15,7 @@ import {
   ProficiencySource,
 } from "../../staticData/types/abilitiesAndProficiencies";
 import Draggable from "../Draggable";
-import DraggableHandle from "../DraggableHandle";
+import { DraggableHandle } from "../DraggableHandle";
 import DropTarget from "../DropTarget";
 import TooltipSource from "../TooltipSource";
 import styles from "./EditProficienciesSubPanel.module.scss";

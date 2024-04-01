@@ -7,6 +7,7 @@ import ServerAPI, { CharacterData, StorageData } from "../../serverAPI";
 import styles from "./EditMoneyDialog.module.scss";
 import { getPersonalPile } from "../../lib/characterUtils";
 import { updateStorage } from "../../redux/storageSlice";
+import { Dictionary } from "../../lib/dictionary";
 
 interface State {
   gpTotal: number;
@@ -14,10 +15,12 @@ interface State {
   saving: boolean;
 }
 
-interface ReactProps {}
+interface ReactProps {
+  storageId: number;
+}
 
 interface InjectedProps {
-  character: CharacterData;
+  storage: StorageData;
   dispatch?: Dispatch;
 }
 
@@ -28,7 +31,7 @@ class AEditMoneyDialog extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      gpTotal: -1,
+      gpTotal: props.storage?.money ?? 0,
       gpDelta: 0,
       saving: false,
     };
@@ -76,19 +79,13 @@ class AEditMoneyDialog extends React.Component<Props, State> {
     );
   }
 
-  componentDidMount(): void {
-    this.setState({ gpTotal: getPersonalPile(this.props.character.id).money });
-  }
-
   private async onSetMoneyTotalClicked(): Promise<void> {
     if (this.state.saving) {
       return;
     }
     this.setState({ saving: true });
 
-    const personalPile = getPersonalPile(this.props.character.id);
-
-    const result = await ServerAPI.setMoney(personalPile.id, this.state.gpTotal);
+    const result = await ServerAPI.setMoney(this.props.storage.id, this.state.gpTotal);
 
     if ("error" in result) {
       this.props.dispatch?.(
@@ -103,7 +100,7 @@ class AEditMoneyDialog extends React.Component<Props, State> {
       );
     } else {
       const data: StorageData = {
-        ...getPersonalPile(this.props.character.id),
+        ...this.props.storage,
         money: result.newMoneyValue,
       };
       this.props.dispatch?.(updateStorage(data));
@@ -118,12 +115,10 @@ class AEditMoneyDialog extends React.Component<Props, State> {
     }
     this.setState({ saving: true });
 
-    const personalPile = getPersonalPile(this.props.character.id);
-
     const result = await ServerAPI.setMoney(
-      personalPile.id,
+      this.props.storage.id,
       // It is possible to have negative money, for bookkeeping purposes.
-      personalPile.money + this.state.gpDelta
+      this.props.storage.money + this.state.gpDelta
     );
 
     if ("error" in result) {
@@ -139,7 +134,7 @@ class AEditMoneyDialog extends React.Component<Props, State> {
       );
     } else {
       const data: StorageData = {
-        ...getPersonalPile(this.props.character.id),
+        ...this.props.storage,
         money: result.newMoneyValue,
       };
       this.props.dispatch?.(updateStorage(data));
@@ -154,10 +149,10 @@ class AEditMoneyDialog extends React.Component<Props, State> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const character = state.characters.characters[state.characters.activeCharacterId];
+  const storage = state.storages.allStorages[props.storageId];
   return {
     ...props,
-    character,
+    storage,
   };
 }
 

@@ -10,7 +10,7 @@ import { Dictionary } from "../../lib/dictionary";
 import TooltipSource from "../TooltipSource";
 import { SpellTooltip } from "../database/SpellTooltip";
 import Draggable from "../Draggable";
-import DraggableHandle from "../DraggableHandle";
+import { DraggableHandle } from "../DraggableHandle";
 import DropTarget from "../DropTarget";
 import { addSpellbookEntry, removeSpellbookEntry } from "../../redux/spellbooksSlice";
 

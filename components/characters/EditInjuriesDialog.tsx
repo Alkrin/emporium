@@ -8,7 +8,7 @@ import styles from "./EditInjuriesDialog.module.scss";
 import { showToaster } from "../../redux/toastersSlice";
 import TooltipSource from "../TooltipSource";
 import Draggable from "../Draggable";
-import DraggableHandle from "../DraggableHandle";
+import { DraggableHandle } from "../DraggableHandle";
 import DropTarget from "../DropTarget";
 import { AbilityOrProficiency, ProficiencySource } from "../../staticData/types/abilitiesAndProficiencies";
 import { AllInjuries, AllInjuriesArray } from "../../staticData/injuries/AllInjuries";
