@@ -18,6 +18,7 @@ import { activitiesSlice } from "./activitiesSlice";
 import { mapsSlice } from "./mapsSlice";
 import { locationsSlice } from "./locationsSlice";
 import { armiesSlice } from "./armiesSlice";
+import { structuresSlice } from "./structuresSlice";
 
 const store = configureStore({
   reducer: {
@@ -36,6 +37,7 @@ const store = configureStore({
     repertoires: repertoiresSlice.reducer,
     spellbooks: spellbooksSlice.reducer,
     storages: storagesSlice.reducer,
+    structures: structuresSlice.reducer,
     subPanels: subPanelsSlice.reducer,
     toasters: toastersSlice.reducer,
     tooltip: tooltipSlice.reducer,

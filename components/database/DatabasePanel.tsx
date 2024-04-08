@@ -9,6 +9,7 @@ import { DatabaseSpellsSubPanel } from "./DatabaseSpellsSubPanel";
 import styles from "./DatabasePanel.module.scss";
 import { DatabaseEquipmentSetsSubPanel } from "./DatabaseEquipmentSetsSubPanel";
 import { DatabaseTroopsSubPanel } from "./DatabaseTroopsSubPanel";
+import { DatabaseStructureComponentsSubPanel } from "./DatabaseStructureComponentsSubPanel";
 
 interface ReactProps {}
 
@@ -30,6 +31,9 @@ class ADatabasePanel extends React.Component<Props> {
         </div>
         <div className={styles.dataButton} onClick={this.onSpellsClicked.bind(this)}>
           Spells
+        </div>
+        <div className={styles.dataButton} onClick={this.onStructureComponentsClicked.bind(this)}>
+          Structure Components
         </div>
         <div className={styles.dataButton} onClick={this.onTroopsClicked.bind(this)}>
           Troops
@@ -69,6 +73,18 @@ class ADatabasePanel extends React.Component<Props> {
         id: "DatabaseSpells",
         content: () => {
           return <DatabaseSpellsSubPanel />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onStructureComponentsClicked(): void {
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "DatabaseStructureComponents",
+        content: () => {
+          return <DatabaseStructureComponentsSubPanel />;
         },
         escapable: true,
       })

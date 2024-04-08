@@ -1,0 +1,160 @@
+.root {
+  width: 50vmin;
+  border-radius: 1vmin;
+  border: 2px solid white;
+  background-color: #222;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  color: wheat;
+  font-size: 1.2rem;
+  text-align: right;
+}
+
+.textField {
+  position: relative;
+  font-size: 1.1rem;
+}
+
+.contentRow {
+  @extend .row;
+  position: relative;
+  align-items: center;
+  margin-top: 1vmin;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
+}
+
+.titleLabel {
+  position: relative;
+  margin-top: 0.5vmin;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
+  font-size: 1.5rem;
+  color: wheat;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+}
+
+.nameLabel {
+  @extend .label;
+  position: relative;
+  width: 10vmin;
+}
+
+.nameTextField {
+  @extend .textField;
+  margin-left: 1vmin;
+  width: 30vmin;
+}
+
+.descriptionLabel {
+  @extend .label;
+  position: relative;
+  width: 10vmin;
+}
+
+.descriptionTextField {
+  @extend .textField;
+  margin-left: 1vmin;
+  width: 30vmin;
+  height: 10vmin;
+  font-size: 0.8rem;
+  resize: none;
+}
+
+.locationLabel {
+  @extend .label;
+  position: relative;
+  width: 10vmin;
+}
+
+.locationTextField {
+  @extend .textField;
+  margin-left: 1vmin;
+  width: 30vmin;
+}
+
+.buttonRow {
+  @extend .row;
+  margin-top: 1.5vmin;
+  margin-bottom: 1.5vmin;
+  position: relative;
+  justify-content: center;
+}
+
+.saveButton {
+  position: relative;
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+}
+
+.deleteButton {
+  position: relative;
+  margin-left: 2vmin;
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+}
+
+.savingVeil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  pointer-events: all;
+}
+
+.savingLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: wheat;
+  font-size: 3rem;
+}
+
+.editButton {
+  width: 2.5vmin;
+  height: 2.5vmin;
+  margin-left: 1vmin;
+}

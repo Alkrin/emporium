@@ -6,6 +6,7 @@ import {
   updateEquipmentSets,
   updateItemDefs,
   updateSpellDefs,
+  updateStructureComponentDefs,
   updateTroopDefs,
 } from "../redux/gameDefsSlice";
 import { showModal } from "../redux/modalsSlice";
@@ -96,6 +97,26 @@ export async function refetchEquipmentSetItems(dispatch: Dispatch): Promise<void
   }
 }
 
+export async function refetchStructureComponentDefs(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchStructureComponentDefs();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "StructureComponentDef Fetch Error",
+        content: {
+          title: "Error!",
+          message: "Failed to fetch StructureComponentDef data",
+        },
+        escapable: true,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe defs that no longer exist.
+    dispatch(updateStructureComponentDefs(result));
+  }
+}
+
 export async function refetchTroopDefs(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchTroopDefs();
 
@@ -123,6 +144,7 @@ export class GameDefsDataSource extends ExternalDataSource {
       await refetchEquipmentSetItems(this.dispatch);
       await refetchItemDefs(this.dispatch);
       await refetchSpellDefs(this.dispatch);
+      await refetchStructureComponentDefs(this.dispatch);
       await refetchTroopDefs(this.dispatch);
     }
   }

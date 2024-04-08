@@ -16,6 +16,9 @@ import {
   ServerItemDefData,
   ServerSpellDefData,
   StorageData,
+  StructureComponentData,
+  StructureComponentDefData,
+  StructureData,
   TroopData,
   TroopDefData,
   TroopInjuryData,
@@ -225,6 +228,15 @@ export type RequestBody_EditSpellDef = ServerSpellDefData;
 // Storage
 export type RequestBody_CreateStorage = Omit<StorageData, "id">;
 export type RequestBody_EditStorage = StorageData;
+// Structure
+export type RequestBody_CreateStructure = Omit<StructureData, "id">;
+export type RequestBody_EditStructure = StructureData;
+// StructureComponent
+export type RequestBody_CreateStructureComponent = Omit<StructureComponentData, "id">;
+export type RequestBody_EditStructureComponent = StructureComponentData;
+// StructureComponentDef
+export type RequestBody_CreateStructureComponentDef = Omit<StructureComponentDefData, "id">;
+export type RequestBody_EditStructureComponentDef = StructureComponentDefData;
 // Troop
 export type RequestBody_CreateTroop = Omit<TroopData, "id">;
 export type RequestBody_EditTroop = TroopData;

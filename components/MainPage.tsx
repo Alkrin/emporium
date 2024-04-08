@@ -24,6 +24,7 @@ import {
   refetchEquipmentSets,
   refetchItemDefs,
   refetchSpellDefs,
+  refetchStructureComponentDefs,
   refetchTroopDefs,
 } from "../dataSources/GameDefsDataSource";
 import { refetchItems } from "../dataSources/ItemsDataSource";
@@ -38,6 +39,9 @@ import { ToolsPanel } from "./tools/ToolsPanel";
 import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../dataSources/ArmiesDataSource";
 import { setActiveArmyId } from "../redux/armiesSlice";
 import { ArmiesPanel } from "./armies/ArmiesPanel";
+import { refetchStructureComponents, refetchStructures } from "../dataSources/StructuresDataSource";
+import { setActiveStructureId } from "../redux/structuresSlice";
+import { StructuresPanel } from "./structures/StructuresPanel";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -47,7 +51,7 @@ interface InjectedProps {
 
 type Props = ReactProps & InjectedProps;
 
-type MainPanelId = "Characters" | "Armies" | "World" | "Activities" | "Tools" | "Database";
+type MainPanelId = "Characters" | "Armies" | "Structures" | "World" | "Activities" | "Tools" | "Database";
 
 interface State {
   activePanel: MainPanelId;
@@ -69,6 +73,7 @@ class AMainPage extends React.Component<Props, State> {
         <div className={`${styles.contentWrapper} ${sizeClass}`}>
           {this.state.activePanel === "Characters" && <CharactersPanel />}
           {this.state.activePanel === "Armies" && <ArmiesPanel />}
+          {this.state.activePanel === "Structures" && <StructuresPanel />}
           {this.state.activePanel === "World" && <WorldPanel />}
           {this.state.activePanel === "Activities" && <ActivitiesPanel />}
           {this.state.activePanel === "Tools" && <ToolsPanel />}
@@ -111,6 +116,18 @@ class AMainPage extends React.Component<Props, State> {
               }}
             >
               <img className={styles.panelSelectorImage} src={"/images/Armies.png"} />
+            </TooltipSource>
+            <TooltipSource
+              className={`${styles.panelSelector} ${this.state.activePanel === "Structures" ? styles.selected : ""}`}
+              tooltipParams={{ id: "StructuresPanel", content: "Structures" }}
+              onMouseDown={() => {
+                this.props.dispatch?.(setActiveStructureId(0));
+                requestAnimationFrame(() => {
+                  this.setState({ activePanel: "Structures" });
+                });
+              }}
+            >
+              <img className={styles.panelSelectorImage} src={"/images/Structures.png"} />
             </TooltipSource>
             <TooltipSource
               className={`${styles.panelSelector} ${this.state.activePanel === "Activities" ? styles.selected : ""}`}
@@ -198,6 +215,12 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchSpellbooks(this.props.dispatch);
                 this.setState({ nowLoading: "Storages" });
                 await refetchStorages(this.props.dispatch);
+                this.setState({ nowLoading: "Structure Component Defs" });
+                await refetchStructureComponentDefs(this.props.dispatch);
+                this.setState({ nowLoading: "Structure Components" });
+                await refetchStructureComponents(this.props.dispatch);
+                this.setState({ nowLoading: "Structures" });
+                await refetchStructures(this.props.dispatch);
                 this.setState({ nowLoading: "Troop Defs" });
                 await refetchTroopDefs(this.props.dispatch);
                 this.setState({ nowLoading: "Troops" });

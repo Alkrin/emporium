@@ -1,7 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { Dictionary } from "../lib/dictionary";
-import { EquipmentSetData, EquipmentSetItemData, ItemDefData, SpellDefData, TroopDefData } from "../serverAPI";
+import {
+  EquipmentSetData,
+  EquipmentSetItemData,
+  ItemDefData,
+  SpellDefData,
+  StructureComponentDefData,
+  TroopDefData,
+} from "../serverAPI";
 
 export interface UpdateItemsForEquipmentSetParams {
   set_id: number;
@@ -14,6 +21,7 @@ interface GameDefsReduxState {
   equipmentSetItemsBySet: Dictionary<EquipmentSetItemData[]>;
   items: Dictionary<ItemDefData>;
   spells: Dictionary<SpellDefData>;
+  structureComponents: Dictionary<StructureComponentDefData>;
   troops: Dictionary<TroopDefData>;
 }
 
@@ -24,6 +32,7 @@ function buildDefaultGameDefsReduxState(): GameDefsReduxState {
     equipmentSetItemsBySet: {},
     items: {},
     spells: {},
+    structureComponents: {},
     troops: {},
   };
   return defaults;
@@ -123,6 +132,18 @@ export const gameDefsSlice = createSlice({
         });
       });
     },
+    updateStructureComponentDefs: (state: GameDefsReduxState, action: PayloadAction<StructureComponentDefData[]>) => {
+      state.structureComponents = {};
+      action.payload.forEach((scdd) => {
+        state.structureComponents[scdd.id] = scdd;
+      });
+    },
+    updateStructureComponentDef: (state: GameDefsReduxState, action: PayloadAction<StructureComponentDefData>) => {
+      state.structureComponents[action.payload.id] = action.payload;
+    },
+    deleteStructureComponentDef: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.structureComponents[action.payload];
+    },
     updateTroopDefs: (state: GameDefsReduxState, action: PayloadAction<TroopDefData[]>) => {
       state.troops = {};
       action.payload.forEach((tdd) => {
@@ -150,6 +171,9 @@ export const {
   updateEquipmentSet,
   updateItemsForEquipmentSet,
   deleteEquipmentSet,
+  updateStructureComponentDefs,
+  updateStructureComponentDef,
+  deleteStructureComponentDef,
   updateTroopDefs,
   updateTroopDef,
   deleteTroopDef,
