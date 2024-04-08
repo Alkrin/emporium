@@ -194,12 +194,12 @@
 
 .infoRow {
   @extend .row;
-  margin-bottom: 0.5vmin;
+  margin-bottom: -0.5vmin;
+  justify-content: center;
 }
 
 .infoLabel {
   position: relative;
-  width: 10vmin;
   text-align: right;
   color: white;
   font-size: 1rem;
@@ -212,21 +212,24 @@
   font-size: 1rem;
 }
 
-.troopLabel {
+.componentLabel {
   position: relative;
   color: wheat;
   font-size: 0.9rem;
   text-align: center;
-  border-bottom: 1px solid wheat;
 }
 
-.gearContainer {
+.horizontalLine {
   position: relative;
-  max-height: 4.5vmin;
-  flex-shrink: 0;
+  margin-top: 0.5vmin;
   margin-bottom: 0.5vmin;
-  border-bottom: 1px solid wheat;
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
 
+.descriptionContainer {
+  position: relative;
   overflow-y: auto;
 
   /* width */
@@ -246,10 +249,8 @@
   }
 }
 
-.gearLabel {
+.descriptionLabel {
   position: relative;
-  margin-top: 0.5vmin;
-  margin-bottom: 0.5vmin;
   width: 100%;
   color: gray;
   font-size: 0.8rem;

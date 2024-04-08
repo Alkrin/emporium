@@ -53,6 +53,12 @@ import {
   RequestBody_EditStorage,
   RequestBody_DeleteStorage,
   RequestBody_DeleteItems,
+  RequestBody_CreateStructure,
+  RequestBody_EditStructure,
+  RequestBody_CreateStructureComponent,
+  RequestBody_EditStructureComponent,
+  RequestBody_CreateStructureComponentDef,
+  RequestBody_EditStructureComponentDef,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -478,6 +484,31 @@ export interface TroopInjuryData {
   recovery_date: string;
 }
 
+export interface StructureData {
+  id: number;
+  name: string;
+  description: string;
+  /** Structures are owned by Characters, if they are owned at all. */
+  owner_id: number;
+  location_id: number;
+}
+
+export interface StructureComponentDefData {
+  id: number;
+  name: string;
+  description: string;
+  /** Base construction cost in GP. */
+  cost: number;
+}
+
+export interface StructureComponentData {
+  id: number;
+  structure_id: number;
+  component_id: number;
+  /** Partial components are permitted.  e.g. Stone walls are counted by 100' segments, but you can have 50' of wall if quantity is 0.5. */
+  quantity: number;
+}
+
 export function StringToNumbers(s: string): number[] {
   return s.split(",").map((s2) => {
     return +s2;
@@ -517,6 +548,9 @@ export type EquipmentSetItemsResult = ServerError | EquipmentSetItemData[];
 export type ItemDefsResult = ServerError | ItemDefData[];
 export type ItemsResult = ServerError | ItemData[];
 export type UsersResult = ServerError | UserData[];
+export type StructureComponentDefsResult = ServerError | StructureComponentDefData[];
+export type StructureComponentsResult = ServerError | StructureComponentData[];
+export type StructuresResult = ServerError | StructureData[];
 export type StoragesResult = ServerError | StorageData[];
 export type SpellDefsResult = ServerError | SpellDefData[];
 export type ProficienciesResult = ServerError | ProficiencyData[];
@@ -711,6 +745,42 @@ class AServerAPI {
     });
 
     const data: ServerError | RepertoireEntryData[] = await res.json();
+    return data;
+  }
+
+  async fetchStructureComponentDefs(): Promise<StructureComponentDefsResult> {
+    const res = await fetch("/api/fetchStructureComponentDefs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | StructureComponentDefData[] = await res.json();
+    return data;
+  }
+
+  async fetchStructureComponents(): Promise<StructureComponentsResult> {
+    const res = await fetch("/api/fetchStructureComponents", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | StructureComponentData[] = await res.json();
+    return data;
+  }
+
+  async fetchStructures(): Promise<StructuresResult> {
+    const res = await fetch("/api/fetchStructures", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | StructureData[] = await res.json();
     return data;
   }
 
@@ -1827,6 +1897,132 @@ class AServerAPI {
       id,
     };
     const res = await fetch("/api/deleteTroopInjury", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createStructure(data: StructureData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateStructure = {
+      ...data,
+    };
+    const res = await fetch("/api/createStructure", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editStructure(data: StructureData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditStructure = {
+      ...data,
+    };
+    const res = await fetch("/api/editStructure", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteStructure(id: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteStructure", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createStructureComponent(data: StructureComponentData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateStructureComponent = {
+      ...data,
+    };
+    const res = await fetch("/api/createStructureComponent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editStructureComponent(data: StructureComponentData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditStructureComponent = {
+      ...data,
+    };
+    const res = await fetch("/api/editStructureComponent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteStructureComponent(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteStructureComponent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createStructureComponentDef(data: StructureComponentDefData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateStructureComponentDef = {
+      ...data,
+    };
+    const res = await fetch("/api/createStructureComponentDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editStructureComponentDef(data: StructureComponentDefData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditStructureComponentDef = {
+      ...data,
+    };
+    const res = await fetch("/api/editStructureComponentDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteStructureComponentDef(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteStructureComponentDef", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

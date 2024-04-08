@@ -1,5 +1,5 @@
 .root {
-  width: 57vmin;
+  width: 28vmin;
   border-radius: 1vmin;
   border: 2px solid white;
   background-color: #222;
@@ -66,7 +66,7 @@
 .countLabel {
   @extend .label;
   position: relative;
-  margin-left: -6vmin;
+  margin-left: 0vmin;
 }
 
 .countTextField {
@@ -84,9 +84,29 @@
   justify-content: center;
 }
 
-.createButton {
+.saveButton {
   position: relative;
   padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+}
+
+.deleteButton {
+  position: relative;
+  padding: 0.5vmin;
+  margin-left: 1vmin;
   box-sizing: border-box;
   background-color: black;
   border: solid 2px #aaa;
@@ -122,69 +142,12 @@
   font-size: 3rem;
 }
 
-.listContainer {
-  position: relative;
-  width: 30vmin;
-  height: 23vmin;
-  box-sizing: border-box;
-  padding-top: 0.5vmin;
-  padding-left: 0.5vmin;
-  padding-right: 0.5vmin;
-  border-radius: 0.5vmin;
-  box-shadow: inset 0 0 0 2px wheat;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: scroll;
-
-  /* width */
-  &::-webkit-scrollbar {
-    width: 1.5vmin;
-  }
-
-  /* Track */
-  &::-webkit-scrollbar-track {
-    background-color: black;
-    box-shadow: inset 0 0 0 2px wheat;
-  }
-
-  /* Handle */
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(245, 222, 179, 0.5);
-  }
-}
-
-.listRow {
-  margin-bottom: 0.25vmin;
-  padding: 0.25vmin;
-  background-color: rgba(255, 255, 255, 0.1);
-  font-size: 0.8rem;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  &:hover {
-    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
-  }
-
-  &.selected {
-    box-shadow: inset 0 0 0 2px red;
-  }
-}
-
-.listName {
-  font-size: 0.8rem;
-  color: wheat;
-  text-align: left;
-  width: 15vmin;
-  flex-grow: 1;
-}
-
 .infoPanel {
   @extend .column;
   position: relative;
   box-sizing: border-box;
   margin-left: 1vmin;
+  margin-right: 1vmin;
   padding: 1vmin;
   border-radius: 0.5vmin;
   border: 2px solid wheat;
@@ -194,7 +157,7 @@
 
 .infoRow {
   @extend .row;
-  margin-bottom: 0.5vmin;
+  margin-bottom: -0.5vmin;
 }
 
 .infoLabel {
@@ -212,21 +175,24 @@
   font-size: 1rem;
 }
 
-.troopLabel {
+.componentLabel {
   position: relative;
   color: wheat;
   font-size: 0.9rem;
   text-align: center;
-  border-bottom: 1px solid wheat;
 }
 
-.gearContainer {
+.horizontalLine {
   position: relative;
-  max-height: 4.5vmin;
-  flex-shrink: 0;
+  margin-top: 0.5vmin;
   margin-bottom: 0.5vmin;
-  border-bottom: 1px solid wheat;
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
 
+.descriptionContainer {
+  position: relative;
   overflow-y: auto;
 
   /* width */
@@ -246,10 +212,8 @@
   }
 }
 
-.gearLabel {
+.descriptionLabel {
   position: relative;
-  margin-top: 0.5vmin;
-  margin-bottom: 0.5vmin;
   width: 100%;
   color: gray;
   font-size: 0.8rem;

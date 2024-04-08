@@ -147,7 +147,8 @@
   position: relative;
   font-size: 1rem;
   color: yellow;
-  width: 3vmin;
+  width: 3.8vmin;
+  flex-shrink: 0;
 }
 
 .listName {
@@ -156,6 +157,27 @@
   color: wheat;
   text-align: left;
   flex-grow: 1;
+}
+
+.listConLabel {
+  position: relative;
+  margin-left: 39.4vmin;
+  margin-top: -1vmin;
+  margin-bottom: -1vmin;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  color: wheat;
+}
+
+.listConBonus {
+  position: relative;
+  font-size: 1rem;
+  color: lime;
+  flex-shrink: 0;
+
+  &.negative {
+    color: red;
+  }
 }
 
 .injuryButton {

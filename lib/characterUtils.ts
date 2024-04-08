@@ -57,6 +57,10 @@ export function getBonusForStat(value: number): StatBonus {
   return 0;
 }
 
+export function getBonusString(value: number): string {
+  return `${value > 0 ? "+" : ""}${value}`;
+}
+
 export function getCharacterXPMultiplier(character: CharacterData): number {
   let smallestPrimaryStat = 18;
   const characterClass = AllClasses[character.class_name];

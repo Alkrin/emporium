@@ -36,6 +36,7 @@ import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../../dataSources/ArmiesDataSource";
 import { refetchActivities } from "../../dataSources/ActivitiesDataSource";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
+import { getBonusForStat, getBonusString } from "../../lib/characterUtils";
 
 interface State {
   isSaving: boolean;
@@ -144,6 +145,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
             2
           )}`}</div>
         </div>
+        {this.state.adventurerParticipants.length > 0 && <div className={styles.listConLabel}>{"CON"}</div>}
         <div className={styles.participantListContainer}>
           {this.state.adventurerParticipants.map(this.renderAdventurerParticipantRow.bind(this))}
           {this.state.armyParticipants.map(this.renderArmyParticipantRow.bind(this))}
@@ -210,10 +212,14 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     const adventurer = this.props.allCharacters[p.characterId];
     const isInjured = p.pendingInjuryIds.length > 0;
     const isDead = p.isPendingDeath;
+    const conBonus = getBonusForStat(adventurer.constitution);
     return (
       <div className={styles.listRow} key={`adventurer${index}`}>
         <div className={styles.listIndex}>{index + 1}</div>
         <div className={styles.listName}>{adventurer.name}</div>
+        <div className={`${styles.listConBonus} ${conBonus < 0 ? styles.negative : ""}`}>
+          {getBonusString(conBonus)}
+        </div>
         <div
           className={`${styles.injuryButton} ${isInjured ? styles.injured : ""}`}
           onClick={this.onAdventurerInjuryClicked.bind(this, p)}
