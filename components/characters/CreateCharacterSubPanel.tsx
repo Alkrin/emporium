@@ -32,6 +32,7 @@ import { RequestField_StartingEquipmentData } from "../../serverRequestTypes";
 import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
+import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
 
 interface State {
   nameText: string;
@@ -734,6 +735,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       cxp_deductible_date: "",
       dead: false,
       location_id: this.state.locationId,
+      maintenance_paid: 0,
+      maintenance_date: getFirstOfThisMonthDateString(),
       // EquipmentData values are ignored when editing a character.
       ...emptyEquipmentData,
     };
