@@ -34,6 +34,7 @@ import { getAllItemAssociatedItemIds, getPersonalPile } from "../../lib/characte
 import { setActiveStorageId } from "../../redux/storageSlice";
 import { StoragesList } from "./StoragesList";
 import { EditMoneyDialog } from "./EditMoneyDialog";
+import { getStorageDisplayName } from "../../lib/storageUtils";
 
 export const DropTypeItem = "DropTypeItem";
 
@@ -44,7 +45,6 @@ interface ReactProps {}
 
 interface InjectedProps {
   character: CharacterData;
-  allCharacters: Dictionary<CharacterData>;
   allStorages: Dictionary<StorageData>;
   allItemDefs: Dictionary<ItemDefData>;
   allItems: Dictionary<ItemData>;
@@ -68,9 +68,7 @@ class AEditStoragesSubPanel extends React.Component<Props> {
     }
 
     const selectedStorage = this.props.allStorages[this.props.activeStorageId];
-    const storageName = selectedStorage.name.includes("Personal Pile")
-      ? `${this.props.allCharacters[selectedStorage.owner_id].name}'s Personal Pile`
-      : selectedStorage.name;
+    const storageName = getStorageDisplayName(this.props.activeStorageId);
 
     return (
       <div className={styles.root}>
@@ -635,7 +633,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const character = state.characters.characters[state.characters.activeCharacterId];
-  const { characters } = state.characters;
   const { allStorages, activeStorageId } = state.storages;
   const allItemDefs = state.gameDefs.items;
   const { allItems } = state.items;
@@ -644,7 +641,6 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   return {
     ...props,
     character,
-    allCharacters: characters,
     allStorages,
     allItemDefs,
     allItems,

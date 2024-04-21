@@ -13,6 +13,7 @@ import {
 } from "./characterUtils";
 import { Dictionary } from "./dictionary";
 import dateFormat from "dateformat";
+import { getFirstOfThisMonthDateString } from "./stringUtils";
 
 export enum RewardDistro {
   // Even distribution to all participants.  Henchman hierarchy is ignored, and only local participants get a share.
@@ -188,7 +189,7 @@ export function generateActivityOutcomes(
       const recipient = allCharacters[r.characterId];
 
       // See how much is left on the monthly CXP deductible.  Reset it if needed.
-      const thisMonth = dateFormat(new Date(), "yyyy-mm-01");
+      const thisMonth = getFirstOfThisMonthDateString();
       let remainingDeductible = recipient.remaining_cxp_deductible;
       if (
         // Never had a deductible before.

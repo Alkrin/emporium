@@ -1,5 +1,7 @@
 import store from "../redux/store";
 import { StructureComponentData } from "../serverAPI";
+import { MaintenanceStatus } from "./characterUtils";
+import { getFirstOfThisMonthDateString } from "./stringUtils";
 
 export function getStructureValue(structureId: number): number {
   const redux = store.getState();
@@ -20,4 +22,17 @@ export function getStructureMonthlyMaintenance(structureId: number): number {
   const structureValue = getStructureValue(structureId);
   // Maintenance is 0.5% of structure value.
   return structureValue * 0.005;
+}
+
+export function getMaintenanceStatusForStructure(structureId: number): MaintenanceStatus {
+  const redux = store.getState();
+  const structure = redux.structures.structures[structureId];
+
+  const thisMonth = getFirstOfThisMonthDateString();
+
+  if (structure.maintenance_date === thisMonth) {
+    return MaintenanceStatus.Paid;
+  } else {
+    return MaintenanceStatus.Unpaid;
+  }
 }

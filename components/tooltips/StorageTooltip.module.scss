@@ -1,0 +1,53 @@
+.column {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+.root {
+  @extend .column;
+  width: 30vmin;
+}
+
+.header {
+  @extend .row;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5vmin;
+  border-bottom: 1px solid wheat;
+}
+
+.title {
+  position: relative;
+  color: white;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.money {
+  position: relative;
+  margin-left: 1vmin;
+  color: yellow;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.location {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  font-size: 0.8rem;
+  color: #888855;
+}
+
+.owner {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  font-size: 0.8rem;
+  color: #888855;
+}

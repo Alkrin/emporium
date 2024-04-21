@@ -35,7 +35,9 @@ import {
   getCharacterMaxEncumbrance,
   getCharacterMaxHP,
   getCharacterStat,
+  getCostOfLivingForCharacterLevel,
   getInitiativeBonusForCharacter,
+  getMaintenanceStatusForCharacter,
   getMeleeDamageCalculationsForCharacter,
   getMeleeHitCalculationsForCharacter,
   getPersonalPile,
@@ -55,6 +57,7 @@ import { setCharacterLocation } from "../../redux/charactersSlice";
 import { SheetRoot } from "../SheetRoot";
 import { EditCXPDeductibleDialog } from "./EditCXPDeductibleDialog";
 import { EditStoragesSubPanel } from "./EditStoragesSubPanel";
+import { EditCostOfLivingDialog } from "./EditCostOfLivingDialog";
 
 interface ReactProps {
   characterId: number;
@@ -104,6 +107,8 @@ class ACharacterSheet extends React.Component<Props> {
                 </div>
                 <div className={styles.horizontalSpacer} />
                 <div className={styles.column}>
+                  {this.renderCostOfLivingPanel()}
+                  <div className={styles.verticalSpacer} />
                   {this.renderSpeedPanel()}
                   <div className={styles.verticalSpacer} />
                   {this.renderInitiativePanel()}
@@ -433,7 +438,7 @@ class ACharacterSheet extends React.Component<Props> {
         return m + s.money;
       }, 0);
       return (
-        <div className={styles.moneyPanel}>
+        <div>
           <TooltipSource
             className={styles.moneyContainer}
             tooltipParams={{ id: "Money", content: this.renderMoneyTooltip.bind(this) }}
@@ -444,6 +449,28 @@ class ACharacterSheet extends React.Component<Props> {
             </div>
             <div className={styles.moneyValue}>{addCommasToNumber(money, 2)}</div>
           </TooltipSource>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  private renderCostOfLivingPanel(): React.ReactNode {
+    if (this.props.character) {
+      const maintenanceStatus = getMaintenanceStatusForCharacter(this.props.characterId);
+      return (
+        <div>
+          <div className={styles.panelContainer}>
+            <div className={styles.centeredRow}>
+              <div className={styles.panelTitle}>Cost of Living</div>
+              <EditButton className={styles.panelEditButton} onClick={this.onCostOfLivingEditClicked.bind(this)} />
+            </div>
+            <div className={styles.costOfLivingValue}>
+              {addCommasToNumber(getCostOfLivingForCharacterLevel(this.props.character.level), 2)}
+            </div>
+            <div className={`${styles.maintenanceStatus} ${styles[maintenanceStatus]}`}>{maintenanceStatus}</div>
+          </div>
         </div>
       );
     } else {
@@ -611,6 +638,18 @@ class ACharacterSheet extends React.Component<Props> {
         id: "moneyEdit",
         content: () => {
           return <EditMoneyDialog storageId={getPersonalPile(this.props.characterId).id} />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onCostOfLivingEditClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "costOfLivingEdit",
+        content: () => {
+          return <EditCostOfLivingDialog />;
         },
         escapable: true,
       })

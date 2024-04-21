@@ -84,6 +84,10 @@
   &.owned {
     background-color: rgba(255, 0, 255, 0.1);
   }
+
+  &.dead {
+    background-color: black;
+  }
 }
 
 .listName {

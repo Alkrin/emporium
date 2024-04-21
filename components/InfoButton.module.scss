@@ -1,0 +1,9 @@
+.root {
+  position: relative;
+  width: 2vmin;
+  height: 2vmin;
+  flex-shrink: 0;
+  background-image: url("/images/InfoIcon.png");
+  background-size: contain;
+  cursor: inspect;
+}

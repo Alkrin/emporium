@@ -1,6 +1,8 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { SQLQuery, executeTransaction } from "../../lib/db";
 import { RequestBody_CreateOrEditCharacter, RequestField_StartingEquipmentData } from "../../serverRequestTypes";
+import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
+import { getCostOfLivingForCharacterLevel } from "../../lib/characterUtils";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
@@ -10,7 +12,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     // Create the new character.
     queries.push({
-      query: `INSERT INTO characters (user_id,name,gender,portrait_url,class_name,level,strength,intelligence,wisdom,dexterity,constitution,charisma,xp,hp,hit_dice,location_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      query: `INSERT INTO characters (user_id,name,gender,portrait_url,class_name,level,strength,intelligence,wisdom,dexterity,constitution,charisma,xp,hp,hit_dice,location_id,maintenance_date,maintenance_paid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       values: [
         b.user_id,
         b.name,
@@ -28,6 +30,9 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         b.hp,
         b.hit_dice,
         b.location_id,
+        // A fresh character starts out marked as "maintenance fully paid for this month", since you should have paid that amount to hire them.
+        getFirstOfThisMonthDateString(),
+        getCostOfLivingForCharacterLevel(b.level),
       ],
     });
     queries.push({

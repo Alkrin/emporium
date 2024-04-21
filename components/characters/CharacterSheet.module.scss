@@ -1015,3 +1015,52 @@
   width: 2vmin;
   height: 2vmin;
 }
+
+.panelContainer {
+  @extend .column;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.panelTitle {
+  @extend .normalText;
+  flex-grow: 1;
+}
+
+.panelEditButton {
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+}
+
+.costOfLivingValue {
+  @extend .valueText;
+  margin-top: -0.5vmin;
+  text-align: center;
+}
+
+.maintenanceStatus {
+  @extend .normalText;
+  text-align: center;
+  font-weight: bolder;
+  font-style: italic;
+
+  &.Unknown {
+    color: red;
+  }
+  &.Unpaid {
+    color: red;
+  }
+  &.Underpaid {
+    color: yellow;
+  }
+  &.Paid {
+    color: green;
+  }
+  &.Overpaid {
+    color: lime;
+  }
+}

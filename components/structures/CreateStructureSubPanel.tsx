@@ -61,6 +61,7 @@ class ACreateStructureSubPanel extends React.Component<Props, State> {
           description: "",
           location_id: 0,
           owner_id: props.currentUserId,
+          maintenance_date: "",
         },
         isSaving: false,
       };

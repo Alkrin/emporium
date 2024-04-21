@@ -18,8 +18,14 @@ import { showSubPanel } from "../../redux/subPanelsSlice";
 import { CreateStructureComponentSubPanel } from "./CreateStructureComponentSubPanel";
 import { EditStructureComponentSubPanel } from "./EditStructureComponentSubPanel";
 import { SheetRoot } from "../SheetRoot";
-import { getStructureMonthlyMaintenance, getStructureValue } from "../../lib/structureUtils";
+import {
+  getMaintenanceStatusForStructure,
+  getStructureMonthlyMaintenance,
+  getStructureValue,
+} from "../../lib/structureUtils";
 import { updateStructure } from "../../redux/structuresSlice";
+import dateFormat from "dateformat";
+import { PayStructureMaintenanceDialog } from "./PayStructureMaintenanceDialog";
 
 interface ReactProps {
   structureId: number;
@@ -69,6 +75,7 @@ class AStructureSheet extends React.Component<Props> {
   }
 
   private renderSummary(): React.ReactNode {
+    const maintenanceStatus = getMaintenanceStatusForStructure(this.props.structureId);
     return (
       <div className={styles.summaryRoot}>
         <div className={styles.row}>
@@ -77,6 +84,12 @@ class AStructureSheet extends React.Component<Props> {
             <div className={styles.valueText}>{this.props.location?.name ?? "---"}</div>
             <EditButton className={styles.editButton} onClick={this.onEditLocationClicked.bind(this)} />
           </div>
+          <div className={styles.halfWidth}>
+            <div className={styles.normalText}>{`Monthly Maintenance:\xa0`}</div>
+            <div className={styles.valueText}>
+              {getStructureMonthlyMaintenance(this.props.structureId).toFixed(2)}gp
+            </div>
+          </div>
         </div>
         <div className={styles.row}>
           <div className={styles.halfWidth}>
@@ -84,10 +97,9 @@ class AStructureSheet extends React.Component<Props> {
             <div className={styles.valueText}>{getStructureValue(this.props.structureId).toFixed(2)}gp</div>
           </div>
           <div className={styles.halfWidth}>
-            <div className={styles.normalText}>{`Monthly Maintenance:\xa0`}</div>
-            <div className={styles.valueText}>
-              {getStructureMonthlyMaintenance(this.props.structureId).toFixed(2)}gp
-            </div>
+            <div className={styles.normalText}>{`${dateFormat(new Date(), "mmmm yyyy")} Fees:\xa0`}</div>
+            <div className={`${styles.maintenanceStatus} ${styles[maintenanceStatus]}`}>{maintenanceStatus}</div>
+            <EditButton className={styles.editButton} onClick={this.onPayMaintenanceClicked.bind(this)} />
           </div>
         </div>
       </div>
@@ -126,6 +138,18 @@ class AStructureSheet extends React.Component<Props> {
           </div>
         </div>
       </div>
+    );
+  }
+
+  private onPayMaintenanceClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "payMaintenance",
+        content: () => {
+          return <PayStructureMaintenanceDialog />;
+        },
+        escapable: true,
+      })
     );
   }
 

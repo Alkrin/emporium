@@ -59,6 +59,9 @@ import {
   RequestBody_EditStructureComponent,
   RequestBody_CreateStructureComponentDef,
   RequestBody_EditStructureComponentDef,
+  RequestBody_PayCharacterMaintenance,
+  RequestBody_PayArmyMaintenance,
+  RequestBody_PayStructureMaintenance,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -210,6 +213,8 @@ export interface CharacterData extends CharacterEquipmentData {
   cxp_deductible_date: string;
   dead: boolean;
   location_id: number;
+  maintenance_date: string;
+  maintenance_paid: number;
 }
 
 export interface ProficiencyData {
@@ -468,6 +473,8 @@ export interface ArmyData {
   name: string;
   location_id: number;
   user_id: number;
+  /** The last month for which maintenance has been paid. */
+  maintenance_date: string;
 }
 
 export interface TroopData {
@@ -491,6 +498,8 @@ export interface StructureData {
   /** Structures are owned by Characters, if they are owned at all. */
   owner_id: number;
   location_id: number;
+  /** The last month for which maintenance has been paid. */
+  maintenance_date: string;
 }
 
 export interface StructureComponentDefData {
@@ -2023,6 +2032,54 @@ class AServerAPI {
       id,
     };
     const res = await fetch("/api/deleteStructureComponentDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async payCharacterMaintenance(characterId: number, storageId: number, gp: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_PayCharacterMaintenance = {
+      characterId,
+      storageId,
+      gp,
+    };
+    const res = await fetch("/api/payCharacterMaintenance", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async payArmyMaintenance(armyId: number, storageId: number, gp: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_PayArmyMaintenance = {
+      armyId,
+      storageId,
+      gp,
+    };
+    const res = await fetch("/api/payArmyMaintenance", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async payStructureMaintenance(structureId: number, storageId: number, gp: number): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_PayStructureMaintenance = {
+      structureId,
+      storageId,
+      gp,
+    };
+    const res = await fetch("/api/payStructureMaintenance", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

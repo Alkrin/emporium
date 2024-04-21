@@ -235,3 +235,26 @@
   font-size: 0.7rem;
   color: #880;
 }
+
+.maintenanceStatus {
+  @extend .normalText;
+  text-align: center;
+  font-weight: bolder;
+  font-style: italic;
+
+  &.Unknown {
+    color: red;
+  }
+  &.Unpaid {
+    color: red;
+  }
+  &.Underpaid {
+    color: yellow;
+  }
+  &.Paid {
+    color: green;
+  }
+  &.Overpaid {
+    color: lime;
+  }
+}
