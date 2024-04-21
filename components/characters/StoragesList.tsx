@@ -21,6 +21,7 @@ import { showModal } from "../../redux/modalsSlice";
 import { CreateStorageDialog } from "./CreateStorageDialog";
 import DropTarget from "../DropTarget";
 import { DropTypeItem } from "./EditStoragesSubPanel";
+import { getStorageDisplayName } from "../../lib/storageUtils";
 
 interface State {
   filters: FilterValues;
@@ -86,10 +87,9 @@ class AStoragesList extends React.Component<Props, State> {
   private renderStorageRow(storage: StorageData, index: number): React.ReactNode {
     const selectedClass = storage.id === this.props.activeStorageId ? styles.selected : "";
     const ownedClass = storage.owner_id === this.props.activeCharacterId ? styles.owned : "";
+    const deadClass = this.props.characters[storage.owner_id].dead ? styles.dead : "";
 
-    const name = storage.name.includes("Personal Pile")
-      ? `${this.props.characters[storage.owner_id].name}'s Personal Pile`
-      : storage.name;
+    const name = getStorageDisplayName(storage.id);
 
     const draggableId = `Storage${storage.id}`;
 
@@ -97,7 +97,7 @@ class AStoragesList extends React.Component<Props, State> {
       <DropTarget
         dropId={draggableId}
         dropTypes={[DropTypeItem]}
-        className={`${styles.listRow} ${selectedClass} ${ownedClass}`}
+        className={`${styles.listRow} ${selectedClass} ${ownedClass} ${deadClass}`}
         key={`storageRow${index}`}
         onClick={this.onStorageRowClick.bind(this, storage.id)}
       >
@@ -171,14 +171,20 @@ class AStoragesList extends React.Component<Props, State> {
         }
       }
 
-      // And an alphy sort when the others don't apply.
-      const nameA = storageA.name.includes("Personal Pile")
-        ? `${this.props.characters[storageA.owner_id].name}'s Personal Pile`
-        : storageA.name;
+      // Dead characters' storages go last.
+      const aDead = this.props.characters[storageA.owner_id].dead;
+      const bDead = this.props.characters[storageB.owner_id].dead;
+      if (aDead !== bDead) {
+        if (aDead) {
+          return 1;
+        } else {
+          return -1;
+        }
+      }
 
-      const nameB = storageB.name.includes("Personal Pile")
-        ? `${this.props.characters[storageB.owner_id].name}'s Personal Pile`
-        : storageB.name;
+      // And an alphy sort when the others don't apply.
+      const nameA = getStorageDisplayName(storageA.id);
+      const nameB = getStorageDisplayName(storageB.id);
 
       return nameA.localeCompare(nameB);
     });

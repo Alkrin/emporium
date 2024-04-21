@@ -1,6 +1,8 @@
 import store from "../redux/store";
 import { TroopData } from "../serverAPI";
 import dateFormat from "dateformat";
+import { MaintenanceStatus } from "./characterUtils";
+import { getFirstOfThisMonthDateString } from "./stringUtils";
 
 export function getTroopAvailableUnitCount(troop: TroopData, currentDateOverride?: string): number {
   const redux = store.getState();
@@ -98,4 +100,17 @@ export function getArmyTotalWages(armyID: number): number {
   });
 
   return wages;
+}
+
+export function getMaintenanceStatusForArmy(armyId: number): MaintenanceStatus {
+  const redux = store.getState();
+  const army = redux.armies.armies[armyId];
+
+  const thisMonth = getFirstOfThisMonthDateString();
+
+  if (army.maintenance_date === thisMonth) {
+    return MaintenanceStatus.Paid;
+  } else {
+    return MaintenanceStatus.Unpaid;
+  }
 }

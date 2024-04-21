@@ -43,6 +43,8 @@ import { ProficiencySeduction } from "../staticData/proficiencies/ProficiencySed
 import { ProficiencyLayOnHands } from "../staticData/proficiencies/ProficiencyLayOnHands";
 import { ProficiencyFamiliar } from "../staticData/proficiencies/ProficiencyFamiliar";
 import { InjuryBlind } from "../staticData/injuries/InjuryBlind";
+import { getFirstOfThisMonthDateString } from "./stringUtils";
+import { getAllStorageAssociatedItemIds } from "./storageUtils";
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
 export function getBonusForStat(value: number): StatBonus {
@@ -127,38 +129,6 @@ export function getAllItemAssociatedItemIds(itemId: number): number[] {
 
   // Start by getting items directly contained in the storage.
   const finalItemIds: number[] = [itemId];
-
-  // Contained items.
-  // Breadth First Search to find all nested items.
-  let activeItemIds: number[] = [...finalItemIds];
-  while (activeItemIds.length > 0) {
-    // Find all items contained inside the active items.
-    const containedItems = Object.values(redux.items.allItems).filter((item) => {
-      return activeItemIds.includes(item.container_id);
-    });
-    // Save this layer of items and dig down to the next.
-    activeItemIds = containedItems.map((i) => {
-      return i.id;
-    });
-    finalItemIds.push(...activeItemIds);
-  }
-
-  return finalItemIds;
-}
-
-export function getAllStorageAssociatedItemIds(storageId: number): number[] {
-  const redux = store.getState();
-  const storage = redux.storages.allStorages[storageId];
-  if (!storage) {
-    return [];
-  }
-
-  // Start by getting items directly contained in the storage.
-  const finalItemIds: number[] = Object.values(redux.items.allItems)
-    .filter((item) => {
-      return item.storage_id === storageId;
-    })
-    .map((item2) => item2.id);
 
   // Contained items.
   // Breadth First Search to find all nested items.
@@ -1282,7 +1252,7 @@ export function getPersonalPile(characterId: number): StorageData {
   const redux = store.getState();
 
   const pileName = getPersonalPileName(characterId);
-  const pile = redux.storages.storagesByCharacterId[characterId].find((storage) => {
+  const pile = redux.storages.storagesByCharacterId[characterId]?.find((storage) => {
     return storage.name === pileName;
   }) as StorageData;
 
@@ -1293,7 +1263,7 @@ export function getCXPDeductibleRemainingForCharacter(characterId: number): numb
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
 
-  const thisMonth = dateFormat(new Date(), "yyyy-mm-01");
+  const thisMonth = getFirstOfThisMonthDateString();
 
   if (
     // Never had a deductible before.
@@ -1307,4 +1277,72 @@ export function getCXPDeductibleRemainingForCharacter(characterId: number): numb
 
   // Otherwise, whatever number is in the record is correct.
   return character.remaining_cxp_deductible;
+}
+
+const livingCostsByLevel: number[] = [
+  12, // L0
+  25,
+  50,
+  100,
+  200,
+  400, // L5
+  800,
+  1600,
+  3000,
+  7250,
+  12000, // L10
+  32000,
+  50000,
+  135000,
+  350000, // L14
+];
+export function getCostOfLivingForCharacterLevel(level: number): number {
+  return livingCostsByLevel[level] ?? 0;
+}
+
+export enum MaintenanceStatus {
+  Unknown = "Unknown",
+  Unpaid = "Unpaid",
+  Underpaid = "Underpaid",
+  Paid = "Paid",
+  Overpaid = "Overpaid",
+}
+export function getMaintenanceStatusForCharacter(characterId: number): MaintenanceStatus {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+
+  const thisMonth = getFirstOfThisMonthDateString();
+
+  const cost = getCostOfLivingForCharacterLevel(character.level);
+  const paid = thisMonth === character.maintenance_date ? character.maintenance_paid : 0;
+
+  if (paid === 0) {
+    return MaintenanceStatus.Unpaid;
+  }
+  if (paid < cost) {
+    return MaintenanceStatus.Underpaid;
+  }
+  if (paid === cost) {
+    return MaintenanceStatus.Paid;
+  }
+  if (paid > cost) {
+    return MaintenanceStatus.Overpaid;
+  }
+
+  return MaintenanceStatus.Unknown;
+}
+
+export function getApparentLevelForCharacter(characterId: number): number {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+
+  const lastAmountPaid = character.maintenance_paid;
+  let apparentLevel = 0;
+  for (
+    ;
+    lastAmountPaid > livingCostsByLevel[apparentLevel] && apparentLevel < livingCostsByLevel.length;
+    ++apparentLevel
+  ) {}
+
+  return apparentLevel;
 }

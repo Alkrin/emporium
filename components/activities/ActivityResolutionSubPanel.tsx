@@ -17,6 +17,7 @@ import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { AllInjuriesArray } from "../../staticData/injuries/AllInjuries";
 import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../../dataSources/ArmiesDataSource";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
+import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
 
 enum Distro {
   // Even distribution to all participants.  Henchman hierarchy is ignored, and only local participants get a share.
@@ -748,7 +749,7 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
         const recipient = allCharacters[r.characterId];
 
         // See how much is left on the monthly CXP deductible.  Reset it if needed.
-        const thisMonth = dateFormat(new Date(), "yyyy-mm-01");
+        const thisMonth = getFirstOfThisMonthDateString();
         let remainingDeductible = recipient.remaining_cxp_deductible;
         if (
           // Never had a deductible before.

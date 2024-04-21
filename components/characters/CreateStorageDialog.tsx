@@ -10,9 +10,10 @@ import { deleteStorage, setActiveStorageId, updateStorage } from "../../redux/st
 import { Dictionary } from "../../lib/dictionary";
 import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
-import { getAllStorageAssociatedItemIds, getPersonalPile } from "../../lib/characterUtils";
+import { getPersonalPile } from "../../lib/characterUtils";
 import { deleteSpellbook } from "../../redux/spellbooksSlice";
 import { deleteItem } from "../../redux/itemsSlice";
+import { getAllStorageAssociatedItemIds } from "../../lib/storageUtils";
 
 interface State {
   isSaving: boolean;

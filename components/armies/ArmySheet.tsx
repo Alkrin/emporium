@@ -18,10 +18,13 @@ import {
   getArmyLowestSpeed,
   getArmyTotalBattleRating,
   getArmyTotalWages,
+  getMaintenanceStatusForArmy,
   getTroopAvailableBattleRating,
   getTroopTotalBattleRating,
 } from "../../lib/armyUtils";
 import { SheetRoot } from "../SheetRoot";
+import dateFormat from "dateformat";
+import { PayArmyMaintenanceDialog } from "./PayArmyMaintenanceDialog";
 
 interface ReactProps {
   armyId: number;
@@ -69,6 +72,7 @@ class AArmySheet extends React.Component<Props> {
   }
 
   private renderSummary(): React.ReactNode {
+    const maintenanceStatus = getMaintenanceStatusForArmy(this.props.armyId);
     return (
       <div className={styles.summaryRoot}>
         <div className={styles.row}>
@@ -96,6 +100,14 @@ class AArmySheet extends React.Component<Props> {
           <div className={styles.halfWidth}>
             <div className={styles.normalText}>{`Total Wages:\xa0`}</div>
             <div className={styles.valueText}>{getArmyTotalWages(this.props.armyId)}gp</div>
+          </div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.halfWidth}></div>
+          <div className={styles.halfWidth}>
+            <div className={styles.normalText}>{`${dateFormat(new Date(), "mmmm yyyy")} Wages:\xa0`}</div>
+            <div className={`${styles.maintenanceStatus} ${styles[maintenanceStatus]}`}>{maintenanceStatus}</div>
+            <EditButton className={styles.editButton} onClick={this.onPayMaintenanceClicked.bind(this)} />
           </div>
         </div>
       </div>
@@ -139,6 +151,18 @@ class AArmySheet extends React.Component<Props> {
           </div>
         </div>
       </div>
+    );
+  }
+
+  private onPayMaintenanceClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "payMaintenance",
+        content: () => {
+          return <PayArmyMaintenanceDialog />;
+        },
+        escapable: true,
+      })
     );
   }
 

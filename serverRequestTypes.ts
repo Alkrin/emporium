@@ -126,6 +126,24 @@ export interface RequestBody_SetCharacterLocation {
   locationId: number;
 }
 
+export interface RequestBody_PayCharacterMaintenance {
+  characterId: number;
+  storageId: number;
+  gp: number;
+}
+
+export interface RequestBody_PayArmyMaintenance {
+  armyId: number;
+  storageId: number;
+  gp: number;
+}
+
+export interface RequestBody_PayStructureMaintenance {
+  structureId: number;
+  storageId: number;
+  gp: number;
+}
+
 export interface RequestBody_SetCharacterRemainingCXPDeductible {
   characterId: number;
   remainingCXPDeductible: number;

@@ -1,0 +1,130 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: wheat;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rowText {
+  @extend .normalText;
+  //width: 15vmin;
+  text-align: right;
+}
+
+.dialogButton {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
+}
+
+.structureName {
+  @extend .normalText;
+  font-size: 1.5rem;
+  margin-bottom: 0.5vmin;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+}
+
+.maintenanceStatus {
+  @extend .normalText;
+  font-weight: bolder;
+  font-style: italic;
+
+  &.Unknown {
+    color: red;
+  }
+  &.Unpaid {
+    color: red;
+  }
+  &.Underpaid {
+    color: yellow;
+  }
+  &.Paid {
+    color: green;
+  }
+  &.Overpaid {
+    color: lime;
+  }
+}
+
+.explanationText {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: green;
+  text-align: center;
+  max-width: 25vmin;
+}
+
+.infoButton {
+  position: relative;
+  margin-left: 0.5vmin;
+}
+
+.infoPanel {
+  @extend .column;
+  position: relative;
+  background-color: #191919;
+  padding: 0.5vmin 2vmin;
+  border-radius: 1vmin;
+  border: 1px solid green;
+}
+
+.promptTitle {
+  @extend .normalText;
+  font-size: 1.1rem;
+  margin-top: 1vmin;
+  margin-bottom: 0.5vmin;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+}
+
+.gpTextField {
+  position: relative;
+  margin-left: 1vmin;
+  margin-right: 1vmin;
+  width: 8vmin;
+}

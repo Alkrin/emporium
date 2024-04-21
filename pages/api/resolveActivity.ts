@@ -3,6 +3,7 @@ import { SQLQuery, executeTransaction } from "../../lib/db";
 import { RequestBody_ResolveActivity } from "../../serverRequestTypes";
 import { ActivityData_ParticipantToString, ActivityOutcomeData, ActivityOutcomeType } from "../../serverAPI";
 import dateFormat from "dateformat";
+import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
@@ -67,7 +68,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
           // Set remaining deductible and update deductible date to the first day of this month.
           queries.push({
             query: `UPDATE characters SET remaining_cxp_deductible=?,cxp_deductible_date=? WHERE id=?`,
-            values: [o.quantity, dateFormat(new Date(), "yyyy-mm-01"), o.target_id],
+            values: [o.quantity, getFirstOfThisMonthDateString(), o.target_id],
           });
           break;
         }
