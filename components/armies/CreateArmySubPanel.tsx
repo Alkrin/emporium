@@ -52,6 +52,7 @@ class ACreateArmySubPanel extends React.Component<Props, State> {
           name: "",
           location_id: 0,
           user_id: props.currentUserId,
+          maintenance_date: "",
         },
         isSaving: false,
       };
