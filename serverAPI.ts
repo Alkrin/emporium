@@ -62,6 +62,10 @@ import {
   RequestBody_PayCharacterMaintenance,
   RequestBody_PayArmyMaintenance,
   RequestBody_PayStructureMaintenance,
+  RequestBody_CreateContract,
+  RequestBody_EditContract,
+  RequestBody_ExerciseContract as RequestBody_ExerciseContracts,
+  RequestBody_PayCostOfLiving,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -518,6 +522,17 @@ export interface StructureComponentData {
   quantity: number;
 }
 
+export interface ContractData {
+  id: number;
+  def_id: number;
+  party_a_id: number;
+  party_b_id: number;
+  target_a_id: number;
+  target_b_id: number;
+  value: number;
+  exercise_date: string;
+}
+
 export function StringToNumbers(s: string): number[] {
   return s.split(",").map((s2) => {
     return +s2;
@@ -572,6 +587,7 @@ export type LocationCitiesResult = ServerError | LocationCityData[];
 export type LocationLairsResult = ServerError | LocationLairData[];
 export type TroopDefsResult = ServerError | TroopDefData[];
 export type ArmiesResult = ServerError | ArmyData[];
+export type ContractsResult = ServerError | ContractData[];
 export type TroopsResult = ServerError | TroopData[];
 export type TroopInjuriesResult = ServerError | TroopInjuryData[];
 export type SetHPResult = ServerError | HPChange;
@@ -913,10 +929,15 @@ class AServerAPI {
     return await res.json();
   }
 
-  async setHenchmaster(masterCharacterId: number, minionCharacterId: number): Promise<EditRowResult> {
+  async setHenchmaster(
+    masterCharacterId: number,
+    minionCharacterId: number,
+    percentLoot: number
+  ): Promise<MultiModifyResult> {
     const requestBody: RequestBody_SetHenchmaster = {
       masterCharacterId,
       minionCharacterId,
+      percentLoot,
     };
     const res = await fetch("/api/setHenchmaster", {
       method: "POST",
@@ -1177,6 +1198,16 @@ class AServerAPI {
 
   async fetchArmies(): Promise<ArmiesResult> {
     const res = await fetch("/api/fetchArmies", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  }
+
+  async fetchContracts(): Promise<ContractsResult> {
+    const res = await fetch("/api/fetchContracts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1523,10 +1554,35 @@ class AServerAPI {
   async resolveActivity(
     activity: ActivityData,
     resolution_text: string,
-    outcomes: ActivityOutcomeData[]
+    outcomes: ActivityOutcomeData[],
+    campaignGPDistributions: Dictionary<number>
   ): Promise<MultiModifyResult> {
-    const requestBody: RequestBody_ResolveActivity = { activity, resolution_text, outcomes };
+    const requestBody: RequestBody_ResolveActivity = { activity, resolution_text, outcomes, campaignGPDistributions };
     const res = await fetch("/api/resolveActivity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async exerciseContracts(contracts: ContractData[], gp: number[]): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_ExerciseContracts = { contracts, gp };
+    const res = await fetch("/api/exerciseContracts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async payCostOfLiving(characters: CharacterData[], gp: number[]): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_PayCostOfLiving = { characters, gp };
+    const res = await fetch("/api/payCostOfLiving", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1822,6 +1878,48 @@ class AServerAPI {
       troop_ids,
     };
     const res = await fetch("/api/deleteArmy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createContract(data: ContractData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateContract = {
+      ...data,
+    };
+    const res = await fetch("/api/createContract", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editContract(data: ContractData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditContract = {
+      ...data,
+    };
+    const res = await fetch("/api/editContract", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteContract(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteContract", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

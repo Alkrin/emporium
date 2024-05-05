@@ -3,6 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
 import ServerAPI, {
+  ContractData,
   LocationData,
   StructureComponentData,
   StructureComponentDefData,
@@ -26,6 +27,8 @@ import {
 import { updateStructure } from "../../redux/structuresSlice";
 import dateFormat from "dateformat";
 import { PayStructureMaintenanceDialog } from "./PayStructureMaintenanceDialog";
+import { ContractId } from "../../redux/gameDefsSlice";
+import { EditStructureMaintenanceContractDialog } from "./EditStructureMaintenanceContractDialog";
 
 interface ReactProps {
   structureId: number;
@@ -37,6 +40,7 @@ interface InjectedProps {
   components: StructureComponentData[];
   componentDefs: Dictionary<StructureComponentDefData>;
   location: LocationData;
+  contract: ContractData;
   dispatch?: Dispatch;
 }
 
@@ -100,6 +104,14 @@ class AStructureSheet extends React.Component<Props> {
             <div className={styles.normalText}>{`${dateFormat(new Date(), "mmmm yyyy")} Fees:\xa0`}</div>
             <div className={`${styles.maintenanceStatus} ${styles[maintenanceStatus]}`}>{maintenanceStatus}</div>
             <EditButton className={styles.editButton} onClick={this.onPayMaintenanceClicked.bind(this)} />
+          </div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.halfWidth}></div>
+          <div className={styles.halfWidth}>
+            <div className={styles.normalText}>{`Contract:\xa0`}</div>
+            <div className={styles.valueText}>{this.props.contract ? "Active" : "---"}</div>
+            <EditButton className={styles.editButton} onClick={this.onEditContractClicked.bind(this)} />
           </div>
         </div>
       </div>
@@ -210,6 +222,22 @@ class AStructureSheet extends React.Component<Props> {
       })
     );
   }
+
+  private onEditContractClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "EditContract",
+        content: () => {
+          return (
+            <EditStructureMaintenanceContractDialog
+              contract={this.props.contract}
+              structureId={this.props.structureId}
+            />
+          );
+        },
+      })
+    );
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
@@ -217,12 +245,15 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const location = state.locations.locations[structure?.location_id];
   const components = state.structures.componentsByStructure[structure?.id] ?? [];
   const componentDefs = state.gameDefs.structureComponents;
+  const contract =
+    state.contracts.contractsByDefByPartyBId[ContractId.StructureMaintenanceContract]?.[props.structureId]?.[0];
   return {
     ...props,
     structure,
     components,
     location,
     componentDefs,
+    contract,
   };
 }
 

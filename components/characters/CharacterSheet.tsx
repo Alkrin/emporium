@@ -58,6 +58,7 @@ import { SheetRoot } from "../SheetRoot";
 import { EditCXPDeductibleDialog } from "./EditCXPDeductibleDialog";
 import { EditStoragesSubPanel } from "./EditStoragesSubPanel";
 import { EditCostOfLivingDialog } from "./EditCostOfLivingDialog";
+import { CharacterContractsDialog } from "./CharacterContractsDialog";
 
 interface ReactProps {
   characterId: number;
@@ -126,6 +127,8 @@ class ACharacterSheet extends React.Component<Props> {
                   {this.renderStoragePanel()}
                   <div className={styles.verticalSpacer} />
                   {this.renderLocationPanel()}
+                  <div className={styles.verticalSpacer} />
+                  {this.renderContractsPanel()}
                 </div>
               </div>
             </div>
@@ -493,6 +496,21 @@ class ACharacterSheet extends React.Component<Props> {
     }
   }
 
+  private renderContractsPanel(): React.ReactNode {
+    if (this.props.character) {
+      return (
+        <div className={styles.panelContainer}>
+          <div className={styles.centeredRow}>
+            <div className={styles.storageTitle}>{"Contracts"}</div>
+            <EditButton className={styles.storageEditButton} onClick={this.onEditContractsClicked.bind(this)} />
+          </div>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   private renderDeductiblePanel(): React.ReactNode {
     if (this.props.character) {
       const remainingDeductible = getCXPDeductibleRemainingForCharacter(this.props.characterId);
@@ -556,6 +574,18 @@ class ACharacterSheet extends React.Component<Props> {
         id: "EditStorages",
         content: () => {
           return <EditStoragesSubPanel />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onEditContractsClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "contractsEdit",
+        content: () => {
+          return <CharacterContractsDialog />;
         },
         escapable: true,
       })

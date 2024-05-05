@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { Dictionary } from "../lib/dictionary";
 import {
+  ContractData,
   EquipmentSetData,
   EquipmentSetItemData,
   ItemDefData,
@@ -10,12 +11,20 @@ import {
   TroopDefData,
 } from "../serverAPI";
 
+export interface ContractDefData {
+  id: number;
+  name: string;
+  description: string; // May include tags for {PartyA}, {PartyB}, {TargetA}, {TargetB}, and {Value}.
+  terms: Dictionary<ContractTermType>;
+}
+
 export interface UpdateItemsForEquipmentSetParams {
   set_id: number;
   items: EquipmentSetItemData[];
 }
 
 interface GameDefsReduxState {
+  contracts: Dictionary<ContractDefData>;
   equipmentSets: Dictionary<EquipmentSetData>;
   equipmentSetsByClass: Dictionary<EquipmentSetData[]>;
   equipmentSetItemsBySet: Dictionary<EquipmentSetItemData[]>;
@@ -27,6 +36,7 @@ interface GameDefsReduxState {
 
 function buildDefaultGameDefsReduxState(): GameDefsReduxState {
   const defaults: GameDefsReduxState = {
+    contracts: buildContractDefs(),
     equipmentSets: {},
     equipmentSetsByClass: {},
     equipmentSetItemsBySet: {},
@@ -36,6 +46,121 @@ function buildDefaultGameDefsReduxState(): GameDefsReduxState {
     troops: {},
   };
   return defaults;
+}
+
+// NEVER CHANGE THE VALUE OF A CONTRACT ID, or the whole system will break.
+export enum ContractId {
+  Invalid = 0,
+  ArmyWageContract = 1,
+  CharacterWageContract = 2,
+  StructureMaintenanceContract = 3,
+  ActivityLootContract = 4,
+  PartiedLootContract = 5,
+  UnpartiedLootContract = 6,
+}
+export enum ContractTerm {
+  PartyA = "PartyA",
+  PartyB = "PartyB",
+  TargetA = "TargetA",
+  TargetB = "TargetB",
+  Value = "Value",
+}
+export enum ContractTermType {
+  Army = "Army",
+  Character = "Character",
+  Number = "Number",
+  Storage = "Storage",
+  Structure = "Structure",
+}
+
+export function getContractTermKey(term: ContractTerm): keyof ContractData {
+  const keys: Dictionary<keyof ContractData> = {
+    [ContractTerm.PartyA]: "party_a_id",
+    [ContractTerm.PartyB]: "party_b_id",
+    [ContractTerm.TargetA]: "target_a_id",
+    [ContractTerm.TargetB]: "target_b_id",
+    [ContractTerm.Value]: "value",
+  };
+
+  return keys[term];
+}
+
+function buildContractDefs(): Dictionary<ContractDefData> {
+  const defs: Dictionary<ContractDefData> = {
+    [ContractId.ArmyWageContract]: {
+      id: ContractId.ArmyWageContract,
+      name: "Army Wage Contract",
+      description: "The character {PartyA} will pay the wages of army {PartyB} once per month from storage {TargetA}.",
+      terms: {
+        [ContractTerm.PartyA]: ContractTermType.Character,
+        [ContractTerm.PartyB]: ContractTermType.Army,
+        [ContractTerm.TargetA]: ContractTermType.Storage,
+      },
+    },
+    [ContractId.CharacterWageContract]: {
+      id: ContractId.CharacterWageContract,
+      name: "Character Wage Contract",
+      description:
+        "The character {PartyA} will pay the wages of character {PartyB} once per month from storage {TargetA} " +
+        "into storage {TargetB}.  The amount is equal to the Cost Of Living for {PartyB}'s current level at the time of payment.",
+      terms: {
+        [ContractTerm.PartyA]: ContractTermType.Character,
+        [ContractTerm.PartyB]: ContractTermType.Character,
+        [ContractTerm.TargetA]: ContractTermType.Storage,
+        [ContractTerm.TargetB]: ContractTermType.Storage,
+      },
+    },
+    [ContractId.StructureMaintenanceContract]: {
+      id: ContractId.StructureMaintenanceContract,
+      name: "Structure Maintenance Contract",
+      description:
+        "The character {PartyA} will pay the maintenance for structure {PartyB} once per month from storage {TargetA}.  " +
+        "The amount is equal to the full maintenance cost for {PartyB} at the time of payment.",
+      terms: {
+        [ContractTerm.PartyA]: ContractTermType.Character,
+        [ContractTerm.PartyB]: ContractTermType.Structure,
+        [ContractTerm.TargetA]: ContractTermType.Storage,
+      },
+    },
+    [ContractId.ActivityLootContract]: {
+      id: ContractId.ActivityLootContract,
+      name: "Activity Loot Contract",
+      description:
+        "When character {PartyA} participates in an Activity, {PartyA} will pay {Value}% of their share to {PartyB}, into storage {TargetA}.",
+      terms: {
+        [ContractTerm.PartyA]: ContractTermType.Character,
+        [ContractTerm.PartyB]: ContractTermType.Character,
+        [ContractTerm.Value]: ContractTermType.Number,
+        [ContractTerm.TargetA]: ContractTermType.Storage,
+      },
+    },
+    [ContractId.PartiedLootContract]: {
+      id: ContractId.PartiedLootContract,
+      name: "Partied Loot Contract",
+      description:
+        "When character {PartyA} and character {PartyB} both participate in the same Activity, {PartyB} will not receive a direct share of loot.  " +
+        "Instead, {PartyA} will pay {PartyB} {Value}% from {PartyA}'s share.",
+      terms: {
+        [ContractTerm.PartyA]: ContractTermType.Character,
+        [ContractTerm.PartyB]: ContractTermType.Character,
+        [ContractTerm.Value]: ContractTermType.Number,
+      },
+    },
+    [ContractId.UnpartiedLootContract]: {
+      id: ContractId.UnpartiedLootContract,
+      name: "Unpartied Loot Contract",
+      description:
+        "When character {PartyA} does not participate and character {PartyB} does participate in an Activity, {PartyB} will pay {Value}% from " +
+        "{PartyB}'s share into storage {TargetA}.",
+      terms: {
+        [ContractTerm.PartyA]: ContractTermType.Character,
+        [ContractTerm.PartyB]: ContractTermType.Character,
+        [ContractTerm.Value]: ContractTermType.Number,
+        [ContractTerm.TargetA]: ContractTermType.Storage,
+      },
+    },
+  };
+  return defs;
 }
 
 export const gameDefsSlice = createSlice({

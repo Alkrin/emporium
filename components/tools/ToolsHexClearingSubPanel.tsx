@@ -245,19 +245,17 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         return createActivityParticipant(adventurer.characterId);
       })
     );
-    const outcomes = generateActivityOutcomes(
+    const [outcomes, campaignGPDistributions] = generateActivityOutcomes(
       activity,
       this.state.currentDate,
       this.state.adventurerParticipants,
       this.state.armyParticipants,
       +this.state.xpEarnedString,
       +this.state.goldFoundString,
-      0,
-      RewardDistro.Hench,
-      RewardDistro.Hench
+      0
     );
 
-    const res = await ServerAPI.resolveActivity(activity, "", outcomes);
+    const res = await ServerAPI.resolveActivity(activity, "", outcomes, campaignGPDistributions);
     if (
       "error" in res ||
       !!res.find((v) => {

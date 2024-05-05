@@ -10,8 +10,17 @@ export abstract class LocalStore {
     this.name = name;
   }
 
-  protected getItem(key: string): string | null {
-    return localStorage.getItem(this.prefixedKey(key));
+  protected getItem<T>(key: string): T | undefined {
+    const raw = localStorage.getItem(this.prefixedKey(key));
+    if (!raw) {
+      return undefined;
+    } else {
+      try {
+        return JSON.parse(raw) as T;
+      } catch (error) {
+        return undefined;
+      }
+    }
   }
 
   protected setItem(key: string, value: any): void {

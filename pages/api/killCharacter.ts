@@ -1,12 +1,39 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { SQLQuery, executeTransaction } from "../../lib/db";
 import { RequestBody_KillOrReviveCharacter } from "../../serverRequestTypes";
+import { ContractId } from "../../redux/gameDefsSlice";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
     const b = req.body as RequestBody_KillOrReviveCharacter;
 
     const queries: SQLQuery[] = [];
+
+    // Cancel all of their contracts.
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND party_a_id=?`,
+      values: [ContractId.ArmyWageContract, b.characterId],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND party_a_id=?`,
+      values: [ContractId.StructureMaintenanceContract, b.characterId],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+      values: [ContractId.ActivityLootContract, b.characterId, b.characterId],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+      values: [ContractId.CharacterWageContract, b.characterId, b.characterId],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+      values: [ContractId.PartiedLootContract, b.characterId, b.characterId],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+      values: [ContractId.UnpartiedLootContract, b.characterId, b.characterId],
+    });
 
     // Set all of their henchmen free.
     queries.push({

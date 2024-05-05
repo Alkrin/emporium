@@ -2,7 +2,14 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
-import ServerAPI, { ArmyData, LocationData, TroopData, TroopDefData, TroopInjuryData } from "../../serverAPI";
+import ServerAPI, {
+  ArmyData,
+  ContractData,
+  LocationData,
+  TroopData,
+  TroopDefData,
+  TroopInjuryData,
+} from "../../serverAPI";
 import styles from "./ArmySheet.module.scss";
 import { FittingView } from "../FittingView";
 import { EditButton } from "../EditButton";
@@ -25,6 +32,8 @@ import {
 import { SheetRoot } from "../SheetRoot";
 import dateFormat from "dateformat";
 import { PayArmyMaintenanceDialog } from "./PayArmyMaintenanceDialog";
+import { ContractId } from "../../redux/gameDefsSlice";
+import { EditArmyWageContractDialog } from "./EditArmyWageContractDialog";
 
 interface ReactProps {
   armyId: number;
@@ -37,6 +46,7 @@ interface InjectedProps {
   injuries: Dictionary<TroopInjuryData[]>;
   location: LocationData;
   troopDefs: Dictionary<TroopDefData>;
+  contract: ContractData;
   dispatch?: Dispatch;
 }
 
@@ -82,12 +92,8 @@ class AArmySheet extends React.Component<Props> {
             <EditButton className={styles.editButton} onClick={this.onEditLocationClicked.bind(this)} />
           </div>
           <div className={styles.halfWidth}>
-            <div className={styles.normalText}>{`Battle Rating:\xa0`}</div>
-            <div className={styles.valueText}>
-              {`${getArmyAvailableBattleRating(this.props.armyId).toFixed(2)} / ${getArmyTotalBattleRating(
-                this.props.armyId
-              ).toFixed(2)}`}
-            </div>
+            <div className={styles.normalText}>{`Total Wages:\xa0`}</div>
+            <div className={styles.valueText}>{getArmyTotalWages(this.props.armyId)}gp</div>
           </div>
         </div>
         <div className={styles.row}>
@@ -98,16 +104,24 @@ class AArmySheet extends React.Component<Props> {
             } miles`}</div>
           </div>
           <div className={styles.halfWidth}>
-            <div className={styles.normalText}>{`Total Wages:\xa0`}</div>
-            <div className={styles.valueText}>{getArmyTotalWages(this.props.armyId)}gp</div>
-          </div>
-        </div>
-        <div className={styles.row}>
-          <div className={styles.halfWidth}></div>
-          <div className={styles.halfWidth}>
             <div className={styles.normalText}>{`${dateFormat(new Date(), "mmmm yyyy")} Wages:\xa0`}</div>
             <div className={`${styles.maintenanceStatus} ${styles[maintenanceStatus]}`}>{maintenanceStatus}</div>
             <EditButton className={styles.editButton} onClick={this.onPayMaintenanceClicked.bind(this)} />
+          </div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.halfWidth}>
+            <div className={styles.normalText}>{`Battle Rating:\xa0`}</div>
+            <div className={styles.valueText}>
+              {`${getArmyAvailableBattleRating(this.props.armyId).toFixed(2)} / ${getArmyTotalBattleRating(
+                this.props.armyId
+              ).toFixed(2)}`}
+            </div>
+          </div>
+          <div className={styles.halfWidth}>
+            <div className={styles.normalText}>{`Contract:\xa0`}</div>
+            <div className={styles.valueText}>{this.props.contract ? "Active" : "---"}</div>
+            <EditButton className={styles.editButton} onClick={this.onEditContractClicked.bind(this)} />
           </div>
         </div>
       </div>
@@ -189,6 +203,17 @@ class AArmySheet extends React.Component<Props> {
     );
   }
 
+  private onEditContractClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "EditContract",
+        content: () => {
+          return <EditArmyWageContractDialog contract={this.props.contract} armyId={this.props.armyId} />;
+        },
+      })
+    );
+  }
+
   private onEditLocationClicked(): void {
     this.props.dispatch?.(
       showModal({
@@ -231,6 +256,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const troops = state.armies.troopsByArmy[army?.id] ?? [];
   const injuries = state.armies.troopInjuriesByTroop;
   const troopDefs = state.gameDefs.troops;
+  const contract = state.contracts.contractsByDefByPartyBId[ContractId.ArmyWageContract]?.[props.armyId]?.[0];
   return {
     ...props,
     army,
@@ -238,6 +264,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     injuries,
     location,
     troopDefs,
+    contract,
   };
 }
 

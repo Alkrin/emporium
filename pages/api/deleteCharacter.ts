@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { SQLQuery, executeTransaction } from "../../lib/db";
 import { RequestBody_DeleteCharacter } from "../../serverRequestTypes";
+import { ContractId } from "../../redux/gameDefsSlice";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
@@ -51,6 +52,32 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     queries.push({
       query: `UPDATE characters SET henchmaster_id=0 WHERE henchmaster_id=?`,
       values: [b.id],
+    });
+
+    // Contracts.
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND party_a_id=?`,
+      values: [ContractId.ArmyWageContract, b.id],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND party_a_id=?`,
+      values: [ContractId.StructureMaintenanceContract, b.id],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+      values: [ContractId.ActivityLootContract, b.id, b.id],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+      values: [ContractId.CharacterWageContract, b.id, b.id],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+      values: [ContractId.PartiedLootContract, b.id, b.id],
+    });
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+      values: [ContractId.UnpartiedLootContract, b.id, b.id],
     });
 
     // The actual character gets deleted last, after all of its dependent data is gone.

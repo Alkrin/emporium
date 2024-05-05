@@ -20,6 +20,7 @@ import { MapsDataSource } from "../dataSources/MapsDataSource";
 import { LocationsDataSource } from "../dataSources/LocationsDataSource";
 import { ArmiesDataSource } from "../dataSources/ArmiesDataSource";
 import { StructuresDataSource } from "../dataSources/StructuresDataSource";
+import { ContractsDataSource } from "../dataSources/ContractsDataSource";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -60,6 +61,7 @@ class ALandingPage extends React.Component<Props> {
         <LocationsDataSource />
         <ArmiesDataSource />
         <StructuresDataSource />
+        <ContractsDataSource />
         {this.props.currentUserId ? <MainPage /> : <Login />}
       </div>
     );

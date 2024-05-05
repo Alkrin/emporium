@@ -33,6 +33,7 @@ import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
 import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
+import { refetchContracts } from "../../dataSources/ContractsDataSource";
 
 interface State {
   nameText: string;
@@ -639,6 +640,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 
     if (this.props.dispatch) {
       await refetchCharacters(this.props.dispatch);
+      await refetchContracts(this.props.dispatch);
     }
 
     this.setState({ isSaving: false });
@@ -856,6 +858,9 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                     this.props.dispatch?.(unsetAllHenchmenForCharacter(this.props.selectedCharacter.id));
                     // The character itself.
                     this.props.dispatch?.(deleteCharacter(this.props.selectedCharacter.id));
+                    if (this.props.dispatch) {
+                      refetchContracts(this.props.dispatch);
+                    }
                   }
                 }, 300);
               }

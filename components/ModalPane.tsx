@@ -181,6 +181,7 @@ class ModalPane extends React.Component<Props, State> {
               visibleModals: this.state.visibleModals.filter((mpe) => {
                 return mpe.id !== topExitingModal.id;
               }),
+              exitingModalId: "",
             });
           }, 300);
         }

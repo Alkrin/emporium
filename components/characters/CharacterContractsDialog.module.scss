@@ -1,0 +1,158 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: wheat;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dialogButton {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
+}
+
+.title {
+  position: relative;
+  margin-bottom: 1vmin;
+  font-size: 1.5rem;
+  color: wheat;
+}
+
+.listContainer {
+  position: relative;
+  width: 26vmin;
+  height: 30vmin;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.sectionHeader {
+  position: relative;
+  background-color: darkcyan;
+  color: white;
+  font-size: 1rem;
+  padding-left: 0.5vmin;
+  user-select: none;
+}
+
+.contractListRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  margin-left: 0.5vmin;
+  padding: 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.contractListName {
+  position: relative;
+  flex-grow: 1;
+  font-size: 0.9rem;
+  color: white;
+  user-select: none;
+}
+
+.editButton {
+  position: relative;
+  margin-left: 0.5vmin;
+}
+
+.dataPanelRoot {
+  width: 25vmin;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.generateContractRow {
+  @extend .column;
+  position: relative;
+  background-color: #300;
+  padding: 0.5vmin;
+}
+
+.generateContractButton {
+  position: relative;
+  color: white;
+  font-size: 1rem;
+  border-radius: 0.5vmin;
+  border: 1px solid white;
+  padding: 0.25vmin;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background-color: #030;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}

@@ -1,0 +1,96 @@
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.root {
+  @extend .column;
+  position: relative;
+  background-color: #191919;
+  padding: 0.5vmin 2vmin;
+  border-radius: 1vmin;
+  border: 1px solid green;
+}
+
+.contractText {
+  position: relative;
+  font-size: 1rem;
+  color: gray;
+}
+
+.wordsRow {
+  @extend .row;
+  flex-wrap: wrap;
+}
+
+.term {
+  position: relative;
+  font-size: 1rem;
+  color: yellow;
+}
+
+.specified {
+  position: relative;
+  font-size: 1rem;
+  color: lime;
+}
+
+.unspecified {
+  position: relative;
+  font-size: 1rem;
+  color: red;
+}
+
+.editButton {
+  position: relative;
+  margin-left: 0.5vmin;
+}
+
+.termsContainer {
+  @extend .column;
+  position: relative;
+  margin-top: 1vmin;
+}
+
+.defineTermsLabel {
+  position: relative;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.typeError {
+  position: relative;
+  font-size: 0.8rem;
+  color: red;
+}
+
+.termName {
+  position: relative;
+  width: 8vmin;
+  font-size: 1rem;
+  color: wheat;
+  text-align: center;
+}
+
+.termValue {
+  position: relative;
+  width: 15vmin;
+  font-size: 0.8rem;
+}
+
+.termEditButton {
+  position: relative;
+  margin-left: 1vmin;
+
+  &.locked {
+    opacity: 0;
+    pointer-events: none;
+  }
+}

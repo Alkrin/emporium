@@ -10,29 +10,27 @@
   color: wheat;
 }
 
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
 .row {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .rowText {
   @extend .normalText;
-  width: 15vmin;
+  //width: 15vmin;
   text-align: right;
-}
-
-.orText {
-  @extend .normalText;
-  margin-top: 1vmin;
-  margin-bottom: 1vmin;
-  text-align: center;
-}
-
-.storageName {
-  @extend .normalText;
-  margin-bottom: 1vmin;
-  border-bottom: 1px solid yellow;
 }
 
 .dialogButton {
@@ -57,14 +55,32 @@
   }
 }
 
-.closeButton {
+.actionButton {
   @extend .dialogButton;
   margin-top: 1.5vmin;
   width: 15vmin;
 }
 
-.gpTextField {
-  width: 8vmin;
-  margin-left: 1vmin;
-  margin-right: 0.5vmin;
+.structureName {
+  @extend .normalText;
+  font-size: 1.5rem;
+  margin-bottom: 0.5vmin;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+}
+
+.contractTitle {
+  @extend .normalText;
+  font-size: 1.2rem;
+  margin-bottom: 0.5vmin;
+  text-align: center;
+}
+
+.infoButton {
+  position: relative;
+  margin-left: 0.5vmin;
+}
+
+.contractContainer {
+  position: relative;
 }

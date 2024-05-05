@@ -1,5 +1,11 @@
 import store from "../redux/store";
-import { ActivityData, ActivityOutcomeData, ActivityOutcomeType, ActivityParticipant } from "../serverAPI";
+import {
+  ActivityData,
+  ActivityOutcomeData,
+  ActivityOutcomeType,
+  ActivityParticipant,
+  ContractData,
+} from "../serverAPI";
 import {
   canCharacterFindTraps,
   canCharacterSneak,
@@ -14,6 +20,7 @@ import {
 import { Dictionary } from "./dictionary";
 import dateFormat from "dateformat";
 import { getFirstOfThisMonthDateString } from "./stringUtils";
+import { ContractId } from "../redux/gameDefsSlice";
 
 export enum RewardDistro {
   // Even distribution to all participants.  Henchman hierarchy is ignored, and only local participants get a share.
@@ -45,10 +52,8 @@ export function generateActivityOutcomes(
   armyParticipants: ArmyParticipant[],
   totalMXP: number,
   gpWithXp: number,
-  gpWithoutXp: number,
-  xpDistro: RewardDistro,
-  gpDistro: RewardDistro
-): ActivityOutcomeData[] {
+  gpWithoutXp: number
+): [ActivityOutcomeData[], Dictionary<number>] {
   const redux = store.getState();
   const allCharacters = redux.characters.characters;
 
@@ -82,12 +87,11 @@ export function generateActivityOutcomes(
     return !deadCharacterIds.includes(p.characterId);
   });
 
-  // Gold and XP distribution.
-  // TODO: Implement Contracts to replace RewardDistro.
   interface RecipientData {
     characterId: number;
-    gold: number;
-    campaignGold: number; // Henchmaster's share from their henchmen.
+    xpGold: number;
+    nonXPGold: number;
+    campaignGold: number; // Contractually granted share of gold paid to this recipient by others.
     campaignDeductiblePayment: number;
     xpShares: number;
     xpMultiplier: number;
@@ -98,7 +102,8 @@ export function generateActivityOutcomes(
     const participant = allCharacters[p.characterId];
     recipients[p.characterId] = {
       characterId: p.characterId,
-      gold: 0,
+      xpGold: 0,
+      nonXPGold: 0,
       campaignGold: 0,
       campaignDeductiblePayment: 0,
       xpShares: 0,
@@ -106,46 +111,16 @@ export function generateActivityOutcomes(
       xp: 0,
     };
   });
-  function distributeGoldThroughHenchChain(remainingGold: number, henchmasterId: number): void {
-    const henchmaster = allCharacters[henchmasterId];
 
-    // Make sure a recipient entry exists.
-    if (!recipients[henchmasterId]) {
-      recipients[henchmasterId] = {
-        characterId: henchmasterId,
-        gold: 0,
-        campaignGold: 0,
-        campaignDeductiblePayment: 0,
-        xpShares: 0,
-        xpMultiplier: getCharacterXPMultiplier(henchmaster),
-        xp: 0,
-      };
-    }
-
-    const shouldGiveGoldToHenchmaster =
-      gpDistro === RewardDistro.Hench && // Hench mode?
-      henchmaster.henchmaster_id > 0 && // Has a henchmaster?
-      !deadCharacterIds.includes(henchmaster.henchmaster_id); // Henchmaster is still alive?
-
-    if (shouldGiveGoldToHenchmaster) {
-      recipients[henchmasterId].campaignGold += remainingGold / 2;
-      // Everybody passes half of their share up the chain as campaign gold.
-      distributeGoldThroughHenchChain(remainingGold / 2, henchmaster.henchmaster_id);
-    } else {
-      recipients[henchmasterId].campaignGold += remainingGold;
-    }
-  }
-  // All surviving participants are included as recipients.
-  let nonXPGoldPerShare = gpWithoutXp / survivingAdventurerParticipants.length;
-  let xpGoldPerShare = gpWithXp / survivingAdventurerParticipants.length;
+  // MXP distribution.
+  // First figure out how many shares each participant gets.
   let totalXPShares: number = 0;
   survivingAdventurerParticipants.forEach((p) => {
     const participant = allCharacters[p.characterId];
     const xpMultiplier = getCharacterXPMultiplier(participant);
     let xpShares: number = 2;
-    // If your henchmaster is in the group, you get half a share.
+    // If your henchmaster is in the group, you get half a share of mxp.
     if (
-      xpDistro === RewardDistro.Hench &&
       !!survivingAdventurerParticipants.find((p2) => {
         return p2.characterId === participant.henchmaster_id;
       })
@@ -154,35 +129,161 @@ export function generateActivityOutcomes(
     }
     totalXPShares += xpShares;
 
-    let gold = nonXPGoldPerShare + xpGoldPerShare;
-    let gxp = xpGoldPerShare * xpMultiplier;
-
-    const shouldGiveGoldToHenchmaster =
-      gpDistro === RewardDistro.Hench && // Hench mode?
-      participant.henchmaster_id > 0 && // Has a henchmaster?
-      !deadCharacterIds.includes(participant.henchmaster_id); // Henchmaster is still alive?
-    if (shouldGiveGoldToHenchmaster) {
-      gold /= 2;
-      gxp /= 2;
-      distributeGoldThroughHenchChain(gold, participant.henchmaster_id);
-    }
-
     // A few pre-calculated values.
     recipients[p.characterId].xpShares = xpShares;
     recipients[p.characterId].xpMultiplier = xpMultiplier;
-    // Add the calculated earnings.
-    recipients[p.characterId].gold += gold;
-    recipients[p.characterId].xp = Math.ceil(recipients[p.characterId].xp + gxp);
   });
 
-  // Distribute MXP.
+  // Actually distribute the MXP.
   const mxpPerShare = totalMXP / totalXPShares;
   Object.values(recipients).forEach((r) => {
     const mxp = Math.ceil(mxpPerShare * r.xpShares * r.xpMultiplier);
     r.xp = Math.ceil(r.xp + mxp);
   });
 
-  // In theory, we have now distributed XP and GP into recipient structs.  Next we should look at campaignGold
+  // Gold and GXP distribution.
+  // Some participants may have contractually given up their own shares of loot.
+  const minionIds: number[] = [];
+  Object.values(redux.contracts.contractsByDefByPartyAId[ContractId.PartiedLootContract] ?? {}).forEach(
+    (plcs: ContractData[]) => {
+      plcs.forEach((plc) => {
+        const partyAIsPresent = !!survivingAdventurerParticipants.find((sap) => sap.characterId === plc.party_a_id);
+        const partyBIsPresent = !!survivingAdventurerParticipants.find((sap) => sap.characterId === plc.party_b_id);
+
+        if (partyAIsPresent && partyBIsPresent) {
+          minionIds.push(plc.party_b_id);
+        }
+      });
+    }
+  );
+
+  const participantsWithLootShares = survivingAdventurerParticipants.filter((p) => {
+    // If there is a PartiedLoot contract and both parties are in the list of survivors, one of them (the "minion")
+    // doesn't get a personal share, but is instead paid out of the other's share.
+    return !minionIds.includes(p.characterId);
+  });
+
+  // Key: storageId, value: GP amount to deposit.
+  const campaignGPDistributions: Dictionary<number> = {};
+
+  // Helper function to recursively pass GP through the contract chain.
+  function distributeCampaignGP(campaignGP: number, recipientId: number, targetStorageId: number): void {
+    // If we're down to less than a copper to distribute, just stop.
+    if (campaignGP < 0.01) {
+      return;
+    }
+
+    const character = allCharacters[recipientId];
+
+    // Make sure a recipient entry exists.
+    if (!recipients[recipientId]) {
+      recipients[recipientId] = {
+        characterId: recipientId,
+        xpGold: 0,
+        nonXPGold: 0,
+        campaignGold: 0,
+        campaignDeductiblePayment: 0,
+        xpShares: 0,
+        xpMultiplier: getCharacterXPMultiplier(character),
+        xp: 0,
+      };
+    }
+
+    // Contractual obligations!
+    // ActivityLootContracts were already activated before entering this recursion, so we don't have to check them again.
+    // PartiedLootContracts were already activated to generate `participantsWithLootShares`, so we don't have to check them again.
+    // UnpartiedLootContracts are the last relevant type.  CampaignGP is distributed according to this chain regardless of the characters'
+    //   participation in (or absence from) this activity.
+    let personalShare = campaignGP;
+    const ulcs: ContractData[] =
+      redux.contracts.contractsByDefByPartyBId[ContractId.UnpartiedLootContract]?.[recipientId] ?? [];
+    ulcs.forEach((ulc) => {
+      const percentOwed = ulc.value / 100;
+      const gpOwed = campaignGP * percentOwed;
+      const gpPaid = Math.min(personalShare, gpOwed);
+      personalShare -= gpPaid;
+      // Recursively pass the CampaignGP up the contract chain.
+      distributeCampaignGP(gpPaid, ulc.party_a_id, ulc.target_a_id);
+    });
+
+    // Once all UnpartiedLootContracts have been satisfied, the remaining CampaignGP can be applied to this character.
+    // Tracking total by character, used later for CXP deductible calculations.
+    recipients[recipientId].campaignGold += personalShare;
+    // Tracking just the total amount that will finally be deposited in each storage, regardless of anything else.
+    campaignGPDistributions[targetStorageId] = (campaignGPDistributions[targetStorageId] ?? 0) + personalShare;
+  }
+
+  const nonXPGoldPerShare = gpWithoutXp / participantsWithLootShares.length;
+  const xpGoldPerShare = gpWithXp / participantsWithLootShares.length;
+  participantsWithLootShares.forEach((p) => {
+    // Check if this participant has any contracts that require them to share their loot.
+    let nonXPGoldPersonalShare = nonXPGoldPerShare;
+    let xpGoldPersonalShare = xpGoldPerShare;
+
+    // Is there a relevant ActivityLoot contract? (gives away a flat percentage off the top).
+    const alcs = redux.contracts.contractsByDefByPartyAId[ContractId.ActivityLootContract]?.[p.characterId] ?? [];
+    alcs.forEach((alc) => {
+      const percentOwed = alc.value / 100;
+      const nonXPGoldOwed = nonXPGoldPerShare * percentOwed;
+      const xpGoldOwed = xpGoldPerShare * percentOwed;
+
+      nonXPGoldPersonalShare -= nonXPGoldOwed;
+      xpGoldPersonalShare -= xpGoldOwed;
+
+      // Distribute the owed gold through the contract chain.
+      distributeCampaignGP(nonXPGoldOwed + xpGoldOwed, alc.party_b_id, alc.target_a_id);
+    });
+
+    // ALCs come off the top.  PLCS and ULCs are a percentage of what remains after that.
+    let nonXPGoldPersonalShareRemaining = nonXPGoldPersonalShare;
+    let xpGoldPersonalShareRemaining = xpGoldPersonalShare;
+
+    // Is there a relevant PartiedLoot contract? (pays a percentage of their personal share to a minion who is also present)
+    const plcs = redux.contracts.contractsByDefByPartyAId[ContractId.PartiedLootContract]?.[p.characterId] ?? [];
+    plcs.forEach((plc) => {
+      // If party B is present (and alive), pay them.
+      if (!!survivingAdventurerParticipants.find((sap) => sap.characterId === plc.party_b_id)) {
+        const percentOwed = plc.value / 100;
+        const nonXPGoldOwed = nonXPGoldPersonalShare * percentOwed;
+        const xpGoldOwed = xpGoldPersonalShare * percentOwed;
+        const nonXPGoldPaid = Math.min(nonXPGoldOwed, nonXPGoldPersonalShareRemaining);
+        const xpGoldPaid = Math.min(xpGoldOwed, xpGoldPersonalShareRemaining);
+        nonXPGoldPersonalShareRemaining -= nonXPGoldPaid;
+        xpGoldPersonalShareRemaining -= xpGoldPaid;
+
+        recipients[plc.party_b_id].nonXPGold += nonXPGoldPaid;
+        recipients[plc.party_b_id].xpGold += xpGoldPaid;
+      }
+    });
+
+    // Is there a relevant UnpartiedLoot contract? (pays a percentage of their personal share to a master who is NOT present)
+    const ulcs = redux.contracts.contractsByDefByPartyBId[ContractId.UnpartiedLootContract]?.[p.characterId] ?? [];
+    ulcs.forEach((ulc) => {
+      // If the master is not present, pay them as CampaignGP.
+      if (
+        !deadCharacterIds.includes(ulc.party_a_id) &&
+        !survivingAdventurerParticipants.find((sap) => sap.characterId === ulc.party_a_id)
+      ) {
+        const percentOwed = ulc.value / 100;
+        const nonXPGoldOwed = nonXPGoldPersonalShare * percentOwed;
+        const xpGoldOwed = xpGoldPersonalShare * percentOwed;
+        const nonXPGoldPaid = Math.min(nonXPGoldOwed, nonXPGoldPersonalShareRemaining);
+        const xpGoldPaid = Math.min(xpGoldOwed, xpGoldPersonalShareRemaining);
+        nonXPGoldPersonalShareRemaining -= nonXPGoldPaid;
+        xpGoldPersonalShareRemaining -= xpGoldPaid;
+
+        distributeCampaignGP(nonXPGoldPaid + xpGoldPaid, ulc.party_a_id, ulc.target_a_id);
+      }
+    });
+
+    // Once all contracts have been satisfied, any remaining loot goes to this character.
+    recipients[p.characterId].nonXPGold += nonXPGoldPersonalShareRemaining;
+    recipients[p.characterId].xpGold += xpGoldPersonalShareRemaining;
+    // xpGold grant XP, of course!
+    recipients[p.characterId].xp += Math.ceil(xpGoldPersonalShareRemaining * recipients[p.characterId].xpMultiplier);
+  });
+
+  // In theory, we have now distributed MXP and GP into recipient structs.  Next we should look at campaignGold
   // and apply it against the monthly deductible so we can know how much of it counts to grant xp.
   Object.values(recipients).forEach((r) => {
     if (r.campaignGold > 0) {
@@ -213,21 +314,20 @@ export function generateActivityOutcomes(
       r.campaignDeductiblePayment = Math.min(remainingDeductible, Math.ceil(r.campaignGold));
       // Apply remaining CGP as CXP.
       const cgpAfterDeductible = r.campaignGold - r.campaignDeductiblePayment;
-      r.xp += cgpAfterDeductible * r.xpMultiplier;
+      r.xp += Math.ceil(cgpAfterDeductible * r.xpMultiplier);
     }
   });
 
   // Turn "recipients" into Outcomes.
   Object.values(recipients).forEach((r) => {
-    console.log({ ...r });
     // If there is GP gained, add a GP outcome.
-    if (r.gold + r.campaignGold > 0) {
+    if (r.nonXPGold + r.xpGold > 0) {
       const o: ActivityOutcomeData = {
         id: 0, // Will be overwritten by the server.
         activity_id: activityId,
         target_id: r.characterId,
         type: ActivityOutcomeType.Gold,
-        quantity: r.gold + r.campaignGold,
+        quantity: r.nonXPGold + r.xpGold,
         extra: "",
       };
       outcomes.push(o);
@@ -304,7 +404,7 @@ export function generateActivityOutcomes(
     }
   });
 
-  return outcomes;
+  return [outcomes, campaignGPDistributions];
 }
 
 export function generateAnonymousActivity(endDate: string, participants: ActivityParticipant[]): ActivityData {

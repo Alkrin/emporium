@@ -8,6 +8,7 @@ import styles from "./EditMoneyDialog.module.scss";
 import { getPersonalPile } from "../../lib/characterUtils";
 import { updateStorage } from "../../redux/storageSlice";
 import { Dictionary } from "../../lib/dictionary";
+import { getStorageDisplayName } from "../../lib/storageUtils";
 
 interface State {
   gpTotal: number;
@@ -40,6 +41,7 @@ class AEditMoneyDialog extends React.Component<Props, State> {
   render(): React.ReactNode {
     return (
       <div className={styles.root}>
+        <div className={styles.storageName}>{getStorageDisplayName(this.props.storageId)}</div>
         <div className={styles.row}>
           <div className={styles.rowText}>Set Exact GP Value</div>
           <input

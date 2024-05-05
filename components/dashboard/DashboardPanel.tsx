@@ -1,0 +1,465 @@
+import { Dispatch } from "@reduxjs/toolkit";
+import * as React from "react";
+import { connect } from "react-redux";
+import { RootState } from "../../redux/store";
+import styles from "./DashboardPanel.module.scss";
+import ServerAPI, { CharacterData, ContractData, StorageData } from "../../serverAPI";
+import { EditButton } from "../EditButton";
+import { showModal } from "../../redux/modalsSlice";
+import { SelectAdventurerDialog } from "../dialogs/SelectAdventurerDialog";
+import { dashboardLocalStore } from "../../localStores/dashboardLocalStore";
+import { setDashboardCharacterId } from "../../redux/charactersSlice";
+import { addCommasToNumber, getCostOfLivingForCharacter, getPersonalPile } from "../../lib/characterUtils";
+import { Dictionary } from "../../lib/dictionary";
+import { getStorageDisplayName } from "../../lib/storageUtils";
+import { UserRole } from "../../redux/userSlice";
+import { ContractId } from "../../redux/gameDefsSlice";
+import { getArmyTotalWages } from "../../lib/armyUtils";
+import { getStructureMonthlyMaintenance } from "../../lib/structureUtils";
+import dateFormat from "dateformat";
+import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
+import { refetchContracts } from "../../dataSources/ContractsDataSource";
+import { refetchCharacters } from "../../dataSources/CharactersDataSource";
+import { refetchArmies } from "../../dataSources/ArmiesDataSource";
+import { refetchStructures } from "../../dataSources/StructuresDataSource";
+import { SavingVeil } from "../SavingVeil";
+import { refetchStorages } from "../../dataSources/StoragesDataSource";
+import { InfoButton } from "../InfoButton";
+
+interface State {
+  isSaving: boolean;
+}
+
+interface ReactProps {}
+
+interface InjectedProps {
+  character: CharacterData;
+  dashboardCharacterId: number;
+  allStorages: Dictionary<StorageData>;
+  allCharacters: Dictionary<CharacterData>;
+  contractsByDefByPartyAId: Dictionary<Dictionary<ContractData[]>>;
+  contractsByDefByPartyBId: Dictionary<Dictionary<ContractData[]>>;
+  activeRole: UserRole;
+  currentUserId: number;
+  dispatch?: Dispatch;
+}
+
+type Props = ReactProps & InjectedProps;
+
+class ADashboardPanel extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      isSaving: false,
+    };
+  }
+
+  render(): React.ReactNode {
+    return (
+      <div className={styles.root}>
+        <div className={styles.characterSelectorPanel}>
+          <div className={styles.characterSelectorLabel}>{"Active Character:\xa0"}</div>
+          <div className={styles.characterSelectorValue}>{this.props.character?.name ?? "---"}</div>
+          <EditButton className={styles.editButton} onClick={this.onSelectActiveCharacterClicked.bind(this)} />
+        </div>
+        {this.renderFinancesPanel()}
+        {this.renderCostOfLivingPanel()}
+        <SavingVeil show={this.state.isSaving} textOverride={"Making Payments..."} />
+      </div>
+    );
+  }
+
+  private renderFinancesPanel(): React.ReactNode {
+    const storages = this.getSortedStorages();
+    return (
+      <div className={styles.financesPanel}>
+        <div className={styles.panelTitle}>{"Finances"}</div>
+        <div className={styles.storagesPanel}>
+          <div className={styles.storageFirstColumn}>
+            <div className={styles.storageHeader}>{"Account"}</div>
+            {storages.map((s, index) => {
+              const rowStyle = index % 2 ? styles.odd : "";
+              return (
+                <div className={`${styles.storageCell} ${rowStyle}`} key={index}>
+                  <div className={styles.storageName}>{getStorageDisplayName(s.id)}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className={styles.storageOtherColumn}>
+            <div className={styles.storageHeader}>{"Funds"}</div>
+            {storages.map((s, index) => {
+              const rowStyle = index % 2 ? styles.odd : "";
+              return (
+                <div className={`${styles.storageCell} ${rowStyle}`} key={index}>
+                  <div className={styles.storageMoney}>{addCommasToNumber(s.money, 2)}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className={styles.storageOtherColumn}>
+            <div className={styles.storageHeader}>{"Expenses"}</div>
+            {storages.map((s, index) => {
+              const rowStyle = index % 2 ? styles.odd : "";
+              const expenses = this.getExpensesForStorage(s.id);
+              return (
+                <div className={`${styles.storageCell} ${rowStyle}`} key={index}>
+                  <div className={styles.storageExpense}>{addCommasToNumber(expenses, 2)}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className={styles.storageOtherColumn}>
+            <div className={styles.storageHeader}>{dateFormat(new Date(), "mmm yyyy")}</div>
+            {storages.map((s, index) => {
+              const rowStyle = index % 2 ? styles.odd : "";
+              const unpaidContracts = this.getUnpaidContractsForStorage(s.id);
+              const unpaidAmount = this.getUnpaidAmountForContracts(unpaidContracts);
+              return (
+                <div className={`${styles.storageCell} ${rowStyle}`} key={index}>
+                  <div className={`${styles.financeStatusLabel} ${unpaidAmount > 0 ? styles.Unpaid : styles.Paid}`}>
+                    {unpaidAmount > 0 ? `${addCommasToNumber(unpaidAmount, 2)}` : `Paid`}
+                  </div>
+                  {unpaidAmount > 0 && unpaidAmount <= s.money && (
+                    <div className={styles.payButton} onClick={this.onPayClicked.bind(this, s.id)}>
+                      {"PAY"}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderCostOfLivingPanel(): React.ReactNode {
+    const destitute = this.getCharactersWhoNeedToPayCostOfLivingButCantAffordIt().sort(
+      ({ name: nameA }, { name: nameB }) => {
+        return nameA.localeCompare(nameB);
+      }
+    );
+    const rich = this.getCharactersWhoNeedToPayCostOfLivingAndCanAffordIt();
+    const paid = this.getCharactersWhoHavePaidCostOfLiving();
+    return (
+      <div className={styles.costOfLivingPanel}>
+        <div className={styles.panelTitle}>{`Cost Of Living, ${dateFormat(new Date(), "mmm yyyy")}`}</div>
+        <div className={styles.costOfLivingDataRow}>
+          <div className={styles.costOfLivingLabel}>{"Insolvent Unpaid Characters:\xa0"}</div>
+          <div className={styles.costOfLivingValue}>{destitute.length}</div>
+          <InfoButton
+            className={styles.infoButton}
+            tooltipParams={{
+              id: "DestituteCharacters",
+              content: () => {
+                const toShow = destitute.slice(0, 9);
+                return (
+                  <div className={styles.destituteTooltipRoot}>
+                    {toShow.map((d, index) => {
+                      return (
+                        <div className={styles.destituteTooltipRow} key={index}>
+                          {d.name}
+                        </div>
+                      );
+                    })}
+                    {toShow.length < destitute.length && <div className={styles.destituteTooltipRow}>{"..."}</div>}
+                  </div>
+                );
+              },
+            }}
+          />
+        </div>
+        <div className={styles.costOfLivingDataRow}>
+          <div className={styles.costOfLivingLabel}>{"Solvent Unpaid Characters:\xa0"}</div>
+          <div className={styles.costOfLivingValue}>{rich.length}</div>
+        </div>
+        <div className={styles.costOfLivingDataRow}>
+          <div className={styles.costOfLivingLabel}>{"Paid Characters:\xa0"}</div>
+          <div className={styles.costOfLivingValue}>{paid.length}</div>
+        </div>
+        {rich.length > 0 && (
+          <div className={styles.payCostOfLivingButton} onClick={this.onPayCostOfLivingClicked.bind(this)}>
+            {"Make Payments"}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  private async onPayCostOfLivingClicked(): Promise<void> {
+    this.setState({ isSaving: true });
+    const unpaid = this.getCharactersWhoNeedToPayCostOfLivingAndCanAffordIt();
+
+    const res = await ServerAPI.payCostOfLiving(
+      unpaid,
+      unpaid.map((c) => {
+        return getCostOfLivingForCharacter(c.id);
+      })
+    );
+    if ("error" in res || res.find((r) => "error" in r)) {
+      // Error modal.
+      this.props.dispatch?.(
+        showModal({
+          id: "PayCostOfLivingError",
+          content: { title: "Error", message: "An Error occurred while attempting to pay Cost Of Living expenses." },
+        })
+      );
+    } else {
+      if (this.props.dispatch) {
+        await refetchCharacters(this.props.dispatch);
+        await refetchStorages(this.props.dispatch);
+      }
+    }
+
+    this.setState({ isSaving: false });
+  }
+
+  private getCharactersWhoNeedToPayCostOfLiving(): CharacterData[] {
+    const thisMonth = getFirstOfThisMonthDateString();
+    const characters: CharacterData[] = Object.values(this.props.allCharacters).filter((c) => {
+      // Corpses don't pay maintenance.
+      if (c.dead) return false;
+
+      const isUnpaid = c.maintenance_date !== thisMonth;
+      const isOwnedByUser = c.user_id === this.props.currentUserId;
+
+      return isUnpaid && isOwnedByUser;
+    });
+
+    return characters;
+  }
+
+  private getCharactersWhoNeedToPayCostOfLivingAndCanAffordIt(): CharacterData[] {
+    const characters: CharacterData[] = this.getCharactersWhoNeedToPayCostOfLiving().filter((c) => {
+      const personalPile = getPersonalPile(c.id);
+      const cost = getCostOfLivingForCharacter(c.id);
+
+      return cost <= personalPile.money;
+    });
+
+    return characters;
+  }
+
+  private getCharactersWhoNeedToPayCostOfLivingButCantAffordIt(): CharacterData[] {
+    const characters: CharacterData[] = this.getCharactersWhoNeedToPayCostOfLiving().filter((c) => {
+      const personalPile = getPersonalPile(c.id);
+      const cost = getCostOfLivingForCharacter(c.id);
+
+      return cost > personalPile.money;
+    });
+
+    return characters;
+  }
+
+  private getCharactersWhoHavePaidCostOfLiving(): CharacterData[] {
+    const thisMonth = getFirstOfThisMonthDateString();
+    const characters: CharacterData[] = Object.values(this.props.allCharacters).filter((c) => {
+      // Corpses don't pay maintenance.
+      if (c.dead) return false;
+
+      const isUnpaid = c.maintenance_date !== thisMonth;
+      const isOwnedByUser = c.user_id === this.props.currentUserId;
+
+      return !isUnpaid && isOwnedByUser;
+    });
+
+    return characters;
+  }
+
+  private async onPayClicked(storageId: number): Promise<void> {
+    this.setState({ isSaving: true });
+    const unpaidContracts = this.getUnpaidContractsForStorage(storageId);
+
+    const res = await ServerAPI.exerciseContracts(
+      unpaidContracts,
+      unpaidContracts.map(this.getUnpaidAmountForContract.bind(this))
+    );
+    if ("error" in res || res.find((r) => "error" in r)) {
+      // Error modal.
+      this.props.dispatch?.(
+        showModal({
+          id: "ExerciseContractsError",
+          content: { title: "Error", message: "An Error occurred while attempting to exercise the contracts." },
+        })
+      );
+    } else {
+      if (this.props.dispatch) {
+        await refetchContracts(this.props.dispatch);
+        await refetchCharacters(this.props.dispatch);
+        await refetchArmies(this.props.dispatch);
+        await refetchStructures(this.props.dispatch);
+        await refetchStorages(this.props.dispatch);
+      }
+    }
+
+    this.setState({ isSaving: false });
+  }
+
+  private getUnpaidContractsForStorage(storageId: number): ContractData[] {
+    const unpaid: ContractData[] = [];
+
+    const thisMonth = getFirstOfThisMonthDateString();
+
+    // Army wages.
+    unpaid.push(
+      ...this.props.contractsByDefByPartyAId[ContractId.ArmyWageContract]?.[this.props.dashboardCharacterId]?.filter(
+        (awc) => awc.target_a_id === storageId && awc.exercise_date !== thisMonth
+      )
+    );
+
+    // Character wages.
+    unpaid.push(
+      ...this.props.contractsByDefByPartyAId[ContractId.CharacterWageContract]?.[
+        this.props.dashboardCharacterId
+      ]?.filter((cwc) => cwc.target_a_id === storageId && cwc.exercise_date !== thisMonth)
+    );
+
+    // Structure maintenance.
+    unpaid.push(
+      ...this.props.contractsByDefByPartyAId[ContractId.StructureMaintenanceContract]?.[
+        this.props.dashboardCharacterId
+      ]?.filter((smc) => smc.target_a_id === storageId && smc.exercise_date !== thisMonth)
+    );
+
+    return unpaid;
+  }
+
+  private getUnpaidAmountForContract(contract: ContractData): number {
+    switch (contract.def_id) {
+      case ContractId.ArmyWageContract: {
+        return getArmyTotalWages(contract.party_b_id);
+      }
+      case ContractId.CharacterWageContract: {
+        return getCostOfLivingForCharacter(contract.party_b_id);
+      }
+      case ContractId.StructureMaintenanceContract: {
+        return getStructureMonthlyMaintenance(contract.party_b_id);
+      }
+    }
+    return 0;
+  }
+
+  private getUnpaidAmountForContracts(contracts: ContractData[]): number {
+    let total = 0;
+
+    contracts.forEach((c) => {
+      total += this.getUnpaidAmountForContract(c);
+    });
+
+    return total;
+  }
+
+  private getExpensesForStorage(storageId: number): number {
+    let total = 0;
+
+    // Army wages.
+    this.props.contractsByDefByPartyAId[ContractId.ArmyWageContract]?.[this.props.dashboardCharacterId]?.forEach(
+      (awc) => {
+        if (awc.target_a_id === storageId) {
+          total += getArmyTotalWages(awc.party_b_id);
+        }
+      }
+    );
+
+    // Character wages.
+    this.props.contractsByDefByPartyAId[ContractId.CharacterWageContract]?.[this.props.dashboardCharacterId]?.forEach(
+      (cwc) => {
+        if (cwc.target_a_id === storageId) {
+          total += getCostOfLivingForCharacter(cwc.party_b_id);
+        }
+      }
+    );
+
+    // Structure maintenance.
+    this.props.contractsByDefByPartyAId[ContractId.StructureMaintenanceContract]?.[
+      this.props.dashboardCharacterId
+    ]?.forEach((smc) => {
+      if (smc.target_a_id === storageId) {
+        total += getStructureMonthlyMaintenance(smc.party_b_id);
+      }
+    });
+
+    return total;
+  }
+
+  private onSelectActiveCharacterClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "selectActiveCharacter",
+        content: () => {
+          return (
+            <SelectAdventurerDialog
+              preselectedAdventurerId={this.props.dashboardCharacterId}
+              onSelectionConfirmed={async (characterId: number) => {
+                dashboardLocalStore.setDashboardCharacterId(characterId);
+                this.props.dispatch?.(setDashboardCharacterId(characterId));
+              }}
+            />
+          );
+        },
+        escapable: true,
+        widthVmin: 45,
+      })
+    );
+  }
+
+  private getSortedStorages(): StorageData[] {
+    if (!this.props.character) {
+      return [];
+    }
+
+    const permittedStorages = Object.values(this.props.allStorages).filter((storage) => {
+      return (
+        this.props.activeRole !== "player" ||
+        // Storages are owned by characters, not players, so we have to chain back through the owner to find the user.
+        this.props.allCharacters[storage.owner_id].user_id === this.props.currentUserId
+      );
+    });
+
+    const filteredStorages = permittedStorages.filter((s) => {
+      return s.owner_id === this.props.dashboardCharacterId;
+    });
+
+    const personalPileId = getPersonalPile(this.props.dashboardCharacterId ?? 0)?.id ?? 0;
+    filteredStorages.sort((storageA, storageB) => {
+      // The focused character's Personal Pile is always first.
+      if (storageA.id === personalPileId) {
+        return -1;
+      } else if (storageB.id === personalPileId) {
+        return 1;
+      }
+
+      // And an alphy sort when the others don't apply.
+      const nameA = getStorageDisplayName(storageA.id);
+      const nameB = getStorageDisplayName(storageB.id);
+
+      return nameA.localeCompare(nameB);
+    });
+
+    return filteredStorages;
+  }
+}
+
+function mapStateToProps(state: RootState, props: ReactProps): Props {
+  const character = state.characters.characters[state.characters.dashboardCharacterId];
+  const { dashboardCharacterId, characters: allCharacters } = state.characters;
+  const allStorages = state.storages.allStorages;
+  const { activeRole } = state.hud;
+  const currentUserId = state.user.currentUser.id;
+  const { contractsByDefByPartyAId, contractsByDefByPartyBId } = state.contracts;
+  return {
+    ...props,
+    character,
+    dashboardCharacterId,
+    allStorages,
+    allCharacters,
+    contractsByDefByPartyAId,
+    contractsByDefByPartyBId,
+    activeRole,
+    currentUserId,
+  };
+}
+
+export const DashboardPanel = connect(mapStateToProps)(ADashboardPanel);

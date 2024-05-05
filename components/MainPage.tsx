@@ -42,6 +42,8 @@ import { ArmiesPanel } from "./armies/ArmiesPanel";
 import { refetchStructureComponents, refetchStructures } from "../dataSources/StructuresDataSource";
 import { setActiveStructureId } from "../redux/structuresSlice";
 import { StructuresPanel } from "./structures/StructuresPanel";
+import { refetchContracts } from "../dataSources/ContractsDataSource";
+import { DashboardPanel } from "./dashboard/DashboardPanel";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -51,7 +53,7 @@ interface InjectedProps {
 
 type Props = ReactProps & InjectedProps;
 
-type MainPanelId = "Characters" | "Armies" | "Structures" | "World" | "Activities" | "Tools" | "Database";
+type MainPanelId = "Dashboard" | "Characters" | "Armies" | "Structures" | "World" | "Activities" | "Tools" | "Database";
 
 interface State {
   activePanel: MainPanelId;
@@ -63,7 +65,7 @@ class AMainPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { activePanel: "Characters", isLoading: false, nowLoading: "" };
+    this.state = { activePanel: "Dashboard", isLoading: false, nowLoading: "" };
   }
 
   render(): React.ReactNode {
@@ -71,6 +73,7 @@ class AMainPage extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <div className={`${styles.contentWrapper} ${sizeClass}`}>
+          {this.state.activePanel === "Dashboard" && <DashboardPanel />}
           {this.state.activePanel === "Characters" && <CharactersPanel />}
           {this.state.activePanel === "Armies" && <ArmiesPanel />}
           {this.state.activePanel === "Structures" && <StructuresPanel />}
@@ -93,6 +96,17 @@ class AMainPage extends React.Component<Props, State> {
           </div>
 
           <div className={styles.panelSelectors}>
+            <TooltipSource
+              className={`${styles.panelSelector} ${this.state.activePanel === "Dashboard" ? styles.selected : ""}`}
+              tooltipParams={{ id: "DashboardPanel", content: "Dashboard" }}
+              onMouseDown={() => {
+                requestAnimationFrame(() => {
+                  this.setState({ activePanel: "Dashboard" });
+                });
+              }}
+            >
+              <img className={styles.panelSelectorImage} src={"/images/Dashboard.png"} />
+            </TooltipSource>
             <TooltipSource
               className={`${styles.panelSelector} ${this.state.activePanel === "Characters" ? styles.selected : ""}`}
               tooltipParams={{ id: "CharactersPanel", content: "Characters" }}
@@ -187,6 +201,8 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchArmies(this.props.dispatch);
                 this.setState({ nowLoading: "Characters" });
                 await refetchCharacters(this.props.dispatch);
+                this.setState({ nowLoading: "Contracts" });
+                await refetchContracts(this.props.dispatch);
                 this.setState({ nowLoading: "Equipment Set Items" });
                 await refetchEquipmentSetItems(this.props.dispatch);
                 this.setState({ nowLoading: "Equipment Sets" });

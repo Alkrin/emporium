@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { SQLQuery, executeTransaction } from "../../lib/db";
 import { RequestBody_DeleteArmy } from "../../serverRequestTypes";
+import { ContractId } from "../../redux/gameDefsSlice";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
@@ -20,6 +21,12 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         query: `DELETE FROM troops WHERE id=?`,
         values: [tid],
       });
+    });
+
+    // Contracts.
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND party_b_id=?`,
+      values: [ContractId.ArmyWageContract, b.id],
     });
 
     // The army itself.

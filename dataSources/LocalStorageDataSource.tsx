@@ -2,6 +2,8 @@ import * as React from "react";
 import { authLocalStore } from "../localStores/authLocalStore";
 import ExternalDataSource from "../redux/externalDataSource";
 import { setLastAuthedUserName } from "../redux/userSlice";
+import { dashboardLocalStore } from "../localStores/dashboardLocalStore";
+import { setDashboardCharacterId } from "../redux/charactersSlice";
 
 export class LocalStorageDataSource extends ExternalDataSource {
   componentDidMount(): void {
@@ -10,5 +12,8 @@ export class LocalStorageDataSource extends ExternalDataSource {
     // UI, since Redux automatically triggers re-renders when data changes.
     const prevPlayer = authLocalStore.getLastAuthedPlayerName();
     this.dispatch?.(setLastAuthedUserName(prevPlayer));
+
+    const dashboardCharacterId = dashboardLocalStore.getDashboardCharacterId();
+    this.dispatch?.(setDashboardCharacterId(dashboardCharacterId));
   }
 }

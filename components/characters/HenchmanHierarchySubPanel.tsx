@@ -19,6 +19,9 @@ import { showToaster } from "../../redux/toastersSlice";
 import Draggable from "../Draggable";
 import { DraggableHandle } from "../DraggableHandle";
 import BonusTooltip from "../BonusTooltip";
+import { showModal } from "../../redux/modalsSlice";
+import { InputSingleNumberDialog } from "../dialogs/InputSingleNumberDialog";
+import { refetchContracts } from "../../dataSources/ContractsDataSource";
 
 const DropTypeMinion = "Minion";
 
@@ -173,14 +176,38 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
       return;
     }
 
-    const res = await ServerAPI.setHenchmaster(this.state.selectedCharacterId, character.id);
-    if ("error" in res) {
-      this.showErrorToaster("A server error occurred.  Henchman not assigned.");
-    } else {
-      this.props.dispatch?.(
-        setHenchmaster({ masterCharacterId: this.state.selectedCharacterId, minionCharacterId: character.id })
-      );
-    }
+    // Confirm what percentage of loot was promised to this henchman (default is 15%).
+    this.props.dispatch?.(
+      showModal({
+        id: "HenchmanContracts",
+        content: () => {
+          return (
+            <InputSingleNumberDialog
+              title={`Contract Negotiations`}
+              prompt={`What percent of loot was promised to ${character.name} in exchange for serving as a henchman?`}
+              initialValue={15}
+              onValueConfirmed={async (percentage: number) => {
+                const res = await ServerAPI.setHenchmaster(this.state.selectedCharacterId, character.id, percentage);
+                if ("error" in res || res.find((r) => "error" in r)) {
+                  this.showErrorToaster("A server error occurred.  Henchman not assigned.");
+                } else {
+                  this.props.dispatch?.(
+                    setHenchmaster({
+                      masterCharacterId: this.state.selectedCharacterId,
+                      minionCharacterId: character.id,
+                    })
+                  );
+                  // Becoming a henchman generates some default contracts between the minion and the master.
+                  if (this.props.dispatch) {
+                    await refetchContracts(this.props.dispatch);
+                  }
+                }
+              }}
+            />
+          );
+        },
+      })
+    );
   }
 
   private canBecomeMinion(potentialMinionCharacterId: number): boolean {
@@ -255,12 +282,12 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
   }
 
   private async onRemoveMinionClicked(minionCharacterId: number): Promise<void> {
-    const res = await ServerAPI.setHenchmaster(0, minionCharacterId);
-    if ("error" in res) {
+    const res = await ServerAPI.setHenchmaster(0, minionCharacterId, 0);
+    if ("error" in res || res.find((r) => "error" in r)) {
       this.props.dispatch?.(
         showToaster({
           id: "ServerError",
-          content: { title: "Server Error", message: res.error },
+          content: { title: "Server Error", message: "An error occurred while attempting to fire this henchman." },
         })
       );
     } else {
