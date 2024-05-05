@@ -19,6 +19,7 @@ import { mapsSlice } from "./mapsSlice";
 import { locationsSlice } from "./locationsSlice";
 import { armiesSlice } from "./armiesSlice";
 import { structuresSlice } from "./structuresSlice";
+import { contractsSlice } from "./contractsSlice";
 
 const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ const store = configureStore({
     armies: armiesSlice.reducer,
     characters: charactersSlice.reducer,
     contextMenu: contextMenuSlice.reducer,
+    contracts: contractsSlice.reducer,
     dragAndDrop: dragAndDropSlice.reducer,
     gameDefs: gameDefsSlice.reducer,
     hud: hudSlice.reducer,

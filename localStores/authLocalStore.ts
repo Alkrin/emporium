@@ -8,13 +8,8 @@ class AuthLocalStore extends LocalStore {
   }
 
   getLastAuthedPlayerName(): string {
-    const lastNameRaw = this.getItem(keyLastAuthedPlayerName) ?? "";
-
-    try {
-      return JSON.parse(lastNameRaw);
-    } catch (error) {
-      return "";
-    }
+    const lastName = this.getItem<string>(keyLastAuthedPlayerName) ?? "";
+    return lastName;
   }
 
   setLastAuthedPlayerName(name: string): void {

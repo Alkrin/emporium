@@ -1300,6 +1300,12 @@ export function getCostOfLivingForCharacterLevel(level: number): number {
   return livingCostsByLevel[level] ?? 0;
 }
 
+export function getCostOfLivingForCharacter(characterId: number): number {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  return getCostOfLivingForCharacterLevel(character?.level ?? 0);
+}
+
 export enum MaintenanceStatus {
   Unknown = "Unknown",
   Unpaid = "Unpaid",

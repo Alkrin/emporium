@@ -12,6 +12,7 @@ import styles from "./SavingVeil.module.scss";
 
 interface ReactProps {
   show: boolean;
+  textOverride?: string;
 }
 
 interface InjectedProps {
@@ -27,7 +28,7 @@ class ASavingVeil extends React.Component<Props> {
     } else {
       return (
         <div className={styles.root}>
-          <div className={styles.label}>{"Saving..."}</div>
+          <div className={styles.label}>{this.props.textOverride ?? "Saving..."}</div>
         </div>
       );
     }

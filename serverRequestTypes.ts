@@ -3,7 +3,9 @@ import {
   ActivityData,
   ActivityOutcomeData,
   ArmyData,
+  CharacterData,
   CharacterEquipmentData,
+  ContractData,
   EquipmentSetData,
   EquipmentSetItemData,
   LocationCityData,
@@ -88,6 +90,7 @@ export interface RequestBody_DeleteItems {
 export interface RequestBody_SetHenchmaster {
   masterCharacterId: number;
   minionCharacterId: number;
+  percentLoot: number;
 }
 
 export interface RequestBody_CreateItem {
@@ -198,6 +201,17 @@ export interface RequestBody_ResolveActivity {
   activity: ActivityData;
   resolution_text: string;
   outcomes: ActivityOutcomeData[];
+  campaignGPDistributions: Dictionary<number>;
+}
+
+export interface RequestBody_ExerciseContract {
+  contracts: ContractData[];
+  gp: number[];
+}
+
+export interface RequestBody_PayCostOfLiving {
+  characters: CharacterData[];
+  gp: number[];
 }
 
 export interface RequestBody_KillOrReviveCharacter {
@@ -224,6 +238,9 @@ export type RequestBody_EditActivity = ServerActivityData;
 // Army
 export type RequestBody_CreateArmy = Omit<ArmyData, "id">;
 export type RequestBody_EditArmy = ArmyData;
+// Contract
+export type RequestBody_CreateContract = Omit<ContractData, "id">;
+export type RequestBody_EditContract = ContractData;
 // ItemDef
 export type RequestBody_CreateItemDef = Omit<ServerItemDefData, "id">;
 export type RequestBody_EditItemDef = ServerItemDefData;

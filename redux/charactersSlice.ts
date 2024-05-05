@@ -6,6 +6,7 @@ import { CharacterData, CharacterEquipmentData } from "../serverAPI";
 interface CharactersReduxState {
   characters: Dictionary<CharacterData>;
   activeCharacterId: number;
+  dashboardCharacterId: number;
 }
 
 export interface SetXPParams {
@@ -48,6 +49,7 @@ function buildDefaultCharactersReduxState(): CharactersReduxState {
   const defaults: CharactersReduxState = {
     characters: {},
     activeCharacterId: -1,
+    dashboardCharacterId: 0,
   };
   return defaults;
 }
@@ -66,6 +68,9 @@ export const charactersSlice = createSlice({
     },
     setActiveCharacterId: (state: CharactersReduxState, action: PayloadAction<number>) => {
       state.activeCharacterId = action.payload;
+    },
+    setDashboardCharacterId: (state: CharactersReduxState, action: PayloadAction<number>) => {
+      state.dashboardCharacterId = action.payload;
     },
     setCharacterHP: (state: CharactersReduxState, action: PayloadAction<SetHPParams>) => {
       if (state.characters[action.payload.characterId]) {
@@ -114,6 +119,7 @@ export const {
   updateCharacter,
   deleteCharacter,
   setActiveCharacterId,
+  setDashboardCharacterId,
   setCharacterHP,
   setCharacterLocation,
   setCharacterXP,

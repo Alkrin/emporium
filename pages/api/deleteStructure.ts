@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { SQLQuery, executeTransaction } from "../../lib/db";
 import { RequestBody_DeleteSingleEntry } from "../../serverRequestTypes";
+import { ContractId } from "../../redux/gameDefsSlice";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
@@ -12,6 +13,12 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     queries.push({
       query: `DELETE FROM structure_components WHERE structure_id=?`,
       values: [b.id],
+    });
+
+    // Contracts.
+    queries.push({
+      query: `DELETE FROM contracts WHERE def_id=? AND party_b_id=?`,
+      values: [ContractId.StructureMaintenanceContract, b.id],
     });
 
     // Finally, delete the structure itself.

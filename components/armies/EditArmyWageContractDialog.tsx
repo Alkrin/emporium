@@ -1,0 +1,178 @@
+import { Dispatch } from "@reduxjs/toolkit";
+import * as React from "react";
+import { connect } from "react-redux";
+import { hideModal, showModal } from "../../redux/modalsSlice";
+import { RootState } from "../../redux/store";
+import ServerAPI, { ArmyData, ContractData } from "../../serverAPI";
+import styles from "./EditArmyWageContractDialog.module.scss";
+import { SavingVeil } from "../SavingVeil";
+import { ContractDefData, ContractId, ContractTerm } from "../../redux/gameDefsSlice";
+import dateFormat from "dateformat";
+import { ContractEditor } from "../ContractEditor";
+import { deleteContract, updateContract } from "../../redux/contractsSlice";
+
+interface State {
+  contract: ContractData;
+  isSaving: boolean;
+}
+
+interface ReactProps {
+  armyId: number;
+  contract?: ContractData;
+}
+
+interface InjectedProps {
+  army: ArmyData;
+  contractDef: ContractDefData;
+  dispatch?: Dispatch;
+}
+
+type Props = ReactProps & InjectedProps;
+
+class AEditArmyWageContractDialog extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      contract: props.contract
+        ? { ...props.contract }
+        : {
+            id: 0,
+            def_id: ContractId.ArmyWageContract,
+            party_a_id: 0,
+            party_b_id: props.armyId,
+            target_a_id: 0,
+            target_b_id: 0,
+            value: 0,
+            exercise_date: "",
+          },
+      isSaving: false,
+    };
+  }
+
+  render(): React.ReactNode {
+    return (
+      <div className={styles.root}>
+        <div className={styles.armyName}>{this.props.army.name}</div>
+        <div className={styles.contractTitle}>{"Wage Contract"}</div>
+
+        <ContractEditor
+          className={styles.contractContainer}
+          contract={this.state.contract}
+          lockedTerms={[ContractTerm.PartyB]}
+        />
+
+        <div className={styles.actionButton} onClick={this.onSaveClicked.bind(this)}>
+          Save Changes
+        </div>
+        <div className={styles.actionButton} onClick={this.onCloseClicked.bind(this)}>
+          Close
+        </div>
+        <SavingVeil show={this.state.isSaving} />
+      </div>
+    );
+  }
+
+  private async onSaveClicked(): Promise<void> {
+    if (this.state.isSaving) {
+      return;
+    }
+
+    // Validate the contract.
+    if (this.state.contract.party_a_id && this.state.contract.target_a_id) {
+      this.setState({ isSaving: true });
+      if (this.state.contract.id) {
+        // Edit existing contract.
+        const res = await ServerAPI.editContract(this.state.contract);
+        if ("error" in res) {
+          this.props.dispatch?.(
+            showModal({
+              id: "EditContractError",
+              content: { title: "Error", message: "An Error occurred during contract alteration." },
+            })
+          );
+        } else {
+          this.props.dispatch?.(updateContract(this.state.contract));
+          this.props.dispatch?.(hideModal());
+        }
+      } else {
+        // Create new contract.
+        const res = await ServerAPI.createContract(this.state.contract);
+        if ("error" in res) {
+          this.props.dispatch?.(
+            showModal({
+              id: "CreateContractError",
+              content: { title: "Error", message: "An Error occurred during contract creation." },
+            })
+          );
+        } else {
+          this.state.contract.id = res.insertId;
+          this.props.dispatch?.(updateContract(this.state.contract));
+          this.props.dispatch?.(hideModal());
+        }
+      }
+      this.setState({ isSaving: false });
+    } else if (this.state.contract.id) {
+      // Prompt to delete.
+      this.props.dispatch?.(
+        showModal({
+          id: "DeleteContract",
+          content: {
+            title: "Delete Contract?",
+            message: "These contract terms are invalid.  Do you wish to delete the contract?",
+            buttonText: "Cancel",
+            onButtonClick: async () => {
+              this.props.dispatch?.(hideModal());
+            },
+            extraButtons: [
+              {
+                text: "Delete",
+                onClick: async () => {
+                  const dres = await ServerAPI.deleteContract(this.state.contract.id);
+                  if ("error" in dres) {
+                    this.props.dispatch?.(
+                      showModal({
+                        id: "DeleteContractError",
+                        content: { title: "Error", message: "An Error occurred during contract deletion." },
+                      })
+                    );
+                  } else {
+                    this.props.dispatch?.(deleteContract(this.state.contract.id));
+                    // Close the confirmation dialog.
+                    this.props.dispatch?.(hideModal());
+                    // Close the contract dialog.
+                    this.props.dispatch?.(hideModal());
+                  }
+                },
+              },
+            ],
+          },
+          escapable: true,
+        })
+      );
+    } else {
+      this.props.dispatch?.(
+        showModal({
+          id: "CreateContractError",
+          content: { title: "Error", message: "All Terms must be specified in order to create a contract." },
+        })
+      );
+    }
+  }
+
+  private onCloseClicked(): void {
+    this.props.dispatch?.(hideModal());
+  }
+}
+
+function mapStateToProps(state: RootState, props: ReactProps): Props {
+  const army = state.armies.armies[props.armyId];
+  const contractDef = state.gameDefs.contracts[ContractId.ArmyWageContract];
+  return {
+    ...props,
+    army,
+    contractDef,
+  };
+}
+
+export const EditArmyWageContractDialog = connect(mapStateToProps)(AEditArmyWageContractDialog);

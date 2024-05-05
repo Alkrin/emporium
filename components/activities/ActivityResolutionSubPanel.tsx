@@ -852,7 +852,9 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
     const res = await ServerAPI.resolveActivity(
       this.props.activities[this.props.activeActivityId],
       this.state.resolutionText,
-      outcomes
+      outcomes,
+      // TODO: Use activityUtils.generateActivityOutcomes() instead!
+      {}
     );
 
     // Refetch anything that might be altered by an activity resolution.  So... almost everything.

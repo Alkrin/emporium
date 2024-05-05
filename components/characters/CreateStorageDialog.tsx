@@ -163,10 +163,9 @@ class ACreateStorageDialog extends React.Component<Props, State> {
         content: () => {
           return (
             <SelectLocationDialog
-              preselectedLocationId={this.props.character.location_id}
+              preselectedLocationId={this.state.locationId ? this.state.locationId : this.props.character.location_id}
               onSelectionConfirmed={async (locationId) => {
                 this.setState({ locationId });
-                this.props.dispatch?.(hideModal());
               }}
             />
           );
