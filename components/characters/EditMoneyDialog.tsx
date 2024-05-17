@@ -3,16 +3,14 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData, StorageData } from "../../serverAPI";
+import ServerAPI, { StorageData } from "../../serverAPI";
 import styles from "./EditMoneyDialog.module.scss";
-import { getPersonalPile } from "../../lib/characterUtils";
 import { updateStorage } from "../../redux/storageSlice";
-import { Dictionary } from "../../lib/dictionary";
 import { getStorageDisplayName } from "../../lib/storageUtils";
 
 interface State {
-  gpTotal: number;
-  gpDelta: number;
+  gpTotalString: string;
+  gpDeltaString: string;
   saving: boolean;
 }
 
@@ -32,8 +30,8 @@ class AEditMoneyDialog extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      gpTotal: props.storage?.money ?? 0,
-      gpDelta: 0,
+      gpTotalString: (props.storage?.money ?? 0).toFixed(2),
+      gpDeltaString: (0).toFixed(2),
       saving: false,
     };
   }
@@ -47,9 +45,9 @@ class AEditMoneyDialog extends React.Component<Props, State> {
           <input
             className={styles.gpTextField}
             type={"number"}
-            value={this.state.gpTotal}
+            value={this.state.gpTotalString}
             onChange={(e) => {
-              this.setState({ gpTotal: +e.target.value });
+              this.setState({ gpTotalString: e.target.value });
             }}
             tabIndex={1}
             autoFocus
@@ -64,9 +62,9 @@ class AEditMoneyDialog extends React.Component<Props, State> {
           <input
             className={styles.gpTextField}
             type={"number"}
-            value={this.state.gpDelta}
+            value={this.state.gpDeltaString}
             onChange={(e) => {
-              this.setState({ gpDelta: +e.target.value });
+              this.setState({ gpDeltaString: e.target.value });
             }}
             tabIndex={2}
           />
@@ -87,7 +85,7 @@ class AEditMoneyDialog extends React.Component<Props, State> {
     }
     this.setState({ saving: true });
 
-    const result = await ServerAPI.setMoney(this.props.storage.id, this.state.gpTotal);
+    const result = await ServerAPI.setMoney(this.props.storage.id, +this.state.gpTotalString);
 
     if ("error" in result) {
       this.props.dispatch?.(
@@ -120,7 +118,7 @@ class AEditMoneyDialog extends React.Component<Props, State> {
     const result = await ServerAPI.setMoney(
       this.props.storage.id,
       // It is possible to have negative money, for bookkeeping purposes.
-      this.props.storage.money + this.state.gpDelta
+      this.props.storage.money + +this.state.gpDeltaString
     );
 
     if ("error" in result) {

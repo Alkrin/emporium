@@ -63,6 +63,13 @@
   margin-left: 0.5vmin;
 }
 
+.editButtonInline {
+  position: relative;
+  margin-left: 0.5vmin;
+  margin-top: -0.25vmin;
+  margin-bottom: -0.25vmin;
+}
+
 .financesPanel {
   @extend .dataPanel;
   margin-top: 1vmin;
@@ -216,6 +223,8 @@
 .infoButton {
   position: relative;
   margin-left: 0.5vmin;
+  margin-top: -0.25vmin;
+  margin-bottom: -0.25vmin;
 }
 
 .destituteTooltipRoot {
@@ -223,6 +232,35 @@
 }
 
 .destituteTooltipRow {
+  position: relative;
+  font-size: 1rem;
+  color: #c00;
+}
+
+.expensesTooltipRoot {
+  @extend .column;
+  align-items: flex-start;
+}
+
+.expensesTooltipHeader {
+  position: relative;
+  align-self: center;
+  margin-bottom: 0.5vmin;
+  font-size: 1.2rem;
+  color: wheat;
+  border-bottom: 1px solid yellow;
+}
+
+.expensesTooltipExpenseType {
+  position: relative;
+  font-size: 1rem;
+  color: #990;
+  text-align: right;
+  width: 18vmin;
+  flex-shrink: 0;
+}
+
+.expensesTooltipExpenseAmount {
   position: relative;
   font-size: 1rem;
   color: #c00;
