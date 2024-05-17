@@ -25,6 +25,7 @@ import { refetchStructures } from "../../dataSources/StructuresDataSource";
 import { SavingVeil } from "../SavingVeil";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
 import { InfoButton } from "../InfoButton";
+import { EditMoneyDialog } from "../characters/EditMoneyDialog";
 
 interface State {
   isSaving: boolean;
@@ -94,6 +95,7 @@ class ADashboardPanel extends React.Component<Props, State> {
               return (
                 <div className={`${styles.storageCell} ${rowStyle}`} key={index}>
                   <div className={styles.storageMoney}>{addCommasToNumber(s.money, 2)}</div>
+                  <EditButton className={styles.editButtonInline} onClick={this.onEditFundsClicked.bind(this, s)} />
                 </div>
               );
             })}
@@ -106,6 +108,13 @@ class ADashboardPanel extends React.Component<Props, State> {
               return (
                 <div className={`${styles.storageCell} ${rowStyle}`} key={index}>
                   <div className={styles.storageExpense}>{addCommasToNumber(expenses, 2)}</div>
+                  <InfoButton
+                    className={styles.infoButton}
+                    tooltipParams={{
+                      id: ``,
+                      content: this.renderExpensesTooltip.bind(this, s),
+                    }}
+                  />
                 </div>
               );
             })}
@@ -135,6 +144,32 @@ class ADashboardPanel extends React.Component<Props, State> {
     );
   }
 
+  private renderExpensesTooltip(storage: StorageData): React.ReactNode {
+    return (
+      <div className={styles.expensesTooltipRoot}>
+        <div className={styles.expensesTooltipHeader}>{getStorageDisplayName(storage.id)}</div>
+        <div className={styles.row}>
+          <div className={styles.expensesTooltipExpenseType}>{"Character Wages:\xa0"}</div>
+          <div className={styles.expensesTooltipExpenseAmount}>
+            {addCommasToNumber(this.getCharacterWagesForStorage(storage.id), 2)}
+          </div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.expensesTooltipExpenseType}>{"Army Wages:\xa0"}</div>
+          <div className={styles.expensesTooltipExpenseAmount}>
+            {addCommasToNumber(this.getArmyWagesForStorage(storage.id), 2)}
+          </div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.expensesTooltipExpenseType}>{"Structure Maintenance:\xa0"}</div>
+          <div className={styles.expensesTooltipExpenseAmount}>
+            {addCommasToNumber(this.getStructureMaintenanceForStorage(storage.id), 2)}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   private renderCostOfLivingPanel(): React.ReactNode {
     const destitute = this.getCharactersWhoNeedToPayCostOfLivingButCantAffordIt().sort(
       ({ name: nameA }, { name: nameB }) => {
@@ -155,7 +190,7 @@ class ADashboardPanel extends React.Component<Props, State> {
               id: "DestituteCharacters",
               content: () => {
                 const toShow = destitute.slice(0, 9);
-                return (
+                return toShow.length === 0 ? null : (
                   <div className={styles.destituteTooltipRoot}>
                     {toShow.map((d, index) => {
                       return (
@@ -185,6 +220,18 @@ class ADashboardPanel extends React.Component<Props, State> {
           </div>
         )}
       </div>
+    );
+  }
+
+  private async onEditFundsClicked(storage: StorageData): Promise<void> {
+    this.props.dispatch?.(
+      showModal({
+        id: `EditFunds${storage.id}`,
+        content: () => {
+          return <EditMoneyDialog storageId={storage.id} />;
+        },
+        escapable: true,
+      })
     );
   }
 
@@ -351,10 +398,9 @@ class ADashboardPanel extends React.Component<Props, State> {
     return total;
   }
 
-  private getExpensesForStorage(storageId: number): number {
-    let total = 0;
+  private getArmyWagesForStorage(storageId: number): number {
+    let total: number = 0;
 
-    // Army wages.
     this.props.contractsByDefByPartyAId[ContractId.ArmyWageContract]?.[this.props.dashboardCharacterId]?.forEach(
       (awc) => {
         if (awc.target_a_id === storageId) {
@@ -363,7 +409,12 @@ class ADashboardPanel extends React.Component<Props, State> {
       }
     );
 
-    // Character wages.
+    return total;
+  }
+
+  private getCharacterWagesForStorage(storageId: number): number {
+    let total: number = 0;
+
     this.props.contractsByDefByPartyAId[ContractId.CharacterWageContract]?.[this.props.dashboardCharacterId]?.forEach(
       (cwc) => {
         if (cwc.target_a_id === storageId) {
@@ -372,7 +423,12 @@ class ADashboardPanel extends React.Component<Props, State> {
       }
     );
 
-    // Structure maintenance.
+    return total;
+  }
+
+  private getStructureMaintenanceForStorage(storageId: number): number {
+    let total: number = 0;
+
     this.props.contractsByDefByPartyAId[ContractId.StructureMaintenanceContract]?.[
       this.props.dashboardCharacterId
     ]?.forEach((smc) => {
@@ -380,6 +436,21 @@ class ADashboardPanel extends React.Component<Props, State> {
         total += getStructureMonthlyMaintenance(smc.party_b_id);
       }
     });
+
+    return total;
+  }
+
+  private getExpensesForStorage(storageId: number): number {
+    let total = 0;
+
+    // Army wages.
+    total += this.getArmyWagesForStorage(storageId);
+
+    // Character wages.
+    total += this.getCharacterWagesForStorage(storageId);
+
+    // Structure maintenance.
+    total += this.getStructureMaintenanceForStorage(storageId);
 
     return total;
   }
