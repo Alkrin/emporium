@@ -255,7 +255,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       });
     }
 
-    Object.entries(b.campaignGPDistributions).forEach((storageIdString, gp) => {
+    Object.entries(b.campaignGPDistributions).forEach(([storageIdString, gp]) => {
       const storageId = +storageIdString;
       queries.push({
         query: `UPDATE storage SET money=money+? WHERE id=?`,
