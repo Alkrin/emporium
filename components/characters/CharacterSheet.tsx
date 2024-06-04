@@ -1051,7 +1051,7 @@ class ACharacterSheet extends React.Component<Props> {
       <div className={styles.moneyTooltipRoot}>
         <div className={styles.row}>
           <div className={styles.moneyTooltipTitle}>{"Total GP"}</div>
-          <div className={styles.moneyTooltipValue}>{addCommasToNumber(money)}</div>
+          <div className={styles.moneyTooltipValue}>{addCommasToNumber(money, 2)}</div>
         </div>
         <div className={styles.moneyTooltipDivider} />
         {this.props.storages.map((s) => {
@@ -1059,7 +1059,7 @@ class ACharacterSheet extends React.Component<Props> {
           return (
             <div className={styles.moneyTooltipSourceRow} key={s.id}>
               <div className={styles.moneyTooltipSource}>{storageName}</div>
-              <div className={styles.moneyTooltipSourceValue}>{addCommasToNumber(s.money)}</div>
+              <div className={styles.moneyTooltipSourceValue}>{addCommasToNumber(s.money, 2)}</div>
             </div>
           );
         })}

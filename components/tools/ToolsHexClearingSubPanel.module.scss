@@ -21,6 +21,12 @@
   user-select: none;
 }
 
+.reducedValueText {
+  font-size: 1rem;
+  color: red;
+  user-select: none;
+}
+
 .firstLabel {
   @extend .labelText;
   margin-top: 0.2vmin;
