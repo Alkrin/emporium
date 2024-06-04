@@ -118,7 +118,7 @@ class ASelectArmiesDialog extends React.Component<Props, State> {
         <div className={styles.listBattleRating}>{`BR: ${getArmyAvailableBattleRating(
           army.id,
           this.props.currentDateOverride
-        )} / ${getArmyTotalBattleRating(army.id)}`}</div>
+        ).toFixed(2)} / ${getArmyTotalBattleRating(army.id).toFixed(2)}`}</div>
         <div className={styles.listName}>{army.name}</div>
         <div className={styles.plusMinusButton} onClick={this.onRemoveParticipant.bind(this, army)}>
           -
@@ -130,9 +130,9 @@ class ASelectArmiesDialog extends React.Component<Props, State> {
   private renderArmyRow(army: ArmyData, index: number): React.ReactNode {
     return (
       <div className={styles.listRow} key={`armyRow${index}`}>
-        <div className={styles.listBattleRating}>{`BR: ${getArmyAvailableBattleRating(
-          army.id
-        )} / ${getArmyTotalBattleRating(army.id)}`}</div>
+        <div className={styles.listBattleRating}>{`BR: ${getArmyAvailableBattleRating(army.id).toFixed(
+          2
+        )} / ${getArmyTotalBattleRating(army.id).toFixed(2)}`}</div>
         <div className={styles.listName}>{army.name}</div>
         <div className={styles.plusMinusButton} onClick={this.onAddParticipant.bind(this, army)}>
           +

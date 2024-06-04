@@ -83,6 +83,14 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     this.nextTabIndex = 1;
 
     const totalAdventurerLevel = this.getTotalAdventurerLevel();
+    const healthyAdventurerLevel = this.getHealthyAdventurerLevel();
+
+    const totalBattleRating = this.getAllTroopsTotalBattleRating();
+    const availableBattleRating = this.getAllTroopsAvailableBattleRating();
+    const healthyBattleRating = this.getAllTroopsHealthyBattleRating();
+
+    const totalParticipantCount = this.getTotalParticipantCount();
+    const healthyParticipantCount = this.getHealthyParticipantCount();
 
     return (
       <div className={styles.root}>
@@ -103,9 +111,18 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
           <div className={styles.sectionButton} onClick={this.onAdventurersClick.bind(this)} />
           <div className={styles.row}>
             <div className={styles.labelText}>{`\xa0\xa0Expedition Level:\xa0`}</div>
-            <div className={styles.valueText}>{`${totalAdventurerLevel} / 6 = ${(totalAdventurerLevel / 6).toFixed(
-              2
-            )} = ${Math.floor(totalAdventurerLevel / 6).toFixed(0)}`}</div>
+            <div className={styles.valueText}>{`${totalAdventurerLevel}`}</div>
+            {totalAdventurerLevel !== healthyAdventurerLevel && (
+              <div className={styles.reducedValueText}>{`\xa0(${healthyAdventurerLevel})`}</div>
+            )}
+            <div className={styles.valueText}>{`\xa0/ 6 = ${(totalAdventurerLevel / 6).toFixed(2)} = ${Math.floor(
+              totalAdventurerLevel / 6
+            ).toFixed(0)}`}</div>
+            {totalAdventurerLevel !== healthyAdventurerLevel && (
+              <div className={styles.reducedValueText}>{`\xa0(${Math.floor(healthyAdventurerLevel / 6).toFixed(
+                0
+              )})`}</div>
+            )}
           </div>
         </div>
         <div className={styles.row}>
@@ -132,18 +149,24 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
           <div className={styles.sectionButton} onClick={this.onArmiesClick.bind(this)} />
           <div className={styles.row}>
             <div className={styles.labelText}>{`\xa0\xa0Battle Rating:\xa0`}</div>
-            <div className={styles.valueText}>{`${this.getAllTroopsAvailableBattleRating().toFixed(
+            <div className={styles.valueText}>{`${availableBattleRating.toFixed(2)} / ${totalBattleRating.toFixed(
               2
-            )} / ${this.getAllTroopsTotalBattleRating().toFixed(2)}`}</div>
+            )}`}</div>
+            {availableBattleRating !== healthyBattleRating && (
+              <div className={styles.reducedValueText}>{`\xa0(${healthyBattleRating.toFixed(2)})`}</div>
+            )}
           </div>
         </div>
         <div className={styles.row}>
           <div className={styles.firstLabel}>{"Scaling Modifier: "}</div>
-          <div className={styles.valueText}>{`\xa0\xa0\xa0${
-            this.state.adventurerParticipants.length + this.state.armyParticipants.length
-          } / 6 = ${((this.state.adventurerParticipants.length + this.state.armyParticipants.length) / 6).toFixed(
-            2
-          )}`}</div>
+          <div className={styles.valueText}>{`\xa0\xa0\xa0${totalParticipantCount}`}</div>
+          {totalParticipantCount !== healthyParticipantCount && (
+            <div className={styles.reducedValueText}>{`\xa0(${healthyParticipantCount})`}</div>
+          )}
+          <div className={styles.valueText}>{`\xa0/ 6 = ${(totalParticipantCount / 6).toFixed(2)}`}</div>
+          {totalParticipantCount !== healthyParticipantCount && (
+            <div className={styles.reducedValueText}>{`\xa0(${(healthyParticipantCount / 6).toFixed(2)})`}</div>
+          )}
         </div>
         {this.state.adventurerParticipants.length > 0 && <div className={styles.listConLabel}>{"CON"}</div>}
         <div className={styles.participantListContainer}>
@@ -230,6 +253,29 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         />
       </div>
     );
+  }
+
+  private getTotalParticipantCount(): number {
+    return this.state.adventurerParticipants.length + this.state.armyParticipants.length;
+  }
+
+  private getHealthyParticipantCount(): number {
+    let healthyCount = 0;
+
+    Object.values(this.state.adventurerParticipants).forEach((ap) => {
+      if (!ap.isPendingDeath && ap.pendingInjuryIds.length === 0) {
+        healthyCount++;
+      }
+    });
+
+    Object.values(this.state.armyParticipants).forEach((ap) => {
+      const healthyTroopCount = ap.troopCount - ap.pendingDeathCount - ap.pendingInjuryCount;
+      if (healthyTroopCount > 0) {
+        healthyCount++;
+      }
+    });
+
+    return healthyCount;
   }
 
   private async onApplyOutcomesClick(): Promise<void> {
@@ -408,6 +454,24 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     );
   }
 
+  private getAllTroopsHealthyBattleRating(): number {
+    let br = 0;
+
+    this.state.armyParticipants.forEach((p) => {
+      const healthyCount = p.troopCount - p.pendingDeathCount - p.pendingInjuryCount;
+      if (healthyCount > 0) {
+        const troopDef = this.props.troopDefs[p.troopDefId];
+        if (healthyCount === troopDef.platoon_size) {
+          br += troopDef.platoon_br;
+        } else {
+          br += troopDef.individual_br * healthyCount;
+        }
+      }
+    });
+
+    return br;
+  }
+
   private getAllTroopsAvailableBattleRating(): number {
     let br = 0;
 
@@ -450,6 +514,22 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
 
   private getTotalAdventurerLevel(): number {
     const total = this.state.adventurerParticipants.reduce((levels: number, p: AdventurerParticipant) => {
+      if (p.characterId === this.state.leadFromBehindID) {
+        return levels + (this.props.allCharacters[p.characterId]?.level ?? 0) / 2;
+      } else {
+        return levels + (this.props.allCharacters[p.characterId]?.level ?? 0);
+      }
+    }, 0);
+    return total;
+  }
+
+  private getHealthyAdventurerLevel(): number {
+    const total = this.state.adventurerParticipants.reduce((levels: number, p: AdventurerParticipant) => {
+      // If the participant is dead or injured, don't count their power.
+      if (p.isPendingDeath || p.pendingInjuryIds.length > 0) {
+        return levels;
+      }
+
       if (p.characterId === this.state.leadFromBehindID) {
         return levels + (this.props.allCharacters[p.characterId]?.level ?? 0) / 2;
       } else {
