@@ -61,14 +61,33 @@
   padding: 10vmin;
 }
 
+.mapOverlayRoot {
+  @extend .row;
+  position: absolute;
+  top: 10vmin;
+  left: 10vmin;
+  right: 10vmin;
+  bottom: 10vmin;
+  pointer-events: none;
+}
+
+.overlayHexRoot {
+  position: relative;
+  margin-bottom: var(--hexMargin);
+  flex-shrink: 0;
+  height: var(--hexSize);
+  width: calc(var(--hexSize) * 1.1547);
+  pointer-events: none;
+}
+
 .hexRoot {
   position: relative;
+  margin-bottom: var(--hexMargin);
   flex-shrink: 0;
   height: var(--hexSize);
   width: calc(var(--hexSize) * 1.1547);
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 
-  margin-bottom: var(--hexMargin);
   pointer-events: all;
 
   display: flex;
@@ -198,4 +217,16 @@
   width: 80%;
   height: 80%;
   object-fit: contain;
+}
+
+.cityNameLabel {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  text-wrap: nowrap;
+  font-size: 1rem;
+  filter: drop-shadow(black 0px 0px 1px);
+  pointer-events: none;
 }
