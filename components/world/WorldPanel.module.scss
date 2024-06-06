@@ -42,6 +42,7 @@
 .mapSelector {
   position: relative;
   margin-top: 0.5vmin;
+  margin-bottom: 1vmin;
   resize: none;
 }
 
@@ -217,4 +218,41 @@
   &:active {
     opacity: 1;
   }
+}
+
+.mapSettingsRow {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+.mapSettingsCheckbox {
+  position: relative;
+  box-sizing: border-box;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid wheat;
+  border-radius: 1rem;
+  cursor: pointer;
+
+  &.checked {
+    &::after {
+      content: "";
+      cursor: pointer;
+      position: absolute;
+      border-radius: 0.5rem;
+      top: 0.25vmin;
+      left: 0.25vmin;
+      right: 0.25vmin;
+      bottom: 0.25vmin;
+      background-color: red;
+    }
+  }
+}
+
+.mapSettingsLabel {
+  position: relative;
+  margin-left: 1vmin;
+  color: white;
+  font-size: 1rem;
 }

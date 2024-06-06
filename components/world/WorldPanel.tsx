@@ -8,7 +8,7 @@ import { Dictionary } from "../../lib/dictionary";
 import { showSubPanel } from "../../redux/subPanelsSlice";
 import { WorldMapsSubPanel } from "./WorldMapsSubPanel";
 import { SubPanelPane } from "../SubPanelPane";
-import { HexMap } from "./HexMap";
+import { HexMap, HexMapSettings } from "./HexMap";
 import { MapHexTypes, MapHexTypesArray } from "./MapHexConstants";
 import { showModal } from "../../redux/modalsSlice";
 import { updateMapHex } from "../../redux/mapsSlice";
@@ -20,6 +20,7 @@ interface State {
   mapID: number;
   selectedX: number;
   selectedY: number;
+  mapSettings: HexMapSettings;
 }
 
 interface ReactProps {}
@@ -41,13 +42,22 @@ class AWorldPanel extends React.Component<Props, State> {
       mapID: -1,
       selectedX: Number.MIN_SAFE_INTEGER,
       selectedY: Number.MIN_SAFE_INTEGER,
+      mapSettings: {
+        showCoordinates: true,
+        showLocations: true,
+        showCityNames: true,
+      },
     };
   }
 
   render(): React.ReactNode {
     return (
       <div className={styles.root}>
-        <HexMap mapID={this.state.mapID} onHexSelected={this.onHexSelected.bind(this)} />
+        <HexMap
+          mapID={this.state.mapID}
+          onHexSelected={this.onHexSelected.bind(this)}
+          settings={this.state.mapSettings}
+        />
         <div className={styles.mapSelectorRoot}>
           <div className={styles.mapSelectorTitle}>{"Map"}</div>
           <select
@@ -71,6 +81,41 @@ class AWorldPanel extends React.Component<Props, State> {
             })}
           </select>
           <div className={styles.mapEditButton} onClick={this.onMapEditClick.bind(this)} />
+          <div className={styles.mapSettingsRow}>
+            <div
+              className={`${styles.mapSettingsCheckbox} ${
+                this.state.mapSettings.showCoordinates ? styles.checked : ""
+              }`}
+              onClick={() => {
+                this.setState({
+                  mapSettings: { ...this.state.mapSettings, showCoordinates: !this.state.mapSettings.showCoordinates },
+                });
+              }}
+            />
+            <div className={styles.mapSettingsLabel}>{"Show Coordinates"}</div>
+          </div>
+          <div className={styles.mapSettingsRow}>
+            <div
+              className={`${styles.mapSettingsCheckbox} ${this.state.mapSettings.showLocations ? styles.checked : ""}`}
+              onClick={() => {
+                this.setState({
+                  mapSettings: { ...this.state.mapSettings, showLocations: !this.state.mapSettings.showLocations },
+                });
+              }}
+            />
+            <div className={styles.mapSettingsLabel}>{"Show Locations"}</div>
+          </div>
+          <div className={styles.mapSettingsRow}>
+            <div
+              className={`${styles.mapSettingsCheckbox} ${this.state.mapSettings.showCityNames ? styles.checked : ""}`}
+              onClick={() => {
+                this.setState({
+                  mapSettings: { ...this.state.mapSettings, showCityNames: !this.state.mapSettings.showCityNames },
+                });
+              }}
+            />
+            <div className={styles.mapSettingsLabel}>{"Show City Names"}</div>
+          </div>
         </div>
         {this.renderHexData()}
         <SubPanelPane />
