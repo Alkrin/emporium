@@ -3,8 +3,9 @@ import {
   ActivityData,
   ActivityOutcomeData,
   ActivityOutcomeType,
-  ActivityParticipant,
+  ActivityAdventurerParticipant,
   ContractData,
+  ActivityArmyParticipant,
 } from "../serverAPI";
 import {
   canCharacterFindTraps,
@@ -21,6 +22,7 @@ import { Dictionary } from "./dictionary";
 import dateFormat from "dateformat";
 import { getFirstOfThisMonthDateString } from "./stringUtils";
 import { ContractId } from "../redux/gameDefsSlice";
+import { getTroopAvailableUnitCount } from "./armyUtils";
 
 export enum RewardDistro {
   // Even distribution to all participants.  Henchman hierarchy is ignored, and only local participants get a share.
@@ -407,7 +409,12 @@ export function generateActivityOutcomes(
   return [outcomes, campaignGPDistributions];
 }
 
-export function generateAnonymousActivity(endDate: string, participants: ActivityParticipant[]): ActivityData {
+export function generateAnonymousActivity(
+  endDate: string,
+  participants: ActivityAdventurerParticipant[],
+  armyParticipants: ActivityArmyParticipant[],
+  leadFromBehindId: number
+): ActivityData {
   const redux = store.getState();
 
   const activity: ActivityData = {
@@ -418,16 +425,18 @@ export function generateAnonymousActivity(endDate: string, participants: Activit
     start_date: endDate,
     end_date: endDate,
     participants,
+    army_participants: armyParticipants,
+    lead_from_behind_id: leadFromBehindId,
     resolution_text: "",
   };
   return activity;
 }
 
-export function createActivityParticipant(characterId: number): ActivityParticipant {
+export function createActivityAdventurerParticipant(characterId: number): ActivityAdventurerParticipant {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
 
-  const newParticipant: ActivityParticipant = {
+  const newParticipant: ActivityAdventurerParticipant = {
     characterId: character.id,
     characterLevel: character.level,
     isArcane: isCharacterArcane(character.id),
@@ -437,6 +446,23 @@ export function createActivityParticipant(characterId: number): ActivityParticip
     canFindTraps: canCharacterFindTraps(character.id),
     hasMagicWeapons: doesCharacterHaveMagicWeapons(character.id),
     hasSilverWeapons: doesCharacterHaveSilverWeapons(character.id),
+  };
+  return newParticipant;
+}
+
+export function createActivityArmyParticipant(armyId: number, startDate: string): ActivityArmyParticipant {
+  const redux = store.getState();
+
+  const troopCounts: Dictionary<number> = {};
+  redux.armies.troopsByArmy[armyId].forEach((troopData) => {
+    // This accounts for injuries on the startDate.
+    let count: number = getTroopAvailableUnitCount(troopData, startDate);
+    troopCounts[troopData.def_id] = (troopCounts[troopData.def_id] ?? 0) + count;
+  });
+
+  const newParticipant: ActivityArmyParticipant = {
+    armyId,
+    troopCounts,
   };
   return newParticipant;
 }

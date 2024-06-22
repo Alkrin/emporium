@@ -25,9 +25,9 @@ import {
   getArmyLowestSpeed,
   getArmyTotalBattleRating,
   getArmyTotalWages,
+  getBattleRatingForTroopDefAndCount,
   getMaintenanceStatusForArmy,
   getTroopAvailableBattleRating,
-  getTroopTotalBattleRating,
 } from "../../lib/armyUtils";
 import { SheetRoot } from "../SheetRoot";
 import dateFormat from "dateformat";
@@ -153,7 +153,7 @@ class AArmySheet extends React.Component<Props> {
             <div className={styles.listField}>{"Battle Rating:"}</div>
             <div className={styles.listValue}>{`${getTroopAvailableBattleRating(troop).toFixed(
               2
-            )} / ${getTroopTotalBattleRating(troop).toFixed(2)}`}</div>
+            )} / ${getBattleRatingForTroopDefAndCount(troop.def_id, troop.count).toFixed(2)}`}</div>
           </div>
           <div className={styles.listThird}>
             <div className={styles.listField}>{"Movement:"}</div>

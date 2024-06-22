@@ -144,8 +144,16 @@
 }
 
 .participantsHeader {
+  @extend .row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5vmin;
+}
+
+.participantsHeaderLabel {
   @extend .label;
   font-size: 1rem;
+  text-align: center;
 }
 
 .listContainer {
@@ -179,7 +187,7 @@
 
 .participantsListContainer {
   @extend .listContainer;
-  height: 25vmin;
+  height: 20vmin;
 }
 
 .adventurersListContainer {
@@ -201,11 +209,44 @@
   }
 }
 
+.armyListRow {
+  @extend .listRow;
+  margin-bottom: 0;
+  background-color: rgba(100, 255, 255, 0.1);
+}
+
+.armyListSection {
+  @extend .column;
+  margin-bottom: 0.25vmin;
+}
+
+.armyTroopRow {
+  @extend .row;
+  margin-left: 1vmin;
+  padding: 0.25vmin 0.25vmin 0.25vmin 0;
+  border-top: 1px solid black;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.armySpacer {
+  height: 0.25vmin;
+}
+
 .listName {
   font-size: 0.8rem;
   color: wheat;
   text-align: left;
-  width: 15vmin;
+  flex-grow: 1;
+}
+
+.listArmyName {
+  font-size: 0.8rem;
+  color: white;
+  text-align: left;
   flex-grow: 1;
 }
 
@@ -214,7 +255,24 @@
   font-size: 0.8rem;
   color: yellow;
   text-align: center;
-  width: 2vmin;
+  width: 2.2vmin;
+  flex-shrink: 0;
+}
+
+.listTroopCount {
+  margin-left: 0.5vmin;
+  font-size: 0.8rem;
+  color: yellow;
+  text-align: right;
+  width: 4vmin;
+  flex-shrink: 0;
+}
+
+.listBattleRating {
+  font-size: 0.8rem;
+  color: yellow;
+  text-align: center;
+  width: 7.5vmin;
   flex-shrink: 0;
 }
 
@@ -222,7 +280,7 @@
   margin-left: 0.25vmin;
   font-size: 0.8rem;
   color: wheat;
-  width: 9vmin;
+  width: 12vmin;
   text-align: left;
 }
 
@@ -252,28 +310,6 @@
   }
 }
 
-.filtersContainer {
-  position: relative;
-  margin-bottom: 0.5vmin;
-  display: flex;
-  flex-direction: column;
-  background-color: #222;
-}
-
-.filterText {
-  position: relative;
-  width: 8vmin;
-  margin-left: 0.5vmin;
-  margin-right: 0.5vmin;
-  font-size: 1rem;
-  color: wheat;
-  text-align: left;
-}
-
-.filterSelector {
-  width: 19.4vmin;
-}
-
 .summarySection {
   @extend .row;
   position: relative;
@@ -294,6 +330,15 @@
   margin-right: 1vmin;
 }
 
+.characterSummaryLabel {
+  @extend .label;
+  width: 13.5vmin;
+  flex-shrink: 0;
+  font-size: 1rem;
+  text-align: right;
+  margin-right: 1vmin;
+}
+
 .summaryValue {
   position: relative;
   color: yellow;
@@ -302,5 +347,20 @@
 
 .preparednessContainer {
   align-self: center;
-  width: 60%;
+}
+
+.editButton {
+  margin-left: 1vmin;
+}
+
+.firstLabel {
+  font-size: 1rem;
+  color: wheat;
+  user-select: none;
+  margin-top: 0.2vmin;
+}
+
+.leadFromBehindSelector {
+  margin-left: 1vmin;
+  flex-grow: 1;
 }

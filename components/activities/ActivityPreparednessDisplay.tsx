@@ -3,7 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
 import { RootState } from "../../redux/store";
-import { ActivityParticipant, CharacterData, ItemData, ItemDefData } from "../../serverAPI";
+import { ActivityAdventurerParticipant, CharacterData, ItemData, ItemDefData } from "../../serverAPI";
 import styles from "./ActivityPreparednessDisplay.module.scss";
 import TooltipSource from "../TooltipSource";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
@@ -13,7 +13,7 @@ import { ProficiencyLayOnHands } from "../../staticData/proficiencies/Proficienc
 import { Tag } from "../../lib/tags";
 
 interface ReactProps {
-  participants: ActivityParticipant[];
+  participants: ActivityAdventurerParticipant[];
   cellSizeVmin: number;
 }
 

@@ -8,16 +8,29 @@ import { Dictionary } from "../../lib/dictionary";
 import { ArmyData, LocationData, UserData } from "../../serverAPI";
 import { UserRole } from "../../redux/userSlice";
 import { getArmyAvailableBattleRating, getArmyTotalBattleRating } from "../../lib/armyUtils";
+import dateFormat from "dateformat";
+import {
+  FilterDropdowns,
+  FilterType,
+  FilterValueAny,
+  FilterValueBusyStatus,
+  FilterValues,
+  isFilterMetArmyBusyStatus,
+  isFilterMetLocation,
+  isFilterMetOwner,
+} from "../FilterDropdowns";
 
 interface State {
+  startDate: string;
+  endDate: string;
   selectedArmyIDs: number[];
-  filterOwnerId: number;
-  filterLocationId: number;
+  filters: FilterValues;
 }
 
 interface ReactProps {
   preselectedArmyIDs: number[];
-  currentDateOverride?: string;
+  startDateOverride?: string;
+  endDateOverride?: string;
   onSelectionConfirmed: (armyIDs: number[]) => void;
 }
 
@@ -36,10 +49,18 @@ class ASelectArmiesDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    const startDate = this.props.startDateOverride ?? dateFormat(new Date(), "yyyy-mm-dd");
+    const endDate = this.props.endDateOverride ?? startDate;
+
     this.state = {
+      startDate,
+      endDate,
       selectedArmyIDs: [...props.preselectedArmyIDs],
-      filterOwnerId: -1,
-      filterLocationId: -1,
+      filters: {
+        [FilterType.Owner]: FilterValueAny,
+        [FilterType.Location]: FilterValueAny,
+        [FilterType.BusyStatus]: FilterValueBusyStatus.Available,
+      },
     };
   }
 
@@ -47,45 +68,32 @@ class ASelectArmiesDialog extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <div className={styles.title}>{"Select Armies"}</div>
+        <div className={styles.contentRow}>
+          <div className={styles.normalText}>{"When are they needed?\xa0"}</div>
+          <input
+            type={"date"}
+            value={this.state.startDate}
+            onChange={(e) => {
+              this.setState({ startDate: e.target.value });
+            }}
+          />
+          <div className={styles.normalText}>{"\xa0-\xa0"}</div>
+          <input
+            type={"date"}
+            value={this.state.endDate}
+            onChange={(e) => {
+              this.setState({ endDate: e.target.value });
+            }}
+          />
+        </div>
         <div className={styles.filtersContainer}>
-          <div className={styles.row}>
-            <div className={styles.filterText}>Owner</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterOwnerId}
-              onChange={(e) => {
-                this.setState({ filterOwnerId: +e.target.value });
-              }}
-            >
-              <option value={-1}>Any</option>
-              {this.sortPermittedUsers().map(({ id, name }) => {
-                return (
-                  <option value={id} key={`user${name}`}>
-                    {name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.filterText}>Location</div>
-            <select
-              className={styles.filterSelector}
-              value={this.state.filterLocationId}
-              onChange={(e) => {
-                this.setState({ filterLocationId: +e.target.value });
-              }}
-            >
-              <option value={-1}>Any</option>
-              {this.getSortedLocations().map(({ id, name }) => {
-                return (
-                  <option value={id} key={`location${name}`}>
-                    {name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+          <FilterDropdowns
+            filterOrder={[[FilterType.Owner, FilterType.BusyStatus, FilterType.Location]]}
+            filterValues={this.state.filters}
+            onFilterChanged={(filters) => {
+              this.setState({ filters });
+            }}
+          />
         </div>
         <div className={styles.participantsSection}>
           <div className={styles.participantsContainer}>
@@ -117,7 +125,7 @@ class ASelectArmiesDialog extends React.Component<Props, State> {
       <div className={styles.listRow} key={`participantRow${index}`}>
         <div className={styles.listBattleRating}>{`BR: ${getArmyAvailableBattleRating(
           army.id,
-          this.props.currentDateOverride
+          this.props.startDateOverride
         ).toFixed(2)} / ${getArmyTotalBattleRating(army.id).toFixed(2)}`}</div>
         <div className={styles.listName}>{army.name}</div>
         <div className={styles.plusMinusButton} onClick={this.onRemoveParticipant.bind(this, army)}>
@@ -208,12 +216,17 @@ class ASelectArmiesDialog extends React.Component<Props, State> {
       }
 
       // Apply Owner filter.
-      if (this.state.filterOwnerId > -1 && army.user_id !== this.state.filterOwnerId) {
+      if (!isFilterMetOwner(this.state.filters, army.user_id)) {
         return false;
       }
 
       // Apply Location filter.
-      if (this.state.filterLocationId > -1 && army.location_id !== this.state.filterLocationId) {
+      if (!isFilterMetLocation(this.state.filters, army.location_id)) {
+        return false;
+      }
+
+      // Apply Status filter.
+      if (!isFilterMetArmyBusyStatus(this.state.filters, army.id, this.state.startDate, this.state.endDate)) {
         return false;
       }
 

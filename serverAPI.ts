@@ -296,15 +296,18 @@ export interface ActivityData {
   description: string;
   start_date: string;
   end_date: string;
-  participants: ActivityParticipant[];
+  participants: ActivityAdventurerParticipant[];
+  army_participants: ActivityArmyParticipant[];
+  lead_from_behind_id: number;
   resolution_text: string;
 }
 
-export type ServerActivityData = Omit<ActivityData, "participants"> & {
+export type ServerActivityData = Omit<ActivityData, "participants" | "army_participants"> & {
   participants: string;
+  army_participants: string;
 };
 
-export interface ActivityParticipant {
+export interface ActivityAdventurerParticipant {
   characterId: number;
   characterLevel: number;
   isArcane: boolean;
@@ -316,7 +319,62 @@ export interface ActivityParticipant {
   hasSilverWeapons: boolean;
 }
 
-export function ActivityData_StringToParticipants(s: string): ActivityParticipant[] {
+export interface ActivityArmyParticipant {
+  armyId: number;
+  // key: troop def id, value: count of that troop present at the start of the activity
+  troopCounts: Dictionary<number>;
+}
+
+export function ActivityData_StringToArmyParticipants(s: string): ActivityArmyParticipant[] {
+  if (s.length === 0) {
+    return [];
+  }
+
+  // Army strings are separated by '|'
+  const armyStrings = s.split("|");
+
+  const armyParticipants: ActivityArmyParticipant[] = armyStrings.map((armyString) => {
+    const troopCounts: Dictionary<number> = {};
+    const stringIds = armyString.split(",");
+
+    // Pop off the armyId first.
+    const armyId = +(stringIds.shift() ?? "0");
+
+    // Everything after that is paired troop def ids and troop counts.
+    stringIds.forEach((sid) => {
+      const [troopDefId, count] = sid.split(":");
+      troopCounts[+troopDefId] = (troopCounts[+troopDefId] ?? 0) + +count;
+    });
+
+    const p: ActivityArmyParticipant = {
+      armyId,
+      troopCounts,
+    };
+    return p;
+  });
+
+  return armyParticipants;
+}
+
+export function ActivityData_ArmyParticipantToString(armyParticipant: ActivityArmyParticipant): string {
+  return (
+    `${armyParticipant.armyId},` +
+    Object.entries(armyParticipant.troopCounts)
+      .map(([troopDefIdString, count]) => {
+        return `${troopDefIdString}:${count}`;
+      })
+      .join(",")
+  );
+}
+export function ActivityData_ArmyParticipantsToString(participants: ActivityArmyParticipant[]): string {
+  return participants
+    .map((p) => {
+      return ActivityData_ArmyParticipantToString(p);
+    })
+    .join("|");
+}
+
+export function ActivityData_StringToParticipants(s: string): ActivityAdventurerParticipant[] {
   if (s.length === 0) {
     return [];
   }
@@ -324,7 +382,7 @@ export function ActivityData_StringToParticipants(s: string): ActivityParticipan
   return stringIds.map((sid) => {
     const [pid, level, isArcane, isDivine, canTurnUndead, canSneak, canFindTraps, hasMagicWeapons, hasSilverWeapons] =
       sid.split(":");
-    const p: ActivityParticipant = {
+    const p: ActivityAdventurerParticipant = {
       characterId: +pid,
       characterLevel: +level,
       isArcane: isArcane === "T",
@@ -339,7 +397,7 @@ export function ActivityData_StringToParticipants(s: string): ActivityParticipan
   });
 }
 
-export function ActivityData_ParticipantToString(participant: ActivityParticipant): string {
+export function ActivityData_ParticipantToString(participant: ActivityAdventurerParticipant): string {
   return (
     `${participant.characterId}:` +
     `${participant.characterLevel}:` +
@@ -352,7 +410,7 @@ export function ActivityData_ParticipantToString(participant: ActivityParticipan
     `${participant.hasSilverWeapons ? "T" : "F"}`
   );
 }
-export function ActivityData_ParticipantsToString(participants: ActivityParticipant[]): string {
+export function ActivityData_ParticipantsToString(participants: ActivityAdventurerParticipant[]): string {
   return participants
     .map((p) => {
       return ActivityData_ParticipantToString(p);
@@ -650,6 +708,7 @@ class AServerAPI {
         activityData.push({
           ...sActivityData,
           participants: ActivityData_StringToParticipants(sActivityData.participants),
+          army_participants: ActivityData_StringToArmyParticipants(sActivityData.army_participants),
         });
       });
 
@@ -1511,6 +1570,7 @@ class AServerAPI {
     const requestBody: RequestBody_CreateActivity = {
       ...activity,
       participants: ActivityData_ParticipantsToString(activity.participants),
+      army_participants: ActivityData_ArmyParticipantsToString(activity.army_participants),
     };
     const res = await fetch("/api/createActivity", {
       method: "POST",
@@ -1526,6 +1586,7 @@ class AServerAPI {
     const requestBody: RequestBody_EditActivity = {
       ...activity,
       participants: ActivityData_ParticipantsToString(activity.participants),
+      army_participants: ActivityData_ArmyParticipantsToString(activity.army_participants),
     };
     const res = await fetch("/api/editActivity", {
       method: "POST",

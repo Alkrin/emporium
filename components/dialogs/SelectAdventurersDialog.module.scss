@@ -107,7 +107,7 @@
 
 .participantsListContainer {
   @extend .listContainer;
-  height: 30vmin;
+  height: 20vmin;
 }
 
 .filtersContainer {
@@ -150,7 +150,6 @@
   font-size: 0.8rem;
   color: wheat;
   text-align: left;
-  width: 15vmin;
   flex-grow: 1;
 }
 
@@ -159,7 +158,7 @@
   font-size: 0.8rem;
   color: yellow;
   text-align: center;
-  width: 2vmin;
+  width: 2.2vmin;
   flex-shrink: 0;
 }
 
@@ -167,7 +166,7 @@
   margin-left: 0.25vmin;
   font-size: 0.8rem;
   color: wheat;
-  width: 9vmin;
+  width: 12vmin;
   text-align: left;
 }
 
@@ -199,5 +198,11 @@
 
 .adventurersListContainer {
   @extend .listContainer;
-  height: 30vmin;
+  height: 20vmin;
+}
+
+.preparednessContainer {
+  position: relative;
+  margin-top: 1vmin;
+  align-self: center;
 }
