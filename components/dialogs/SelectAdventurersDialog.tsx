@@ -5,7 +5,7 @@ import { hideModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import styles from "./SelectAdventurersDialog.module.scss";
 import { Dictionary } from "../../lib/dictionary";
-import { ActivityData, CharacterData, UserData } from "../../serverAPI";
+import { CharacterData } from "../../serverAPI";
 import { UserRole } from "../../redux/userSlice";
 import dateFormat from "dateformat";
 import {
@@ -14,11 +14,13 @@ import {
   FilterValueAny,
   FilterValueBusyStatus,
   FilterValues,
-  isFilterMetBusyStatus,
+  isFilterMetAdventurerBusyStatus,
   isFilterMetLocation,
   isFilterMetOwner,
   isFilterMetProficiency,
 } from "../FilterDropdowns";
+import { ActivityPreparednessDisplay } from "../activities/ActivityPreparednessDisplay";
+import { createActivityAdventurerParticipant } from "../../lib/activityUtils";
 
 interface State {
   startDate: string;
@@ -29,7 +31,8 @@ interface State {
 
 interface ReactProps {
   preselectedAdventurerIDs: number[];
-  currentDateOverride?: string;
+  startDateOverride?: string;
+  endDateOverride?: string;
   onSelectionConfirmed: (adventurerIDs: number[]) => void;
 }
 
@@ -46,11 +49,12 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const currentDate = this.props.currentDateOverride ?? dateFormat(new Date(), "yyyy-mm-dd");
+    const startDate = this.props.startDateOverride ?? dateFormat(new Date(), "yyyy-mm-dd");
+    const endDate = this.props.endDateOverride ?? startDate;
 
     this.state = {
-      startDate: currentDate,
-      endDate: currentDate,
+      startDate,
+      endDate,
       selectedAdventurerIDs: [...props.preselectedAdventurerIDs],
       filters: {
         [FilterType.Owner]: FilterValueAny,
@@ -105,6 +109,13 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
               {this.getSortedAdventurers().map(this.renderAdventurerRow.bind(this))}
             </div>
           </div>
+        </div>
+
+        <div className={styles.preparednessContainer}>
+          <ActivityPreparednessDisplay
+            participants={this.state.selectedAdventurerIDs.map((aid) => createActivityAdventurerParticipant(aid))}
+            cellSizeVmin={6}
+          />
         </div>
 
         <div className={styles.closeButton} onClick={this.onConfirmClicked.bind(this)}>
@@ -210,7 +221,9 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
       }
 
       // Apply Status filter.
-      if (!isFilterMetBusyStatus(this.state.filters, character.id, this.state.startDate, this.state.endDate)) {
+      if (
+        !isFilterMetAdventurerBusyStatus(this.state.filters, character.id, this.state.startDate, this.state.endDate)
+      ) {
         return false;
       }
 

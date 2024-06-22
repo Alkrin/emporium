@@ -61,7 +61,7 @@ export function isFilterMetAliveStatus(filters: FilterValues, character: Charact
   return true;
 }
 
-export function isFilterMetBusyStatus(
+export function isFilterMetAdventurerBusyStatus(
   filters: FilterValues,
   characterId: number,
   startDate: string,
@@ -78,6 +78,47 @@ export function isFilterMetBusyStatus(
     if (
       !activity.participants.find((p) => {
         return characterId === p.characterId;
+      })
+    ) {
+      return false;
+    }
+
+    // Would any of those overlap with the date we are checking?
+    const startTime = new Date(startDate).getTime();
+    const endTime = new Date(endDate).getTime();
+    const activityStartTime = new Date(activity.start_date).getTime();
+    const activityEndTime = new Date(activity.end_date).getTime();
+
+    return Math.max(startTime, activityStartTime) <= Math.min(endTime, activityEndTime);
+  });
+
+  if (busyFilter === FilterValueBusyStatus.Busy && !conflictingActivity) {
+    return false;
+  }
+  if (busyFilter === FilterValueBusyStatus.Available && !!conflictingActivity) {
+    return false;
+  }
+
+  return true;
+}
+
+export function isFilterMetArmyBusyStatus(
+  filters: FilterValues,
+  armyId: number,
+  startDate: string,
+  endDate: string
+): boolean {
+  const busyFilter = filters[FilterType.BusyStatus] ?? FilterValueAny;
+  if (busyFilter === FilterValueAny) {
+    return true;
+  }
+
+  const redux = store.getState();
+  const conflictingActivity = Object.values(redux.activities.activities).find((activity) => {
+    // Look at other activities this army is/was part of.
+    if (
+      !activity.army_participants.find((p) => {
+        return armyId === p.armyId;
       })
     ) {
       return false;

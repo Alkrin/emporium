@@ -26,7 +26,7 @@ import { GeneralProficienciesAt, ProficiencySource } from "../staticData/types/a
 import { WeaponStyle, CharacterStat, SpellType } from "../staticData/types/characterClasses";
 import { WeaponCategory, WeaponType } from "../staticData/types/items";
 import { Dictionary } from "./dictionary";
-import { Stones, doesItemGrantMagicDamageBonus } from "./itemUtils";
+import { Stones, StonesToNumber, doesItemGrantMagicDamageBonus, getTotalEquippedWeight } from "./itemUtils";
 import { EquipmentSlotTag, Tag } from "./tags";
 import { DwarvenFuryFleshRunes } from "../staticData/classFeatures/DwarvenFuryFleshRunes";
 import { SharedMeleeAccuracyBonus } from "../staticData/classFeatures/SharedMeleeAccuracyBonus";
@@ -1351,4 +1351,29 @@ export function getApparentLevelForCharacter(characterId: number): number {
   ) {}
 
   return apparentLevel;
+}
+
+export function getCombatSpeedForCharacter(characterId: number): number {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+
+  // Calculate encumbrance based on equipment slots.
+  const encumbrance = getTotalEquippedWeight(character, redux.items.allItems, redux.gameDefs.items);
+  const maxEncumbrance: Stones = getCharacterMaxEncumbrance(character);
+
+  // TODO: Running proficiency.  Plus, Thrassians are always at 20 or less?
+
+  let speed = 40;
+
+  if (StonesToNumber(encumbrance) > StonesToNumber(maxEncumbrance)) {
+    speed = 0;
+  } else if (StonesToNumber(encumbrance) > StonesToNumber([10, 0])) {
+    speed = 10;
+  } else if (StonesToNumber(encumbrance) > StonesToNumber([7, 0])) {
+    speed = 20;
+  } else if (StonesToNumber(encumbrance) > StonesToNumber([5, 0])) {
+    speed = 30;
+  }
+
+  return speed;
 }

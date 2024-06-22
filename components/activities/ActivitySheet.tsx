@@ -3,7 +3,15 @@ import * as React from "react";
 import dateFormat from "dateformat";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
-import { ActivityData, ActivityOutcomeData, CharacterData } from "../../serverAPI";
+import {
+  ActivityAdventurerParticipant,
+  ActivityArmyParticipant,
+  ActivityData,
+  ActivityOutcomeData,
+  ArmyData,
+  CharacterData,
+  TroopDefData,
+} from "../../serverAPI";
 import styles from "./ActivitySheet.module.scss";
 import { Dictionary } from "../../lib/dictionary";
 import { ActivityPreparednessDisplay } from "./ActivityPreparednessDisplay";
@@ -12,6 +20,8 @@ import { ActivityResolutionSubPanel } from "./ActivityResolutionSubPanel";
 import { ActivityOutcomesList } from "./ActivityOutcomeList";
 import { CreateActivitySubPanel } from "./CreateActivitySubPanel";
 import { SheetRoot } from "../SheetRoot";
+import { getBattleRatingForTroopDefAndCount } from "../../lib/armyUtils";
+import { getCombatSpeedForCharacter } from "../../lib/characterUtils";
 
 interface ReactProps {
   activityId: number;
@@ -20,9 +30,11 @@ interface ReactProps {
 
 interface InjectedProps {
   allActivities: Dictionary<ActivityData>;
+  allArmies: Dictionary<ArmyData>;
   allCharacters: Dictionary<CharacterData>;
   activity?: ActivityData;
   outcomes: ActivityOutcomeData[];
+  troopDefs: Dictionary<TroopDefData>;
   dispatch?: Dispatch;
 }
 
@@ -42,19 +54,27 @@ class AActivitySheet extends React.Component<Props> {
         <SheetRoot className={`${styles.root} ${animationClass}`}>
           <div className={styles.nameLabel}>{`#${this.props.activity.id}: ${this.props.activity.name}`}</div>
           <div className={styles.row}>
-            <div className={styles.dateLabel}>Start:</div>
+            <div className={styles.dateLabel}>{"Start:"}</div>
             <div className={styles.dateValue}>{dateFormat(localStartDateTime, "d. mmm yyyy")}</div>
             <div className={styles.row}>
-              <div className={styles.summaryLabel}>Exploration Level:</div>
+              <div className={styles.summaryLabel}>{"Exploration Level:"}</div>
               <div className={styles.summaryValue}>{this.getExplorationLevelText()}</div>
             </div>
           </div>
           <div className={styles.row}>
-            <div className={styles.dateLabel}>End:</div>
+            <div className={styles.dateLabel}>{"End:"}</div>
             <div className={styles.dateValue}>{dateFormat(localEndDateTime, "d. mmm yyyy")}</div>
             <div className={styles.row}>
-              <div className={styles.summaryLabel}>Delve Level:</div>
+              <div className={styles.summaryLabel}>{"Delve Level:"}</div>
               <div className={styles.summaryValue}>{this.getDelveLevelText()}</div>
+            </div>
+          </div>
+          <div className={styles.row}>
+            <div className={styles.dateLabel}>{"Move:"}</div>
+            <div className={styles.dateValue}>{this.getTravelSpeedText()}</div>
+            <div className={styles.row}>
+              <div className={styles.summaryLabel}>{"Battle Rating:"}</div>
+              <div className={styles.summaryValue}>{this.getBattleRatingText()}</div>
             </div>
           </div>
           <textarea
@@ -65,19 +85,28 @@ class AActivitySheet extends React.Component<Props> {
           />
           <div className={styles.row}>
             <div className={styles.column}>
-              <div className={styles.normalText}>Participants</div>
+              <div className={styles.headerLabel}>{`Adventurers: ${this.props.activity.participants.length}`}</div>
               <div className={styles.participantsList}>
-                {this.props.activity.participants.map((p) => {
-                  const character = this.props.allCharacters[p.characterId];
-                  return (
-                    <div key={p.characterId}>{`${character.name} L${p.characterLevel} ${character.class_name}`}</div>
-                  );
-                })}
+                {this.getSortedAdventurerParticipants().map(this.renderAdventurerParticipantRow.bind(this))}
+              </div>
+              <div className={styles.row}>
+                <div className={styles.normalText}>{"Lead from Behind?\xa0"}</div>
+                <div className={styles.valueText}>
+                  {this.props.activity?.lead_from_behind_id
+                    ? this.props.allCharacters[this.props.activity.lead_from_behind_id].name
+                    : "---"}
+                </div>
               </div>
             </div>
-            <div className={styles.preparednessContainer}>
-              <ActivityPreparednessDisplay participants={this.props.activity.participants} cellSizeVmin={7} />
+            <div className={styles.column} style={{ marginLeft: "1vmin" }}>
+              <div className={styles.headerLabel}>{"Armies"}</div>
+              <div className={styles.participantsList}>
+                {this.getSortedArmyParticipants().map(this.renderArmyParticipantRows.bind(this))}
+              </div>
             </div>
+          </div>
+          <div className={styles.preparednessContainer}>
+            <ActivityPreparednessDisplay participants={this.props.activity.participants} cellSizeVmin={5} />
           </div>
           <div className={styles.resolutionRow}>
             <div className={styles.column}>
@@ -137,30 +166,185 @@ class AActivitySheet extends React.Component<Props> {
   }
 
   private getExplorationLevelText(): string {
-    if (this.props.activity) {
+    if (!this.props.activity) {
+      return "";
+    } else {
       const totalLevel: number = this.props.activity.participants.reduce((subtotal, p) => {
-        return subtotal + p.characterLevel;
+        if (p.characterId === this.props.activity?.lead_from_behind_id) {
+          return subtotal + p.characterLevel / 2;
+        } else {
+          return subtotal + p.characterLevel;
+        }
       }, 0);
 
       return `${totalLevel} / 6 ≈ ${(totalLevel / 6).toFixed(2)} = ${Math.floor(totalLevel / 6)}`;
-    } else {
-      return "";
     }
   }
 
   private getDelveLevelText(): string {
-    if (this.props.activity) {
+    if (!this.props.activity) {
+      return "";
+    } else {
       const numParticipants = this.props.activity.participants.length;
       const totalLevel: number = this.props.activity.participants.reduce((subtotal, p) => {
-        return subtotal + p.characterLevel;
+        if (p.characterId === this.props.activity?.lead_from_behind_id) {
+          return subtotal + p.characterLevel / 2;
+        } else {
+          return subtotal + p.characterLevel;
+        }
       }, 0);
 
       return `${totalLevel} / ${Math.max(numParticipants, 4)} ≈ ${(totalLevel / Math.max(numParticipants, 4)).toFixed(
         2
       )} = ${Math.round(totalLevel / Math.max(numParticipants, 4))}`;
+    }
+  }
+
+  private getBattleRatingText(): string {
+    if (this.props.activity) {
+      const totalBR = this.props.activity.army_participants.reduce<number>(
+        (totalBRSoFar: number, armyParticipant: ActivityArmyParticipant, armyIndex: number) => {
+          const participantBR = Object.entries(armyParticipant.troopCounts).reduce<number>(
+            (armyBRSoFar: number, entry: [string, number], troopIndex) => {
+              const defId = +entry[0];
+              const count = entry[1];
+              return armyBRSoFar + getBattleRatingForTroopDefAndCount(defId, count);
+            },
+            0
+          );
+          return totalBRSoFar + participantBR;
+        },
+        0
+      );
+
+      return totalBR.toFixed(2);
     } else {
       return "";
     }
+  }
+
+  private getTravelSpeedText(): string {
+    if (this.props.activity) {
+      let slowestAdventurerSpeed = this.props.activity.participants.reduce<number>(
+        (slowestSoFar: number, participant: ActivityAdventurerParticipant) => {
+          const currentSpeed = getCombatSpeedForCharacter(participant.characterId);
+
+          if (slowestSoFar === 0) {
+            return currentSpeed;
+          } else {
+            return Math.min(slowestSoFar, currentSpeed);
+          }
+        },
+        0
+      );
+
+      const armySpeeds = this.props.activity.army_participants.map((armyParticipant) => {
+        const speed = Object.keys(armyParticipant.troopCounts).reduce<number>(
+          (lowestSpeed: number, troopDefIdString: string) => {
+            const def = this.props.troopDefs[+troopDefIdString];
+            if (lowestSpeed === 0) {
+              return def.move;
+            } else {
+              return Math.min(def.move, lowestSpeed);
+            }
+          },
+          0
+        );
+        return speed;
+      });
+      const slowestArmySpeed =
+        armySpeeds.reduce((slowest: number, currentSpeed: number) => {
+          if (slowest === 0) {
+            return currentSpeed;
+          } else {
+            return Math.min(slowest, currentSpeed);
+          }
+          // Have to divide by 3 because troopDefs list the exploration speed, while adventurers give a combat speed.
+        }, 0) / 3;
+
+      let slowestSpeed = Math.min(slowestAdventurerSpeed, slowestArmySpeed);
+      if (this.props.activity.participants.length === 0) {
+        slowestSpeed = slowestArmySpeed;
+      }
+      if (this.props.activity.army_participants.length === 0) {
+        slowestSpeed = slowestAdventurerSpeed;
+      }
+
+      // Exploration speed is 3x combat speed.
+      // Overland hex speed is 1/10th of combat speed.
+
+      return `${3 * slowestSpeed}' or ${slowestSpeed / 10} hex/day`;
+    } else {
+      return "";
+    }
+  }
+
+  private getSortedAdventurerParticipants(): ActivityAdventurerParticipant[] {
+    const participants = [...(this.props.activity?.participants ?? [])];
+    const sorted = participants.sort((a, b) => {
+      const characterA = this.props.allCharacters[a.characterId];
+      const characterB = this.props.allCharacters[b.characterId];
+
+      // Sort by level first.  Highest levels at the top.
+      if (characterA.level !== characterB.level) {
+        return characterB.level - characterA.level;
+      }
+      return characterA.name.localeCompare(characterB.name);
+    });
+
+    return sorted;
+  }
+
+  private getSortedArmyParticipants(): ActivityArmyParticipant[] {
+    const sorted = [...(this.props.activity?.army_participants ?? [])].sort((a, b) => {
+      const armyA = this.props.allArmies[a.armyId];
+      const armyB = this.props.allArmies[b.armyId];
+      return armyA.name.localeCompare(armyB.name);
+    });
+
+    return sorted;
+  }
+
+  private renderAdventurerParticipantRow(participant: ActivityAdventurerParticipant, index: number): React.ReactNode {
+    const character = this.props.allCharacters[participant.characterId];
+    return (
+      <div className={styles.listRow} key={`adventurerParticipantRow${index}`}>
+        <div className={styles.listLevel}>{`L${character.level}`}</div>
+        <div className={styles.listClass}>{character.class_name}</div>
+        <div className={styles.listName}>{character.name}</div>
+      </div>
+    );
+  }
+
+  private renderArmyParticipantRows(participant: ActivityArmyParticipant, index: number): React.ReactNode {
+    const army = this.props.allArmies[participant.armyId];
+    const sortedTroops = Object.entries(participant.troopCounts).sort((a, b) => {
+      const defA = this.props.troopDefs[+a[0]];
+      const defB = this.props.troopDefs[+b[0]];
+      return defA.name.localeCompare(defB.name);
+    });
+    const totalBR: number = sortedTroops.reduce<number>((brSoFar: number, entry: [string, number]) => {
+      const defId = +entry[0];
+      const count = entry[1];
+      return brSoFar + getBattleRatingForTroopDefAndCount(defId, count);
+    }, 0);
+    return (
+      <div className={styles.armyListSection} key={`army${index}`}>
+        <div className={styles.armyListRow} key={`armyParticipantRow${index}`}>
+          <div className={styles.listBattleRating}>{`BR: ${totalBR.toFixed(2)}`}</div>
+          <div className={styles.listArmyName}>{army.name}</div>
+        </div>
+        {sortedTroops.map(([defIdString, count], troopIndex) => {
+          const troopDef = this.props.troopDefs[+defIdString];
+          return (
+            <div className={styles.armyTroopRow} key={`troop${troopIndex}`}>
+              <div className={styles.listTroopCount}>{`${count}×\xa0`}</div>
+              <div className={styles.listName}>{troopDef.name}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
   }
 }
 
@@ -169,12 +353,16 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const activity = allActivities[props.activityId] ?? null;
   const allCharacters = state.characters.characters;
   const outcomes = state.activities.outcomesByActivity[props.activityId] ?? [];
+  const troopDefs = state.gameDefs.troops;
+  const allArmies = state.armies.armies;
   return {
     ...props,
     allActivities,
+    allArmies,
     activity,
     allCharacters,
     outcomes,
+    troopDefs,
   };
 }
 

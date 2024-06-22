@@ -5,13 +5,7 @@ import { RootState } from "../../redux/store";
 import styles from "./ToolsHexClearingSubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
-import ServerAPI, {
-  ActivityParticipant,
-  CharacterData,
-  TroopData,
-  TroopDefData,
-  TroopInjuryData,
-} from "../../serverAPI";
+import ServerAPI, { CharacterData, TroopData, TroopDefData } from "../../serverAPI";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
 import { SelectArmiesDialog } from "../dialogs/SelectArmiesDialog";
@@ -26,8 +20,7 @@ import { InputSingleNumberDialog } from "../dialogs/InputSingleNumberDialog";
 import {
   AdventurerParticipant,
   ArmyParticipant,
-  RewardDistro,
-  createActivityParticipant,
+  createActivityAdventurerParticipant,
   generateActivityOutcomes,
   generateAnonymousActivity,
 } from "../../lib/activityUtils";
@@ -63,7 +56,6 @@ interface ReactProps {}
 interface InjectedProps {
   allCharacters: Dictionary<CharacterData>;
   troopsByArmy: Dictionary<TroopData[]>;
-  troopInjuriesByTroop: Dictionary<TroopInjuryData[]>;
   troopDefs: Dictionary<TroopDefData>;
   dispatch?: Dispatch;
 }
@@ -71,8 +63,6 @@ interface InjectedProps {
 type Props = ReactProps & InjectedProps;
 
 class AToolsHexClearingSubPanel extends React.Component<Props, State> {
-  private nextTabIndex: number = 1;
-
   constructor(props: Props) {
     super(props);
 
@@ -80,8 +70,6 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
   }
 
   render(): React.ReactNode {
-    this.nextTabIndex = 1;
-
     const totalAdventurerLevel = this.getTotalAdventurerLevel();
     const healthyAdventurerLevel = this.getHealthyAdventurerLevel();
 
@@ -288,8 +276,10 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     const activity = generateAnonymousActivity(
       this.state.currentDate,
       this.state.adventurerParticipants.map((adventurer) => {
-        return createActivityParticipant(adventurer.characterId);
-      })
+        return createActivityAdventurerParticipant(adventurer.characterId);
+      }),
+      [],
+      this.state.leadFromBehindID
     );
     const [outcomes, campaignGPDistributions] = generateActivityOutcomes(
       activity,
@@ -551,7 +541,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         content: () => {
           return (
             <SelectAdventurersDialog
-              currentDateOverride={this.state.currentDate}
+              startDateOverride={this.state.currentDate}
               preselectedAdventurerIDs={this.state.adventurerParticipants.map((p) => {
                 return p.characterId;
               })}
@@ -607,7 +597,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
           });
           return (
             <SelectArmiesDialog
-              currentDateOverride={this.state.currentDate}
+              startDateOverride={this.state.currentDate}
               preselectedArmyIDs={Object.values(armyIDs)}
               onSelectionConfirmed={(armyIDs: number[]) => {
                 this.updateArmyParticipants(armyIDs, this.state.armyParticipants);
@@ -663,14 +653,13 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allCharacters = state.characters.characters;
-  const { troopsByArmy, troopInjuriesByTroop } = state.armies;
+  const { troopsByArmy } = state.armies;
   const troopDefs = state.gameDefs.troops;
 
   return {
     ...props,
     allCharacters,
     troopsByArmy,
-    troopInjuriesByTroop,
     troopDefs,
   };
 }

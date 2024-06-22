@@ -35,6 +35,7 @@ import {
   getCharacterMaxEncumbrance,
   getCharacterMaxHP,
   getCharacterStat,
+  getCombatSpeedForCharacter,
   getCostOfLivingForCharacterLevel,
   getInitiativeBonusForCharacter,
   getMaintenanceStatusForCharacter,
@@ -698,26 +699,6 @@ class ACharacterSheet extends React.Component<Props> {
     );
   }
 
-  private getBaseSpeedForEncumbrance(encumbrance: Stones): number {
-    // Calculate speed based on Encumbrance.
-    // TODO: Running proficiency.  Plus, Thrassians are always at 20 or less?
-    const maxEncumbrance: Stones = getCharacterMaxEncumbrance(this.props.character);
-
-    let speed = 40;
-
-    if (StonesToNumber(encumbrance) > StonesToNumber(maxEncumbrance)) {
-      speed = 0;
-    } else if (StonesToNumber(encumbrance) > StonesToNumber([10, 0])) {
-      speed = 10;
-    } else if (StonesToNumber(encumbrance) > StonesToNumber([7, 0])) {
-      speed = 20;
-    } else if (StonesToNumber(encumbrance) > StonesToNumber([5, 0])) {
-      speed = 30;
-    }
-
-    return speed;
-  }
-
   private renderInitiativePanel(): React.ReactNode {
     if (this.props.character) {
       let calc = getInitiativeBonusForCharacter(this.props.characterId);
@@ -751,9 +732,12 @@ class ACharacterSheet extends React.Component<Props> {
   private renderSpeedPanel(): React.ReactNode {
     if (this.props.character) {
       // Calculate encumbrance based on equipment slots.
-      const encumbrance = getTotalEquippedWeight(this.props.character, this.props.allItems, this.props.allItemDefs);
-      const [fullStoneEncumbrance, partialStoneEncumbrance] = encumbrance;
-      const speed = this.getBaseSpeedForEncumbrance(encumbrance);
+      const [fullStoneEncumbrance, partialStoneEncumbrance] = getTotalEquippedWeight(
+        this.props.character,
+        this.props.allItems,
+        this.props.allItemDefs
+      );
+      const speed = getCombatSpeedForCharacter(this.props.characterId);
 
       return (
         <div className={styles.speedPanel}>
@@ -1012,8 +996,7 @@ class ACharacterSheet extends React.Component<Props> {
 
   private renderSpeedTooltip(): React.ReactNode {
     const maxEncumbrance: Stones = getCharacterMaxEncumbrance(this.props.character);
-    const encumbrance = getTotalEquippedWeight(this.props.character, this.props.allItems, this.props.allItemDefs);
-    const baseSpeed = this.getBaseSpeedForEncumbrance(encumbrance);
+    const baseSpeed = getCombatSpeedForCharacter(this.props.characterId);
     // TODO: Running?  Thrassians?
     const lowEncumbranceStyle = baseSpeed === 40 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
     const midEncumbranceStyle = baseSpeed === 30 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;

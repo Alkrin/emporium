@@ -22,10 +22,13 @@ export function getTroopAvailableUnitCount(troop: TroopData, currentDateOverride
 }
 
 export function getTroopAvailableBattleRating(troop: TroopData, currentDateOverride?: string): number {
-  const redux = store.getState();
-  const def = redux.gameDefs.troops[troop.def_id];
-
   let bodyCount = getTroopAvailableUnitCount(troop, currentDateOverride);
+  return getBattleRatingForTroopDefAndCount(troop.def_id, bodyCount);
+}
+
+export function getBattleRatingForTroopDefAndCount(defId: number, bodyCount: number): number {
+  const redux = store.getState();
+  const def = redux.gameDefs.troops[defId];
 
   const platoonCount = Math.floor(bodyCount / def.platoon_size);
   const individualCount = bodyCount % def.platoon_size;
@@ -45,23 +48,13 @@ export function getArmyAvailableBattleRating(armyID: number, currentDateOverride
   return br;
 }
 
-export function getTroopTotalBattleRating(troop: TroopData): number {
-  const redux = store.getState();
-  const def = redux.gameDefs.troops[troop.def_id];
-
-  const platoonCount = Math.floor(troop.count / def.platoon_size);
-  const individualCount = troop.count % def.platoon_size;
-
-  return platoonCount * def.platoon_br + individualCount * def.individual_br;
-}
-
 export function getArmyTotalBattleRating(armyID: number): number {
   const redux = store.getState();
   const troops = redux.armies.troopsByArmy[armyID];
 
   let br: number = 0;
   troops?.forEach((troop) => {
-    br += getTroopTotalBattleRating(troop);
+    br += getBattleRatingForTroopDefAndCount(troop.def_id, troop.count);
   });
 
   return br;

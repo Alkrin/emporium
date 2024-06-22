@@ -4,7 +4,16 @@ import { connect } from "react-redux";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
-import ServerAPI, { ActivityData, ActivityParticipant, CharacterData, LocationData, UserData } from "../../serverAPI";
+import ServerAPI, {
+  ActivityData,
+  ActivityAdventurerParticipant,
+  CharacterData,
+  LocationData,
+  UserData,
+  ArmyData,
+  TroopDefData,
+  ActivityArmyParticipant,
+} from "../../serverAPI";
 import styles from "./CreateActivitySubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
@@ -15,28 +24,14 @@ import { UserRole } from "../../redux/userSlice";
 import { AbilityDisplayData } from "../characters/EditProficienciesSubPanel";
 import { AllProficiencies } from "../../staticData/proficiencies/AllProficiencies";
 import { AbilityOrProficiency } from "../../staticData/types/abilitiesAndProficiencies";
-import {
-  canCharacterFindTraps,
-  canCharacterSneak,
-  canCharacterTurnUndead,
-  doesCharacterHaveMagicWeapons,
-  doesCharacterHaveSilverWeapons,
-  isCharacterArcane,
-  isCharacterDivine,
-  isProficiencyUnlockedForCharacter,
-} from "../../lib/characterUtils";
 import { ActivityPreparednessDisplay } from "./ActivityPreparednessDisplay";
-import {
-  FilterDropdowns,
-  FilterType,
-  FilterValueAny,
-  FilterValueBusyStatus,
-  FilterValues,
-  isFilterMetBusyStatus,
-  isFilterMetLocation,
-  isFilterMetOwner,
-  isFilterMetProficiency,
-} from "../FilterDropdowns";
+import { FilterType, FilterValueAny, FilterValueBusyStatus, FilterValues } from "../FilterDropdowns";
+import { EditButton } from "../EditButton";
+import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
+import { createActivityAdventurerParticipant, createActivityArmyParticipant } from "../../lib/activityUtils";
+import { SelectArmiesDialog } from "../dialogs/SelectArmiesDialog";
+import { getBattleRatingForTroopDefAndCount } from "../../lib/armyUtils";
+import { getCombatSpeedForCharacter } from "../../lib/characterUtils";
 
 interface State {
   activity: ActivityData;
@@ -57,6 +52,8 @@ interface InjectedProps {
   activeRole: UserRole;
   users: Dictionary<UserData>;
   allLocations: Dictionary<LocationData>;
+  allArmies: Dictionary<ArmyData>;
+  troopDefs: Dictionary<TroopDefData>;
   dispatch?: Dispatch;
 }
 
@@ -80,6 +77,8 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
             start_date: a.start_date,
             end_date: a.end_date,
             participants: [...a.participants],
+            army_participants: [...a.army_participants],
+            lead_from_behind_id: a.lead_from_behind_id,
             resolution_text: a.resolution_text,
           },
           filters: {
@@ -102,6 +101,8 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
           start_date: dateFormat(new Date(), "yyyy-mm-dd"),
           end_date: dateFormat(new Date(), "yyyy-mm-dd"),
           participants: [],
+          army_participants: [],
+          lead_from_behind_id: 0,
           resolution_text: "",
         },
         filters: {
@@ -186,24 +187,48 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
 
         <div className={styles.participantsSection}>
           <div className={styles.participantsContainer}>
-            <div className={styles.participantsHeader}>Participants</div>
+            <div className={styles.participantsHeader}>
+              <div
+                className={styles.participantsHeaderLabel}
+              >{`Adventurers: ${this.state.activity.participants.length}`}</div>
+              <EditButton className={styles.editButton} onClick={this.onEditAdventurersClicked.bind(this)} />
+            </div>
             <div className={styles.participantsListContainer}>
-              {this.getSortedParticipants().map(this.renderParticipantRow.bind(this))}
+              {this.getSortedAdventurerParticipants().map(this.renderAdventurerParticipantRow.bind(this))}
+            </div>
+            <div className={styles.row}>
+              <div className={styles.firstLabel}>{"Lead from Behind?"}</div>
+              <select
+                className={styles.leadFromBehindSelector}
+                value={this.state.activity.lead_from_behind_id}
+                onChange={(e) => {
+                  this.setState({
+                    activity: {
+                      ...this.state.activity,
+                      lead_from_behind_id: +e.target.value,
+                    },
+                  });
+                }}
+              >
+                <option value={0}>---</option>
+                {this.getSortedAdventurerParticipants().map(({ characterId }) => {
+                  const character = this.props.allCharacters[characterId];
+                  return (
+                    <option value={characterId} key={`user${character?.name}`}>
+                      {character?.name ?? "Unknown"}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
           </div>
           <div className={styles.participantsContainer}>
-            <div className={styles.participantsHeader}>Adventurers</div>
-            <div className={styles.filtersContainer}>
-              <FilterDropdowns
-                filterOrder={[[FilterType.Owner, FilterType.BusyStatus, FilterType.Location, FilterType.Proficiency]]}
-                filterValues={this.state.filters}
-                onFilterChanged={(filters) => {
-                  this.setState({ filters });
-                }}
-              />
+            <div className={styles.participantsHeader}>
+              <div className={styles.participantsHeaderLabel}>{"Armies"}</div>
+              <EditButton className={styles.editButton} onClick={this.onEditArmiesClicked.bind(this)} />
             </div>
             <div className={styles.adventurersListContainer}>
-              {this.getSortedAdventurers().map(this.renderAdventurerRow.bind(this))}
+              {this.getSortedArmyParticipants().map(this.renderArmyParticipantRows.bind(this))}
             </div>
           </div>
         </div>
@@ -211,20 +236,28 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
         <div className={styles.summarySection}>
           <div className={styles.summaryColumn}>
             <div className={styles.row}>
-              <div className={styles.summaryLabel}>Exploration Level:</div>
+              <div className={styles.characterSummaryLabel}>{"Exploration Level:"}</div>
               <div className={styles.summaryValue}>{this.getExplorationLevelText()}</div>
+            </div>
+            <div className={styles.row}>
+              <div className={styles.characterSummaryLabel}>{"Delve Level:"}</div>
+              <div className={styles.summaryValue}>{this.getDelveLevelText()}</div>
             </div>
           </div>
           <div className={styles.summaryColumn}>
             <div className={styles.row}>
-              <div className={styles.summaryLabel}>Delve Level:</div>
-              <div className={styles.summaryValue}>{this.getDelveLevelText()}</div>
+              <div className={styles.characterSummaryLabel}>{"Battle Rating:"}</div>
+              <div className={styles.summaryValue}>{this.getBattleRatingText()}</div>
+            </div>
+            <div className={styles.row}>
+              <div className={styles.characterSummaryLabel}>{"Exploration Speed:"}</div>
+              <div className={styles.summaryValue}>{this.getTravelSpeedText()}</div>
             </div>
           </div>
         </div>
 
         <div className={styles.preparednessContainer}>
-          <ActivityPreparednessDisplay participants={this.state.activity.participants} cellSizeVmin={7} />
+          <ActivityPreparednessDisplay participants={this.state.activity.participants} cellSizeVmin={6} />
         </div>
 
         <div className={styles.buttonRow}>
@@ -249,9 +282,86 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
     );
   }
 
+  private onEditAdventurersClicked(): void {
+    // Show a modal to select / edit the adventurer list.
+    this.props.dispatch?.(
+      showModal({
+        id: "Adventurers",
+        widthVmin: 60,
+        content: () => {
+          return (
+            <SelectAdventurersDialog
+              startDateOverride={this.state.activity.start_date}
+              endDateOverride={this.state.activity.end_date}
+              preselectedAdventurerIDs={this.state.activity.participants.map((p) => {
+                return p.characterId;
+              })}
+              onSelectionConfirmed={(adventurerIDs: number[]) => {
+                // If the leadFromBehind character is no longer participating, clear them from the leadFromBehind slot.
+                if (!adventurerIDs.includes(this.state.activity.lead_from_behind_id)) {
+                  this.setState({ activity: { ...this.state.activity, lead_from_behind_id: 0 } });
+                }
+                // And change the participant list itself, of course.
+                this.updateAdventurerParticipants(adventurerIDs);
+              }}
+            />
+          );
+        },
+      })
+    );
+  }
+
+  private onEditArmiesClicked(): void {
+    // Show a modal to select / edit the army list.
+    this.props.dispatch?.(
+      showModal({
+        id: "Armies",
+        widthVmin: 60,
+        content: () => {
+          const armyIDs: Dictionary<number> = {};
+          this.state.activity.army_participants.forEach((p) => {
+            armyIDs[p.armyId] = p.armyId;
+          });
+          return (
+            <SelectArmiesDialog
+              startDateOverride={this.state.activity.start_date}
+              endDateOverride={this.state.activity.end_date}
+              preselectedArmyIDs={Object.values(armyIDs)}
+              onSelectionConfirmed={(armyIDs: number[]) => {
+                this.updateArmyParticipants(armyIDs);
+              }}
+            />
+          );
+        },
+      })
+    );
+  }
+
+  private updateAdventurerParticipants(adventurerIDs: number[]): void {
+    const participants = adventurerIDs.map((aid) => createActivityAdventurerParticipant(aid));
+    const activity: ActivityData = {
+      ...this.state.activity,
+      participants,
+    };
+    this.setState({ activity });
+  }
+
+  private updateArmyParticipants(armyIDs: number[]): void {
+    const army_participants = armyIDs.map((aid) => createActivityArmyParticipant(aid, this.state.activity.start_date));
+    const activity: ActivityData = {
+      ...this.state.activity,
+      army_participants,
+    };
+    this.setState({ activity });
+  }
+
   private getExplorationLevelText(): string {
     const totalLevel: number = this.state.activity.participants.reduce((subtotal, p) => {
-      return subtotal + p.characterLevel;
+      if (p.characterId === this.state.activity.lead_from_behind_id) {
+        return subtotal + p.characterLevel / 2;
+      } else {
+        return subtotal + p.characterLevel;
+      }
     }, 0);
 
     return `${totalLevel} / 6 ≈ ${(totalLevel / 6).toFixed(2)} = ${Math.floor(totalLevel / 6)}`;
@@ -260,7 +370,11 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
   private getDelveLevelText(): string {
     const numParticipants = this.state.activity.participants.length;
     const totalLevel: number = this.state.activity.participants.reduce((subtotal, p) => {
-      return subtotal + p.characterLevel;
+      if (p.characterId === this.state.activity.lead_from_behind_id) {
+        return subtotal + p.characterLevel / 2;
+      } else {
+        return subtotal + p.characterLevel;
+      }
     }, 0);
 
     return `${totalLevel} / ${Math.max(numParticipants, 4)} ≈ ${(totalLevel / Math.max(numParticipants, 4)).toFixed(
@@ -268,151 +382,142 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
     )} = ${Math.round(totalLevel / Math.max(numParticipants, 4))}`;
   }
 
-  private getSortedParticipants(): CharacterData[] {
-    const p: CharacterData[] = this.state.activity.participants.map((p) => {
-      return this.props.allCharacters[p.characterId];
-    });
-
-    // Sort by level, then by name.
-    p.sort((a, b) => {
-      if (a.level !== b.level) {
-        return b.level - a.level;
-      }
-      return a.name.localeCompare(b.name);
-    });
-
-    return p;
-  }
-
-  private getSortedAdventurers(): CharacterData[] {
-    const permittedCharacters = Object.values(this.props.allCharacters).filter((character) => {
-      return this.props.activeRole !== "player" || character.user_id === this.props.currentUserId;
-    });
-
-    const filteredCharacters: CharacterData[] = permittedCharacters.filter((character) => {
-      // Exclude the dead.
-      if (character.dead) {
-        return false;
-      }
-      // Exclude characters that are already participants.
-      if (
-        !!this.state.activity.participants.find((p) => {
-          return character.id === p.characterId;
-        })
-      ) {
-        return false;
-      }
-
-      // Apply Owner filter.
-      if (!isFilterMetOwner(this.state.filters, character.user_id)) {
-        return false;
-      }
-
-      // Apply Location filter.
-      if (!isFilterMetLocation(this.state.filters, character.location_id)) {
-        return false;
-      }
-
-      // Apply Status filter.
-      if (
-        !isFilterMetBusyStatus(
-          this.state.filters,
-          character.id,
-          this.state.activity.start_date,
-          this.state.activity.end_date
-        )
-      ) {
-        return false;
-      }
-
-      // Apply Proficiency filter.
-      if (!isFilterMetProficiency(this.state.filters, character.id)) {
-        return false;
-      }
-
-      return true;
-    });
-
-    // Sort by level, then by name.
-    filteredCharacters.sort((a, b) => {
-      if (a.level !== b.level) {
-        return b.level - a.level;
-      }
-      return a.name.localeCompare(b.name);
-    });
-
-    return filteredCharacters;
-  }
-
-  private renderParticipantRow(character: CharacterData, index: number): React.ReactNode {
-    return (
-      <div className={styles.listRow} key={`participantRow${index}`}>
-        <div className={styles.listLevel}>L{character.level}</div>
-        <div className={styles.listClass}>{character.class_name}</div>
-        <div className={styles.listName}>{character.name}</div>
-        <div className={styles.plusMinusButton} onClick={this.onRemoveParticipant.bind(this, character)}>
-          -
-        </div>
-      </div>
+  private getBattleRatingText(): string {
+    const totalBR = this.state.activity.army_participants.reduce<number>(
+      (totalBRSoFar: number, armyParticipant: ActivityArmyParticipant, armyIndex: number) => {
+        const participantBR = Object.entries(armyParticipant.troopCounts).reduce<number>(
+          (armyBRSoFar: number, entry: [string, number], troopIndex) => {
+            const defId = +entry[0];
+            const count = entry[1];
+            return armyBRSoFar + getBattleRatingForTroopDefAndCount(defId, count);
+          },
+          0
+        );
+        return totalBRSoFar + participantBR;
+      },
+      0
     );
+
+    return totalBR.toFixed(2);
   }
 
-  private renderAdventurerRow(character: CharacterData, index: number): React.ReactNode {
-    return (
-      <div className={styles.listRow} key={`adventurerRow${index}`}>
-        <div className={styles.listLevel}>L{character.level}</div>
-        <div className={styles.listClass}>{character.class_name}</div>
-        <div className={styles.listName}>{character.name}</div>
-        <div className={styles.plusMinusButton} onClick={this.onAddParticipant.bind(this, character)}>
-          +
-        </div>
-      </div>
-    );
-  }
+  private getTravelSpeedText(): string {
+    let slowestAdventurerSpeed = this.state.activity.participants.reduce<number>(
+      (slowestSoFar: number, participant: ActivityAdventurerParticipant) => {
+        const currentSpeed = getCombatSpeedForCharacter(participant.characterId);
 
-  private onAddParticipant(character: CharacterData): void {
-    const newParticipant: ActivityParticipant = {
-      characterId: character.id,
-      characterLevel: character.level,
-      isArcane: isCharacterArcane(character.id),
-      isDivine: isCharacterDivine(character.id),
-      canTurnUndead: canCharacterTurnUndead(character.id),
-      canSneak: canCharacterSneak(character.id),
-      canFindTraps: canCharacterFindTraps(character.id),
-      hasMagicWeapons: doesCharacterHaveMagicWeapons(character.id),
-      hasSilverWeapons: doesCharacterHaveSilverWeapons(character.id),
-    };
-    const participants = [...this.state.activity.participants, newParticipant];
-    const activity: ActivityData = {
-      ...this.state.activity,
-      participants,
-    };
-    this.setState({ activity });
-  }
-
-  private onRemoveParticipant(character: CharacterData): void {
-    const participants = this.state.activity.participants.filter((p) => {
-      return p.characterId !== character.id;
-    });
-    const activity: ActivityData = {
-      ...this.state.activity,
-      participants,
-    };
-    this.setState({ activity });
-  }
-
-  private sortPermittedUsers(): UserData[] {
-    const permittedUsers = Object.values(this.props.users)
-      .filter((user) => {
-        if (this.props.activeRole !== "player") {
-          return true;
+        if (slowestSoFar === 0) {
+          return currentSpeed;
         } else {
-          return user.id === this.props.currentUserId;
+          return Math.min(slowestSoFar, currentSpeed);
         }
-      })
-      .sort();
+      },
+      0
+    );
 
-    return permittedUsers;
+    const armySpeeds = this.state.activity.army_participants.map((armyParticipant) => {
+      const speed = Object.keys(armyParticipant.troopCounts).reduce<number>(
+        (lowestSpeed: number, troopDefIdString: string) => {
+          const def = this.props.troopDefs[+troopDefIdString];
+          if (lowestSpeed === 0) {
+            return def.move;
+          } else {
+            return Math.min(def.move, lowestSpeed);
+          }
+        },
+        0
+      );
+      return speed;
+    });
+    const slowestArmySpeed =
+      armySpeeds.reduce((slowest: number, currentSpeed: number) => {
+        if (slowest === 0) {
+          return currentSpeed;
+        } else {
+          return Math.min(slowest, currentSpeed);
+        }
+        // Have to divide by 3 because troopDefs list the exploration speed, while adventurers give a combat speed.
+      }, 0) / 3;
+
+    let slowestSpeed = Math.min(slowestAdventurerSpeed, slowestArmySpeed);
+    if (this.state.activity.participants.length === 0) {
+      slowestSpeed = slowestArmySpeed;
+    }
+    if (this.state.activity.army_participants.length === 0) {
+      slowestSpeed = slowestAdventurerSpeed;
+    }
+
+    // Exploration speed is 3x combat speed.
+    // Overland hex speed is 1/10th of combat speed.
+
+    return `${3 * slowestSpeed}' or ${slowestSpeed / 10} hex/day`;
+  }
+
+  private getSortedAdventurerParticipants(): ActivityAdventurerParticipant[] {
+    const sorted = [...this.state.activity.participants].sort((a, b) => {
+      const characterA = this.props.allCharacters[a.characterId];
+      const characterB = this.props.allCharacters[b.characterId];
+
+      // Sort by level first.  Highest levels at the top.
+      if (characterA.level !== characterB.level) {
+        return characterB.level - characterA.level;
+      }
+      return characterA.name.localeCompare(characterB.name);
+    });
+
+    return sorted;
+  }
+
+  private getSortedArmyParticipants(): ActivityArmyParticipant[] {
+    const sorted = [...this.state.activity.army_participants].sort((a, b) => {
+      const armyA = this.props.allArmies[a.armyId];
+      const armyB = this.props.allArmies[b.armyId];
+      return armyA.name.localeCompare(armyB.name);
+    });
+
+    return sorted;
+  }
+
+  private renderAdventurerParticipantRow(participant: ActivityAdventurerParticipant, index: number): React.ReactNode {
+    const character = this.props.allCharacters[participant.characterId];
+    return (
+      <div className={styles.listRow} key={`adventurerParticipantRow${index}`}>
+        <div className={styles.listLevel}>{`L${character.level}`}</div>
+        <div className={styles.listClass}>{character.class_name}</div>
+        <div className={styles.listName}>{character.name}</div>
+      </div>
+    );
+  }
+
+  private renderArmyParticipantRows(participant: ActivityArmyParticipant, index: number): React.ReactNode {
+    const army = this.props.allArmies[participant.armyId];
+    const sortedTroops = Object.entries(participant.troopCounts).sort((a, b) => {
+      const defA = this.props.troopDefs[+a[0]];
+      const defB = this.props.troopDefs[+b[0]];
+      return defA.name.localeCompare(defB.name);
+    });
+    const totalBR: number = sortedTroops.reduce<number>((brSoFar: number, entry: [string, number]) => {
+      const defId = +entry[0];
+      const count = entry[1];
+      return brSoFar + getBattleRatingForTroopDefAndCount(defId, count);
+    }, 0);
+    return (
+      <div className={styles.armyListSection} key={`army${index}`}>
+        <div className={styles.armyListRow} key={`armyParticipantRow${index}`}>
+          <div className={styles.listBattleRating}>{`BR: ${totalBR.toFixed(2)}`}</div>
+          <div className={styles.listArmyName}>{army.name}</div>
+        </div>
+        {sortedTroops.map(([defIdString, count], troopIndex) => {
+          const troopDef = this.props.troopDefs[+defIdString];
+          return (
+            <div className={styles.armyTroopRow} key={`troop${troopIndex}`}>
+              <div className={styles.listTroopCount}>{`${count}×\xa0`}</div>
+              <div className={styles.listName}>{troopDef.name}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
   }
 
   private async onSaveClicked(): Promise<void> {
@@ -582,6 +687,8 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { activeRole } = state.hud;
   const { users } = state.user;
   const allLocations = state.locations.locations;
+  const allArmies = state.armies.armies;
+  const troopDefs = state.gameDefs.troops;
   return {
     ...props,
     currentUserId: state.user.currentUser.id,
@@ -591,6 +698,8 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     activeRole,
     users,
     allLocations,
+    allArmies,
+    troopDefs,
   };
 }
 
