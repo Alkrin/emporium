@@ -1,3 +1,4 @@
+import { ActivityResolution, convertActivityOutcomeForServer, convertServerActivityOutcome } from "./lib/activityUtils";
 import { getAllCharacterAssociatedItemIds } from "./lib/characterUtils";
 import { Dictionary } from "./lib/dictionary";
 import { UserRole } from "./redux/userSlice";
@@ -299,7 +300,6 @@ export interface ActivityData {
   participants: ActivityAdventurerParticipant[];
   army_participants: ActivityArmyParticipant[];
   lead_from_behind_id: number;
-  resolution_text: string;
 }
 
 export type ServerActivityData = Omit<ActivityData, "participants" | "army_participants"> & {
@@ -419,56 +419,76 @@ export function ActivityData_ParticipantsToString(participants: ActivityAdventur
 }
 
 export enum ActivityOutcomeType {
-  Invalid = "Invalid",
-  XP = "XP",
-  Gold = "Gold",
-  Item = "Item",
-  CXPDeductible = "CXPDeductible",
-  CXPDeductibleReset = "CXPDeductibleReset",
-  Injury = "Injury",
-  Death = "Death",
-  Relocate = "Relocate", // Character changed to a new location.
-  ArmyDeath = "ArmyDeath",
-  ArmyInjury = "ArmyInjury",
+  Invalid = "---",
+  ChangeLocation = "ChangeLocation",
+  Description = "Description",
+  InjuriesAndDeaths = "InjuriesAndDeaths",
+  LootAndXP = "LootAndXP",
 }
+export const SortedActivityOutcomeTypes = Object.values(ActivityOutcomeType).sort();
+export const UniqueActivityOutcomeTypes = [
+  ActivityOutcomeType.ChangeLocation,
+  ActivityOutcomeType.Description,
+  ActivityOutcomeType.InjuriesAndDeaths,
+  ActivityOutcomeType.LootAndXP,
+];
+
 export interface ActivityOutcomeData {
   id: number;
   activity_id: number;
   type: ActivityOutcomeType;
-  target_id: number;
-  quantity: number;
-  extra: string;
 }
-
-type ServerActivityOutcomeData = Omit<ActivityOutcomeData, "type"> & {
-  type: string;
-};
 
 export function ActivityOutcomeData_StringToType(s: string): ActivityOutcomeType {
   switch (s) {
-    case ActivityOutcomeType.XP:
-      return ActivityOutcomeType.XP;
-    case ActivityOutcomeType.Gold:
-      return ActivityOutcomeType.Gold;
-    case ActivityOutcomeType.Item:
-      return ActivityOutcomeType.Item;
-    case ActivityOutcomeType.CXPDeductible:
-      return ActivityOutcomeType.CXPDeductible;
-    case ActivityOutcomeType.CXPDeductibleReset:
-      return ActivityOutcomeType.CXPDeductibleReset;
-    case ActivityOutcomeType.Injury:
-      return ActivityOutcomeType.Injury;
-    case ActivityOutcomeType.Death:
-      return ActivityOutcomeType.Death;
-    case ActivityOutcomeType.Relocate:
-      return ActivityOutcomeType.Relocate;
-    case ActivityOutcomeType.ArmyDeath:
-      return ActivityOutcomeType.ArmyDeath;
-    case ActivityOutcomeType.ArmyInjury:
-      return ActivityOutcomeType.ArmyInjury;
+    case ActivityOutcomeType.ChangeLocation:
+      return ActivityOutcomeType.ChangeLocation;
+    case ActivityOutcomeType.Description:
+      return ActivityOutcomeType.Description;
+    case ActivityOutcomeType.InjuriesAndDeaths:
+      return ActivityOutcomeType.InjuriesAndDeaths;
+    case ActivityOutcomeType.LootAndXP:
+      return ActivityOutcomeType.LootAndXP;
     default:
       return ActivityOutcomeType.Invalid;
   }
+}
+
+export interface ServerActivityOutcomeData {
+  id: number;
+  activity_id: number;
+  type: string;
+  data: string;
+}
+
+export interface ActivityOutcomeData_ChangeLocation extends ActivityOutcomeData {
+  type: ActivityOutcomeType.ChangeLocation;
+  locationId: number;
+}
+
+export interface ActivityOutcomeData_Description extends ActivityOutcomeData {
+  type: ActivityOutcomeType.Description;
+  description: string;
+}
+
+export interface ActivityOutcomeData_InjuriesAndDeaths extends ActivityOutcomeData {
+  type: ActivityOutcomeType.InjuriesAndDeaths;
+  // Character deaths and injures are inter-related.  Dead characters generally aren't ALSO injured.
+  deadCharacterIds: number[];
+  // Injuries state.  Key: characterId, value: injuryIds.
+  characterInjuries: Dictionary<string[]>;
+  // First key: armyId, second key: troopDefId, value: number of injuries.
+  troopInjuriesByArmy: Dictionary<Dictionary<number>>;
+  // First key: armyId, second key: troopDefId, value: number of deaths.
+  troopDeathsByArmy: Dictionary<Dictionary<number>>;
+}
+
+export interface ActivityOutcomeData_LootAndXP extends ActivityOutcomeData {
+  type: ActivityOutcomeType.LootAndXP;
+  goldWithXP: number;
+  goldWithoutXP: number;
+  combatXP: number;
+  campaignXP: number;
 }
 
 export interface MapData {
@@ -623,6 +643,7 @@ export interface RowDeleted {
 
 export type LogInResult = ServerError | UserData;
 export type ActivitiesResult = ServerError | ActivityData[];
+export type ExpectedOutcomesResult = ServerError | ActivityOutcomeData[];
 export type ActivityOutcomesResult = ServerError | ActivityOutcomeData[];
 export type CharactersResult = ServerError | CharacterData[];
 export type EquipmentSetsResult = ServerError | EquipmentSetData[];
@@ -716,6 +737,32 @@ class AServerAPI {
     }
   }
 
+  async fetchExpectedOutcomes(): Promise<ExpectedOutcomesResult> {
+    const res = await fetch("/api/fetchExpectedOutcomes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerActivityOutcomeData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      const outcomes: ActivityOutcomeData[] = [];
+      data.forEach((sod) => {
+        const data = convertServerActivityOutcome(sod);
+        if (data) {
+          outcomes.push(data);
+        } else {
+          console.error(`Found invalid ServerActivityOutcomeData in expected_outcomes.`, sod);
+          return { error: "Found invalid ServerActivityOutcomeData in expected_outcomes." };
+        }
+      });
+      return outcomes;
+    }
+  }
+
   async fetchActivityOutcomes(): Promise<ActivityOutcomesResult> {
     const res = await fetch("/api/fetchActivityOutcomes", {
       method: "POST",
@@ -728,15 +775,17 @@ class AServerAPI {
     if ("error" in data) {
       return data;
     } else {
-      const outcomeData: ActivityOutcomeData[] = [];
-      data.forEach((sOutcomeData) => {
-        outcomeData.push({
-          ...sOutcomeData,
-          type: ActivityOutcomeData_StringToType(sOutcomeData.type),
-        });
+      const outcomes: ActivityOutcomeData[] = [];
+      data.forEach((sod) => {
+        const data = convertServerActivityOutcome(sod);
+        if (data) {
+          outcomes.push(data);
+        } else {
+          console.error(`Found invalid ServerActivityOutcomeData in activity_outcomes.`, sod);
+          return { error: "Found invalid ServerActivityOutcomeData in activity_outcomes." };
+        }
       });
-
-      return outcomeData;
+      return outcomes;
     }
   }
 
@@ -1566,11 +1615,15 @@ class AServerAPI {
     return await res.json();
   }
 
-  async createActivity(activity: ActivityData): Promise<InsertRowResult> {
+  async createActivity(
+    activity: ActivityData,
+    expectedOutcomes: ServerActivityOutcomeData[]
+  ): Promise<MultiModifyResult> {
     const requestBody: RequestBody_CreateActivity = {
       ...activity,
       participants: ActivityData_ParticipantsToString(activity.participants),
       army_participants: ActivityData_ArmyParticipantsToString(activity.army_participants),
+      expectedOutcomes,
     };
     const res = await fetch("/api/createActivity", {
       method: "POST",
@@ -1582,11 +1635,15 @@ class AServerAPI {
     return await res.json();
   }
 
-  async editActivity(activity: ActivityData): Promise<EditRowResult> {
+  async editActivity(
+    activity: ActivityData,
+    expectedOutcomes: ServerActivityOutcomeData[]
+  ): Promise<MultiModifyResult> {
     const requestBody: RequestBody_EditActivity = {
       ...activity,
       participants: ActivityData_ParticipantsToString(activity.participants),
       army_participants: ActivityData_ArmyParticipantsToString(activity.army_participants),
+      expectedOutcomes,
     };
     const res = await fetch("/api/editActivity", {
       method: "POST",
@@ -1614,11 +1671,14 @@ class AServerAPI {
 
   async resolveActivity(
     activity: ActivityData,
-    resolution_text: string,
     outcomes: ActivityOutcomeData[],
-    campaignGPDistributions: Dictionary<number>
+    resolution: ActivityResolution
   ): Promise<MultiModifyResult> {
-    const requestBody: RequestBody_ResolveActivity = { activity, resolution_text, outcomes, campaignGPDistributions };
+    const requestBody: RequestBody_ResolveActivity = {
+      activity,
+      outcomes: outcomes.map(convertActivityOutcomeForServer),
+      resolution,
+    };
     const res = await fetch("/api/resolveActivity", {
       method: "POST",
       headers: {

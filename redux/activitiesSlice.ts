@@ -1,10 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { Dictionary } from "../lib/dictionary";
-import { ActivityData, ActivityOutcomeData, CharacterData, CharacterEquipmentData } from "../serverAPI";
+import { ActivityData, ActivityOutcomeData } from "../serverAPI";
 
 interface ActivitiesReduxState {
   activities: Dictionary<ActivityData>;
+  expectedOutcomesByActivity: Dictionary<ActivityOutcomeData[]>;
   outcomesByActivity: Dictionary<ActivityOutcomeData[]>;
   activeActivityId: number;
 }
@@ -12,6 +13,7 @@ interface ActivitiesReduxState {
 function buildDefaultActivitiesReduxState(): ActivitiesReduxState {
   const defaults: ActivitiesReduxState = {
     activities: {},
+    expectedOutcomesByActivity: {},
     outcomesByActivity: {},
     activeActivityId: 0,
   };
@@ -28,6 +30,16 @@ export const activitiesSlice = createSlice({
         newActivities[a.id] = a;
       });
       state.activities = newActivities;
+    },
+    updateExpectedOutcomes: (state: ActivitiesReduxState, action: PayloadAction<ActivityOutcomeData[]>) => {
+      const newOutcomes: Dictionary<ActivityOutcomeData[]> = {};
+      action.payload.forEach((o) => {
+        if (!newOutcomes[o.activity_id]) {
+          newOutcomes[o.activity_id] = [];
+        }
+        newOutcomes[o.activity_id].push(o);
+      });
+      state.expectedOutcomesByActivity = newOutcomes;
     },
     updateActivityOutcomes: (state: ActivitiesReduxState, action: PayloadAction<ActivityOutcomeData[]>) => {
       const newOutcomes: Dictionary<ActivityOutcomeData[]> = {};
@@ -53,6 +65,7 @@ export const activitiesSlice = createSlice({
 
 export const {
   updateActivities,
+  updateExpectedOutcomes,
   updateActivityOutcomes,
   setActiveActivityId,
   deleteActivity,

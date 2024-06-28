@@ -20,6 +20,12 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       values: [b.id],
     });
 
+    // Expected Outcomes too.
+    queries.push({
+      query: "DELETE FROM expected_outcomes WHERE activity_id=?",
+      values: [b.id],
+    });
+
     const results = await executeTransaction<any>(queries);
 
     res.status(200).json(results);

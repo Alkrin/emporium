@@ -22,6 +22,7 @@ import { CreateActivitySubPanel } from "./CreateActivitySubPanel";
 import { SheetRoot } from "../SheetRoot";
 import { getBattleRatingForTroopDefAndCount } from "../../lib/armyUtils";
 import { getCombatSpeedForCharacter } from "../../lib/characterUtils";
+import { sortActivityOutcomes } from "../../lib/activityUtils";
 
 interface ReactProps {
   activityId: number;
@@ -34,6 +35,7 @@ interface InjectedProps {
   allCharacters: Dictionary<CharacterData>;
   activity?: ActivityData;
   outcomes: ActivityOutcomeData[];
+  expectedOutcomes: ActivityOutcomeData[];
   troopDefs: Dictionary<TroopDefData>;
   dispatch?: Dispatch;
 }
@@ -108,24 +110,23 @@ class AActivitySheet extends React.Component<Props> {
           <div className={styles.preparednessContainer}>
             <ActivityPreparednessDisplay participants={this.props.activity.participants} cellSizeVmin={5} />
           </div>
-          <div className={styles.resolutionRow}>
-            <div className={styles.column}>
-              <div className={styles.normalText}>Resolution</div>
-              <textarea
-                className={styles.resolutionTextField}
-                value={this.props.activity.resolution_text}
-                disabled
-                spellCheck={false}
-              />
-            </div>
-            <div className={styles.column}>
-              <div className={styles.normalText}>Outcomes</div>
-              <ActivityOutcomesList className={styles.outcomesList} outcomes={this.props.outcomes} />
-            </div>
+
+          <div className={styles.outcomesContainer}>
+            <div className={styles.normalText}>{this.props.outcomes.length > 0 ? "Outcomes" : "Expected Outcomes"}</div>
+            <ActivityOutcomesList
+              className={styles.outcomesList}
+              outcomes={
+                this.props.outcomes.length > 0
+                  ? [...this.props.outcomes].sort(sortActivityOutcomes)
+                  : [...this.props.expectedOutcomes].sort(sortActivityOutcomes)
+              }
+              canEdit={false}
+            />
           </div>
+
           <div className={styles.buttonRow}>
             <div className={styles.actionButton} onClick={this.onResolveClicked.bind(this)}>
-              {this.props.activity.resolution_text.length > 0 ? "Clone Activity" : "Resolve Activity"}
+              {this.props.outcomes.length > 0 ? "Clone Activity" : "Resolve Activity"}
             </div>
           </div>
         </SheetRoot>
@@ -141,7 +142,7 @@ class AActivitySheet extends React.Component<Props> {
 
   private onResolveClicked(): void {
     if (this.props.activity) {
-      if (this.props.activity.resolution_text.length > 0) {
+      if (this.props.outcomes.length > 0) {
         // Open the activityCreator in edit mode.
         this.props.dispatch?.(
           showSubPanel({
@@ -353,6 +354,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const activity = allActivities[props.activityId] ?? null;
   const allCharacters = state.characters.characters;
   const outcomes = state.activities.outcomesByActivity[props.activityId] ?? [];
+  const expectedOutcomes = state.activities.expectedOutcomesByActivity[props.activityId] ?? [];
   const troopDefs = state.gameDefs.troops;
   const allArmies = state.armies.armies;
   return {
@@ -362,6 +364,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     activity,
     allCharacters,
     outcomes,
+    expectedOutcomes,
     troopDefs,
   };
 }

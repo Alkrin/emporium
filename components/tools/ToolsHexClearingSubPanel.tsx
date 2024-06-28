@@ -5,23 +5,29 @@ import { RootState } from "../../redux/store";
 import styles from "./ToolsHexClearingSubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
-import ServerAPI, { CharacterData, TroopData, TroopDefData } from "../../serverAPI";
+import ServerAPI, {
+  ActivityAdventurerParticipant,
+  ActivityArmyParticipant,
+  ActivityData,
+  ActivityOutcomeData_InjuriesAndDeaths,
+  ActivityOutcomeData_LootAndXP,
+  ActivityOutcomeType,
+  ArmyData,
+  CharacterData,
+  TroopData,
+  TroopDefData,
+} from "../../serverAPI";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
 import { SelectArmiesDialog } from "../dialogs/SelectArmiesDialog";
-import {
-  getArmyAvailableBattleRating,
-  getArmyTotalBattleRating,
-  getTroopAvailableUnitCount,
-} from "../../lib/armyUtils";
+import { getArmyAvailableBattleRating, getArmyTotalBattleRating } from "../../lib/armyUtils";
 import dateFormat from "dateformat";
 import { SelectAdventurerInjuryDialog } from "../dialogs/SelectAdventurerInjuryDialog";
 import { InputSingleNumberDialog } from "../dialogs/InputSingleNumberDialog";
 import {
-  AdventurerParticipant,
-  ArmyParticipant,
   createActivityAdventurerParticipant,
-  generateActivityOutcomes,
+  createActivityArmyParticipant,
+  generateActivityResolution,
   generateAnonymousActivity,
 } from "../../lib/activityUtils";
 import { refetchCharacters } from "../../dataSources/CharactersDataSource";
@@ -33,20 +39,35 @@ import { getBonusForStat, getBonusString } from "../../lib/characterUtils";
 
 interface State {
   isSaving: boolean;
-  currentDate: string;
-  leadFromBehindID: number;
-  adventurerParticipants: AdventurerParticipant[];
-  armyParticipants: ArmyParticipant[];
+  activity: ActivityData;
+  laxOutcome: ActivityOutcomeData_LootAndXP;
+  painOutcome: ActivityOutcomeData_InjuriesAndDeaths;
+
   goldFoundString: string;
   xpEarnedString: string;
 }
 
 const defaultState: State = {
   isSaving: false,
-  currentDate: dateFormat(new Date(), "yyyy-mm-dd"),
-  leadFromBehindID: 0,
-  adventurerParticipants: [],
-  armyParticipants: [],
+  activity: generateAnonymousActivity(dateFormat(new Date(), "yyyy-mm-dd"), [], [], 0),
+  laxOutcome: {
+    id: 0,
+    activity_id: 0,
+    type: ActivityOutcomeType.LootAndXP,
+    goldWithXP: 0,
+    goldWithoutXP: 0,
+    combatXP: 0,
+    campaignXP: 0,
+  },
+  painOutcome: {
+    id: 0,
+    activity_id: 0,
+    type: ActivityOutcomeType.InjuriesAndDeaths,
+    deadCharacterIds: [],
+    characterInjuries: {},
+    troopDeathsByArmy: {},
+    troopInjuriesByArmy: {},
+  },
   goldFoundString: "0",
   xpEarnedString: "0",
 };
@@ -54,6 +75,7 @@ const defaultState: State = {
 interface ReactProps {}
 
 interface InjectedProps {
+  allArmies: Dictionary<ArmyData>;
   allCharacters: Dictionary<CharacterData>;
   troopsByArmy: Dictionary<TroopData[]>;
   troopDefs: Dictionary<TroopDefData>;
@@ -88,14 +110,16 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
           <input
             className={styles.currentDate}
             type={"date"}
-            value={this.state.currentDate}
+            value={this.state.activity.end_date}
             onChange={(e) => {
-              this.setState({ currentDate: e.target.value });
+              this.setState({
+                activity: { ...this.state.activity, start_date: e.target.value, end_date: e.target.value },
+              });
             }}
           />
         </div>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>{`Adventurers: ${this.state.adventurerParticipants.length}`}</div>
+          <div className={styles.firstLabel}>{`Adventurers: ${this.state.activity.participants.length}`}</div>
           <div className={styles.sectionButton} onClick={this.onAdventurersClick.bind(this)} />
           <div className={styles.row}>
             <div className={styles.labelText}>{`\xa0\xa0Expedition Level:\xa0`}</div>
@@ -117,9 +141,9 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
           <div className={styles.firstLabel}>{"Lead from Behind?"}</div>
           <select
             className={styles.leadFromBehindSelector}
-            value={this.state.leadFromBehindID}
+            value={this.state.activity.lead_from_behind_id}
             onChange={(e) => {
-              this.setState({ leadFromBehindID: +e.target.value });
+              this.setState({ activity: { ...this.state.activity, lead_from_behind_id: +e.target.value } });
             }}
           >
             <option value={0}>---</option>
@@ -133,7 +157,10 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
           </select>
         </div>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>{`Troops: ${this.state.armyParticipants.length}`}</div>
+          <div className={styles.firstLabel}>{`Troops: ${this.state.activity.army_participants.reduce<number>(
+            (total, ap) => total + Object.keys(ap.troopCounts).length,
+            0
+          )}`}</div>
           <div className={styles.sectionButton} onClick={this.onArmiesClick.bind(this)} />
           <div className={styles.row}>
             <div className={styles.labelText}>{`\xa0\xa0Battle Rating:\xa0`}</div>
@@ -156,10 +183,13 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
             <div className={styles.reducedValueText}>{`\xa0(${(healthyParticipantCount / 6).toFixed(2)})`}</div>
           )}
         </div>
-        {this.state.adventurerParticipants.length > 0 && <div className={styles.listConLabel}>{"CON"}</div>}
+        {this.state.activity.participants.length > 0 && <div className={styles.listConLabel}>{"CON"}</div>}
         <div className={styles.participantListContainer}>
-          {this.state.adventurerParticipants.map(this.renderAdventurerParticipantRow.bind(this))}
-          {this.state.armyParticipants.map(this.renderArmyParticipantRow.bind(this))}
+          {this.state.activity.participants.length > 0 && (
+            <div className={styles.participantHeader}>{"Adventurers"}</div>
+          )}
+          {this.state.activity.participants.map(this.renderAdventurerParticipantRow.bind(this))}
+          {this.state.activity.army_participants.map(this.renderArmyParticipantRows.bind(this))}
         </div>
         <div className={styles.row}>
           <div className={styles.firstLabel}>{"Gold Found"}</div>
@@ -168,7 +198,10 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
             type={"number"}
             value={this.state.goldFoundString}
             onChange={(e) => {
-              this.setState({ goldFoundString: e.target.value });
+              this.setState({
+                goldFoundString: e.target.value,
+                laxOutcome: { ...this.state.laxOutcome, goldWithXP: +e.target.value },
+              });
             }}
           />
         </div>
@@ -179,7 +212,10 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
             type={"number"}
             value={this.state.xpEarnedString}
             onChange={(e) => {
-              this.setState({ xpEarnedString: e.target.value });
+              this.setState({
+                xpEarnedString: e.target.value,
+                laxOutcome: { ...this.state.laxOutcome, combatXP: +e.target.value },
+              });
             }}
           />
         </div>
@@ -197,32 +233,90 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private renderArmyParticipantRow(p: ArmyParticipant, index: number): React.ReactNode {
-    const troop = this.props.troopsByArmy[p.armyId].find((t) => {
-      return t.id === p.troopId;
+  private renderArmyParticipantRows(p: ActivityArmyParticipant, index: number): React.ReactNode {
+    const army = this.props.allArmies[p.armyId];
+    const sortedTroops = Object.entries(p.troopCounts).sort((a, b) => {
+      const defA = this.props.troopDefs[+a[0]];
+      const defB = this.props.troopDefs[+b[0]];
+      return defA.name.localeCompare(defB.name);
     });
-    const troopDef = this.props.troopDefs[troop?.def_id ?? 0];
+
     return (
-      <div className={styles.listRow} key={`troop${index}`}>
-        <div className={styles.listIndex}>{index + 1 + this.state.adventurerParticipants.length}</div>
-        <div className={styles.listCount}>{p.troopCount}×</div>
-        <div className={styles.listName}>{troopDef.name}</div>
+      <React.Fragment key={`Army${index}`}>
+        <div className={styles.participantHeader}>{army.name}</div>
+        {sortedTroops.map(this.renderTroopRow.bind(this, army, index))}
+      </React.Fragment>
+    );
+  }
+
+  private getTroopStartPosition(armyIndex: number, troopIndex: number, troopCounts: [string, number][]): number {
+    // We presume to start armies/troops one slot past the adventurers.
+    let startPosition = this.state.activity.participants.length + 1;
+
+    // Iterate through each army and troop type and increment per full or partial platoon.
+    for (let ai = 0; ai <= armyIndex; ++ai) {
+      if (ai === armyIndex) {
+        // For the specific army and troop, use the sorted troop counts passed in.
+        for (let ti = 0; ti < troopIndex; ++ti) {
+          const [troopDefId, troopCount] = troopCounts[ti];
+          const def = this.props.troopDefs[+troopDefId];
+          const numPlatoons = Math.ceil(troopCount / def.platoon_size);
+          startPosition += numPlatoons;
+        }
+      } else {
+        // For any previous armies, we don't care what their order was, just their platoon counts.
+        const armyParticipant = this.state.activity.army_participants[ai];
+        const troopCounts = Object.entries(armyParticipant.troopCounts);
+        for (let ti = 0; ti < troopCounts.length; ++ti) {
+          const [troopDefId, troopCount] = troopCounts[ti];
+          const def = this.props.troopDefs[+troopDefId];
+          const numPlatoons = Math.ceil(troopCount / def.platoon_size);
+          startPosition += numPlatoons;
+        }
+      }
+    }
+    return startPosition;
+  }
+
+  private renderTroopRow(
+    army: ArmyData,
+    armyIndex: number,
+    entry: [string, number],
+    index: number,
+    troopCounts: [string, number][]
+  ): React.ReactNode {
+    const troopDefId = +entry[0];
+    const count = entry[1];
+    const def = this.props.troopDefs[troopDefId];
+    const startPosition = this.getTroopStartPosition(armyIndex, index, troopCounts);
+    const endPosition = Math.max(startPosition, startPosition + Math.ceil(count / def.platoon_size) - 1);
+
+    const injuryCount = this.state.painOutcome.troopInjuriesByArmy[army.id]?.[troopDefId] ?? 0;
+    const deathCount = this.state.painOutcome.troopDeathsByArmy[army.id]?.[troopDefId] ?? 0;
+
+    return (
+      <div className={styles.listRow} key={`Troop${index}`}>
+        <div className={styles.listIndex}>
+          {startPosition === endPosition ? startPosition : `${startPosition}-${endPosition}`}
+        </div>
+        <div className={styles.listCount}>{`${count}×\xa0`}</div>
+        <div className={styles.listName}>{def.name}</div>
         <div
-          className={`${styles.injuryButton} ${p.pendingInjuryCount > 0 ? styles.injured : ""}`}
-          onClick={this.onArmyInjuryClicked.bind(this, p)}
+          className={`${styles.injuryButton} ${injuryCount > 0 ? styles.injured : ""}`}
+          onClick={this.onArmyInjuryClicked.bind(this, army.id, troopDefId, count)}
         />
         <div
-          className={`${styles.deathButton} ${p.pendingDeathCount > 0 ? styles.dead : ""}`}
-          onClick={this.onArmyDeathClicked.bind(this, p)}
+          className={`${styles.deathButton} ${deathCount > 0 ? styles.dead : ""}`}
+          onClick={this.onArmyDeathClicked.bind(this, army.id, troopDefId, count)}
         />
       </div>
     );
   }
 
-  private renderAdventurerParticipantRow(p: AdventurerParticipant, index: number): React.ReactNode {
+  private renderAdventurerParticipantRow(p: ActivityAdventurerParticipant, index: number): React.ReactNode {
     const adventurer = this.props.allCharacters[p.characterId];
-    const isInjured = p.pendingInjuryIds.length > 0;
-    const isDead = p.isPendingDeath;
+    const isInjured = (this.state.painOutcome.characterInjuries[p.characterId] ?? []).length > 0;
+    const isDead = this.state.painOutcome.deadCharacterIds.includes(p.characterId);
     const conBonus = getBonusForStat(adventurer.constitution);
     return (
       <div className={styles.listRow} key={`adventurer${index}`}>
@@ -243,25 +337,51 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     );
   }
 
+  private getPlatoonCountForTroop(troopDefId: number, unitCount: number): number {
+    const def = this.props.troopDefs[troopDefId];
+    return Math.ceil(unitCount / def.platoon_size);
+  }
+
   private getTotalParticipantCount(): number {
-    return this.state.adventurerParticipants.length + this.state.armyParticipants.length;
+    const armyPlatoonCount = this.state.activity.army_participants.reduce<number>((total, ap) => {
+      const troopPlatoonCount = Object.entries(ap.troopCounts).reduce<number>(
+        (troopTotal, [troopDefId, troopCount]) => {
+          return troopTotal + this.getPlatoonCountForTroop(+troopDefId, troopCount);
+        },
+        0
+      );
+      return total + troopPlatoonCount;
+    }, 0);
+    return this.state.activity.participants.length + armyPlatoonCount;
   }
 
   private getHealthyParticipantCount(): number {
     let healthyCount = 0;
 
-    Object.values(this.state.adventurerParticipants).forEach((ap) => {
-      if (!ap.isPendingDeath && ap.pendingInjuryIds.length === 0) {
+    Object.values(this.state.activity.participants).forEach((ap) => {
+      const isInjured = (this.state.painOutcome.characterInjuries[ap.characterId] ?? []).length > 0;
+      const isDead = this.state.painOutcome.deadCharacterIds.includes(ap.characterId);
+      if (!isInjured && !isDead) {
         healthyCount++;
       }
     });
 
-    Object.values(this.state.armyParticipants).forEach((ap) => {
-      const healthyTroopCount = ap.troopCount - ap.pendingDeathCount - ap.pendingInjuryCount;
-      if (healthyTroopCount > 0) {
-        healthyCount++;
-      }
-    });
+    const healthyArmyPlatoonCount = this.state.activity.army_participants.reduce<number>((total, ap) => {
+      const troopPlatoonCount = Object.entries(ap.troopCounts).reduce<number>(
+        (troopTotal, [troopDefId, troopCount]) => {
+          const troopInjuryCount = this.state.painOutcome.troopInjuriesByArmy[ap.armyId]?.[troopDefId] ?? 0;
+          const troopDeathCount = this.state.painOutcome.troopDeathsByArmy[ap.armyId]?.[troopDefId] ?? 0;
+          return (
+            troopTotal +
+            this.getPlatoonCountForTroop(+troopDefId, Math.max(0, troopCount - troopInjuryCount - troopDeathCount))
+          );
+        },
+        0
+      );
+      return total + troopPlatoonCount;
+    }, 0);
+
+    healthyCount += healthyArmyPlatoonCount;
 
     return healthyCount;
   }
@@ -273,25 +393,10 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
 
     this.setState({ isSaving: true });
 
-    const activity = generateAnonymousActivity(
-      this.state.currentDate,
-      this.state.adventurerParticipants.map((adventurer) => {
-        return createActivityAdventurerParticipant(adventurer.characterId);
-      }),
-      [],
-      this.state.leadFromBehindID
-    );
-    const [outcomes, campaignGPDistributions] = generateActivityOutcomes(
-      activity,
-      this.state.currentDate,
-      this.state.adventurerParticipants,
-      this.state.armyParticipants,
-      +this.state.xpEarnedString,
-      +this.state.goldFoundString,
-      0
-    );
+    const outcomes = [this.state.painOutcome, this.state.laxOutcome];
+    const resolution = generateActivityResolution(this.state.activity, outcomes, this.state.activity.end_date);
 
-    const res = await ServerAPI.resolveActivity(activity, "", outcomes, campaignGPDistributions);
+    const res = await ServerAPI.resolveActivity(this.state.activity, outcomes, resolution);
     if (
       "error" in res ||
       !!res.find((v) => {
@@ -322,23 +427,41 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         await refetchTroopInjuries(this.props.dispatch);
       }
       // Remove injured and dead characters.
-      const remainingAdventurers = this.state.adventurerParticipants.filter((a) => {
-        return !a.isPendingDeath && a.pendingInjuryIds.length === 0;
+      const remainingAdventurers = this.state.activity.participants.filter((a) => {
+        const isInjured = (this.state.painOutcome.characterInjuries[a.characterId] ?? []).length > 0;
+        const isDead = this.state.painOutcome.deadCharacterIds.includes(a.characterId);
+        return !isInjured && !isDead;
       });
-      this.setState({ adventurerParticipants: remainingAdventurers });
-
-      // Re-generate ArmyParticipants.
-      const armyIDs: Dictionary<number> = {};
-      this.state.armyParticipants.forEach((p) => {
-        armyIDs[p.armyId] = p.armyId;
-      });
-      this.updateArmyParticipants(Object.values(armyIDs), []);
+      this.setState({ activity: { ...this.state.activity, participants: remainingAdventurers } });
     }
 
-    this.setState({ isSaving: false, goldFoundString: "0", xpEarnedString: "0" });
+    this.setState({
+      isSaving: false,
+      // Clear the outcomes back to nothing.
+      laxOutcome: {
+        id: 0,
+        activity_id: 0,
+        type: ActivityOutcomeType.LootAndXP,
+        goldWithXP: 0,
+        goldWithoutXP: 0,
+        combatXP: 0,
+        campaignXP: 0,
+      },
+      painOutcome: {
+        id: 0,
+        activity_id: 0,
+        type: ActivityOutcomeType.InjuriesAndDeaths,
+        deadCharacterIds: [],
+        characterInjuries: {},
+        troopDeathsByArmy: {},
+        troopInjuriesByArmy: {},
+      },
+      goldFoundString: "0",
+      xpEarnedString: "0",
+    });
   }
 
-  private onAdventurerInjuryClicked(p: AdventurerParticipant): void {
+  private onAdventurerInjuryClicked(p: ActivityAdventurerParticipant): void {
     if (this.state.isSaving) {
       return;
     }
@@ -348,11 +471,14 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         content: () => {
           return (
             <SelectAdventurerInjuryDialog
-              preselectedInjuryIds={p.pendingInjuryIds}
+              preselectedInjuryIds={this.state.painOutcome.characterInjuries[p.characterId] ?? []}
               onSelectionConfirmed={async (injuryIds: string[]) => {
-                const participants: AdventurerParticipant[] = [...this.state.adventurerParticipants];
-                p.pendingInjuryIds = injuryIds;
-                this.setState({ adventurerParticipants: participants });
+                this.setState({
+                  painOutcome: {
+                    ...this.state.painOutcome,
+                    characterInjuries: { ...this.state.painOutcome.characterInjuries, [p.characterId]: injuryIds },
+                  },
+                });
               }}
             />
           );
@@ -361,7 +487,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private onAdventurerDeathClicked(p: AdventurerParticipant): void {
+  private onAdventurerDeathClicked(p: ActivityAdventurerParticipant): void {
     if (this.state.isSaving) {
       return;
     }
@@ -373,16 +499,24 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
           message: `Was ${this.props.allCharacters[p.characterId].name} slain?`,
           buttonText: "No",
           onButtonClick: () => {
-            p.isPendingDeath = false;
-            this.setState({ adventurerParticipants: [...this.state.adventurerParticipants] });
+            this.setState({
+              painOutcome: {
+                ...this.state.painOutcome,
+                deadCharacterIds: this.state.painOutcome.deadCharacterIds.filter((dcid) => dcid !== p.characterId),
+              },
+            });
             this.props.dispatch?.(hideModal());
           },
           extraButtons: [
             {
               text: "Yes",
               onClick: () => {
-                p.isPendingDeath = true;
-                this.setState({ adventurerParticipants: [...this.state.adventurerParticipants] });
+                this.setState({
+                  painOutcome: {
+                    ...this.state.painOutcome,
+                    deadCharacterIds: [...this.state.painOutcome.deadCharacterIds, p.characterId],
+                  },
+                });
                 this.props.dispatch?.(hideModal());
               },
             },
@@ -392,24 +526,32 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private onArmyInjuryClicked(p: ArmyParticipant): void {
-    if (this.state.isSaving) {
-      return;
-    }
-    const def = this.props.troopDefs[p.troopDefId];
+  private onArmyInjuryClicked(armyId: number, troopDefId: number, troopCount: number): void {
+    const def = this.props.troopDefs[troopDefId];
+    const numInjuries = this.state.painOutcome.troopInjuriesByArmy[armyId]?.[troopDefId] ?? 0;
+
     this.props.dispatch?.(
       showModal({
         id: "ArmyInjury",
         content: () => {
           return (
             <InputSingleNumberDialog
-              title={`${p.troopCount}× ${def.name}`}
-              prompt={"How many injured individuals in this platoon?"}
-              initialValue={p.pendingInjuryCount}
+              title={`${troopCount}× ${def.name}`}
+              prompt={`Platoon size: ${def.platoon_size}\n\nHow many injured individuals of this troop type?`}
+              initialValue={numInjuries}
               onValueConfirmed={async (count: number) => {
-                const participants: ArmyParticipant[] = [...this.state.armyParticipants];
-                p.pendingInjuryCount = count;
-                this.setState({ armyParticipants: participants });
+                this.setState({
+                  painOutcome: {
+                    ...this.state.painOutcome,
+                    troopInjuriesByArmy: {
+                      ...this.state.painOutcome.troopInjuriesByArmy,
+                      [armyId]: {
+                        ...(this.state.painOutcome.troopInjuriesByArmy[armyId] ?? {}),
+                        [troopDefId]: Math.max(0, Math.min(troopCount, count)),
+                      },
+                    },
+                  },
+                });
               }}
             />
           );
@@ -418,24 +560,32 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private onArmyDeathClicked(p: ArmyParticipant): void {
-    if (this.state.isSaving) {
-      return;
-    }
-    const def = this.props.troopDefs[p.troopDefId];
+  private onArmyDeathClicked(armyId: number, troopDefId: number, troopCount: number): void {
+    const def = this.props.troopDefs[troopDefId];
+    const numDeaths = this.state.painOutcome.troopDeathsByArmy[armyId]?.[troopDefId] ?? 0;
+
     this.props.dispatch?.(
       showModal({
         id: "ArmyDeath",
         content: () => {
           return (
             <InputSingleNumberDialog
-              title={`${p.troopCount}× ${def.name}`}
-              prompt={"How many individuals killed in this platoon?"}
-              initialValue={p.pendingDeathCount}
+              title={`${troopCount}× ${def.name}`}
+              prompt={"How many individuals of this troop type were killed?"}
+              initialValue={numDeaths}
               onValueConfirmed={async (count: number) => {
-                const participants: ArmyParticipant[] = [...this.state.armyParticipants];
-                p.pendingDeathCount = count;
-                this.setState({ armyParticipants: participants });
+                this.setState({
+                  painOutcome: {
+                    ...this.state.painOutcome,
+                    troopDeathsByArmy: {
+                      ...this.state.painOutcome.troopDeathsByArmy,
+                      [armyId]: {
+                        ...(this.state.painOutcome.troopDeathsByArmy[armyId] ?? {}),
+                        [troopDefId]: Math.max(0, Math.min(troopCount, count)),
+                      },
+                    },
+                  },
+                });
               }}
             />
           );
@@ -447,16 +597,20 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
   private getAllTroopsHealthyBattleRating(): number {
     let br = 0;
 
-    this.state.armyParticipants.forEach((p) => {
-      const healthyCount = p.troopCount - p.pendingDeathCount - p.pendingInjuryCount;
-      if (healthyCount > 0) {
-        const troopDef = this.props.troopDefs[p.troopDefId];
-        if (healthyCount === troopDef.platoon_size) {
-          br += troopDef.platoon_br;
-        } else {
-          br += troopDef.individual_br * healthyCount;
+    this.state.activity.army_participants.forEach((p) => {
+      Object.entries(p.troopCounts).forEach(([troopDefId, troopCount]) => {
+        const troopInjuries = this.state.painOutcome.troopInjuriesByArmy[p.armyId]?.[troopDefId] ?? 0;
+        const troopDeaths = this.state.painOutcome.troopDeathsByArmy[p.armyId]?.[troopDefId] ?? 0;
+        const healthyCount = troopCount - troopInjuries - troopDeaths;
+        if (healthyCount > 0) {
+          const troopDef = this.props.troopDefs[troopDefId];
+          const fullPlatoons = Math.floor(healthyCount / troopDef.platoon_size);
+          const looseUnits = healthyCount % troopDef.platoon_size;
+
+          br += fullPlatoons * troopDef.platoon_br;
+          br += looseUnits * troopDef.individual_br;
         }
-      }
+      });
     });
 
     return br;
@@ -466,12 +620,12 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     let br = 0;
 
     const armies: Dictionary<number> = {};
-    this.state.armyParticipants.forEach((p) => {
+    this.state.activity.army_participants.forEach((p) => {
       armies[p.armyId] = p.armyId;
     });
 
     Object.values(armies).forEach((armyId) => {
-      br += getArmyAvailableBattleRating(armyId, this.state.currentDate);
+      br += getArmyAvailableBattleRating(armyId, this.state.activity.end_date);
     });
 
     return br;
@@ -481,7 +635,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     let br = 0;
 
     const armies: Dictionary<number> = {};
-    this.state.armyParticipants.forEach((p) => {
+    this.state.activity.army_participants.forEach((p) => {
       armies[p.armyId] = p.armyId;
     });
 
@@ -493,7 +647,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
   }
 
   private getSortedAdventurers(): CharacterData[] {
-    const adventurers = this.state.adventurerParticipants.map((p) => {
+    const adventurers = this.state.activity.participants.map((p) => {
       return this.props.allCharacters[p.characterId];
     });
     adventurers.sort(({ name: nameA }, { name: nameB }) => {
@@ -503,8 +657,8 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
   }
 
   private getTotalAdventurerLevel(): number {
-    const total = this.state.adventurerParticipants.reduce((levels: number, p: AdventurerParticipant) => {
-      if (p.characterId === this.state.leadFromBehindID) {
+    const total = this.state.activity.participants.reduce((levels: number, p: ActivityAdventurerParticipant) => {
+      if (p.characterId === this.state.activity.lead_from_behind_id) {
         return levels + (this.props.allCharacters[p.characterId]?.level ?? 0) / 2;
       } else {
         return levels + (this.props.allCharacters[p.characterId]?.level ?? 0);
@@ -514,13 +668,15 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
   }
 
   private getHealthyAdventurerLevel(): number {
-    const total = this.state.adventurerParticipants.reduce((levels: number, p: AdventurerParticipant) => {
+    const total = this.state.activity.participants.reduce((levels: number, p: ActivityAdventurerParticipant) => {
       // If the participant is dead or injured, don't count their power.
-      if (p.isPendingDeath || p.pendingInjuryIds.length > 0) {
+      const isInjured = (this.state.painOutcome.characterInjuries[p.characterId] ?? []).length > 0;
+      const isDead = this.state.painOutcome.deadCharacterIds.includes(p.characterId);
+      if (isDead || isInjured) {
         return levels;
       }
 
-      if (p.characterId === this.state.leadFromBehindID) {
+      if (p.characterId === this.state.activity.lead_from_behind_id) {
         return levels + (this.props.allCharacters[p.characterId]?.level ?? 0) / 2;
       } else {
         return levels + (this.props.allCharacters[p.characterId]?.level ?? 0);
@@ -541,14 +697,17 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         content: () => {
           return (
             <SelectAdventurersDialog
-              startDateOverride={this.state.currentDate}
-              preselectedAdventurerIDs={this.state.adventurerParticipants.map((p) => {
+              startDateOverride={this.state.activity.end_date}
+              preselectedAdventurerIDs={this.state.activity.participants.map((p) => {
                 return p.characterId;
               })}
               onSelectionConfirmed={(adventurerIDs: number[]) => {
                 // If the selected LeadFromBehind adventurer is no longer participating, deselect them.
-                if (this.state.leadFromBehindID && !adventurerIDs.includes(this.state.leadFromBehindID)) {
-                  this.setState({ leadFromBehindID: 0 });
+                if (
+                  this.state.activity.lead_from_behind_id &&
+                  !adventurerIDs.includes(this.state.activity.lead_from_behind_id)
+                ) {
+                  this.setState({ activity: { ...this.state.activity, lead_from_behind_id: 0 } });
                 }
                 this.updateAdventurerParticipants(adventurerIDs);
               }}
@@ -559,29 +718,32 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private updateAdventurerParticipants(adventurerIDs: number[]): void {
-    // If any adventurers were removed, remove them.
-    const participants = this.state.adventurerParticipants.filter((p) => {
-      return adventurerIDs.includes(p.characterId);
+  private updateAdventurerParticipants(adventurerIds: number[]): void {
+    // Find out who was removed.  We'll need to clean them out of the Injury and Death outcomes.
+    const removedAdventurerIds = this.state.activity.participants
+      .filter((p) => {
+        return !adventurerIds.includes(p.characterId);
+      })
+      .map((p) => p.characterId);
+
+    const painOutcome: ActivityOutcomeData_InjuriesAndDeaths = {
+      ...this.state.painOutcome,
+      // They're not here, they're not dying from this.
+      deadCharacterIds: this.state.painOutcome.deadCharacterIds.filter((id) => {
+        return !removedAdventurerIds.includes(id);
+      }),
+    };
+    removedAdventurerIds.forEach((id) => {
+      // They're not here, they're not getting injured.
+      delete painOutcome.characterInjuries[id];
     });
-    // If there are new adventurers, add them.
-    adventurerIDs.forEach((aid) => {
-      if (
-        !participants.find((p) => {
-          return p.characterId === aid;
-        })
-      ) {
-        const newParticipant: AdventurerParticipant = {
-          characterId: aid,
-          pendingInjuryIds: [],
-          isPendingDeath: false,
-        };
-        participants.push(newParticipant);
-      }
+
+    const newParticipants: ActivityAdventurerParticipant[] = adventurerIds.map((characterId) => {
+      return createActivityAdventurerParticipant(characterId);
     });
 
     // And update state with the new set.
-    this.setState({ adventurerParticipants: participants });
+    this.setState({ activity: { ...this.state.activity, participants: newParticipants }, painOutcome });
   }
 
   private onArmiesClick(): void {
@@ -591,16 +753,12 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         id: "Armies",
         widthVmin: 60,
         content: () => {
-          const armyIDs: Dictionary<number> = {};
-          this.state.armyParticipants.forEach((p) => {
-            armyIDs[p.armyId] = p.armyId;
-          });
           return (
             <SelectArmiesDialog
-              startDateOverride={this.state.currentDate}
-              preselectedArmyIDs={Object.values(armyIDs)}
+              startDateOverride={this.state.activity.end_date}
+              preselectedArmyIDs={this.state.activity.army_participants.map((ap) => ap.armyId)}
               onSelectionConfirmed={(armyIDs: number[]) => {
-                this.updateArmyParticipants(armyIDs, this.state.armyParticipants);
+                this.updateArmyParticipants(armyIDs);
               }}
             />
           );
@@ -609,55 +767,44 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     );
   }
 
-  private updateArmyParticipants(armyIDs: number[], previousParticipants: ArmyParticipant[]): void {
-    // If any armies were removed, remove them.
-    const participants = previousParticipants.filter((p) => {
-      return armyIDs.includes(p.armyId);
-    });
-    // If there are new armies, add them.
-    armyIDs.forEach((aid) => {
-      if (
-        !participants.find((p) => {
-          return p.armyId === aid;
-        })
-      ) {
-        // Split the troops into platoons.
-        const troops = this.props.troopsByArmy[aid];
-        troops.forEach((troop) => {
-          const def = this.props.troopDefs[troop.def_id];
-          // This function accounts for injuries.
-          let remainingTroops = getTroopAvailableUnitCount(troop);
-          while (remainingTroops > 0) {
-            const troopCount = Math.min(def.platoon_size, remainingTroops);
-            const newParticipant: ArmyParticipant = {
-              armyId: aid,
-              troopId: troop.id,
-              troopDefId: def.id,
-              troopCount,
-              pendingInjuryCount: 0,
-              pendingDeathCount: 0,
-            };
-            participants.push(newParticipant);
-            remainingTroops -= troopCount;
-          }
-        });
-      }
+  private updateArmyParticipants(armyIds: number[]): void {
+    // Find out who was removed.  We'll need to clean them out of the Injury and Death outcomes.
+    const removedArmyIds = this.state.activity.army_participants
+      .filter((p) => {
+        return !armyIds.includes(p.armyId);
+      })
+      .map((p) => p.armyId);
+
+    const troopDeathsByArmy = { ...this.state.painOutcome.troopDeathsByArmy };
+    const troopInjuriesByArmy = { ...this.state.painOutcome.troopInjuriesByArmy };
+    removedArmyIds.forEach((armyId) => {
+      delete troopDeathsByArmy[armyId];
+      delete troopInjuriesByArmy[armyId];
     });
 
-    // No extra sorting for the troops.
+    const painOutcome: ActivityOutcomeData_InjuriesAndDeaths = {
+      ...this.state.painOutcome,
+      troopDeathsByArmy,
+      troopInjuriesByArmy,
+    };
+
+    const newParticipants: ActivityArmyParticipant[] = armyIds.map((armyId) => {
+      return createActivityArmyParticipant(armyId, this.state.activity.end_date);
+    });
 
     // And update state with the new set.
-    this.setState({ armyParticipants: participants });
+    this.setState({ activity: { ...this.state.activity, army_participants: newParticipants }, painOutcome });
   }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allCharacters = state.characters.characters;
-  const { troopsByArmy } = state.armies;
+  const { troopsByArmy, armies: allArmies } = state.armies;
   const troopDefs = state.gameDefs.troops;
 
   return {
     ...props,
+    allArmies,
     allCharacters,
     troopsByArmy,
     troopDefs,

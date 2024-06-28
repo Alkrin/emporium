@@ -3,7 +3,7 @@ import * as React from "react";
 import ExternalDataSource from "../redux/externalDataSource";
 import { showModal } from "../redux/modalsSlice";
 import ServerAPI from "../serverAPI";
-import { updateActivities, updateActivityOutcomes } from "../redux/activitiesSlice";
+import { updateActivities, updateActivityOutcomes, updateExpectedOutcomes } from "../redux/activitiesSlice";
 
 export async function refetchActivities(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchActivities();
@@ -21,6 +21,25 @@ export async function refetchActivities(dispatch: Dispatch): Promise<void> {
     );
   } else {
     dispatch(updateActivities(result));
+  }
+}
+
+export async function refetchExpectedOutcomes(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchExpectedOutcomes();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "ExpectedOutcomes Fetch Error",
+        content: {
+          title: "Error!",
+          message: "Failed to fetch ExpectedOutcomes data",
+        },
+        escapable: true,
+      })
+    );
+  } else {
+    dispatch(updateExpectedOutcomes(result));
   }
 }
 
@@ -48,6 +67,7 @@ export class ActivitiesDataSource extends ExternalDataSource {
     if (this.dispatch) {
       await refetchActivities(this.dispatch);
       await refetchActivityOutcomes(this.dispatch);
+      await refetchExpectedOutcomes(this.dispatch);
     }
   }
 }

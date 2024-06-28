@@ -170,32 +170,21 @@
   margin-right: 1vmin;
 }
 
-.resolutionRow {
-  @extend .row;
-  margin-top: 1vmin;
-  align-items: flex-start;
-}
-
 .summaryValue {
   position: relative;
   color: yellow;
   font-size: 1rem;
 }
 
+.outcomesContainer {
+  position: relative;
+  margin-top: 1vmin;
+}
+
 .outcomesList {
   position: relative;
   height: 20vmin;
-  width: 24vmin;
-}
-
-.resolutionTextField {
-  position: relative;
-  margin-right: 1vmin;
-  font-size: 0.8rem;
-  color: black;
-  resize: none;
-  height: 20vmin;
-  width: 24vmin;
+  width: 50vmin;
 }
 
 .buttonRow {

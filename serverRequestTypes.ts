@@ -1,7 +1,6 @@
-import { Dictionary } from "./lib/dictionary";
+import { ActivityResolution } from "./lib/activityUtils";
 import {
   ActivityData,
-  ActivityOutcomeData,
   ArmyData,
   CharacterData,
   CharacterEquipmentData,
@@ -15,6 +14,7 @@ import {
   MapHexData,
   ProficiencyData,
   ServerActivityData,
+  ServerActivityOutcomeData,
   ServerItemDefData,
   ServerSpellDefData,
   StorageData,
@@ -199,9 +199,8 @@ export interface RequestBody_CreateOrEditEquipmentSet {
 
 export interface RequestBody_ResolveActivity {
   activity: ActivityData;
-  resolution_text: string;
-  outcomes: ActivityOutcomeData[];
-  campaignGPDistributions: Dictionary<number>;
+  outcomes: ServerActivityOutcomeData[];
+  resolution: ActivityResolution;
 }
 
 export interface RequestBody_ExerciseContract {
@@ -233,8 +232,12 @@ export interface RequestBody_DeleteSingleEntry {
 }
 
 // Activity
-export type RequestBody_CreateActivity = Omit<ServerActivityData, "id" | "resolution_text">;
-export type RequestBody_EditActivity = ServerActivityData;
+export type RequestBody_CreateActivity = Omit<ServerActivityData, "id"> & {
+  expectedOutcomes: ServerActivityOutcomeData[];
+};
+export type RequestBody_EditActivity = ServerActivityData & {
+  expectedOutcomes: ServerActivityOutcomeData[];
+};
 // Army
 export type RequestBody_CreateArmy = Omit<ArmyData, "id">;
 export type RequestBody_EditArmy = ArmyData;
