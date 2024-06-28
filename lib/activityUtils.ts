@@ -664,8 +664,6 @@ export function convertActivityOutcomeForServer(eo: ActivityOutcomeData): Server
     case ActivityOutcomeType.InjuriesAndDeaths: {
       const teo = eo as ActivityOutcomeData_InjuriesAndDeaths;
 
-      // TODO: Major categories are separated by '|'.
-
       // Dead character ids are a comma-separated list.
       const deadCharactersData = teo.deadCharacterIds.map((dcid) => dcid.toString()).join(",");
 
@@ -710,6 +708,7 @@ export function convertActivityOutcomeForServer(eo: ActivityOutcomeData): Server
         })
         .join(":");
 
+      // Major categories are separated by '|'.
       seo.data = `${deadCharactersData}|${injuredCharactersData}|${troopInjuriesData}|${troopDeathsData}`;
 
       break;
