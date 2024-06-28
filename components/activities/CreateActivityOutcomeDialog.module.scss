@@ -1,47 +1,14 @@
 .root {
-  width: 50vmin;
-  height: 50vmin;
-  border-radius: 1vmin;
-  border: 2px solid white;
-  background-color: #222;
-  padding: 1vmin;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  color: wheat;
+  width: 100%;
 }
 
-.labelText {
+.normalText {
   font-size: 1rem;
   color: wheat;
-  user-select: none;
-}
-
-.valueText {
-  font-size: 1rem;
-  color: yellow;
-  user-select: none;
-}
-
-.reducedValueText {
-  font-size: 1rem;
-  color: red;
-  user-select: none;
-}
-
-.firstLabel {
-  @extend .labelText;
-  margin-top: 0.2vmin;
-  width: 15vmin;
-  text-align: right;
-}
-
-.secondLabel {
-  @extend .firstLabel;
-  margin-left: 0.5vmin;
-}
-
-.textInput {
-  position: relative;
-  resize: none;
 }
 
 .row {
@@ -55,24 +22,17 @@
   flex-direction: column;
 }
 
-.panelTitle {
-  font-size: 3rem;
-  color: wheat;
+.dialogButton {
   position: relative;
-  margin-bottom: 1vmin;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
   text-align: center;
-  border-bottom: 1px solid yellow;
-  user-select: none;
-}
-
-.sectionButton {
-  position: relative;
-  margin-left: 1vmin;
-  background-image: url("/images/EditIcon.png");
-  background-size: contain;
-  cursor: pointer;
-  width: 1.5rem;
-  height: 1.5rem;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
   opacity: 0.5;
 
   &:hover {
@@ -84,20 +44,92 @@
   }
 }
 
-.leadFromBehindSelector {
-  margin-left: 1vmin;
-  min-width: 20vmin;
+.closeButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
 }
 
-.currentDate {
+.title {
+  @extend .normalText;
+  position: relative;
+  font-size: 1.5rem;
+  line-height: 2.5vmin;
+  text-align: center;
+  text-wrap: nowrap;
+}
+
+.contentRow {
+  @extend .row;
+  position: relative;
+  margin-top: 1vmin;
+}
+
+.typeSelector {
+  position: relative;
   margin-left: 1vmin;
+  width: 15vmin;
+  font-size: 0.8rem;
+}
+
+.outcomePanel {
+  @extend .column;
+  align-items: center;
+  position: relative;
+  margin-top: 1vmin;
+  border-radius: 0.5vmin;
+  background-color: black;
+  padding: 1vmin;
+  width: 92%;
+}
+
+.invalidDescription {
+  @extend .normalText;
+  font-style: italic;
+  color: darkgoldenrod;
+}
+
+.editButton {
+  margin-left: 1vmin;
+}
+
+.outcomeFieldHeader {
+  @extend .normalText;
+  width: 100%;
+  text-align: center;
+}
+
+.outcomeFieldLabel {
+  @extend .normalText;
+  width: 10vmin;
+  text-align: right;
+}
+
+.outcomeFieldValue {
+  color: yellow;
+  font-size: 1rem;
+}
+
+.outcomeFieldInput {
+  position: relative;
+  margin-left: 1vmin;
+  width: 10vmin;
+  font-size: 0.8rem;
+  resize: none;
+}
+
+.descriptionTextField {
+  position: relative;
+  margin-top: 0.5vmin;
+  resize: none;
+  height: 10vmin;
+  width: 100%;
 }
 
 .participantListContainer {
   position: relative;
   height: 20vmin;
-  margin-top: 1vmin;
-  margin-bottom: 1vmin;
+  width: 100%;
   padding-top: 0.5vmin;
   padding-left: 0.5vmin;
   padding-right: 0.5vmin;
@@ -134,10 +166,10 @@
 
 .listRow {
   @extend .row;
-  margin-bottom: 0.25vmin;
+  margin-bottom: 1px;
   padding: 0.5vmin;
   background-color: rgba(255, 255, 255, 0.1);
-  font-size: 1rem;
+  font-size: 0.8rem;
   cursor: pointer;
 
   &:hover {
@@ -151,24 +183,25 @@
 
 .listIndex {
   position: relative;
-  font-size: 1rem;
-  margin-left: -0.25vmin;
+  font-size: 0.8rem;
   color: white;
-  width: 3.75vmin;
+  width: 3vmin;
+  flex-shrink: 0;
   text-align: center;
 }
 
 .listCount {
   position: relative;
-  font-size: 1rem;
+  font-size: 0.8rem;
   color: yellow;
-  width: 4.25vmin;
+  width: 3.4vmin;
   flex-shrink: 0;
+  text-align: right;
 }
 
 .listName {
   position: relative;
-  font-size: 1rem;
+  font-size: 0.8rem;
   color: wheat;
   text-align: left;
   flex-grow: 1;
@@ -199,8 +232,8 @@
   position: relative;
   margin-left: 0.5vmin;
   flex-shrink: 0;
-  width: 2.4vmin;
-  height: 2.4vmin;
+  width: 1.92vmin;
+  height: 1.92vmin;
   background-image: url("/images/InjuryIcon.png");
   background-position: center;
   background-size: contain;
@@ -225,8 +258,8 @@
   position: relative;
   margin-left: 0.5vmin;
   flex-shrink: 0;
-  width: 2.4vmin;
-  height: 2.4vmin;
+  width: 1.92vmin;
+  height: 1.92vmin;
   background-image: url("/images/DeathIcon.png");
   background-position: center;
   background-size: contain;
@@ -245,52 +278,9 @@
   }
 }
 
-.numberInputField {
-  @extend .textInput;
-  margin-left: 0.5vmin;
-  width: 20vmin;
-}
-
-.applyButton {
-  position: relative;
-  user-select: none;
-  margin-top: 1vmin;
-  align-self: center;
-  box-sizing: border-box;
-  padding: 0.35vmin 1vmin;
-  font-size: 1rem;
-  line-height: 1rem;
-  text-align: center;
-  border: 2px solid white;
-  border-radius: 0.5vmin;
-  background-color: #333;
-  color: white;
-  opacity: 0.5;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:active {
-    opacity: 1;
-  }
-}
-
-.savingVeil {
+.conHeader {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  pointer-events: all;
-}
-
-.savingLabel {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: wheat;
-  font-size: 3rem;
+  left: 20.75vmin;
+  font-size: 0.8rem;
+  color: yellow;
 }

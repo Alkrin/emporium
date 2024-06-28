@@ -1,13 +1,20 @@
 import store from "../redux/store";
 import {
   ActivityData,
-  ActivityOutcomeData,
-  ActivityOutcomeType,
   ActivityAdventurerParticipant,
   ContractData,
   ActivityArmyParticipant,
+  ActivityOutcomeData,
+  ActivityOutcomeType,
+  ActivityOutcomeData_ChangeLocation,
+  ActivityOutcomeData_Description,
+  ActivityOutcomeData_InjuriesAndDeaths,
+  ActivityOutcomeData_LootAndXP,
+  ServerActivityOutcomeData,
+  UniqueActivityOutcomeTypes,
 } from "../serverAPI";
 import {
+  addCommasToNumber,
   canCharacterFindTraps,
   canCharacterSneak,
   canCharacterTurnUndead,
@@ -15,6 +22,7 @@ import {
   doesCharacterHaveSilverWeapons,
   getCampaignXPDeductibleCapForLevel,
   getCharacterXPMultiplier,
+  getPersonalPile,
   isCharacterArcane,
   isCharacterDivine,
 } from "./characterUtils";
@@ -24,81 +32,110 @@ import { getFirstOfThisMonthDateString } from "./stringUtils";
 import { ContractId } from "../redux/gameDefsSlice";
 import { getTroopAvailableUnitCount } from "./armyUtils";
 
-export enum RewardDistro {
-  // Even distribution to all participants.  Henchman hierarchy is ignored, and only local participants get a share.
-  Equal = "equal",
-  // For xp, if your henchmaster is in the group, you get 1 share.  If you not, you get 2 shares.
-  // For gold, participants start from equal shares, then give half of their loot to their henchmaster, recursively.
-  Hench = "hench",
-}
-
-export interface ArmyParticipant {
-  armyId: number;
+export interface ActivityResolutionData_ArmyDeath {
   troopId: number;
-  troopDefId: number;
-  troopCount: number;
-  pendingInjuryCount: number;
-  pendingDeathCount: number;
+  deathCount: number;
 }
 
-export interface AdventurerParticipant {
+export interface ActivityResolutionData_ArmyInjury {
+  troopId: number;
+  injuryCount: number;
+  recoveryDate: string;
+}
+
+export interface ActivityResolutionData_CampaignXPDeductiblePayment {
   characterId: number;
-  pendingInjuryIds: string[];
-  isPendingDeath: boolean;
+  xpAmount: number;
 }
 
-export function generateActivityOutcomes(
+export interface ActivityResolutionData_CampaignXPDeductibleReset {
+  characterId: number;
+  remainingDeductible: number;
+}
+
+export interface ActivityResolutionData_MoneyGranted {
+  storageId: number;
+  gpAmount: number;
+}
+
+export interface ActivityResolutionData_XPGranted {
+  characterId: number;
+  xpAmount: number;
+}
+
+export interface ActivityResolution {
+  deadCharacterIds: number[];
+  /** Key: injuryId, value: array of characterIds */
+  characterInjuries: Dictionary<number[]>;
+  armyDeaths: ActivityResolutionData_ArmyDeath[];
+  armyInjuries: ActivityResolutionData_ArmyInjury[];
+  cxpDeductiblePayments: ActivityResolutionData_CampaignXPDeductiblePayment[];
+  cxpDeductibleResets: ActivityResolutionData_CampaignXPDeductibleReset[];
+  moneyGranted: ActivityResolutionData_MoneyGranted[];
+  xpGranted: ActivityResolutionData_XPGranted[];
+  destinationId: number;
+}
+
+export function generateActivityResolution(
   activity: ActivityData,
-  currentDate: string,
-  adventurerParticipants: AdventurerParticipant[],
-  armyParticipants: ArmyParticipant[],
-  totalMXP: number,
-  gpWithXp: number,
-  gpWithoutXp: number
-): [ActivityOutcomeData[], Dictionary<number>] {
+  outcomes: ActivityOutcomeData[],
+  currentDate: string
+): ActivityResolution {
   const redux = store.getState();
   const allCharacters = redux.characters.characters;
 
-  const activityId = activity.id ?? 0;
+  const resolution: ActivityResolution = {
+    deadCharacterIds: [],
+    characterInjuries: {},
+    armyDeaths: [],
+    armyInjuries: [],
+    cxpDeductiblePayments: [],
+    cxpDeductibleResets: [],
+    moneyGranted: [],
+    xpGranted: [],
+    destinationId: 0,
+  };
 
-  const outcomes: ActivityOutcomeData[] = [];
-
-  // Adventurer Deaths.
-  const deadCharacterIds: number[] = adventurerParticipants
-    .filter((ap) => {
-      return ap.isPendingDeath;
-    })
-    .map((ap) => {
-      return ap.characterId;
-    });
-  // Create "death" outcomes for the dead.
-  deadCharacterIds.forEach((did) => {
-    const o: ActivityOutcomeData = {
-      id: 0, // Will be overwritten by the server.
-      activity_id: activityId,
-      target_id: did,
-      type: ActivityOutcomeType.Death,
-      quantity: 0,
-      extra: "",
-    };
-    outcomes.push(o);
+  // Any outcome could in theory have multiple instances.  For most, only the first matters.
+  const outcomesByType: Dictionary<ActivityOutcomeData[]> = {};
+  outcomes.forEach((o) => {
+    if (!outcomesByType[o.type]) {
+      outcomesByType[o.type] = [];
+    }
+    outcomesByType[o.type].push(o);
   });
 
+  // Change Location.
+  const changeLocationData = outcomesByType[
+    ActivityOutcomeType.ChangeLocation
+  ]?.[0] as ActivityOutcomeData_ChangeLocation;
+  if (changeLocationData) {
+    resolution.destinationId = changeLocationData.locationId;
+  }
+
+  // Adventurer Deaths.
+  const injuriesAndDeathsData = outcomesByType[
+    ActivityOutcomeType.InjuriesAndDeaths
+  ]?.[0] as ActivityOutcomeData_InjuriesAndDeaths;
+
+  resolution.deadCharacterIds = injuriesAndDeathsData?.deadCharacterIds ?? [];
+
   // Only surviving participants get stuff.
-  const survivingAdventurerParticipants = adventurerParticipants.filter((p) => {
-    return !deadCharacterIds.includes(p.characterId);
+  const survivingAdventurerParticipants = activity.participants.filter((p) => {
+    return !resolution.deadCharacterIds.includes(p.characterId);
   });
 
   interface RecipientData {
     characterId: number;
     xpGold: number;
     nonXPGold: number;
-    campaignGold: number; // Contractually granted share of gold paid to this recipient by others.
     campaignDeductiblePayment: number;
+    campaignXP: number; // From campaignGold or directly from campaignXP distribution.
     xpShares: number;
     xpMultiplier: number;
     xp: number;
   }
+
   const recipients: Dictionary<RecipientData> = {};
   survivingAdventurerParticipants.forEach((p) => {
     const participant = allCharacters[p.characterId];
@@ -106,13 +143,15 @@ export function generateActivityOutcomes(
       characterId: p.characterId,
       xpGold: 0,
       nonXPGold: 0,
-      campaignGold: 0,
       campaignDeductiblePayment: 0,
+      campaignXP: 0,
       xpShares: 0,
       xpMultiplier: getCharacterXPMultiplier(participant),
       xp: 0,
     };
   });
+
+  const lootAndXPData = outcomesByType[ActivityOutcomeType.LootAndXP]?.[0] as ActivityOutcomeData_LootAndXP;
 
   // MXP distribution.
   // First figure out how many shares each participant gets.
@@ -136,11 +175,14 @@ export function generateActivityOutcomes(
     recipients[p.characterId].xpMultiplier = xpMultiplier;
   });
 
-  // Actually distribute the MXP.
-  const mxpPerShare = totalMXP / totalXPShares;
+  // Actually distribute the MXP and CXP.
+  const mxpPerShare = (lootAndXPData?.combatXP ?? 0) / totalXPShares;
+  const campaignXPShare = (lootAndXPData?.campaignXP ?? 0) / survivingAdventurerParticipants.length;
   Object.values(recipients).forEach((r) => {
     const mxp = Math.ceil(mxpPerShare * r.xpShares * r.xpMultiplier);
     r.xp = Math.ceil(r.xp + mxp);
+    const cxp = Math.ceil(campaignXPShare * r.xpMultiplier);
+    r.campaignXP = Math.ceil(r.campaignXP + cxp);
   });
 
   // Gold and GXP distribution.
@@ -177,14 +219,14 @@ export function generateActivityOutcomes(
 
     const character = allCharacters[recipientId];
 
-    // Make sure a recipient entry exists.
+    // Make sure a recipient entry exists.  The direct participants are already there, but henchmasters and contract holders might not be yet.
     if (!recipients[recipientId]) {
       recipients[recipientId] = {
         characterId: recipientId,
         xpGold: 0,
         nonXPGold: 0,
-        campaignGold: 0,
         campaignDeductiblePayment: 0,
+        campaignXP: 0,
         xpShares: 0,
         xpMultiplier: getCharacterXPMultiplier(character),
         xp: 0,
@@ -208,15 +250,15 @@ export function generateActivityOutcomes(
       distributeCampaignGP(gpPaid, ulc.party_a_id, ulc.target_a_id);
     });
 
-    // Once all UnpartiedLootContracts have been satisfied, the remaining CampaignGP can be applied to this character.
-    // Tracking total by character, used later for CXP deductible calculations.
-    recipients[recipientId].campaignGold += personalShare;
+    // Once all UnpartiedLootContracts have been satisfied, the remaining CampaignGP can be applied to this character,
+    // and appropriate CampaignXP can be assigned (used later for CampaignXP deductible calculations).
+    recipients[recipientId].campaignXP += Math.ceil(personalShare * recipients[recipientId].xpMultiplier);
     // Tracking just the total amount that will finally be deposited in each storage, regardless of anything else.
     campaignGPDistributions[targetStorageId] = (campaignGPDistributions[targetStorageId] ?? 0) + personalShare;
   }
 
-  const nonXPGoldPerShare = gpWithoutXp / participantsWithLootShares.length;
-  const xpGoldPerShare = gpWithXp / participantsWithLootShares.length;
+  const nonXPGoldPerShare = (lootAndXPData?.goldWithoutXP ?? 0) / participantsWithLootShares.length;
+  const xpGoldPerShare = (lootAndXPData?.goldWithXP ?? 0) / participantsWithLootShares.length;
   participantsWithLootShares.forEach((p) => {
     // Check if this participant has any contracts that require them to share their loot.
     let nonXPGoldPersonalShare = nonXPGoldPerShare;
@@ -263,7 +305,7 @@ export function generateActivityOutcomes(
     ulcs.forEach((ulc) => {
       // If the master is not present, pay them as CampaignGP.
       if (
-        !deadCharacterIds.includes(ulc.party_a_id) &&
+        !resolution.deadCharacterIds.includes(ulc.party_a_id) &&
         !survivingAdventurerParticipants.find((sap) => sap.characterId === ulc.party_a_id)
       ) {
         const percentOwed = ulc.value / 100;
@@ -285,10 +327,10 @@ export function generateActivityOutcomes(
     recipients[p.characterId].xp += Math.ceil(xpGoldPersonalShareRemaining * recipients[p.characterId].xpMultiplier);
   });
 
-  // In theory, we have now distributed MXP and GP into recipient structs.  Next we should look at campaignGold
-  // and apply it against the monthly deductible so we can know how much of it counts to grant xp.
+  // In theory, we have now distributed CXP, MXP, and GP into recipient structs.  Next we should look at campaignXP
+  // and apply it against the monthly deductible so we can know how much of it will actually grant xp.
   Object.values(recipients).forEach((r) => {
-    if (r.campaignGold > 0) {
+    if (r.campaignXP > 0) {
       const recipient = allCharacters[r.characterId];
 
       // See how much is left on the monthly CXP deductible.  Reset it if needed.
@@ -301,22 +343,18 @@ export function generateActivityOutcomes(
         recipient.cxp_deductible_date !== thisMonth
       ) {
         remainingDeductible = getCampaignXPDeductibleCapForLevel(recipient.level);
-        const o: ActivityOutcomeData = {
-          id: 0, // Will be overwritten by the server.
-          activity_id: activityId,
-          target_id: r.characterId,
-          type: ActivityOutcomeType.CXPDeductibleReset,
-          quantity: remainingDeductible,
-          extra: "",
+        const o: ActivityResolutionData_CampaignXPDeductibleReset = {
+          characterId: r.characterId,
+          remainingDeductible,
         };
-        outcomes.push(o);
+        resolution.cxpDeductibleResets.push(o);
       }
 
-      // Apply CGP against the deductible first.
-      r.campaignDeductiblePayment = Math.min(remainingDeductible, Math.ceil(r.campaignGold));
-      // Apply remaining CGP as CXP.
-      const cgpAfterDeductible = r.campaignGold - r.campaignDeductiblePayment;
-      r.xp += Math.ceil(cgpAfterDeductible * r.xpMultiplier);
+      // Apply CXP against the deductible first.
+      r.campaignDeductiblePayment = Math.min(remainingDeductible, Math.ceil(r.campaignXP));
+      // Apply remaining CXP.
+      const cxpAfterDeductible = r.campaignXP - r.campaignDeductiblePayment;
+      r.xp += Math.ceil(cxpAfterDeductible * r.xpMultiplier);
     }
   });
 
@@ -324,54 +362,46 @@ export function generateActivityOutcomes(
   Object.values(recipients).forEach((r) => {
     // If there is GP gained, add a GP outcome.
     if (r.nonXPGold + r.xpGold > 0) {
-      const o: ActivityOutcomeData = {
-        id: 0, // Will be overwritten by the server.
-        activity_id: activityId,
-        target_id: r.characterId,
-        type: ActivityOutcomeType.Gold,
-        quantity: r.nonXPGold + r.xpGold,
-        extra: "",
+      const o: ActivityResolutionData_MoneyGranted = {
+        storageId: getPersonalPile(r.characterId).id,
+        gpAmount: r.nonXPGold + r.xpGold,
       };
-      outcomes.push(o);
+      resolution.moneyGranted.push(o);
     }
     // If there is XP gained, add an XP outcome.
     if (r.xp > 0) {
-      const o: ActivityOutcomeData = {
-        id: 0, // Will be overwritten by the server.
-        activity_id: activityId,
-        target_id: r.characterId,
-        type: ActivityOutcomeType.XP,
-        quantity: r.xp,
-        extra: "",
+      const o: ActivityResolutionData_XPGranted = {
+        characterId: r.characterId,
+        xpAmount: r.xp,
       };
-      outcomes.push(o);
+      resolution.xpGranted.push(o);
     }
     // If the CXP deductible changed, add a deductible outcome.
     if (r.campaignDeductiblePayment > 0) {
-      const o: ActivityOutcomeData = {
-        id: 0, // Will be overwritten by the server.
-        activity_id: activityId,
-        target_id: r.characterId,
-        type: ActivityOutcomeType.CXPDeductible,
-        quantity: r.campaignDeductiblePayment,
-        extra: "",
+      const o: ActivityResolutionData_CampaignXPDeductiblePayment = {
+        characterId: r.characterId,
+        xpAmount: r.campaignDeductiblePayment,
       };
-      outcomes.push(o);
+      resolution.cxpDeductiblePayments.push(o);
     }
   });
 
+  // Campaign GP distributions (we accumulated these down to one per storage to cut down on DB writes).
+  Object.entries(campaignGPDistributions).forEach(([storageIdString, gpAmount]) => {
+    const o: ActivityResolutionData_MoneyGranted = {
+      storageId: +storageIdString,
+      gpAmount,
+    };
+    resolution.moneyGranted.push(o);
+  });
+
   // Adventurer Injuries.
-  adventurerParticipants.forEach((ap) => {
-    ap.pendingInjuryIds.forEach((injuryId) => {
-      const o: ActivityOutcomeData = {
-        id: 0, // Will be overwritten by the server.
-        activity_id: activityId,
-        target_id: ap.characterId,
-        type: ActivityOutcomeType.Injury,
-        quantity: 0,
-        extra: injuryId,
-      };
-      outcomes.push(o);
+  Object.entries(injuriesAndDeathsData?.characterInjuries ?? {}).forEach(([characterIdString, injuryIds]) => {
+    injuryIds.forEach((injuryId) => {
+      if (!resolution.characterInjuries[injuryId]) {
+        resolution.characterInjuries[injuryId] = [];
+      }
+      resolution.characterInjuries[injuryId].push(+characterIdString);
     });
   });
 
@@ -379,34 +409,35 @@ export function generateActivityOutcomes(
   const recoveryDate = new Date(currentDate);
   recoveryDate.setDate(recoveryDate.getDate() + 7);
   const recoveryDateString = dateFormat(recoveryDate, "yyyy-mm-dd");
-  armyParticipants.forEach((ap) => {
-    // Deaths
-    if (ap.pendingDeathCount > 0) {
-      const o: ActivityOutcomeData = {
-        id: 0, // Will be overwritten by the server.
-        activity_id: activityId,
-        target_id: ap.troopId,
-        type: ActivityOutcomeType.ArmyDeath,
-        quantity: ap.pendingDeathCount,
-        extra: "",
-      };
-      outcomes.push(o);
-    }
-    // Injuries
-    if (ap.pendingInjuryCount > 0) {
-      const o: ActivityOutcomeData = {
-        id: 0, // Will be overwritten by the server.
-        activity_id: activityId,
-        target_id: ap.troopId,
-        type: ActivityOutcomeType.ArmyInjury,
-        quantity: ap.pendingInjuryCount,
-        extra: recoveryDateString,
-      };
-      outcomes.push(o);
-    }
+
+  Object.entries(injuriesAndDeathsData?.troopInjuriesByArmy ?? {}).forEach(([armyIdString, troopInjuries]) => {
+    Object.entries(troopInjuries).forEach(([troopDefIdString, injuryCount]) => {
+      const troopId = redux.armies.troopsByArmy[+armyIdString].find((troop) => troop.def_id === +troopDefIdString)?.id;
+      if (troopId) {
+        const o: ActivityResolutionData_ArmyInjury = {
+          troopId,
+          injuryCount,
+          recoveryDate: recoveryDateString,
+        };
+        resolution.armyInjuries.push(o);
+      }
+    });
   });
 
-  return [outcomes, campaignGPDistributions];
+  Object.entries(injuriesAndDeathsData?.troopDeathsByArmy ?? {}).forEach(([armyIdString, troopDeaths]) => {
+    Object.entries(troopDeaths).forEach(([troopDefIdString, deathCount]) => {
+      const troopId = redux.armies.troopsByArmy[+armyIdString].find((troop) => troop.def_id === +troopDefIdString)?.id;
+      if (troopId) {
+        const o: ActivityResolutionData_ArmyDeath = {
+          troopId,
+          deathCount,
+        };
+        resolution.armyDeaths.push(o);
+      }
+    });
+  });
+
+  return resolution;
 }
 
 export function generateAnonymousActivity(
@@ -427,7 +458,6 @@ export function generateAnonymousActivity(
     participants,
     army_participants: armyParticipants,
     lead_from_behind_id: leadFromBehindId,
-    resolution_text: "",
   };
   return activity;
 }
@@ -465,4 +495,259 @@ export function createActivityArmyParticipant(armyId: number, startDate: string)
     troopCounts,
   };
   return newParticipant;
+}
+
+export function getDisplayTextForExpectedOutcome(data: ActivityOutcomeData): string {
+  const redux = store.getState();
+
+  switch (data.type) {
+    case ActivityOutcomeType.ChangeLocation: {
+      const dcl = data as ActivityOutcomeData_ChangeLocation;
+      const locationName = redux.locations.locations[dcl.locationId]?.name ?? "<LOCATION TBD>";
+      return `Participants move to ${locationName}`;
+    }
+    case ActivityOutcomeType.Description: {
+      const dd = data as ActivityOutcomeData_Description;
+      return dd.description;
+    }
+    case ActivityOutcomeType.InjuriesAndDeaths: {
+      const diad = data as ActivityOutcomeData_InjuriesAndDeaths;
+      return (
+        `Injured Adventurers: ${Object.keys(diad.characterInjuries).length}\n` +
+        `Killed Adventurers: ${diad.deadCharacterIds.length}\n` +
+        `Injured Troops: ${Object.values(diad.troopInjuriesByArmy).reduce<number>((injuries, troopData) => {
+          injuries += Object.values(troopData).reduce<number>((soFar, count) => {
+            return soFar + count;
+          }, 0);
+          return injuries;
+        }, 0)}\n` +
+        `Killed Troops: ${Object.values(diad.troopDeathsByArmy).reduce<number>((deaths, troopData) => {
+          deaths += Object.values(troopData).reduce<number>((soFar, count) => {
+            return soFar + count;
+          }, 0);
+          return deaths;
+        }, 0)}`
+      );
+    }
+    case ActivityOutcomeType.LootAndXP: {
+      const dlax = data as ActivityOutcomeData_LootAndXP;
+      return (
+        `Gold with XP:\t\xa0${addCommasToNumber(dlax.goldWithXP, 2)}gp\n` +
+        `Gold w/o XP:\t\xa0${addCommasToNumber(dlax.goldWithoutXP, 2)}gp\n` +
+        `Combat XP:\t\xa0${addCommasToNumber(dlax.combatXP)}\n` +
+        `Campaign XP:\t\xa0${addCommasToNumber(dlax.campaignXP)}`
+      );
+    }
+    default: {
+      return "";
+    }
+  }
+}
+
+export function convertServerActivityOutcome(seo: ServerActivityOutcomeData): ActivityOutcomeData | null {
+  switch (seo.type) {
+    case ActivityOutcomeType.ChangeLocation: {
+      const o: ActivityOutcomeData_ChangeLocation = {
+        type: seo.type,
+        id: seo.id,
+        activity_id: seo.activity_id,
+        locationId: +seo.data,
+      };
+      return o;
+    }
+    case ActivityOutcomeType.Description: {
+      const o: ActivityOutcomeData_Description = {
+        type: seo.type,
+        id: seo.id,
+        activity_id: seo.activity_id,
+        description: seo.data,
+      };
+      return o;
+    }
+    case ActivityOutcomeType.InjuriesAndDeaths: {
+      // Major categories are separated by '|'.
+      const [deadCharacterIdsData, characterInjuriesData, troopInjuriesByArmyData, troopDeathsByArmyData] =
+        seo.data.split("|");
+      // Dead character ids are a comma-separated list.
+      const deadCharacterIds = deadCharacterIdsData.split(",").map((dcidString) => +dcidString);
+      // Injured characters are separated by ':'.
+      // The character id is separated from the injuries by '-'.
+      // The injury ids are a comma-separated list.
+      const characterInjuries: Dictionary<string[]> = {};
+      characterInjuriesData.split(":").forEach((characterInjuriesDatum) => {
+        const [characterIdString, injuriesData] = characterInjuriesDatum.split("-");
+        const injuryIds = injuriesData.split(",");
+        characterInjuries[+characterIdString] = injuryIds;
+      });
+      // Armies are separated by ':'.
+      // ArmyId is separated from troop types by '~'.
+      // Troop types are separated by ','.
+      // TroopDefId is separated from the injury count by '-'.
+      const troopInjuriesByArmy: Dictionary<Dictionary<number>> = {};
+      troopInjuriesByArmyData.split(":").forEach((armyInjuriesDatum) => {
+        const [armyIdString, troopTypesData] = armyInjuriesDatum.split("~");
+        const troopInjuries: Dictionary<number> = {};
+        troopTypesData.split(",").forEach((troopInjuriesDatum) => {
+          const [troopDefIdString, countString] = troopInjuriesDatum.split("-");
+          troopInjuries[+troopDefIdString] = +countString;
+        });
+        troopInjuriesByArmy[+armyIdString] = troopInjuries;
+      });
+      // Armies are separated by ':'.
+      // ArmyId is separated from troop types by '~'.
+      // Troop types are separated by ','.
+      // TroopDefId is separated from the death count by '-'.
+      const troopDeathsByArmy: Dictionary<Dictionary<number>> = {};
+      troopDeathsByArmyData.split(":").forEach((armyDeathsDatum) => {
+        const [armyIdString, troopTypesData] = armyDeathsDatum.split("~");
+        const troopDeaths: Dictionary<number> = {};
+        troopTypesData.split(",").forEach((troopDeathsDatum) => {
+          const [troopDefIdString, countString] = troopDeathsDatum.split("-");
+          troopDeaths[+troopDefIdString] = +countString;
+        });
+        troopDeathsByArmy[+armyIdString] = troopDeaths;
+      });
+
+      const o: ActivityOutcomeData_InjuriesAndDeaths = {
+        type: seo.type,
+        id: seo.id,
+        activity_id: seo.activity_id,
+        deadCharacterIds,
+        // Injuries state.  Key: characterId, value: injuryIds.
+        characterInjuries,
+        // First key: armyId, second key: troopDefId, value: number of injuries.
+        troopInjuriesByArmy,
+        // First key: armyId, second key: troopDefId, value: number of deaths.
+        troopDeathsByArmy,
+      };
+      return o;
+    }
+    case ActivityOutcomeType.LootAndXP: {
+      const [goldWithXPString, goldWithoutXPString, combatXPString, campaignXPString] = seo.data.split(",");
+      const o: ActivityOutcomeData_LootAndXP = {
+        type: seo.type,
+        id: seo.id,
+        activity_id: seo.activity_id,
+        goldWithXP: +goldWithXPString,
+        goldWithoutXP: +goldWithoutXPString,
+        combatXP: +combatXPString,
+        campaignXP: +campaignXPString,
+      };
+      return o;
+    }
+    default: {
+      console.error(`Found invalid ExpectedOutcomeType: ${seo.type}`);
+      return null;
+    }
+  }
+}
+
+export function convertActivityOutcomeForServer(eo: ActivityOutcomeData): ServerActivityOutcomeData {
+  const seo: ServerActivityOutcomeData = {
+    id: eo.id,
+    activity_id: eo.activity_id,
+    type: eo.type,
+    data: "",
+  };
+
+  switch (eo.type) {
+    case ActivityOutcomeType.ChangeLocation: {
+      const teo = eo as ActivityOutcomeData_ChangeLocation;
+      seo.data = teo.locationId.toString();
+      break;
+    }
+    case ActivityOutcomeType.Description: {
+      const teo = eo as ActivityOutcomeData_Description;
+      seo.data = teo.description;
+      break;
+    }
+    case ActivityOutcomeType.InjuriesAndDeaths: {
+      const teo = eo as ActivityOutcomeData_InjuriesAndDeaths;
+
+      // TODO: Major categories are separated by '|'.
+
+      // Dead character ids are a comma-separated list.
+      const deadCharactersData = teo.deadCharacterIds.map((dcid) => dcid.toString()).join(",");
+
+      // Injured characters are separated by ':'.
+      const injuredCharactersData = Object.entries(teo.characterInjuries)
+        .map(([characterIdString, injuryIds]) => {
+          // The character id is separated from the injuries by '-'.
+          // The injury ids are a comma-separated list.
+          return characterIdString + "-" + injuryIds.join(",");
+        })
+        .join(":");
+
+      // Armies are separated by ':'.
+      const troopInjuriesData = Object.entries(teo.troopInjuriesByArmy)
+        .map(([armyIdString, troopInjuries]) => {
+          // ArmyId is separated from troop types by '~'.
+          // Troop types are separated by ','.
+          // TroopDefId is separated from the injury count by '-'.
+          return (
+            armyIdString +
+            "~" +
+            Object.entries(troopInjuries)
+              .map((troopDefId, count) => `${troopDefId}-${count}`)
+              .join(",")
+          );
+        })
+        .join(":");
+
+      // Armies are separated by ':'.
+      const troopDeathsData = Object.entries(teo.troopDeathsByArmy)
+        .map(([armyIdString, troopDeaths]) => {
+          // ArmyId is separated from troop types by '~'.
+          // Troop types are separated by ','.
+          // TroopDefId is separated from the injury count by '-'.
+          return (
+            armyIdString +
+            "~" +
+            Object.entries(troopDeaths)
+              .map((troopDefId, count) => `${troopDefId}-${count}`)
+              .join(",")
+          );
+        })
+        .join(":");
+
+      seo.data = `${deadCharactersData}|${injuredCharactersData}|${troopInjuriesData}|${troopDeathsData}`;
+
+      break;
+    }
+    case ActivityOutcomeType.LootAndXP: {
+      const teo = eo as ActivityOutcomeData_LootAndXP;
+      seo.data = `${teo.goldWithXP},${teo.goldWithoutXP},${teo.combatXP},${teo.campaignXP}`;
+      break;
+    }
+    default: {
+      console.error(`Unable to convert ExpectedOutcomeData with type ${eo.type}`);
+      break;
+    }
+  }
+
+  return seo;
+}
+
+export function sortActivityOutcomes(a: ActivityOutcomeData, b: ActivityOutcomeData): number {
+  if (a.type !== b.type) {
+    if (a.type === ActivityOutcomeType.Description) {
+      return -1;
+    }
+    if (b.type === ActivityOutcomeType.Description) {
+      return 1;
+    }
+  }
+  return b.type.localeCompare(a.type);
+}
+
+export function getDisallowedTypesFromOutcomes(outcomes: ActivityOutcomeData[]): ActivityOutcomeType[] {
+  const disallowedTypes = new Set<ActivityOutcomeType>();
+
+  outcomes.forEach((o) => {
+    if (UniqueActivityOutcomeTypes.includes(o.type)) {
+      disallowedTypes.add(o.type);
+    }
+  });
+
+  return Array.from(disallowedTypes);
 }

@@ -1,266 +1,263 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { SQLQuery, executeTransaction } from "../../lib/db";
 import { RequestBody_ResolveActivity } from "../../serverRequestTypes";
-import { ActivityData_ParticipantToString, ActivityOutcomeData, ActivityOutcomeType } from "../../serverAPI";
+import { ActivityData_ParticipantToString } from "../../serverAPI";
 import dateFormat from "dateformat";
 import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
+import { ContractId } from "../../redux/gameDefsSlice";
+import { ProficiencySource } from "../../staticData/types/abilitiesAndProficiencies";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
     const b = req.body as RequestBody_ResolveActivity;
-    b.outcomes.sort((oa, ob) => {
-      if (oa.type !== ob.type) {
-        // Have to do resets before applying other things.
-        if (oa.type === ActivityOutcomeType.CXPDeductibleReset) {
-          return -1;
-        } else if (ob.type === ActivityOutcomeType.CXPDeductibleReset) {
-          return 1;
-        }
-      }
-      return 0;
-    });
 
     const isAnonymous = b.activity.id === 0;
 
     const queries: SQLQuery[] = [];
 
+    // Anonymous activities won't appear in the database.
     if (!isAnonymous) {
-      // Update the activity with resolution text.
-      queries.push({
-        query: `UPDATE activities SET resolution_text=? WHERE id=?`,
-        values: [b.resolution_text, b.activity.id],
-      });
-
-      // Create the Outcome records.
       b.outcomes.forEach((o) => {
         queries.push({
-          query: `INSERT INTO activity_outcomes (activity_id,type,target_id,quantity) VALUES (?,?,?,?)`,
-          values: [o.activity_id, o.type, o.target_id, o.quantity],
+          query: `INSERT INTO activity_outcomes (activity_id,type,data) VALUES (?,?,?)`,
+          values: [o.activity_id, o.type, o.data],
         });
       });
     }
 
-    // Adventurer Injuries.  Grouped by injury type.
-    const oneDayInjuries: ActivityOutcomeData[] = [];
-    const oneWeekInjuries: ActivityOutcomeData[] = [];
-    const twoWeekInjuries: ActivityOutcomeData[] = [];
-    const fourWeekInjuries: ActivityOutcomeData[] = [];
-    // Apply the Outcomes.
-    b.outcomes.forEach((o) => {
-      switch (o.type) {
-        case ActivityOutcomeType.Gold: {
-          // Increment player gold (goes into their personal pile).
-          queries.push({
-            query: `UPDATE storage SET money=money+? WHERE name=CONCAT('Personal Pile ',CAST(? AS VARCHAR(32)))`,
-            values: [o.quantity, o.target_id],
-          });
-          break;
-        }
-        case ActivityOutcomeType.XP: {
-          // Increment player XP.
-          queries.push({
-            query: `UPDATE characters SET xp=xp+? WHERE id=?`,
-            values: [o.quantity, o.target_id],
-          });
-          break;
-        }
-        case ActivityOutcomeType.CXPDeductibleReset: {
-          // Set remaining deductible and update deductible date to the first day of this month.
-          queries.push({
-            query: `UPDATE characters SET remaining_cxp_deductible=?,cxp_deductible_date=? WHERE id=?`,
-            values: [o.quantity, getFirstOfThisMonthDateString(), o.target_id],
-          });
-          break;
-        }
-        case ActivityOutcomeType.CXPDeductible: {
-          // Decrement remaining deductible.
-          queries.push({
-            query: `UPDATE characters SET remaining_cxp_deductible=GREATEST(remaining_cxp_deductible-?,0) WHERE id=?`,
-            values: [o.quantity, o.target_id],
-          });
-          break;
-        }
-        case ActivityOutcomeType.Injury: {
-          switch (o.extra) {
-            case "OneDay": {
-              oneDayInjuries.push(o);
-              break;
-            }
-            case "OneWeek": {
-              oneWeekInjuries.push(o);
-              break;
-            }
-            case "TwoWeeks": {
-              twoWeekInjuries.push(o);
-              break;
-            }
-            case "FourWeeks": {
-              fourWeekInjuries.push(o);
-              break;
-            }
-            default: {
-              // All other injuries are permanent, and get added as "proficiencies".
-              queries.push({
-                query: "INSERT INTO proficiencies (character_id,feature_id,subtype,source) VALUES(?,?,?,?)",
-                values: [o.target_id, o.extra, "", ActivityOutcomeType.Injury],
-              });
-              break;
-            }
-          }
-          break;
-        }
-        case ActivityOutcomeType.Death: {
-          // These should be the same queries as in the `killCharacter` action.
+    // Apply the resolutions.
 
-          // Set all of their henchmen free.
-          queries.push({
-            query: `UPDATE characters SET henchmaster_id=0 WHERE henchmaster_id=?`,
-            values: [o.target_id],
-          });
+    if (b.resolution.destinationId !== 0) {
+      // Change Location for participating armies and characters.
+      b.activity.participants.forEach((p) => {
+        queries.push({
+          query: `UPDATE characters SET location_id=? WHERE id=?`,
+          values: [b.resolution.destinationId, p.characterId],
+        });
+      });
+      b.activity.army_participants.forEach((ap) => {
+        queries.push({
+          query: `UPDATE armies SET location_id=? WHERE id=?`,
+          values: [b.resolution.destinationId, ap.armyId],
+        });
+      });
+    }
 
-          // The actual character gets deaded last, after all of its dependent data is gone.
-          // We also set them free from their henchmaster.
+    // Deductible resets need to happen before we make deductible payments.
+    b.resolution.cxpDeductibleResets.forEach((data) => {
+      // Set remaining deductible and update deductible date to the first day of this month.
+      queries.push({
+        query: `UPDATE characters SET remaining_cxp_deductible=?,cxp_deductible_date=? WHERE id=?`,
+        values: [data.remainingDeductible, getFirstOfThisMonthDateString(), data.characterId],
+      });
+    });
+
+    b.resolution.cxpDeductiblePayments.forEach((data) => {
+      // Decrement remaining deductible.
+      queries.push({
+        query: `UPDATE characters SET remaining_cxp_deductible=GREATEST(remaining_cxp_deductible-?,0) WHERE id=?`,
+        values: [data.xpAmount, data.characterId],
+      });
+    });
+
+    b.resolution.moneyGranted.forEach((data) => {
+      // Money.
+      queries.push({
+        query: `UPDATE storage SET money=money+? WHERE id=?`,
+        values: [data.gpAmount, data.storageId],
+      });
+    });
+
+    b.resolution.xpGranted.forEach((data) => {
+      // XP.
+      queries.push({
+        query: `UPDATE characters SET xp=xp+? WHERE id=?`,
+        values: [data.xpAmount, data.characterId],
+      });
+    });
+
+    b.resolution.deadCharacterIds.forEach((characterId) => {
+      // These should be the same queries as in the `killCharacter` action.
+
+      // Cancel all of their contracts.
+      queries.push({
+        query: `DELETE FROM contracts WHERE def_id=? AND party_a_id=?`,
+        values: [ContractId.ArmyWageContract, characterId],
+      });
+      queries.push({
+        query: `DELETE FROM contracts WHERE def_id=? AND party_a_id=?`,
+        values: [ContractId.StructureMaintenanceContract, characterId],
+      });
+      queries.push({
+        query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+        values: [ContractId.ActivityLootContract, characterId, characterId],
+      });
+      queries.push({
+        query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+        values: [ContractId.CharacterWageContract, characterId, characterId],
+      });
+      queries.push({
+        query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+        values: [ContractId.PartiedLootContract, characterId, characterId],
+      });
+      queries.push({
+        query: `DELETE FROM contracts WHERE def_id=? AND (party_a_id=? OR party_b_id=?)`,
+        values: [ContractId.UnpartiedLootContract, characterId, characterId],
+      });
+
+      // Set all of their henchmen free.
+      queries.push({
+        query: `UPDATE characters SET henchmaster_id=0 WHERE henchmaster_id=?`,
+        values: [characterId],
+      });
+
+      // The actual character gets deaded last, after all of its dependent data is gone.
+      // We also set them free from their henchmaster.
+      queries.push({
+        query: `UPDATE characters SET dead=true,henchmaster_id=0 WHERE id=?`,
+        values: [characterId],
+      });
+    });
+
+    b.resolution.armyDeaths.forEach((data) => {
+      queries.push({
+        query: `UPDATE troops SET count=count-? WHERE id=?`,
+        values: [data.deathCount, data.troopId],
+      });
+    });
+
+    b.resolution.armyInjuries.forEach((data) => {
+      queries.push({
+        query: "INSERT INTO troop_injuries (troop_id,count,recovery_date) VALUES(?,?,?)",
+        values: [data.troopId, data.injuryCount, data.recoveryDate],
+      });
+    });
+
+    // Character injuries have been grouped by type.
+    // "Bed Rest" activities start the next day after the activity ends.
+    const dayInMillis = 60 * 60 * 24 * 1000;
+    const startDate = new Date(new Date(b.activity.end_date).getTime() + dayInMillis);
+    Object.entries(b.resolution.characterInjuries).forEach(([injuryId, characterIds]) => {
+      switch (injuryId) {
+        case "OneDay": {
+          const endDate = new Date(startDate.getTime() + dayInMillis);
           queries.push({
-            query: `UPDATE characters SET dead=true,henchmaster_id=0 WHERE id=?`,
-            values: [o.target_id],
+            query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
+            values: [
+              b.activity.user_id,
+              "Injuries",
+              `Minimal injuries incurred during #${b.activity.id}.  Requires one day of bed rest.`,
+              dateFormat(startDate, "yyyy-mm-dd"),
+              dateFormat(endDate, "yyyy-mm-dd"),
+              characterIds
+                .map((characterId) => {
+                  const participant = b.activity.participants.find((p) => {
+                    return p.characterId === characterId;
+                  });
+                  if (participant) {
+                    return ActivityData_ParticipantToString(participant);
+                  } else {
+                    // Should never happen, but at least we have a fallback.
+                    return characterId;
+                  }
+                })
+                .join(","),
+            ],
           });
           break;
         }
-        case ActivityOutcomeType.ArmyDeath: {
+        case "OneWeek": {
+          const endDate = new Date(startDate.getTime() + dayInMillis * 7);
           queries.push({
-            query: `UPDATE troops SET count=count-? WHERE id=?`,
-            values: [o.quantity, o.target_id],
+            query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
+            values: [
+              b.activity.user_id,
+              "Injuries",
+              `Minor injuries incurred during #${b.activity.id}.  Requires one week of bed rest.`,
+              dateFormat(startDate, "yyyy-mm-dd"),
+              dateFormat(endDate, "yyyy-mm-dd"),
+              characterIds
+                .map((characterId) => {
+                  const participant = b.activity.participants.find((p) => {
+                    return p.characterId === characterId;
+                  });
+                  if (participant) {
+                    return ActivityData_ParticipantToString(participant);
+                  } else {
+                    // Should never happen, but at least we have a fallback.
+                    return characterId;
+                  }
+                })
+                .join(","),
+            ],
           });
           break;
         }
-        case ActivityOutcomeType.ArmyInjury: {
+        case "TwoWeeks": {
+          const endDate = new Date(startDate.getTime() + dayInMillis * 14);
           queries.push({
-            query: "INSERT INTO troop_injuries (troop_id,count,recovery_date) VALUES(?,?,?)",
-            values: [o.target_id, o.quantity, o.extra],
+            query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
+            values: [
+              b.activity.user_id,
+              "Injuries",
+              `Moderate injuries incurred during #${b.activity.id}.  Requires two weeks of bed rest.`,
+              dateFormat(startDate, "yyyy-mm-dd"),
+              dateFormat(endDate, "yyyy-mm-dd"),
+              characterIds
+                .map((characterId) => {
+                  const participant = b.activity.participants.find((p) => {
+                    return p.characterId === characterId;
+                  });
+                  if (participant) {
+                    return ActivityData_ParticipantToString(participant);
+                  } else {
+                    // Should never happen, but at least we have a fallback.
+                    return characterId;
+                  }
+                })
+                .join(","),
+            ],
+          });
+          break;
+        }
+        case "FourWeeks": {
+          const endDate = new Date(startDate.getTime() + dayInMillis * 28);
+          queries.push({
+            query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
+            values: [
+              b.activity.user_id,
+              "Injuries",
+              `Major injuries incurred during #${b.activity.id}.  Requires four weeks of bed rest.`,
+              dateFormat(startDate, "yyyy-mm-dd"),
+              dateFormat(endDate, "yyyy-mm-dd"),
+              characterIds
+                .map((characterId) => {
+                  const participant = b.activity.participants.find((p) => {
+                    return p.characterId === characterId;
+                  });
+                  if (participant) {
+                    return ActivityData_ParticipantToString(participant);
+                  } else {
+                    // Should never happen, but at least we have a fallback.
+                    return characterId;
+                  }
+                })
+                .join(","),
+            ],
           });
           break;
         }
         default: {
-          throw new Error(`Unhandled ActivityOutcomeType: ${o.type}`);
+          // All other injuries are permanent, and get added as "proficiencies".
+          characterIds.forEach((characterId) => {
+            queries.push({
+              query: "INSERT INTO proficiencies (character_id,feature_id,subtype,source) VALUES(?,?,?,?)",
+              values: [characterId, injuryId, "", ProficiencySource.Injury],
+            });
+          });
+          break;
         }
       }
-    });
-
-    // Injuries have been grouped by type.
-    const dayInMillis = 60 * 60 * 24 * 1000;
-    // "Bed Rest" activities start the next day after the activity ends.
-    const startDate = new Date(new Date(b.activity.end_date).getTime() + dayInMillis);
-    if (oneDayInjuries.length > 0) {
-      const endDate = new Date(startDate.getTime() + dayInMillis);
-      queries.push({
-        query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
-        values: [
-          b.activity.user_id,
-          "Injuries",
-          `Minimal injuries incurred during #${b.activity.id}.  Requires one day of bed rest.`,
-          dateFormat(startDate, "yyyy-mm-dd"),
-          dateFormat(endDate, "yyyy-mm-dd"),
-          oneDayInjuries
-            .map((odi) => {
-              const participant = b.activity.participants.find((p) => {
-                return p.characterId === odi.target_id;
-              });
-              if (participant) {
-                return ActivityData_ParticipantToString(participant);
-              } else {
-                // Should never happen, but at least we have a fallback.
-                return odi.target_id;
-              }
-            })
-            .join(","),
-        ],
-      });
-    }
-    if (oneWeekInjuries.length > 0) {
-      const endDate = new Date(startDate.getTime() + dayInMillis * 7);
-      queries.push({
-        query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
-        values: [
-          b.activity.user_id,
-          "Injuries",
-          `Minor injuries incurred during #${b.activity.id}.  Requires one week of bed rest.`,
-          dateFormat(startDate, "yyyy-mm-dd"),
-          dateFormat(endDate, "yyyy-mm-dd"),
-          oneWeekInjuries
-            .map((owi) => {
-              const participant = b.activity.participants.find((p) => {
-                return p.characterId === owi.target_id;
-              });
-              if (participant) {
-                return ActivityData_ParticipantToString(participant);
-              } else {
-                // Should never happen, but at least we have a fallback.
-                return owi.target_id;
-              }
-            })
-            .join(","),
-        ],
-      });
-    }
-    if (twoWeekInjuries.length > 0) {
-      const endDate = new Date(startDate.getTime() + dayInMillis * 14);
-      queries.push({
-        query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
-        values: [
-          b.activity.user_id,
-          "Injuries",
-          `Moderate injuries incurred during #${b.activity.id}.  Requires two weeks of bed rest.`,
-          dateFormat(startDate, "yyyy-mm-dd"),
-          dateFormat(endDate, "yyyy-mm-dd"),
-          twoWeekInjuries
-            .map((twi) => {
-              const participant = b.activity.participants.find((p) => {
-                return p.characterId === twi.target_id;
-              });
-              if (participant) {
-                return ActivityData_ParticipantToString(participant);
-              } else {
-                // Should never happen, but at least we have a fallback.
-                return twi.target_id;
-              }
-            })
-            .join(","),
-        ],
-      });
-    }
-    if (fourWeekInjuries.length > 0) {
-      const endDate = new Date(startDate.getTime() + dayInMillis * 28);
-      queries.push({
-        query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
-        values: [
-          b.activity.user_id,
-          "Injuries",
-          `Major injuries incurred during #${b.activity.id}.  Requires four weeks of bed rest.`,
-          dateFormat(startDate, "yyyy-mm-dd"),
-          dateFormat(endDate, "yyyy-mm-dd"),
-          fourWeekInjuries
-            .map((fwi) => {
-              const participant = b.activity.participants.find((p) => {
-                return p.characterId === fwi.target_id;
-              });
-              if (participant) {
-                return ActivityData_ParticipantToString(participant);
-              } else {
-                // Should never happen, but at least we have a fallback.
-                return fwi.target_id;
-              }
-            })
-            .join(","),
-        ],
-      });
-    }
-
-    Object.entries(b.campaignGPDistributions).forEach(([storageIdString, gp]) => {
-      const storageId = +storageIdString;
-      queries.push({
-        query: `UPDATE storage SET money=money+? WHERE id=?`,
-        values: [gp, storageId],
-      });
     });
 
     const results = await executeTransaction<any>(queries);

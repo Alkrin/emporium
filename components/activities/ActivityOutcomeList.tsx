@@ -2,12 +2,17 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
-import { ActivityOutcomeData, ActivityOutcomeType, CharacterData } from "../../serverAPI";
+import { ActivityOutcomeData, CharacterData } from "../../serverAPI";
 import styles from "./ActivityOutcomeList.module.scss";
 import { Dictionary } from "../../lib/dictionary";
+import { getDisplayTextForExpectedOutcome } from "../../lib/activityUtils";
+import { EditButton } from "../EditButton";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
   outcomes: ActivityOutcomeData[];
+  canEdit?: boolean;
+  onEditRowClicked?: (data: ActivityOutcomeData, index: number) => void;
+  onDeleteRowClicked?: (data: ActivityOutcomeData, index: number) => void;
 }
 
 interface InjectedProps {
@@ -19,7 +24,17 @@ type Props = ReactProps & InjectedProps;
 
 class AActivityOutcomeList extends React.Component<Props> {
   render(): React.ReactNode {
-    const { outcomes, allCharacters, dispatch, className, ...otherProps } = this.props;
+    const {
+      outcomes,
+      canEdit,
+      onEditRowClicked,
+      onDeleteRowClicked,
+      allCharacters,
+      dispatch,
+      className,
+      ...otherProps
+    } = this.props;
+
     return (
       <div className={`${styles.root} ${className}`} {...otherProps}>
         {this.props.outcomes.map(this.renderOutcomeRow.bind(this))}
@@ -27,41 +42,28 @@ class AActivityOutcomeList extends React.Component<Props> {
     );
   }
 
-  private renderOutcomeRow(outcome: ActivityOutcomeData, index: number): React.ReactNode {
-    let outcomeText = `${outcome.type} ${outcome.target_id} ${outcome.quantity}`;
-    const recipient = this.props.allCharacters[outcome.target_id];
-    switch (outcome.type) {
-      case ActivityOutcomeType.Gold: {
-        outcomeText = `${recipient.name} got ${outcome.quantity.toFixed(2)}gp`;
-        break;
-      }
-      case ActivityOutcomeType.XP: {
-        outcomeText = `${recipient.name} got ${outcome.quantity.toFixed(0)}xp`;
-        break;
-      }
-      case ActivityOutcomeType.CXPDeductible: {
-        outcomeText = `${recipient.name} paid ${outcome.quantity.toFixed(2)}gp into their CXP deductible`;
-        break;
-      }
-      case ActivityOutcomeType.Injury: {
-        outcomeText = `${recipient.name} was injured.`;
-        break;
-      }
-      case ActivityOutcomeType.Death: {
-        outcomeText = `${recipient.name} was killed.`;
-        break;
-      }
-      // Some outcomes don't need to be rendered.
-      case ActivityOutcomeType.Invalid:
-      case ActivityOutcomeType.CXPDeductibleReset: {
-        return null;
-      }
-    }
+  private renderOutcomeRow(data: ActivityOutcomeData, index: number): React.ReactNode {
     return (
       <div className={styles.outcomeRow} key={index}>
-        {outcomeText}
+        <div className={styles.outcomeText}>{getDisplayTextForExpectedOutcome(data)}</div>
+        {this.props.canEdit && (
+          <>
+            <EditButton className={styles.outcomeEditButton} onClick={this.onEditRowClicked.bind(this, data, index)} />
+            <div className={styles.outcomeDeleteButton} onClick={this.onDeleteRowClicked.bind(this, data, index)}>
+              {"-"}
+            </div>
+          </>
+        )}
       </div>
     );
+  }
+
+  private onEditRowClicked(data: ActivityOutcomeData, index: number): void {
+    this.props.onEditRowClicked?.(data, index);
+  }
+
+  private onDeleteRowClicked(data: ActivityOutcomeData, index: number): void {
+    this.props.onDeleteRowClicked?.(data, index);
   }
 }
 

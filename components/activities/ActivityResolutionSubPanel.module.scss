@@ -1,5 +1,7 @@
 .root {
-  width: 40vmin;
+  box-sizing: border-box;
+  width: 52vmin;
+  padding: 1vmin;
   border-radius: 1vmin;
   border: 2px solid white;
   background-color: #222;
@@ -24,50 +26,9 @@
   font-size: 1.2rem;
 }
 
-.centerLabel {
-  position: relative;
-  color: gray;
-  font-size: 1.2rem;
-  text-align: center;
-}
-
-.textField {
-  position: relative;
-  font-size: 0.8rem;
-  color: black;
-  resize: none;
-}
-
-.numberField {
-  position: relative;
-  margin-top: 0.5vmin;
-  margin-bottom: 0.5vmin;
-  font-size: 1rem;
-  color: black;
-  resize: none;
-}
-
-.contentRow {
-  @extend .row;
-  position: relative;
-  margin-top: 1vmin;
-  margin-left: 1vmin;
-  margin-right: 1vmin;
-}
-
-.contentColumn {
-  @extend .column;
-  position: relative;
-  margin-top: 1vmin;
-  margin-left: 1vmin;
-  margin-right: 1vmin;
-}
-
 .titleLabel {
   position: relative;
   margin-top: 0.5vmin;
-  margin-left: 1vmin;
-  margin-right: 1vmin;
   font-size: 1.5rem;
   color: wheat;
   text-align: center;
@@ -76,18 +37,22 @@
 .subtitleLabel {
   position: relative;
   margin-top: 0.5vmin;
-  margin-left: 1vmin;
-  margin-right: 1vmin;
   font-size: 1.2rem;
   color: wheat;
   text-align: center;
   border-bottom: 1px solid yellow;
 }
 
+.outcomesList {
+  position: relative;
+  box-sizing: border-box;
+  margin-top: 1vmin;
+  height: 20vmin;
+}
+
 .buttonRow {
   @extend .row;
   margin-top: 1.5vmin;
-  margin-bottom: 1.5vmin;
   position: relative;
   justify-content: center;
 }
@@ -101,6 +66,7 @@
   border-radius: 0.5vmin;
   font-size: 1.2rem;
   cursor: pointer;
+  user-select: none;
 
   &:hover {
     border-color: white;
@@ -111,312 +77,21 @@
   }
 }
 
-.savingVeil {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  pointer-events: all;
-}
-
-.savingLabel {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: wheat;
-  font-size: 3rem;
-}
-
-.listContainer {
+.outcomesHeaderRow {
+  @extend .row;
   position: relative;
-  padding-top: 0.5vmin;
-  padding-left: 0.5vmin;
-  padding-right: 0.5vmin;
-  border-radius: 0.5vmin;
-  box-shadow: inset 0 0 0 2px wheat;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: scroll;
-
-  /* width */
-  &::-webkit-scrollbar {
-    width: 1.5vmin;
-  }
-
-  /* Track */
-  &::-webkit-scrollbar-track {
-    background-color: black;
-    box-shadow: inset 0 0 0 2px wheat;
-  }
-
-  /* Handle */
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(245, 222, 179, 0.5);
-  }
-}
-
-.listRow {
-  margin-bottom: 0.25vmin;
-  padding: 0.25vmin;
-  background-color: rgba(255, 255, 255, 0.1);
-  font-size: 0.8rem;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  &:hover {
-    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
-  }
-}
-
-.resolutionTextField {
-  @extend .textField;
-  height: 10vmin;
-  margin-bottom: 1vmin;
-}
-
-.radioGroup {
-  @extend .column;
   margin-top: 1vmin;
-  margin-bottom: 1vmin;
-  font-size: 1rem;
-  color: white;
-}
-
-.radioButton {
-  margin-top: 0vmin;
-  appearance: none;
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid #aaa;
-  border-radius: 50%;
-  background-clip: content-box;
-  padding: 3px;
-
-  &:checked {
-    background-color: lime;
-  }
-}
-
-.radioLabel {
-  flex-grow: 1;
-  margin-left: 0.5vmin;
-}
-
-.outcomesListContainer {
-  position: relative;
-  height: 30vmin;
-}
-
-.listContainer {
-  position: relative;
-  padding-top: 0.5vmin;
-  padding-left: 0.5vmin;
-  padding-right: 0.5vmin;
-  border-radius: 0.5vmin;
-  box-shadow: inset 0 0 0 2px wheat;
-  display: flex;
-  flex-direction: column;
-  overflow-y: scroll;
-
-  /* width */
-  &::-webkit-scrollbar {
-    width: 1.5vmin;
-  }
-
-  /* Track */
-  &::-webkit-scrollbar-track {
-    background-color: black;
-    box-shadow: inset 0 0 0 2px wheat;
-  }
-
-  /* Handle */
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(245, 222, 179, 0.5);
-  }
-}
-
-.characterListContainer {
-  @extend .listContainer;
-  height: 18vmin;
-}
-
-.listRow {
-  margin-bottom: 0.25vmin;
-  padding: 0.25vmin;
-  background-color: rgba(255, 255, 255, 0.1);
-  font-size: 0.8rem;
-  display: flex;
-  flex-direction: row;
   align-items: center;
-
-  &:hover {
-    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
-  }
+  justify-content: center;
 }
 
-.listName {
-  font-size: 0.8rem;
-  color: wheat;
-  text-align: left;
-  width: 15vmin;
-  flex-grow: 1;
-}
-
-.listLevel {
-  margin-left: 0.5vmin;
-  font-size: 0.8rem;
-  color: yellow;
-  text-align: center;
-  width: 2vmin;
-  flex-shrink: 0;
-}
-
-.listClass {
-  margin-left: 0.25vmin;
-  font-size: 0.8rem;
-  color: wheat;
-  width: 9vmin;
-  text-align: left;
-}
-
-.addInjuryButton {
+.outcomesHeaderLabel {
   position: relative;
-  margin-left: 0.25vmin;
-  margin-top: -0.1vmin;
-  margin-bottom: -0.1vmin;
-  width: 1.2vmin;
-  height: 1.2vmin;
-  flex-shrink: 0;
-  font-size: 0.85rem;
-  text-align: center;
-  line-height: 1.4vmin;
   color: wheat;
-  border: 1px solid wheat;
-  border-radius: 0.25vmin;
-  opacity: 0.5;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:active {
-    opacity: 1;
-  }
-}
-
-.addDeathButton {
-  position: relative;
-  margin-left: 0.25vmin;
-  margin-top: -0.1vmin;
-  margin-bottom: -0.1vmin;
-  width: 1.2vmin;
-  height: 1.2vmin;
-  flex-shrink: 0;
-  font-size: 0.85rem;
-  text-align: center;
-  line-height: 1.4vmin;
-  color: wheat;
-  border: 1px solid wheat;
-  border-radius: 0.25vmin;
-  opacity: 0.5;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:active {
-    opacity: 1;
-  }
-}
-
-.cancelButton {
-  position: relative;
-  margin-left: 0.25vmin;
-  margin-top: -0.1vmin;
-  margin-bottom: -0.1vmin;
-  width: 1.2vmin;
-  height: 1.2vmin;
-  flex-shrink: 0;
-  font-size: 0.85rem;
-  text-align: center;
-  line-height: 1.4vmin;
-  color: wheat;
-  border: 1px solid wheat;
-  border-radius: 0.25vmin;
-  opacity: 0.5;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:active {
-    opacity: 1;
-  }
-}
-
-.dialogButton {
-  position: relative;
-  box-sizing: border-box;
-  padding: 0.35vmin 1vmin;
   font-size: 1rem;
-  line-height: 1rem;
-  text-align: center;
-  border: 2px solid white;
-  border-radius: 0.5vmin;
-  background-color: #333;
-  color: white;
-  opacity: 0.5;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:active {
-    opacity: 1;
-  }
 }
 
-.injurySelectorContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.assignInjuryButton {
-  @extend .dialogButton;
-  margin-top: 1.5vmin;
-  width: 15vmin;
-}
-
-.closeDialogButton {
-  @extend .dialogButton;
-  margin-top: 1.5vmin;
-  width: 15vmin;
-}
-
-.injuredCharacterData {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.injuryLabel {
-  margin-left: 0.7vmin;
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: red;
-}
-
-.deadCharacterData {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
+.editButton {
+  position: relative;
+  margin-left: 0.5vmin;
 }

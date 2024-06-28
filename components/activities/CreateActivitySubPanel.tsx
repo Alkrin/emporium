@@ -13,28 +13,38 @@ import ServerAPI, {
   ArmyData,
   TroopDefData,
   ActivityArmyParticipant,
+  ActivityOutcomeData,
+  ActivityOutcomeType,
 } from "../../serverAPI";
 import styles from "./CreateActivitySubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
-import { refetchActivities } from "../../dataSources/ActivitiesDataSource";
+import { refetchActivities, refetchExpectedOutcomes } from "../../dataSources/ActivitiesDataSource";
 import { deleteActivity, deleteOutcomesForActivity, setActiveActivityId } from "../../redux/activitiesSlice";
 import dateFormat from "dateformat";
 import { UserRole } from "../../redux/userSlice";
 import { AbilityDisplayData } from "../characters/EditProficienciesSubPanel";
-import { AllProficiencies } from "../../staticData/proficiencies/AllProficiencies";
 import { AbilityOrProficiency } from "../../staticData/types/abilitiesAndProficiencies";
 import { ActivityPreparednessDisplay } from "./ActivityPreparednessDisplay";
 import { FilterType, FilterValueAny, FilterValueBusyStatus, FilterValues } from "../FilterDropdowns";
 import { EditButton } from "../EditButton";
 import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
-import { createActivityAdventurerParticipant, createActivityArmyParticipant } from "../../lib/activityUtils";
+import {
+  convertActivityOutcomeForServer,
+  createActivityAdventurerParticipant,
+  createActivityArmyParticipant,
+  getDisallowedTypesFromOutcomes,
+  sortActivityOutcomes,
+} from "../../lib/activityUtils";
 import { SelectArmiesDialog } from "../dialogs/SelectArmiesDialog";
 import { getBattleRatingForTroopDefAndCount } from "../../lib/armyUtils";
 import { getCombatSpeedForCharacter } from "../../lib/characterUtils";
+import { CreateActivityOutcomeDialog } from "./CreateActivityOutcomeDialog";
+import { ActivityOutcomesList } from "./ActivityOutcomeList";
 
 interface State {
   activity: ActivityData;
+  expectedOutcomes: ActivityOutcomeData[];
   filters: FilterValues;
   isSaving: boolean;
 }
@@ -54,6 +64,7 @@ interface InjectedProps {
   allLocations: Dictionary<LocationData>;
   allArmies: Dictionary<ArmyData>;
   troopDefs: Dictionary<TroopDefData>;
+  expectedOutcomesByActivity: Dictionary<ActivityOutcomeData[]>;
   dispatch?: Dispatch;
 }
 
@@ -79,8 +90,14 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
             participants: [...a.participants],
             army_participants: [...a.army_participants],
             lead_from_behind_id: a.lead_from_behind_id,
-            resolution_text: a.resolution_text,
           },
+          expectedOutcomes: (props.expectedOutcomesByActivity[props.activeActivityId] ?? [])
+            .map((eo) => {
+              // Copy so we don't directly alter the originals.
+              const outcome: ActivityOutcomeData = { ...eo };
+              return outcome;
+            })
+            .sort(sortActivityOutcomes),
           filters: {
             [FilterType.Owner]: FilterValueAny,
             [FilterType.Location]: FilterValueAny,
@@ -103,8 +120,8 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
           participants: [],
           army_participants: [],
           lead_from_behind_id: 0,
-          resolution_text: "",
         },
+        expectedOutcomes: [],
         filters: {
           [FilterType.Owner]: FilterValueAny,
           [FilterType.Location]: FilterValueAny,
@@ -260,6 +277,27 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
           <ActivityPreparednessDisplay participants={this.state.activity.participants} cellSizeVmin={6} />
         </div>
 
+        <div className={styles.expectedOutcomesPanel}>
+          <div className={styles.expectedOutcomesExplanationPanel}>
+            <div className={styles.expectedOutcomesHeader}>{"Expected Outcomes"}</div>
+            <EditButton
+              className={styles.expectedOutcomesAddButton}
+              onClick={this.onAddExpectedOutcomeClicked.bind(this)}
+            />
+            <div className={styles.expectedOutcomesDescription}>
+              {"If there are any expected outcomes for this activity, they can be prepared in advance.  " +
+                "As much data as is entered will be used to pre-populate the actual outcomes during activity resolution."}
+            </div>
+          </div>
+          <ActivityOutcomesList
+            className={styles.expectedOutcomesListContainer}
+            outcomes={this.state.expectedOutcomes}
+            canEdit={true}
+            onEditRowClicked={this.onEditExpectedOutcomeClicked.bind(this)}
+            onDeleteRowClicked={this.onDeleteExpectedOutcomeClicked.bind(this)}
+          />
+        </div>
+
         <div className={styles.buttonRow}>
           <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
             {this.props.isEditMode ? "Save Changes" : "Save Activity"}
@@ -279,6 +317,52 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
         )}
         <SubPanelCloseButton />
       </div>
+    );
+  }
+
+  private onDeleteExpectedOutcomeClicked(data: ActivityOutcomeData, index: number): void {
+    this.setState({ expectedOutcomes: this.state.expectedOutcomes.filter((_, findex) => findex !== index) });
+  }
+
+  private onEditExpectedOutcomeClicked(data: ActivityOutcomeData, index: number): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "EditExpectedOutcome",
+        content: () => {
+          return (
+            <CreateActivityOutcomeDialog
+              activity={this.state.activity}
+              initialValues={data}
+              onValuesConfirmed={async (outcome: ActivityOutcomeData) => {
+                const newOutcomes = [...this.state.expectedOutcomes];
+                newOutcomes[index] = outcome;
+                this.setState({ expectedOutcomes: newOutcomes.sort(sortActivityOutcomes) });
+              }}
+            />
+          );
+        },
+      })
+    );
+  }
+
+  private onAddExpectedOutcomeClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "AddExpectedOutcome",
+        content: () => {
+          return (
+            <CreateActivityOutcomeDialog
+              activity={this.state.activity}
+              disallowedTypes={getDisallowedTypesFromOutcomes(this.state.expectedOutcomes)}
+              onValuesConfirmed={async (outcome: ActivityOutcomeData) => {
+                this.setState({
+                  expectedOutcomes: [...this.state.expectedOutcomes, outcome].sort(sortActivityOutcomes),
+                });
+              }}
+            />
+          );
+        },
+      })
     );
   }
 
@@ -524,7 +608,6 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
     if (this.state.isSaving) {
       return;
     }
-    this.setState({ isSaving: true });
 
     // Valid name?
     if (this.state.activity.name.trim().length === 0) {
@@ -538,25 +621,33 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
           },
         })
       );
-      this.setState({ isSaving: false });
       return;
     }
 
+    this.setState({ isSaving: true });
+
     if (this.props.isEditMode) {
       // Edit the activity.
-      const res = await ServerAPI.editActivity(this.state.activity);
+      const res = await ServerAPI.editActivity(
+        this.state.activity,
+        this.state.expectedOutcomes.map(convertActivityOutcomeForServer)
+      );
     } else {
       // Send it to the server!
-      const res = await ServerAPI.createActivity(this.state.activity);
+      const res = await ServerAPI.createActivity(
+        this.state.activity,
+        this.state.expectedOutcomes.map(convertActivityOutcomeForServer)
+      );
       // Select the newly created activity.
-      if ("insertId" in res) {
-        this.props.dispatch?.(setActiveActivityId(res.insertId));
+      if (Array.isArray(res) && "insertId" in res[0]) {
+        this.props.dispatch?.(setActiveActivityId(res[0].insertId));
       }
     }
 
     // Refetch activities.
     if (this.props.dispatch) {
       await refetchActivities(this.props.dispatch);
+      await refetchExpectedOutcomes(this.props.dispatch);
     }
 
     this.setState({ isSaving: false });
@@ -629,34 +720,6 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
     );
   }
 
-  private getSortedProficiencies(): AbilityDisplayData[] {
-    const data: AbilityDisplayData[] = [];
-
-    Object.values(AllProficiencies).forEach((def) => {
-      // If the filter lists subtypes, iterate those.
-      // If the filter doesn't list subtypes but the def does, iterate those.
-      // If the def has no subtypes, just make a single displayData.
-      let subtypesToIterate: string[] = def.subTypes ?? [];
-
-      if (subtypesToIterate.length === 0) {
-        // Single standard proficiency, no subtypes.
-        data.push(this.buildDisplayDataForProficiency(def));
-      } else {
-        // Has subtype(s).  One entry for each.
-        subtypesToIterate.forEach((subtype) => {
-          data.push(this.buildDisplayDataForProficiency(def, subtype));
-        });
-      }
-    });
-
-    // Sort the proficiencies by name.
-    data.sort((dataA, dataB) => {
-      return dataA.name.localeCompare(dataB.name);
-    });
-
-    return data;
-  }
-
   private buildDisplayDataForProficiency(def: AbilityOrProficiency, subtype?: string): AbilityDisplayData {
     let displayName: string = def.name;
     if (subtype && subtype.length > 0) {
@@ -682,7 +745,7 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const { activities, activeActivityId } = state.activities;
+  const { activities, activeActivityId, expectedOutcomesByActivity } = state.activities;
   const allCharacters = state.characters.characters;
   const { activeRole } = state.hud;
   const { users } = state.user;
@@ -700,6 +763,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     allLocations,
     allArmies,
     troopDefs,
+    expectedOutcomesByActivity,
   };
 }
 

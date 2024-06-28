@@ -22,6 +22,7 @@ interface ReactProps {
 
 interface InjectedProps {
   troopDefs: Dictionary<TroopDefData>;
+  currentTroops: TroopData[];
   dispatch?: Dispatch;
 }
 
@@ -127,12 +128,15 @@ class ACreateTroopSubPanel extends React.Component<Props, State> {
   }
 
   private getSortedTroopDefs(): TroopDefData[] {
-    const defs = Object.values(this.props.troopDefs);
-    defs.sort(({ name: nameA }, { name: nameB }) => {
+    const allowedDefs = Object.values(this.props.troopDefs).filter(({ id }) => {
+      // Each troop type should be unique within an army.  One record for all Heavy Infantry A, etc.
+      return !this.props.currentTroops.find((t) => t.def_id === id);
+    });
+    allowedDefs.sort(({ name: nameA }, { name: nameB }) => {
       return nameA.localeCompare(nameB);
     });
 
-    return defs;
+    return allowedDefs;
   }
 
   private renderTypeRow(def: TroopDefData, index: number): React.ReactNode {
@@ -214,9 +218,12 @@ class ACreateTroopSubPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const troopDefs = state.gameDefs.troops;
+  const currentTroops = state.armies.troopsByArmy[props.armyId] ?? [];
+
   return {
     ...props,
     troopDefs,
+    currentTroops,
   };
 }
 

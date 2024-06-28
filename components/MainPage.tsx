@@ -17,7 +17,11 @@ import TooltipSource from "./TooltipSource";
 import { WorldPanel } from "./world/WorldPanel";
 import { setActiveCharacterId } from "../redux/charactersSlice";
 import { setActiveActivityId } from "../redux/activitiesSlice";
-import { refetchActivities, refetchActivityOutcomes } from "../dataSources/ActivitiesDataSource";
+import {
+  refetchActivities,
+  refetchActivityOutcomes,
+  refetchExpectedOutcomes,
+} from "../dataSources/ActivitiesDataSource";
 import { refetchCharacters } from "../dataSources/CharactersDataSource";
 import {
   refetchEquipmentSetItems,
@@ -207,6 +211,8 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchEquipmentSetItems(this.props.dispatch);
                 this.setState({ nowLoading: "Equipment Sets" });
                 await refetchEquipmentSets(this.props.dispatch);
+                this.setState({ nowLoading: "Expected Outcomes" });
+                await refetchExpectedOutcomes(this.props.dispatch);
                 this.setState({ nowLoading: "Item Defs" });
                 await refetchItemDefs(this.props.dispatch);
                 this.setState({ nowLoading: "Items" });

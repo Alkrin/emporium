@@ -25,9 +25,53 @@
 }
 
 .outcomeRow {
-  position: relative;
   display: flex;
   flex-direction: row;
-  color: gray;
+  margin-bottom: 1px;
+  padding: 0.25vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.outcomeText {
+  position: relative;
+  align-self: center;
+  flex-grow: 1;
+  color: darkgoldenrod;
   font-size: 0.8rem;
+  white-space: pre-wrap;
+}
+
+.outcomeEditButton {
+  position: relative;
+  margin-left: 0.5vmin;
+  flex-shrink: 0;
+}
+
+.outcomeDeleteButton {
+  position: relative;
+  margin-left: 0.25vmin;
+  margin-top: 0.2vmin;
+  width: 1.5vmin;
+  height: 1.5vmin;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.4vmin;
+  color: wheat;
+  border: 1px solid wheat;
+  border-radius: 0.25vmin;
+  opacity: 0.5;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
 }

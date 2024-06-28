@@ -6,7 +6,7 @@ import { Dictionary } from "../../lib/dictionary";
 import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
 import { UserRole } from "../../redux/userSlice";
-import { ActivityData } from "../../serverAPI";
+import { ActivityData, ActivityOutcomeData } from "../../serverAPI";
 import styles from "./ActivitiesList.module.scss";
 import { setActiveActivityId } from "../../redux/activitiesSlice";
 import { CreateActivitySubPanel } from "./CreateActivitySubPanel";
@@ -21,6 +21,7 @@ interface ReactProps {}
 interface InjectedProps {
   activeRole: UserRole;
   activities: Dictionary<ActivityData>;
+  outcomesByActivity: Dictionary<ActivityOutcomeData[]>;
   currentUserId: number;
   activeActivityId: number;
   dispatch?: Dispatch;
@@ -96,8 +97,8 @@ class AActivitiesList extends React.Component<Props, State> {
       const bEnd = new Date(b.end_date).getTime();
       const aCompleted = aEnd <= todayTime;
       const bCompleted = bEnd <= todayTime;
-      const aResolved = a.resolution_text.length > 0;
-      const bResolved = b.resolution_text.length > 0;
+      const aResolved = this.props.outcomesByActivity[a.id]?.length > 0;
+      const bResolved = this.props.outcomesByActivity[b.id]?.length > 0;
 
       const aCompletedUnresolved = aCompleted && !aResolved;
       const bCompletedUnresolved = bCompleted && !bResolved;
@@ -131,11 +132,12 @@ class AActivitiesList extends React.Component<Props, State> {
   }
 
   private renderActivityRow(activity: ActivityData, index: number): React.ReactNode {
+    const outcomes = this.props.outcomesByActivity[activity.id] ?? [];
     const selectedClass = activity.id === this.props.activeActivityId ? styles.selected : "";
     const localEndDate = new Date(activity.end_date);
     let localEndDateTime = localEndDate.getTime() + localEndDate.getTimezoneOffset() * 60000;
     const readyClass = new Date(activity.end_date).getTime() < new Date().getTime() ? styles.ready : "";
-    const resolvedClass = activity.resolution_text.length > 0 ? styles.resolved : "";
+    const resolvedClass = outcomes.length > 0 ? styles.resolved : "";
     return (
       <div
         className={`${styles.listRow} ${selectedClass} ${readyClass} ${resolvedClass}`}
@@ -198,6 +200,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     activeRole,
     currentUserId: state.user.currentUser.id,
     activeActivityId,
+    outcomesByActivity: state.activities.outcomesByActivity,
   };
 }
 

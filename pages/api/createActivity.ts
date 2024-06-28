@@ -1,13 +1,16 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { executeQuery } from "../../lib/db";
+import { SQLQuery, executeTransaction } from "../../lib/db";
 import { RequestBody_CreateActivity } from "../../serverRequestTypes";
 
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
     const b = req.body as RequestBody_CreateActivity;
-    const results = await executeQuery<any>(
-      `INSERT INTO activities (user_id,name,description,start_date,end_date,participants,army_participants,lead_from_behind_id) VALUES (?,?,?,?,?,?,?,?)`,
-      [
+
+    const queries: SQLQuery[] = [];
+
+    queries.push({
+      query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants,army_participants,lead_from_behind_id) VALUES (?,?,?,?,?,?,?,?)`,
+      values: [
         b.user_id,
         b.name,
         b.description,
@@ -16,8 +19,22 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         b.participants,
         b.army_participants,
         b.lead_from_behind_id,
-      ]
-    );
+      ],
+    });
+
+    queries.push({
+      query: `SELECT @id:=LAST_INSERT_ID();`,
+      values: [],
+    });
+
+    b.expectedOutcomes.forEach((eo) => {
+      queries.push({
+        query: `INSERT INTO expected_outcomes (activity_id,type,data) VALUES (@id,?,?)`,
+        values: [eo.type, eo.data],
+      });
+    });
+
+    const results = await executeTransaction<any>(queries);
 
     res.status(200).json(results);
   } catch (error) {

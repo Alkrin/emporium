@@ -284,6 +284,32 @@
   text-align: left;
 }
 
+.plusMinusButton {
+  position: relative;
+  margin-left: 0.25vmin;
+  margin-top: -0.1vmin;
+  margin-bottom: -0.1vmin;
+  width: 1.2vmin;
+  height: 1.2vmin;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.4vmin;
+  color: wheat;
+  border: 1px solid wheat;
+  border-radius: 0.25vmin;
+  opacity: 0.5;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
 .summarySection {
   @extend .row;
   position: relative;
@@ -370,7 +396,7 @@
 }
 
 .expectedOutcomesAddButton {
-  position: absolute !important;
+  position: absolute;
   top: 0;
   right: 0;
 }
@@ -380,36 +406,4 @@
   margin-left: 1vmin;
   margin-right: 1vmin;
   height: 10vmin;
-}
-
-.expectedOutcomeRow {
-  @extend .row;
-  margin-bottom: 1px;
-  padding: 0.25vmin;
-  background-color: rgba(255, 255, 255, 0.1);
-
-  &:hover {
-    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
-  }
-}
-
-.expectedOutcomeText {
-  position: relative;
-  align-self: center;
-  flex-grow: 1;
-  color: darkgoldenrod;
-  font-size: 0.8rem;
-  white-space: pre-wrap;
-}
-
-.expectedOutcomeEditButton {
-  position: relative;
-  margin-left: 0.5vmin;
-  flex-shrink: 0;
-}
-
-.expectedOutcomeDeleteButton {
-  position: relative;
-  margin-left: 0.5vmin;
-  flex-shrink: 0;
 }
