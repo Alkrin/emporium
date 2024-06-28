@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { Dictionary } from "../lib/dictionary";
-import { ActivityData, ActivityResolutionData, ActivityOutcomeData } from "../serverAPI";
+import { ActivityData, ActivityOutcomeData } from "../serverAPI";
 
 interface ActivitiesReduxState {
   activities: Dictionary<ActivityData>;
