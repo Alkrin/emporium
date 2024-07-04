@@ -61,6 +61,12 @@ export const charactersSlice = createSlice({
     updateCharacter: (state: CharactersReduxState, action: PayloadAction<CharacterData>) => {
       state.characters[action.payload.id] = action.payload;
     },
+    updateCharacters: (state: CharactersReduxState, action: PayloadAction<CharacterData[]>) => {
+      state.characters = {};
+      action.payload.forEach((character) => {
+        state.characters[character.id] = character;
+      });
+    },
     deleteCharacter: (state: CharactersReduxState, action: PayloadAction<number>) => {
       if (state.characters[action.payload]) {
         delete state.characters[action.payload];
@@ -116,6 +122,7 @@ export const charactersSlice = createSlice({
 });
 
 export const {
+  updateCharacters,
   updateCharacter,
   deleteCharacter,
   setActiveCharacterId,

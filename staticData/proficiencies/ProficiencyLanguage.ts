@@ -22,5 +22,6 @@ export const ProficiencyLanguage: AbilityOrProficiency = {
     "Hobgoblin",
     "Kobold",
     "Orc",
+    "Turtle",
   ],
 };

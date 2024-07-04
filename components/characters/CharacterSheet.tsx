@@ -24,9 +24,9 @@ import { EditHPDialog } from "./EditHPDialog";
 import { EditProficienciesSubPanel } from "./EditProficienciesSubPanel";
 import { EditXPDialog } from "./EditXPDialog";
 import { Dictionary } from "../../lib/dictionary";
-import { Stones, StonesToNumber, getTotalEquippedWeight } from "../../lib/itemUtils";
+import { Stones, getTotalEquippedWeight } from "../../lib/itemUtils";
 import {
-  BonusCalculations,
+  AttackData,
   addCommasToNumber,
   getArmorBonusForCharacter,
   getBonusForStat,
@@ -39,11 +39,9 @@ import {
   getCostOfLivingForCharacterLevel,
   getInitiativeBonusForCharacter,
   getMaintenanceStatusForCharacter,
-  getMeleeDamageCalculationsForCharacter,
-  getMeleeHitCalculationsForCharacter,
+  getMeleeAttackDataForCharacter,
   getPersonalPile,
-  getRangedDamageCalculationsForCharacter,
-  getRangedHitCalculationsForCharacter,
+  getRangedAttackDataForCharacter,
   getSavingThrowBonusForCharacter,
 } from "../../lib/characterUtils";
 import { RepertoireDialog } from "./RepertoireDialog";
@@ -812,82 +810,83 @@ class ACharacterSheet extends React.Component<Props> {
   }
 
   private renderMeleeCombatSection(): React.ReactNode {
-    const toHit = getMeleeHitCalculationsForCharacter(this.props.characterId);
-    const damage = getMeleeDamageCalculationsForCharacter(this.props.characterId);
-    const damageBonus = damage.bonuses
-      .map((entry) => {
-        return entry[1];
-      })
-      .reduce((runningTotal, currentValue) => {
-        return runningTotal + currentValue;
-      }, 0);
+    const attacks = getMeleeAttackDataForCharacter(this.props.characterId);
 
     return (
       <div className={styles.column}>
-        <TooltipSource
-          className={styles.combatTypeContainer}
-          tooltipParams={{
-            id: "MeleeExplanation",
-            content: this.renderMeleeCombatTooltip.bind(this, toHit, damage.bonuses),
-          }}
-        >
-          <div className={styles.combatTypeName}>{damage.weaponName}</div>
-          <div className={styles.row}>
-            <div className={styles.combatDamageRoll}>{`${damage.numDice}d${damage.sizeDice}${
-              damageBonus > 0 ? `+${damageBonus}` : ""
-            }${damageBonus < 0 ? damageBonus : ""}`}</div>
-            <div className={styles.combatHitRoll}>{`${toHit.totalBonus >= 0 ? "+" : ""}${
-              toHit.totalBonus
-            } to hit`}</div>
-          </div>
-        </TooltipSource>
+        {attacks.map((data, index) => {
+          return (
+            <TooltipSource
+              key={index}
+              className={styles.combatTypeContainer}
+              tooltipParams={{
+                id: "MeleeExplanation",
+                content: this.renderAttackTooltip.bind(this, data),
+              }}
+            >
+              <div className={styles.combatTypeName}>{data.name}</div>
+              <div className={styles.row}>
+                <div className={styles.combatDamageRoll}>{`${data.damage.dice}d${data.damage.die}${
+                  data.damage.bonus > 0 ? `+${data.damage.bonus}` : ""
+                }${data.damage.bonus < 0 ? data.damage.bonus : ""}`}</div>
+                <div className={styles.combatHitRoll}>{`${data.toHit >= 0 ? "+" : ""}${data.toHit} to hit`}</div>
+              </div>
+            </TooltipSource>
+          );
+        })}
       </div>
     );
   }
 
-  private renderMeleeCombatTooltip(toHit: BonusCalculations, damageBonuses: [string, number][]): React.ReactNode {
-    const totalDamageBonus = damageBonuses
-      .map((entry) => {
-        return entry[1];
-      })
-      .reduce((runningTotal, currentValue) => {
-        return runningTotal + currentValue;
-      }, 0);
-
+  private renderAttackTooltip(data: AttackData): React.ReactNode {
     return (
       <div className={styles.combatTooltipRoot}>
         <div className={styles.row}>
           <div className={styles.acTooltipTitle}>Damage</div>
-          <div className={styles.acTooltipValue}>{`${totalDamageBonus > 0 ? "+" : ""} ${totalDamageBonus}`}</div>
+          <div className={styles.acTooltipValue}>{`${data.damage.bonus > 0 ? "+" : ""}${data.damage.bonus}`}</div>
         </div>
         <div className={styles.acTooltipDivider} />
-        {damageBonuses.map(([text, value]) => {
+        {data.damageBonuses.map(([text, value]) => {
           return (
             <div className={styles.acTooltipSourceRow} key={text}>
               <div className={styles.acTooltipSource}>{text}</div>
-              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""} ${value}`}</div>
+              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
             </div>
           );
         })}
+        {data.conditionalDamageBonuses.length > 0 ? (
+          <>
+            <div className={styles.tooltipConditionalHeader}>Conditional Damage Bonuses</div>
+            <div className={styles.acTooltipDivider} />
+            {data.conditionalDamageBonuses.map(([text, value]) => {
+              return (
+                <div className={styles.acTooltipSourceRow} key={text}>
+                  <div className={styles.acTooltipSource}>{text}</div>
+                  <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
+                </div>
+              );
+            })}
+          </>
+        ) : null}
         <div style={{ height: "1vmin" }} />
         <div className={styles.row}>
           <div className={styles.acTooltipTitle}>To Hit</div>
-          <div className={styles.acTooltipValue}>{`${toHit.totalBonus > 0 ? "+" : ""} ${toHit.totalBonus}`}</div>
+          <div className={styles.acTooltipValue}>{`${data.toHit > 0 ? "+" : ""}${data.toHit}`}</div>
         </div>
         <div className={styles.acTooltipDivider} />
-        {toHit.sources.map(([text, value]) => {
+        {data.hitBonuses.map(([text, value]) => {
           return (
             <div className={styles.acTooltipSourceRow} key={text}>
               <div className={styles.acTooltipSource}>{text}</div>
-              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""} ${value}`}</div>
+              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
             </div>
           );
         })}
-        {toHit.conditionalSources.length > 0 ? (
+        {data.conditionalHitBonuses.length > 0 ? (
           <>
             <div className={styles.tooltipConditionalHeader}>Conditional Hit Bonuses</div>
             <div className={styles.acTooltipDivider} />
-            {toHit.conditionalSources.map(([text, value]) => {
+            {data.conditionalHitBonuses.map(([text, value]) => {
               return (
                 <div className={styles.acTooltipSourceRow} key={text}>
                   <div className={styles.acTooltipSource}>{text}</div>
@@ -902,94 +901,33 @@ class ACharacterSheet extends React.Component<Props> {
   }
 
   private renderRangedCombatSection(): React.ReactNode {
-    const toHit = getRangedHitCalculationsForCharacter(this.props.characterId);
-    const damage = getRangedDamageCalculationsForCharacter(this.props.characterId);
-    const damageBonus = damage.bonuses
-      .map((entry) => {
-        return entry[1];
-      })
-      .reduce((runningTotal, currentValue) => {
-        return runningTotal + currentValue;
-      }, 0);
+    const attacks = getRangedAttackDataForCharacter(this.props.characterId);
 
     return (
       <div className={styles.column}>
-        <TooltipSource
-          className={styles.combatTypeContainer}
-          tooltipParams={{
-            id: "RangedExplanation",
-            content: this.renderRangedCombatTooltip.bind(this, toHit, damage.bonuses),
-          }}
-        >
-          <div className={styles.combatTypeName}>{damage.weaponName}</div>
-          <div className={styles.combatTypeName}>{`Range: ${damage.rangeIncrement}' / ${damage.rangeIncrement * 2}' / ${
-            damage.rangeIncrement * 3
-          }' `}</div>
-          <div className={styles.row}>
-            <div className={styles.combatDamageRoll}>{`${damage.numDice}d${damage.sizeDice}${
-              damageBonus > 0 ? `+${damageBonus}` : ""
-            }${damageBonus < 0 ? damageBonus : ""}`}</div>
-            <div className={styles.combatHitRoll}>{`${toHit.totalBonus >= 0 ? "+" : ""}${
-              toHit.totalBonus
-            } to hit`}</div>
-          </div>
-        </TooltipSource>
-      </div>
-    );
-  }
-
-  private renderRangedCombatTooltip(toHit: BonusCalculations, damageBonuses: [string, number][]): React.ReactNode {
-    const totalDamageBonus = damageBonuses
-      .map((entry) => {
-        return entry[1];
-      })
-      .reduce((runningTotal, currentValue) => {
-        return runningTotal + currentValue;
-      }, 0);
-
-    return (
-      <div className={styles.combatTooltipRoot}>
-        <div className={styles.row}>
-          <div className={styles.acTooltipTitle}>Damage</div>
-          <div className={styles.acTooltipValue}>{`${totalDamageBonus > 0 ? "+" : ""} ${totalDamageBonus}`}</div>
-        </div>
-        <div className={styles.acTooltipDivider} />
-        {damageBonuses.map(([text, value]) => {
+        {attacks.map((data, index) => {
           return (
-            <div className={styles.acTooltipSourceRow} key={text}>
-              <div className={styles.acTooltipSource}>{text}</div>
-              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""} ${value}`}</div>
-            </div>
+            <TooltipSource
+              key={index}
+              className={styles.combatTypeContainer}
+              tooltipParams={{
+                id: "RangedExplanation",
+                content: this.renderAttackTooltip.bind(this, data),
+              }}
+            >
+              <div className={styles.combatTypeName}>{data.name}</div>
+              <div
+                className={styles.combatTypeName}
+              >{`Range: ${data.ranges.short}' / ${data.ranges.medium}' / ${data.ranges.long}' `}</div>
+              <div className={styles.row}>
+                <div className={styles.combatDamageRoll}>{`${data.damage.dice}d${data.damage.die}${
+                  data.damage.bonus > 0 ? `+${data.damage.bonus}` : ""
+                }${data.damage.bonus < 0 ? data.damage.bonus : ""}`}</div>
+                <div className={styles.combatHitRoll}>{`${data.toHit >= 0 ? "+" : ""}${data.toHit} to hit`}</div>
+              </div>
+            </TooltipSource>
           );
         })}
-        <div style={{ height: "1vmin" }} />
-        <div className={styles.row}>
-          <div className={styles.acTooltipTitle}>To Hit</div>
-          <div className={styles.acTooltipValue}>{`${toHit.totalBonus > 0 ? "+" : ""} ${toHit.totalBonus}`}</div>
-        </div>
-        <div className={styles.acTooltipDivider} />
-        {toHit.sources.map(([text, value]) => {
-          return (
-            <div className={styles.acTooltipSourceRow} key={text}>
-              <div className={styles.acTooltipSource}>{text}</div>
-              <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""} ${value}`}</div>
-            </div>
-          );
-        })}
-        {toHit.conditionalSources.length > 0 ? (
-          <>
-            <div className={styles.tooltipConditionalHeader}>Conditional Hit Bonuses</div>
-            <div className={styles.acTooltipDivider} />
-            {toHit.conditionalSources.map(([text, value]) => {
-              return (
-                <div className={styles.acTooltipSourceRow} key={text}>
-                  <div className={styles.acTooltipSource}>{text}</div>
-                  <div className={styles.acTooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
-                </div>
-              );
-            })}
-          </>
-        ) : null}
       </div>
     );
   }

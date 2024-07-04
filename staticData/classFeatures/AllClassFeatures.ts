@@ -70,6 +70,9 @@ import { BattlegoatGatecrasherMightyKidneys } from "./BattlegoatGatecrasherMight
 import { BattlegoatGatecrasherInvincibleDigestion } from "./BattlegoatGatecrasherInvincibleDigestion";
 import { BattlegoatGatecrasherDungeonScarred } from "./BattlegoatGatecrasherDungeonScarred";
 import { BattlegoatGatecrasherRedEyed } from "./BattlegoatGatecrasherRedEyed";
+import { SharedInhumanity } from "./SharedInhumanity";
+import { SharedBrutality } from "./SharedBrutality";
+import { SharedNaturalAttackPower } from "./SharedNaturalAttackPower";
 
 export const AllClassFeatures: Dictionary<AbilityOrProficiency> = {
   [AntiPaladinAuraOfProtection.id]: AntiPaladinAuraOfProtection,
@@ -116,16 +119,19 @@ export const AllClassFeatures: Dictionary<AbilityOrProficiency> = {
   [PaladinHolyFervor.id]: PaladinHolyFervor,
   [SharedAgeless.id]: SharedAgeless,
   [SharedAnimalReflexes.id]: SharedAnimalReflexes,
+  [SharedBrutality.id]: SharedBrutality,
   [SharedCreateMagicalConstructs.id]: SharedCreateMagicalConstructs,
   [SharedCreateMagicalCrossbreeds.id]: SharedCreateMagicalCrossbreeds,
   [SharedCreateUndead.id]: SharedCreateUndead,
   [SharedDifficultToSpot.id]: SharedDifficultToSpot,
   [SharedFriendOfBirdsAndBeasts.id]: SharedFriendOfBirdsAndBeasts,
+  [SharedInhumanity.id]: SharedInhumanity,
   [SharedInspireCourage.id]: SharedInspireCourage,
   [SharedMajorMagicCreation.id]: SharedMajorMagicCreation,
   [SharedMeleeAccuracyBonus.id]: SharedMeleeAccuracyBonus,
   [SharedMeleeDamageBonus.id]: SharedMeleeDamageBonus,
   [SharedMinorMagicCreation.id]: SharedMinorMagicCreation,
+  [SharedNaturalAttackPower.id]: SharedNaturalAttackPower,
   [SharedNaturallyStealthy.id]: SharedNaturallyStealthy,
   [SharedRangedAccuracyBonus.id]: SharedRangedAccuracyBonus,
   [SharedRangedDamageBonus.id]: SharedRangedDamageBonus,

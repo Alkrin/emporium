@@ -73,6 +73,26 @@ export interface SelectableClassFeature {
   selections: AbilityFilter | AbilityFilter[];
 }
 
+export interface DieRoll {
+  dice: number;
+  die: number;
+  bonus: number;
+}
+
+export interface AttackRanges {
+  short: number;
+  medium: number;
+  long: number;
+}
+
+export interface NaturalWeapon {
+  name: string;
+  count: number; // How many of this attack do they get (e.g. two claws, one bite, eight tentacles).
+  damageProgression: DieRoll[];
+  hitBonus: number;
+  range?: AttackRanges;
+}
+
 export interface CharacterClass {
   name: string;
   hitDieSize: 4 | 6 | 8 | 10 | 12;
@@ -87,6 +107,8 @@ export interface CharacterClass {
   weaponCategoryPermissions?: WeaponCategory[];
   /** If present, lists permissable weapon types for this class.  Otherwise, all are assumed permissable. */
   weaponTypePermissions?: WeaponType[];
+  /** If present, the character can optionally use natural weapons instead of improvised weapons for unarmed attacks. */
+  naturalWeapons?: NaturalWeapon[];
   // The maximum base AC of armor that this character can equip.  E.g. Fur = 1, Leather = 2, Plate = 6
   maxBaseArmor: number;
   cleaveMultiplier: CleaveMultiplier;
