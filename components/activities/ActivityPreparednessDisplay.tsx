@@ -8,7 +8,7 @@ import styles from "./ActivityPreparednessDisplay.module.scss";
 import TooltipSource from "../TooltipSource";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import { SpellType } from "../../staticData/types/characterClasses";
-import { getAllCharacterAssociatedItemIds, isProficiencyUnlockedForCharacter } from "../../lib/characterUtils";
+import { getAllCharacterAssociatedItemIds, getProficiencyRankForCharacter } from "../../lib/characterUtils";
 import { ProficiencyLayOnHands } from "../../staticData/proficiencies/ProficiencyLayOnHands";
 import { Tag } from "../../lib/tags";
 

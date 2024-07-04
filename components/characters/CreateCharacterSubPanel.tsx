@@ -34,6 +34,7 @@ import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
 import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
 import { refetchContracts } from "../../dataSources/ContractsDataSource";
+import { refetchStorages } from "../../dataSources/StoragesDataSource";
 
 interface State {
   nameText: string;
@@ -772,6 +773,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     if (this.props.dispatch) {
       // The character itself.
       await refetchCharacters(this.props.dispatch);
+      // Their personal pile.
+      await refetchStorages(this.props.dispatch);
       // Any selectable class features.
       await refetchProficiencies(this.props.dispatch);
       if (!this.props.isEditMode) {

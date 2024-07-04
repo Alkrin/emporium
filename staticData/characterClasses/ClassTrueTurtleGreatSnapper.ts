@@ -1,9 +1,11 @@
-import { BattlegoatGatecrasherDungeonScarred } from "../classFeatures/BattlegoatGatecrasherDungeonScarred";
-import { BattlegoatGatecrasherInvincibleDigestion } from "../classFeatures/BattlegoatGatecrasherInvincibleDigestion";
-import { BattlegoatGatecrasherMightyKidneys } from "../classFeatures/BattlegoatGatecrasherMightyKidneys";
-import { BattlegoatGatecrasherRedEyed } from "../classFeatures/BattlegoatGatecrasherRedEyed";
-import { BattlegoatGatecrasherRuneCarvedHorns } from "../classFeatures/BattlegoatGatecrasherRuneCarvedHorns";
-import { BattlegoatGatecrasherSteelWool } from "../classFeatures/BattlegoatGatecrasherSteelWool";
+import { FighterBattlefieldProwess } from "../classFeatures/FighterBattlefieldProwess";
+import { SharedAgeless } from "../classFeatures/SharedAgeless";
+import { SharedBrutality } from "../classFeatures/SharedBrutality";
+import { SharedInhumanity } from "../classFeatures/SharedInhumanity";
+import { SharedMeleeDamageBonus } from "../classFeatures/SharedMeleeDamageBonus";
+import { SharedNaturalAttackPower } from "../classFeatures/SharedNaturalAttackPower";
+import { SharedRangedDamageBonus } from "../classFeatures/SharedRangedDamageBonus";
+import { SharedSavageResilience } from "../classFeatures/SharedSavageResilience";
 import { ProficiencyAcrobatics } from "../proficiencies/ProficiencyAcrobatics";
 import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyAlertness } from "../proficiencies/ProficiencyAlertness";
@@ -31,47 +33,56 @@ import { ProficiencySwashbuckling } from "../proficiencies/ProficiencySwashbuckl
 import { ProficiencyWeaponFinesse } from "../proficiencies/ProficiencyWeaponFinesse";
 import { ProficiencyWeaponFocus } from "../proficiencies/ProficiencyWeaponFocus";
 import { WeaponStyle, CharacterClass, CharacterStat, SavingThrowType } from "../types/characterClasses";
-import { WeaponType } from "../types/items";
 
-export const ClassBattlegoatGatecrasher: CharacterClass = {
-  name: "Battlegoat Gatecrasher",
-  hitDieSize: 10,
-  hpStep: 2,
-  primeRequisites: [CharacterStat.Strength],
-  statRequirements: {},
-  xpToLevel: [0, 3050, 6100, 12200, 24400, 50000, 100000, 220000, 340000, 460000, 580000, 700000, 820000, 940000],
+export const ClassTrueTurtleGreatSnapper: CharacterClass = {
+  name: "True Turtle Great Snapper",
+  hitDieSize: 6,
+  hpStep: 3,
+  primeRequisites: [CharacterStat.Strength, CharacterStat.Constitution],
+  statRequirements: { [CharacterStat.Strength]: 13, [CharacterStat.Constitution]: 11 },
+  xpToLevel: [0, 4800, 9600, 19200, 38400, 76800, 150000, 300000],
   weaponStyles: [WeaponStyle.OneHandOnly],
-  weaponTypePermissions: [WeaponType.GoatBiteRam],
   naturalWeapons: [
     {
-      name: "Bite / Ram",
+      name: "Bite",
       count: 1,
-      damageProgression: [{ dice: 1, die: 6, bonus: 0 }],
+      damageProgression: [
+        { dice: 1, die: 4, bonus: 0 },
+        { dice: 1, die: 6, bonus: 0 },
+        { dice: 1, die: 6, bonus: 1 },
+        { dice: 1, die: 8, bonus: 1 },
+        { dice: 1, die: 8, bonus: 2 },
+        { dice: 1, die: 10, bonus: 2 },
+      ],
       hitBonus: 0,
     },
   ],
   maxBaseArmor: 0, // None
-  cleaveMultiplier: 0.5,
+  cleaveMultiplier: 1,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6],
-    [SavingThrowType.PoisonAndDeath]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7, 7, 6, 5],
-    [SavingThrowType.BlastAndBreath]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7],
-    [SavingThrowType.StaffsAndWands]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7],
-    [SavingThrowType.Spells]: [17, 16, 16, 15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8],
+    [SavingThrowType.PetrificationAndParalysis]: [15, 14, 14, 13, 12, 12, 11, 10],
+    [SavingThrowType.PoisonAndDeath]: [14, 13, 13, 12, 11, 11, 10, 9],
+    [SavingThrowType.BlastAndBreath]: [16, 15, 15, 14, 13, 13, 12, 11],
+    [SavingThrowType.StaffsAndWands]: [16, 15, 15, 14, 13, 13, 12, 11],
+    [SavingThrowType.Spells]: [17, 16, 16, 15, 14, 14, 13, 12],
   },
-  toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6],
+  toHitBonus: [0, 1, 2, 3, 4, 5, 6, 7],
   classFeatures: [
     { def: ProficiencyAdventuring, rank: 1, minLevel: 1 },
-    { def: BattlegoatGatecrasherDungeonScarred, rank: 1, minLevel: 9 },
-    { def: BattlegoatGatecrasherInvincibleDigestion, rank: 1, minLevel: 3 },
-    { def: BattlegoatGatecrasherMightyKidneys, rank: 1, minLevel: 1 },
-    { def: BattlegoatGatecrasherRedEyed, rank: 1, minLevel: 11 },
-    { def: BattlegoatGatecrasherRuneCarvedHorns, rank: 1, minLevel: 1 },
-    { def: BattlegoatGatecrasherSteelWool, rank: 1, minLevel: 1 },
-    { def: ProficiencyLanguage, subtype: "Goat", rank: 1, minLevel: 1 },
+    { def: SharedMeleeDamageBonus, rank: 1, minLevel: 1 },
+    { def: ProficiencyLanguage, subtype: "Turtle", rank: 1, minLevel: 1 },
+    { def: SharedInhumanity, rank: 1, minLevel: 1 },
+    { def: SharedAgeless, rank: 1, minLevel: 1 },
+    { def: SharedSavageResilience, rank: 1, minLevel: 1 },
+    { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 2 },
+    { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 3 },
+    { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 4 },
+    { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 6 },
+    { def: SharedBrutality, rank: 1, minLevel: 7 },
+    { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 8 },
   ],
   selectableClassFeatures: [],
-  classProficienciesAt: [1, 3, 6, 9, 12],
+  classProficienciesAt: [1, 3, 6],
   classProficiencies: [
     { def: ProficiencyAcrobatics },
     { def: ProficiencyAlertness },
@@ -85,10 +96,7 @@ export const ClassBattlegoatGatecrasher: CharacterClass = {
     { def: ProficiencyCommand },
     { def: ProficiencyDungeonBashing },
     { def: ProficiencyEndurance },
-    {
-      def: ProficiencyFightingStyle,
-      subtypes: ["Single Weapon"],
-    },
+    { def: ProficiencyFightingStyle },
     { def: ProficiencyGambling },
     { def: ProficiencyIntimidation },
     { def: ProficiencyLeadership },
@@ -101,6 +109,7 @@ export const ClassBattlegoatGatecrasher: CharacterClass = {
     { def: ProficiencySkirmishing },
     { def: ProficiencySurvival },
     { def: ProficiencySwashbuckling },
+    { def: ProficiencyWeaponFinesse },
     { def: ProficiencyWeaponFocus },
   ],
   spellcasting: [],

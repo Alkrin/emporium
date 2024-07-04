@@ -10,7 +10,7 @@ import { AllProficiencies } from "../../staticData/proficiencies/AllProficiencie
 import { AbilityOrProficiency, ProficiencySource } from "../../staticData/types/abilitiesAndProficiencies";
 import TooltipSource from "../TooltipSource";
 import styles from "./AbilitiesList.module.scss";
-import { isProficiencyUnlockedForCharacter } from "../../lib/characterUtils";
+import { getProficiencyRankForCharacter } from "../../lib/characterUtils";
 import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
 import { AbilityDisplayData } from "./EditProficienciesSubPanel";
 import { AllInjuries } from "../../staticData/injuries/AllInjuries";
@@ -67,6 +67,7 @@ class AAbilitiesList extends React.Component<Props> {
 
   private sortAbilities(): AbilityDisplayData[] {
     const characterClass = AllClasses[this.props.character.class_name];
+
     const displayDataByName: Dictionary<AbilityDisplayData> = {};
 
     // Class abilities/proficiencies.
@@ -77,13 +78,17 @@ class AAbilitiesList extends React.Component<Props> {
       }
 
       const identifyingName = this.buildIdentifyingName(classFeature.def, classFeature.subtype);
-      displayDataByName[identifyingName] = {
-        name: identifyingName,
-        rank: classFeature.rank ?? 1,
-        subtype: classFeature.subtype,
-        minLevel: classFeature.minLevel,
-        def: classFeature.def,
-      };
+      if (!displayDataByName[identifyingName]) {
+        displayDataByName[identifyingName] = {
+          name: identifyingName,
+          rank: classFeature.rank ?? 1,
+          subtype: classFeature.subtype,
+          minLevel: classFeature.minLevel,
+          def: classFeature.def,
+        };
+      } else {
+        displayDataByName[identifyingName].rank += classFeature.rank;
+      }
     });
 
     // Chosen proficiencies.
@@ -94,7 +99,7 @@ class AAbilitiesList extends React.Component<Props> {
       }
 
       // Only include abilities this character has unlocked.
-      if (!isProficiencyUnlockedForCharacter(this.props.character.id, proficiency.feature_id, proficiency.subtype)) {
+      if (!getProficiencyRankForCharacter(this.props.character.id, proficiency.feature_id, proficiency.subtype)) {
         return;
       }
 

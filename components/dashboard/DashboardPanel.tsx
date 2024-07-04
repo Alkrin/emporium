@@ -350,25 +350,30 @@ class ADashboardPanel extends React.Component<Props, State> {
     const thisMonth = getFirstOfThisMonthDateString();
 
     // Army wages.
-    unpaid.push(
-      ...this.props.contractsByDefByPartyAId[ContractId.ArmyWageContract]?.[this.props.dashboardCharacterId]?.filter(
-        (awc) => awc.target_a_id === storageId && awc.exercise_date !== thisMonth
-      )
-    );
+    const unpaidArmyWageContracts = this.props.contractsByDefByPartyAId[ContractId.ArmyWageContract]?.[
+      this.props.dashboardCharacterId
+    ]?.filter((awc) => awc.target_a_id === storageId && awc.exercise_date !== thisMonth);
+    if (unpaidArmyWageContracts?.length > 0) {
+      unpaid.push(...unpaidArmyWageContracts);
+    }
 
     // Character wages.
-    unpaid.push(
-      ...this.props.contractsByDefByPartyAId[ContractId.CharacterWageContract]?.[
-        this.props.dashboardCharacterId
-      ]?.filter((cwc) => cwc.target_a_id === storageId && cwc.exercise_date !== thisMonth)
-    );
+    const unpaidCharacterWageContracts = this.props.contractsByDefByPartyAId[ContractId.CharacterWageContract]?.[
+      this.props.dashboardCharacterId
+    ]?.filter((cwc) => cwc.target_a_id === storageId && cwc.exercise_date !== thisMonth);
+    if (unpaidCharacterWageContracts?.length > 0) {
+      unpaid.push(...unpaidCharacterWageContracts);
+    }
 
     // Structure maintenance.
-    unpaid.push(
-      ...this.props.contractsByDefByPartyAId[ContractId.StructureMaintenanceContract]?.[
-        this.props.dashboardCharacterId
-      ]?.filter((smc) => smc.target_a_id === storageId && smc.exercise_date !== thisMonth)
+    const unpaidStructureMaintenanceContracts = this.props.contractsByDefByPartyAId[
+      ContractId.StructureMaintenanceContract
+    ]?.[this.props.dashboardCharacterId]?.filter(
+      (smc) => smc.target_a_id === storageId && smc.exercise_date !== thisMonth
     );
+    if (unpaidStructureMaintenanceContracts) {
+      unpaid.push(...unpaidStructureMaintenanceContracts);
+    }
 
     return unpaid;
   }

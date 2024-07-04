@@ -26,6 +26,7 @@ import { ClassNobiranWonderworker } from "./ClassNobiranWonderworker";
 import { ClassPaladin } from "./ClassPaladin";
 import { ClassPriestess } from "./ClassPriestess";
 import { ClassThief } from "./ClassThief";
+import { ClassTrueTurtleGreatSnapper } from "./ClassTrueTurtleGreatSnapper";
 import { ClassVenturer } from "./ClassVenturer";
 import { ClassWildHarvester } from "./ClassWildHarvester";
 
@@ -57,6 +58,7 @@ export const AllClasses: { [name: string]: CharacterClass } = {
   [ClassPaladin.name]: ClassPaladin,
   [ClassPriestess.name]: ClassPriestess,
   [ClassThief.name]: ClassThief,
+  [ClassTrueTurtleGreatSnapper.name]: ClassTrueTurtleGreatSnapper,
   [ClassVenturer.name]: ClassVenturer,
   [ClassWildHarvester.name]: ClassWildHarvester,
 };

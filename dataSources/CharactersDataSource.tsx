@@ -1,6 +1,6 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
-import { updateCharacter } from "../redux/charactersSlice";
+import { updateCharacters } from "../redux/charactersSlice";
 import ExternalDataSource from "../redux/externalDataSource";
 import { showModal } from "../redux/modalsSlice";
 import ServerAPI from "../serverAPI";
@@ -20,9 +20,7 @@ export async function refetchCharacters(dispatch: Dispatch): Promise<void> {
       })
     );
   } else {
-    result.forEach((character) => {
-      dispatch(updateCharacter(character));
-    });
+    dispatch(updateCharacters(result));
   }
 }
 

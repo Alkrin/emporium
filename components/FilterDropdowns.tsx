@@ -15,7 +15,7 @@ import { UserRole } from "../redux/userSlice";
 import { AbilityDisplayData } from "./characters/EditProficienciesSubPanel";
 import { AllProficiencies } from "../staticData/proficiencies/AllProficiencies";
 import { AbilityOrProficiency } from "../staticData/types/abilitiesAndProficiencies";
-import { isProficiencyUnlockedForCharacter } from "../lib/characterUtils";
+import { getProficiencyRankForCharacter } from "../lib/characterUtils";
 
 export const FilterValueAny = "---";
 export enum FilterValueAliveStatus {
@@ -180,7 +180,7 @@ export function isFilterMetProficiency(filters: FilterValues, characterId: numbe
     profId = proficiencyFilter;
   }
 
-  if (!isProficiencyUnlockedForCharacter(characterId, profId, subtype)) {
+  if (!getProficiencyRankForCharacter(characterId, profId, subtype)) {
     return false;
   }
 
