@@ -29,6 +29,7 @@ import {
   getDisallowedTypesFromOutcomes,
   sortActivityOutcomes,
 } from "../../lib/activityUtils";
+import { refetchContracts } from "../../dataSources/ContractsDataSource";
 
 interface State {
   outcomes: ActivityOutcomeData[];
@@ -189,6 +190,7 @@ class AActivityResolutionSubPanel extends React.Component<Props, State> {
       await refetchArmies(this.props.dispatch);
       await refetchTroops(this.props.dispatch);
       await refetchTroopInjuries(this.props.dispatch);
+      await refetchContracts(this.props.dispatch);
     }
 
     this.setState({ isSaving: false });

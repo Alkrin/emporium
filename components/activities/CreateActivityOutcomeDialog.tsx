@@ -23,14 +23,19 @@ import {
   SortedActivityOutcomeTypes,
   TroopData,
   TroopDefData,
+  ActivityOutcomeData_MergeArmies,
+  ActivityOutcomeData_TransferEmporiumContracts,
+  StorageData,
 } from "../../serverAPI";
 import { InputSingleNumberDialog } from "../dialogs/InputSingleNumberDialog";
 import { getBonusForStat, getBonusString } from "../../lib/characterUtils";
 import { SelectAdventurerInjuryDialog } from "../dialogs/SelectAdventurerInjuryDialog";
+import { SelectArmyDialog } from "../dialogs/SelectArmyDialog";
 
 interface State {
   type: ActivityOutcomeType;
-  locationId: number;
+  locationId: number; // For ChangeLocation.
+  transferLocationId: number; // For TransferEmporiumContracts.
   // Character deaths and injures are inter-related.  Dead characters generally aren't ALSO injured.
   deadCharacterIds: number[];
   // Injuries state.  Key: characterId, value: injuryIds.
@@ -45,6 +50,8 @@ interface State {
   goldWithoutXPString: string;
   combatXPString: string;
   campaignXPString: string;
+  primaryArmyId: number;
+  subordinateArmyId: number;
 }
 
 interface ReactProps {
@@ -58,6 +65,7 @@ interface InjectedProps {
   allArmies: Dictionary<ArmyData>;
   allCharacters: Dictionary<CharacterData>;
   allLocations: Dictionary<LocationData>;
+  allStorages: Dictionary<StorageData>;
   troopsByArmy: Dictionary<TroopData[]>;
   troopDefs: Dictionary<TroopDefData>;
   dispatch?: Dispatch;
@@ -74,6 +82,7 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
       ? {
           type: iv.type,
           locationId: (iv as ActivityOutcomeData_ChangeLocation).locationId ?? 0,
+          transferLocationId: (iv as ActivityOutcomeData_TransferEmporiumContracts).locationId ?? 0,
           deadCharacterIds: (iv as ActivityOutcomeData_InjuriesAndDeaths).deadCharacterIds ?? [],
           characterInjuries: (iv as ActivityOutcomeData_InjuriesAndDeaths).characterInjuries ?? {},
           description: (iv as ActivityOutcomeData_Description).description ?? "",
@@ -83,10 +92,13 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
           goldWithoutXPString: `${(iv as ActivityOutcomeData_LootAndXP).goldWithoutXP ?? 0}`,
           combatXPString: `${(iv as ActivityOutcomeData_LootAndXP).combatXP ?? 0}`,
           campaignXPString: `${(iv as ActivityOutcomeData_LootAndXP).campaignXP ?? 0}`,
+          primaryArmyId: (iv as ActivityOutcomeData_MergeArmies).primaryArmyId ?? 0,
+          subordinateArmyId: (iv as ActivityOutcomeData_MergeArmies).subordinateArmyId ?? 0,
         }
       : {
           type: ActivityOutcomeType.Invalid,
           locationId: 0,
+          transferLocationId: 0,
           deadCharacterIds: [],
           characterInjuries: {},
           description: "",
@@ -96,6 +108,8 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
           goldWithoutXPString: "0",
           combatXPString: "0",
           campaignXPString: "0",
+          primaryArmyId: 0,
+          subordinateArmyId: 0,
         };
   }
 
@@ -156,6 +170,12 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
       }
       case ActivityOutcomeType.LootAndXP: {
         return this.renderTypeFieldsLootAndXP();
+      }
+      case ActivityOutcomeType.MergeArmies: {
+        return this.renderTypeFieldsMergeArmies();
+      }
+      case ActivityOutcomeType.TransferEmporiumContracts: {
+        return this.renderTypeFieldsTransferEmporiumContracts();
       }
     }
   }
@@ -268,6 +288,47 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
     );
   }
 
+  private renderTypeFieldsMergeArmies(): React.ReactNode {
+    return (
+      <>
+        <div className={styles.outcomeFieldHeader}>
+          {"This will merge the subordinate army into the primary army.  The subordinate army will be destroyed."}
+        </div>
+        <div style={{ height: "1vmin" }} />
+        <div className={styles.row}>
+          <div className={styles.outcomeFieldLabel}>{"Primary:\xa0"}</div>
+          <div className={styles.outcomeFieldValue}>
+            {this.props.allArmies[this.state.primaryArmyId]?.name ?? "---"}
+          </div>
+          <EditButton className={styles.editButton} onClick={this.onSelectPrimaryArmyClicked.bind(this)} />
+        </div>
+        <div className={styles.row}>
+          <div className={styles.outcomeFieldLabel}>{"Subordinate:\xa0"}</div>
+          <div className={styles.outcomeFieldValue}>
+            {this.props.allArmies[this.state.subordinateArmyId]?.name ?? "---"}
+          </div>
+          <EditButton className={styles.editButton} onClick={this.onSelectSubordinateArmyClicked.bind(this)} />
+        </div>
+      </>
+    );
+  }
+
+  private renderTypeFieldsTransferEmporiumContracts(): React.ReactNode {
+    return (
+      <>
+        <div className={styles.outcomeFieldHeader}>
+          {"Which base will participating Emporium Employees transfer their contracts to?"}
+        </div>
+        <div className={styles.row}>
+          <div className={styles.outcomeFieldValue}>
+            {this.props.allLocations[this.state.transferLocationId]?.name ?? "---"}
+          </div>
+          <EditButton className={styles.editButton} onClick={this.onSelectEmporiumBaseClicked.bind(this)} />
+        </div>
+      </>
+    );
+  }
+
   private renderArmyParticipantRows(p: ActivityArmyParticipant, index: number): React.ReactNode {
     const army = this.props.allArmies[p.armyId];
     const sortedTroops = Object.entries(p.troopCounts).sort((a, b) => {
@@ -281,6 +342,46 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
         <div className={styles.participantHeader}>{army.name}</div>
         {sortedTroops.map(this.renderTroopRow.bind(this, army, index))}
       </React.Fragment>
+    );
+  }
+
+  private onSelectPrimaryArmyClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "selectPrimaryArmy",
+        content: () => {
+          return (
+            <SelectArmyDialog
+              preselectedArmyId={this.state.primaryArmyId}
+              onSelectionConfirmed={async (armyId: number) => {
+                this.setState({ primaryArmyId: armyId });
+              }}
+            />
+          );
+        },
+        escapable: true,
+        widthVmin: 45,
+      })
+    );
+  }
+
+  private onSelectSubordinateArmyClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "selectSubordinateArmy",
+        content: () => {
+          return (
+            <SelectArmyDialog
+              preselectedArmyId={this.state.subordinateArmyId}
+              onSelectionConfirmed={async (armyId: number) => {
+                this.setState({ subordinateArmyId: armyId });
+              }}
+            />
+          );
+        },
+        escapable: true,
+        widthVmin: 45,
+      })
     );
   }
 
@@ -506,8 +607,35 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
     );
   }
 
+  private onSelectEmporiumBaseClicked(): void {
+    // A location only has an Emporium base if there is a Storage with the "Emporium" prefix at that location.
+    const bases = Object.values(this.props.allStorages)
+      .filter((storage) => storage.name.startsWith("Emporium"))
+      .map((s) => s.location_id);
+
+    this.props.dispatch?.(
+      showModal({
+        id: "SelectEmporiumBase",
+        widthVmin: 61,
+        content: () => {
+          return (
+            <SelectLocationDialog
+              preselectedLocationId={this.state.locationId}
+              onSelectionConfirmed={this.onEmporiumBaseSelected.bind(this)}
+              locationIdWhitelist={bases}
+            />
+          );
+        },
+      })
+    );
+  }
+
   private async onLocationSelected(locationId: number): Promise<void> {
     this.setState({ locationId });
+  }
+
+  private async onEmporiumBaseSelected(transferLocationId: number): Promise<void> {
+    this.setState({ transferLocationId });
   }
 
   private onConfirmClicked(): void {
@@ -558,6 +686,29 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
         this.props.onValuesConfirmed(dlax);
         break;
       }
+      case ActivityOutcomeType.MergeArmies: {
+        const dma: ActivityOutcomeData_MergeArmies = {
+          id: this.props.initialValues?.id ?? 0,
+          activity_id: this.props.activity.id,
+          type: this.state.type,
+          primaryArmyId: this.state.primaryArmyId,
+          primaryArmyName: this.props.allArmies[this.state.primaryArmyId].name,
+          subordinateArmyId: this.state.subordinateArmyId,
+          subordinateArmyName: this.props.allArmies[this.state.subordinateArmyId].name,
+        };
+        this.props.onValuesConfirmed(dma);
+        break;
+      }
+      case ActivityOutcomeType.TransferEmporiumContracts: {
+        const dtec: ActivityOutcomeData_TransferEmporiumContracts = {
+          id: this.props.initialValues?.id ?? 0,
+          activity_id: this.props.activity.id,
+          type: this.state.type,
+          locationId: this.state.transferLocationId,
+        };
+        this.props.onValuesConfirmed(dtec);
+        break;
+      }
       default: {
         return;
       }
@@ -571,6 +722,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allArmies = state.armies.armies;
   const allLocations = state.locations.locations;
   const allCharacters = state.characters.characters;
+  const allStorages = state.storages.allStorages;
   const troopsByArmy = state.armies.troopsByArmy;
   const troopDefs = state.gameDefs.troops;
   return {
@@ -578,6 +730,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     allArmies,
     allCharacters,
     allLocations,
+    allStorages,
     troopsByArmy,
     troopDefs,
   };

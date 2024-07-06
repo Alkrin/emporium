@@ -260,6 +260,71 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       }
     });
 
+    b.resolution.armyMerges.forEach((merge) => {
+      // Transfer unique troops from the subordinate army into the primary army.
+      merge.uniqueTroopIds.forEach((uniqueTroopId) => {
+        queries.push({
+          query: "UPDATE troops SET army_id=? WHERE id=?",
+          values: [merge.primaryArmyId, uniqueTroopId],
+        });
+      });
+
+      // Resolve each troop merge.
+      merge.troopMerges.forEach(([subordinateTroopId, primaryTroopId]) => {
+        // The primary troop gains the members from the subordinate troop.
+        queries.push({
+          query: "UPDATE troops SET count=count+(SELECT count FROM troops WHERE id=?) WHERE id=?",
+          values: [subordinateTroopId, primaryTroopId],
+        });
+        // Any pending subordinate troop injuries are inherited by the primary troop.
+        queries.push({
+          query: "UPDATE troop_injuries SET troop_id=? WHERE troop_id=?",
+          values: [primaryTroopId, subordinateTroopId],
+        });
+        // The subordinate troop now gets destroyed, since its members have been given away.
+        queries.push({
+          query: "DELETE FROM troops WHERE id=?",
+          values: [subordinateTroopId],
+        });
+      });
+
+      // Now that the troops have all been transferred, delete all contracts associated with the subordinate army.
+      queries.push({
+        query: "DELETE FROM contracts WHERE def_id=? AND party_b_id=?",
+        values: [ContractId.ArmyWageContract, merge.subordinateArmyId],
+      });
+
+      // And finally destroy the subordinate army itself.
+      queries.push({
+        query: "DELETE FROM armies WHERE id=?",
+        values: [merge.subordinateArmyId],
+      });
+    });
+
+    // Army Wage Contract transfers.
+    b.resolution.transferArmyWageContractIds.forEach((contractId) => {
+      queries.push({
+        query: "UPDATE contracts SET target_a_id=? WHERE id=?",
+        values: [b.resolution.transferStorageId, contractId],
+      });
+    });
+
+    // Character Wage Contract transfers.
+    b.resolution.transferCharacterWageContractIds.forEach((contractId) => {
+      queries.push({
+        query: "UPDATE contracts SET target_a_id=? WHERE id=?",
+        values: [b.resolution.transferStorageId, contractId],
+      });
+    });
+
+    // Activity Loot Contract transfers.
+    b.resolution.transferActivityLootContractIds.forEach((contractId) => {
+      queries.push({
+        query: "UPDATE contracts SET target_a_id=? WHERE id=?",
+        values: [b.resolution.transferStorageId, contractId],
+      });
+    });
+
     const results = await executeTransaction<any>(queries);
 
     res.status(200).json(results);

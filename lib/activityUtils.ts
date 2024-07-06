@@ -12,6 +12,8 @@ import {
   ActivityOutcomeData_LootAndXP,
   ServerActivityOutcomeData,
   UniqueActivityOutcomeTypes,
+  ActivityOutcomeData_MergeArmies,
+  ActivityOutcomeData_TransferEmporiumContracts,
 } from "../serverAPI";
 import {
   addCommasToNumber,
@@ -63,17 +65,30 @@ export interface ActivityResolutionData_XPGranted {
   xpAmount: number;
 }
 
+export interface ActivityResolutionData_ArmyMerge {
+  primaryArmyId: number;
+  subordinateArmyId: number;
+  uniqueTroopIds: number[];
+  troopMerges: [number, number][];
+}
+
 export interface ActivityResolution {
   deadCharacterIds: number[];
   /** Key: injuryId, value: array of characterIds */
   characterInjuries: Dictionary<number[]>;
   armyDeaths: ActivityResolutionData_ArmyDeath[];
   armyInjuries: ActivityResolutionData_ArmyInjury[];
+  armyMerges: ActivityResolutionData_ArmyMerge[];
   cxpDeductiblePayments: ActivityResolutionData_CampaignXPDeductiblePayment[];
   cxpDeductibleResets: ActivityResolutionData_CampaignXPDeductibleReset[];
   moneyGranted: ActivityResolutionData_MoneyGranted[];
   xpGranted: ActivityResolutionData_XPGranted[];
   destinationId: number;
+  /** The storageId to/from which all transferred contracts will connect. */
+  transferStorageId: number;
+  transferArmyWageContractIds: number[];
+  transferCharacterWageContractIds: number[];
+  transferActivityLootContractIds: number[];
 }
 
 export function generateActivityResolution(
@@ -89,11 +104,16 @@ export function generateActivityResolution(
     characterInjuries: {},
     armyDeaths: [],
     armyInjuries: [],
+    armyMerges: [],
     cxpDeductiblePayments: [],
     cxpDeductibleResets: [],
     moneyGranted: [],
     xpGranted: [],
     destinationId: 0,
+    transferStorageId: 0,
+    transferArmyWageContractIds: [],
+    transferCharacterWageContractIds: [],
+    transferActivityLootContractIds: [],
   };
 
   // Any outcome could in theory have multiple instances.  For most, only the first matters.
@@ -111,6 +131,66 @@ export function generateActivityResolution(
   ]?.[0] as ActivityOutcomeData_ChangeLocation;
   if (changeLocationData) {
     resolution.destinationId = changeLocationData.locationId;
+  }
+
+  // Transfer Emporium Contracts.
+  const transferEmporiumContractsData = outcomesByType[
+    ActivityOutcomeType.TransferEmporiumContracts
+  ]?.[0] as ActivityOutcomeData_TransferEmporiumContracts;
+  if (transferEmporiumContractsData) {
+    // Find out which storageId is at the target location.  There should always be one because we filtered
+    // the selectable targets like this during Outcome generation.
+    resolution.transferStorageId =
+      Object.values(redux.storages.allStorages).find((s) => {
+        return s.location_id === transferEmporiumContractsData.locationId && s.name.startsWith("Emporium");
+      })?.id ?? 0;
+    // Find the ids of the contracts that will need to be updated.
+    activity.army_participants.forEach((armyParticipant) => {
+      // Army wage contracts.
+      // PartyA is the employer.  PartyB is the army.  TargetA is the employer's storage.
+      resolution.transferArmyWageContractIds.push(
+        ...(redux.contracts.contractsByDefByPartyBId[ContractId.ArmyWageContract]?.[armyParticipant.armyId]
+          ?.filter((contract) => {
+            return (
+              // Trasta is the Employer?
+              contract.party_a_id === 23 &&
+              // Employer's Storage is owned by the Emporium?
+              redux.storages.allStorages[contract.target_a_id].name.startsWith("Emporium")
+            );
+          })
+          ?.map((c) => c.id) ?? [])
+      );
+    });
+    activity.participants.forEach((participant) => {
+      // Character wage contracts.
+      // PartyA is the employer.  PartyB is the employee.  TargetA is the employer's storage.  TargetB is the employee's storage.
+      resolution.transferCharacterWageContractIds.push(
+        ...(redux.contracts.contractsByDefByPartyBId[ContractId.CharacterWageContract]?.[participant.characterId]
+          ?.filter((contract) => {
+            return (
+              // Trasta is the Employer?
+              contract.party_a_id === 23 &&
+              // Employer's Storage is owned by the Emporium?
+              redux.storages.allStorages[contract.target_a_id].name.startsWith("Emporium")
+            );
+          })
+          ?.map((c) => c.id) ?? [])
+      );
+      // Activity loot contracts.
+      // PartyA is the employee.  PartyB is the employer.  TargetA is the employer's storage.
+      resolution.transferActivityLootContractIds.push(
+        ...(redux.contracts.contractsByDefByPartyAId[ContractId.ActivityLootContract]?.[participant.characterId]
+          ?.filter((contract) => {
+            return (
+              // Trasta is the Employer?
+              contract.party_b_id === 23 &&
+              // Employer's Storage is owned by the Emporium?
+              redux.storages.allStorages[contract.target_a_id].name.startsWith("Emporium")
+            );
+          })
+          ?.map((c) => c.id) ?? [])
+      );
+    });
   }
 
   // Adventurer Deaths.
@@ -437,6 +517,31 @@ export function generateActivityResolution(
     });
   });
 
+  outcomesByType[ActivityOutcomeType.MergeArmies]?.forEach((merge) => {
+    const typedMerge = merge as ActivityOutcomeData_MergeArmies;
+    const primaryTroops = redux.armies.troopsByArmy[typedMerge.primaryArmyId];
+    const subordinateTroops = redux.armies.troopsByArmy[typedMerge.subordinateArmyId];
+    // Unique troops are those in the subordinate army for which there is not yet a troop of the matching def_id in the primary army.
+    // Ownership of these troops can just be switched over.
+    const uniqueTroopIds = subordinateTroops
+      .filter((subordinateTroop) => {
+        return !primaryTroops.find((primaryTroop) => primaryTroop.def_id === subordinateTroop.def_id);
+      })
+      .map((troop) => troop.id);
+    const troopsToMerge = subordinateTroops.filter((troop) => !uniqueTroopIds.includes(troop.id));
+    const o: ActivityResolutionData_ArmyMerge = {
+      primaryArmyId: typedMerge.primaryArmyId,
+      subordinateArmyId: typedMerge.subordinateArmyId,
+      uniqueTroopIds,
+      troopMerges: troopsToMerge.map((subordinateTroop) => {
+        const matchingPrimaryTroopId =
+          primaryTroops.find((primaryTroop) => primaryTroop.def_id === subordinateTroop.def_id)?.id ?? 0;
+        return [subordinateTroop.id, matchingPrimaryTroopId];
+      }),
+    };
+    resolution.armyMerges.push(o);
+  });
+
   return resolution;
 }
 
@@ -538,6 +643,16 @@ export function getDisplayTextForExpectedOutcome(data: ActivityOutcomeData): str
         `Campaign XP:\t\xa0${addCommasToNumber(dlax.campaignXP)}`
       );
     }
+    case ActivityOutcomeType.MergeArmies: {
+      const dma = data as ActivityOutcomeData_MergeArmies;
+      return `The troops from ${dma.subordinateArmyName} join ${dma.primaryArmyName}.  ${dma.subordinateArmyName} is disbanded.`;
+    }
+    case ActivityOutcomeType.TransferEmporiumContracts: {
+      const dtec = data as ActivityOutcomeData_TransferEmporiumContracts;
+      return `Participants with Emporium Contracts change their home base to ${
+        redux.locations.locations[dtec.locationId].name
+      }.`;
+    }
     default: {
       return "";
     }
@@ -635,6 +750,28 @@ export function convertServerActivityOutcome(seo: ServerActivityOutcomeData): Ac
       };
       return o;
     }
+    case ActivityOutcomeType.MergeArmies: {
+      const [primaryArmyIdString, primaryArmyName, subordinateArmyIdString, subordinateArmyName] = seo.data.split("|");
+      const o: ActivityOutcomeData_MergeArmies = {
+        type: seo.type,
+        id: seo.id,
+        activity_id: seo.activity_id,
+        primaryArmyId: +primaryArmyIdString,
+        primaryArmyName,
+        subordinateArmyId: +subordinateArmyIdString,
+        subordinateArmyName,
+      };
+      return o;
+    }
+    case ActivityOutcomeType.TransferEmporiumContracts: {
+      const o: ActivityOutcomeData_TransferEmporiumContracts = {
+        type: seo.type,
+        id: seo.id,
+        activity_id: seo.activity_id,
+        locationId: +seo.data,
+      };
+      return o;
+    }
     default: {
       console.error(`Found invalid ExpectedOutcomeType: ${seo.type}`);
       return null;
@@ -716,6 +853,17 @@ export function convertActivityOutcomeForServer(eo: ActivityOutcomeData): Server
     case ActivityOutcomeType.LootAndXP: {
       const teo = eo as ActivityOutcomeData_LootAndXP;
       seo.data = `${teo.goldWithXP},${teo.goldWithoutXP},${teo.combatXP},${teo.campaignXP}`;
+      break;
+    }
+    case ActivityOutcomeType.MergeArmies: {
+      const teo = eo as ActivityOutcomeData_MergeArmies;
+      // We forbade the use of '|' in army names, so this should be safe.
+      seo.data = `${teo.primaryArmyId}|${teo.primaryArmyName}|${teo.subordinateArmyId}|${teo.subordinateArmyName}`;
+      break;
+    }
+    case ActivityOutcomeType.TransferEmporiumContracts: {
+      const teo = eo as ActivityOutcomeData_TransferEmporiumContracts;
+      seo.data = teo.locationId.toString();
       break;
     }
     default: {

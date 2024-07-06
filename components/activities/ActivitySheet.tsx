@@ -298,9 +298,9 @@ class AActivitySheet extends React.Component<Props> {
 
   private getSortedArmyParticipants(): ActivityArmyParticipant[] {
     const sorted = [...(this.props.activity?.army_participants ?? [])].sort((a, b) => {
-      const armyA = this.props.allArmies[a.armyId];
-      const armyB = this.props.allArmies[b.armyId];
-      return armyA.name.localeCompare(armyB.name);
+      const armyAName = this.props.allArmies[a.armyId]?.name ?? "Disbanded Army";
+      const armyBName = this.props.allArmies[b.armyId]?.name ?? "Disbanded Army";
+      return armyAName.localeCompare(armyBName);
     });
 
     return sorted;
@@ -333,7 +333,7 @@ class AActivitySheet extends React.Component<Props> {
       <div className={styles.armyListSection} key={`army${index}`}>
         <div className={styles.armyListRow} key={`armyParticipantRow${index}`}>
           <div className={styles.listBattleRating}>{`BR: ${totalBR.toFixed(2)}`}</div>
-          <div className={styles.listArmyName}>{army.name}</div>
+          <div className={styles.listArmyName}>{army?.name ?? "Disbanded Army"}</div>
         </div>
         {sortedTroops.map(([defIdString, count], troopIndex) => {
           const troopDef = this.props.troopDefs[+defIdString];
