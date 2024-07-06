@@ -76,7 +76,8 @@ class ACreateArmySubPanel extends React.Component<Props, State> {
             type={"text"}
             value={this.state.army.name}
             onChange={(e) => {
-              this.setState({ army: { ...this.state.army, name: e.target.value } });
+              // Vertical bar is forbidden because it is used by ActivityOutcomeData_MergeArmies.
+              this.setState({ army: { ...this.state.army, name: e.target.value.replace("|", "") } });
             }}
             tabIndex={nextTabIndex++}
             spellCheck={false}

@@ -351,6 +351,7 @@
   @extend .column;
   position: relative;
   width: 25vmin;
+  flex-shrink: 0;
 }
 
 .expectedOutcomesHeader {

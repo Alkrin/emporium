@@ -17,6 +17,7 @@ interface State {
 interface ReactProps {
   preselectedLocationId: number;
   onSelectionConfirmed: (locationId: number) => Promise<void>;
+  locationIdWhitelist?: number[];
 }
 
 interface InjectedProps {
@@ -109,7 +110,10 @@ class ASelectLocationDialog extends React.Component<Props, State> {
   }
 
   private getSortedLocations(): LocationData[] {
-    const l: LocationData[] = Object.values(this.props.locations);
+    let l: LocationData[] = Object.values(this.props.locations);
+    if (this.props.locationIdWhitelist) {
+      l = l.filter((data) => this.props.locationIdWhitelist?.includes(data.id));
+    }
 
     // Sort by by name.
     l.sort(({ name: nameA }, { name: nameB }) => {

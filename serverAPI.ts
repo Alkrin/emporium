@@ -424,6 +424,8 @@ export enum ActivityOutcomeType {
   Description = "Description",
   InjuriesAndDeaths = "InjuriesAndDeaths",
   LootAndXP = "LootAndXP",
+  MergeArmies = "MergeArmies",
+  TransferEmporiumContracts = "TransferEmporiumContracts",
 }
 export const SortedActivityOutcomeTypes = Object.values(ActivityOutcomeType).sort();
 export const UniqueActivityOutcomeTypes = [
@@ -449,6 +451,10 @@ export function ActivityOutcomeData_StringToType(s: string): ActivityOutcomeType
       return ActivityOutcomeType.InjuriesAndDeaths;
     case ActivityOutcomeType.LootAndXP:
       return ActivityOutcomeType.LootAndXP;
+    case ActivityOutcomeType.MergeArmies:
+      return ActivityOutcomeType.MergeArmies;
+    case ActivityOutcomeType.TransferEmporiumContracts:
+      return ActivityOutcomeType.TransferEmporiumContracts;
     default:
       return ActivityOutcomeType.Invalid;
   }
@@ -489,6 +495,19 @@ export interface ActivityOutcomeData_LootAndXP extends ActivityOutcomeData {
   goldWithoutXP: number;
   combatXP: number;
   campaignXP: number;
+}
+
+export interface ActivityOutcomeData_MergeArmies extends ActivityOutcomeData {
+  type: ActivityOutcomeType.MergeArmies;
+  primaryArmyId: number;
+  primaryArmyName: string;
+  subordinateArmyId: number;
+  subordinateArmyName: string;
+}
+
+export interface ActivityOutcomeData_TransferEmporiumContracts extends ActivityOutcomeData {
+  type: ActivityOutcomeType.TransferEmporiumContracts;
+  locationId: number;
 }
 
 export interface MapData {
