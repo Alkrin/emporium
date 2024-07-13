@@ -34,7 +34,7 @@ import {
 } from "../staticData/types/characterClasses";
 import { WeaponCategory, WeaponType } from "../staticData/types/items";
 import { Dictionary } from "./dictionary";
-import { Stones, StonesToNumber, doesItemGrantMagicDamageBonus, getTotalEquippedWeight } from "./itemUtils";
+import { Stones, StonesToNumber, getTotalEquippedWeight } from "./itemUtils";
 import { EquipmentSlotTag, Tag } from "./tags";
 import { DwarvenFuryFleshRunes } from "../staticData/classFeatures/DwarvenFuryFleshRunes";
 import { SharedMeleeAccuracyBonus } from "../staticData/classFeatures/SharedMeleeAccuracyBonus";
@@ -54,6 +54,10 @@ import { InjuryBlind } from "../staticData/injuries/InjuryBlind";
 import { getFirstOfThisMonthDateString } from "./stringUtils";
 import { getAllStorageAssociatedItemIds } from "./storageUtils";
 import { SharedNaturalAttackPower } from "../staticData/classFeatures/SharedNaturalAttackPower";
+import { SharedChitinousCarapace } from "../staticData/classFeatures/SharedChitinousCarapace";
+import { ProficiencyRunning } from "../staticData/proficiencies/ProficiencyRunning";
+import { TrueTurtleRunicScutes } from "../staticData/classFeatures/TrueTurtleRunicScutes";
+import { SharedLoadbearing } from "../staticData/classFeatures/SharedLoadbearing";
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
 export function getBonusForStat(value: number): StatBonus {
@@ -130,7 +134,9 @@ export function getCharacterStat(character: CharacterData, stat: CharacterStat):
 }
 
 export function getCharacterMaxEncumbrance(character: CharacterData): Stones {
-  return [20 + getBonusForStat(character.strength), 0];
+  // LoadBearing alters the weight for each encumbrance level.
+  const encumbranceReduction = 2 * getProficiencyRankForCharacter(character.id, SharedLoadbearing.id);
+  return [20 + getBonusForStat(character.strength) + encumbranceReduction, 0];
 }
 
 export function getAllItemAssociatedItemIds(itemId: number): number[] {
@@ -597,9 +603,24 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
       calc.totalBonus += mBonus;
     }
 
+    if (getProficiencyRankForCharacter(characterId, TrueTurtleRunicScutes.id)) {
+      let mBonus = 2;
+      if (character.level >= 7) mBonus += 2;
+      if (character.level >= 13) mBonus += 2;
+
+      calc.sources.push(["True Turtle, Runic Scutes", mBonus]);
+      calc.totalBonus += mBonus;
+    }
+
     if (getProficiencyRankForCharacter(characterId, BattlegoatGatecrasherSteelWool.id)) {
       calc.sources.push(["Battlegoat Gatecrasher, Steel Wool", 1]);
       calc.totalBonus += 1;
+    }
+
+    const chitinRank = getProficiencyRankForCharacter(characterId, SharedChitinousCarapace.id);
+    if (chitinRank > 0) {
+      calc.sources.push(["Chitinous Carapace", chitinRank]);
+      calc.totalBonus += chitinRank;
     }
 
     if (getProficiencyRankForCharacter(characterId, AntiPaladinAuraOfProtection.id)) {
@@ -1433,27 +1454,64 @@ export function getApparentLevelForCharacter(characterId: number): number {
   return apparentLevel;
 }
 
-export function getCombatSpeedForCharacter(characterId: number): number {
+export enum EncumbranceLevel {
+  None = 0,
+  Light = 1,
+  Medium = 2,
+  Heavy = 3,
+  Overloaded = 4,
+}
+
+export function getCombatSpeedsForCharacter(characterId: number): Record<EncumbranceLevel, number> {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+
+  let baseSpeed = 40;
+
+  // The thicker your natural armor, the slower you move.
+  const chitinRank = getProficiencyRankForCharacter(characterId, SharedChitinousCarapace.id);
+  if (chitinRank > 1) {
+    baseSpeed -= 10;
+    if (chitinRank > 2) {
+      baseSpeed -= 10;
+    }
+  }
+
+  // Running increases your base speed if your armor isn't too heavy.
+  if (getProficiencyRankForCharacter(characterId, ProficiencyRunning.id)) {
+    const equippedArmor = redux.gameDefs.items[redux.items.allItems[character?.slot_armor]?.def_id];
+    if ((equippedArmor?.ac ?? 0) <= 4) {
+      baseSpeed += 10;
+    }
+  }
+
+  // TODO: Thrassians are always at 20' or less?
+
+  return [baseSpeed, Math.max(0, baseSpeed - 10), Math.max(0, baseSpeed - 20), Math.max(0, baseSpeed - 30), 0];
+}
+
+export function getEncumbranceLevelForCharacter(characterId: number): EncumbranceLevel {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
 
   // Calculate encumbrance based on equipment slots.
   const encumbrance = getTotalEquippedWeight(character, redux.items.allItems, redux.gameDefs.items);
   const maxEncumbrance: Stones = getCharacterMaxEncumbrance(character);
+  // LoadBearing alters the weight for each encumbrance level.
+  const encumbranceReduction = 2 * getProficiencyRankForCharacter(characterId, SharedLoadbearing.id);
 
-  // TODO: Running proficiency.  Plus, Thrassians are always at 20 or less?
-
-  let speed = 40;
-
+  let encumbranceLevel = EncumbranceLevel.None;
   if (StonesToNumber(encumbrance) > StonesToNumber(maxEncumbrance)) {
-    speed = 0;
-  } else if (StonesToNumber(encumbrance) > StonesToNumber([10, 0])) {
-    speed = 10;
-  } else if (StonesToNumber(encumbrance) > StonesToNumber([7, 0])) {
-    speed = 20;
-  } else if (StonesToNumber(encumbrance) > StonesToNumber([5, 0])) {
-    speed = 30;
+    encumbranceLevel = EncumbranceLevel.Overloaded;
+  } else if (StonesToNumber(encumbrance) > StonesToNumber([10 + encumbranceReduction, 0])) {
+    encumbranceLevel = EncumbranceLevel.Heavy;
+  } else if (StonesToNumber(encumbrance) > StonesToNumber([7 + encumbranceReduction, 0])) {
+    encumbranceLevel = EncumbranceLevel.Medium;
+  } else if (StonesToNumber(encumbrance) > StonesToNumber([5 + encumbranceReduction, 0])) {
+    encumbranceLevel = EncumbranceLevel.Light;
   }
 
-  return speed;
+  // TODO: LoadBearing reduces encumbrance level?
+
+  return encumbranceLevel;
 }

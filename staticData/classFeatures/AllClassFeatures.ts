@@ -73,6 +73,12 @@ import { BattlegoatGatecrasherRedEyed } from "./BattlegoatGatecrasherRedEyed";
 import { SharedInhumanity } from "./SharedInhumanity";
 import { SharedBrutality } from "./SharedBrutality";
 import { SharedNaturalAttackPower } from "./SharedNaturalAttackPower";
+import { SharedChitinousCarapace } from "./SharedChitinousCarapace";
+import { TrueTurtleRunicScutes } from "./TrueTurtleRunicScutes";
+import { SharedLoadbearing } from "./SharedLoadbearing";
+import { SharedInvulnerable } from "./SharedInvulnerable";
+import { SharedDiscomfitedByCivilization } from "./SharedDiscomfitedByCivilization";
+import { TrueTurtleBoneBreakingBite } from "./TrueTurtleBoneBreakingBite";
 
 export const AllClassFeatures: Dictionary<AbilityOrProficiency> = {
   [AntiPaladinAuraOfProtection.id]: AntiPaladinAuraOfProtection,
@@ -120,13 +126,17 @@ export const AllClassFeatures: Dictionary<AbilityOrProficiency> = {
   [SharedAgeless.id]: SharedAgeless,
   [SharedAnimalReflexes.id]: SharedAnimalReflexes,
   [SharedBrutality.id]: SharedBrutality,
+  [SharedChitinousCarapace.id]: SharedChitinousCarapace,
   [SharedCreateMagicalConstructs.id]: SharedCreateMagicalConstructs,
   [SharedCreateMagicalCrossbreeds.id]: SharedCreateMagicalCrossbreeds,
   [SharedCreateUndead.id]: SharedCreateUndead,
   [SharedDifficultToSpot.id]: SharedDifficultToSpot,
+  [SharedDiscomfitedByCivilization.id]: SharedDiscomfitedByCivilization,
   [SharedFriendOfBirdsAndBeasts.id]: SharedFriendOfBirdsAndBeasts,
   [SharedInhumanity.id]: SharedInhumanity,
   [SharedInspireCourage.id]: SharedInspireCourage,
+  [SharedInvulnerable.id]: SharedInvulnerable,
+  [SharedLoadbearing.id]: SharedLoadbearing,
   [SharedMajorMagicCreation.id]: SharedMajorMagicCreation,
   [SharedMeleeAccuracyBonus.id]: SharedMeleeAccuracyBonus,
   [SharedMeleeDamageBonus.id]: SharedMeleeDamageBonus,
@@ -137,6 +147,8 @@ export const AllClassFeatures: Dictionary<AbilityOrProficiency> = {
   [SharedRangedDamageBonus.id]: SharedRangedDamageBonus,
   [SharedRitualMagic.id]: SharedRitualMagic,
   [SharedSavageResilience.id]: SharedSavageResilience,
+  [TrueTurtleBoneBreakingBite.id]: TrueTurtleBoneBreakingBite,
+  [TrueTurtleRunicScutes.id]: TrueTurtleRunicScutes,
   [VenturerAvoidGettingLost.id]: VenturerAvoidGettingLost,
   [VenturerMercantileNetwork.id]: VenturerMercantileNetwork,
   [VenturerMinorMagicCreation.id]: VenturerMinorMagicCreation,

@@ -38,7 +38,7 @@ import {
 } from "../../lib/activityUtils";
 import { SelectArmiesDialog } from "../dialogs/SelectArmiesDialog";
 import { getBattleRatingForTroopDefAndCount } from "../../lib/armyUtils";
-import { getCombatSpeedForCharacter } from "../../lib/characterUtils";
+import { getCombatSpeedsForCharacter } from "../../lib/characterUtils";
 import { CreateActivityOutcomeDialog } from "./CreateActivityOutcomeDialog";
 import { ActivityOutcomesList } from "./ActivityOutcomeList";
 
@@ -488,7 +488,7 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
   private getTravelSpeedText(): string {
     let slowestAdventurerSpeed = this.state.activity.participants.reduce<number>(
       (slowestSoFar: number, participant: ActivityAdventurerParticipant) => {
-        const currentSpeed = getCombatSpeedForCharacter(participant.characterId);
+        const currentSpeed = getCombatSpeedsForCharacter(participant.characterId);
 
         if (slowestSoFar === 0) {
           return currentSpeed;
