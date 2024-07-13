@@ -27,6 +27,7 @@ import { Dictionary } from "../../lib/dictionary";
 import { Stones, getTotalEquippedWeight } from "../../lib/itemUtils";
 import {
   AttackData,
+  EncumbranceLevel,
   addCommasToNumber,
   getArmorBonusForCharacter,
   getBonusForStat,
@@ -35,12 +36,14 @@ import {
   getCharacterMaxEncumbrance,
   getCharacterMaxHP,
   getCharacterStat,
-  getCombatSpeedForCharacter,
+  getCombatSpeedsForCharacter,
   getCostOfLivingForCharacterLevel,
+  getEncumbranceLevelForCharacter,
   getInitiativeBonusForCharacter,
   getMaintenanceStatusForCharacter,
   getMeleeAttackDataForCharacter,
   getPersonalPile,
+  getProficiencyRankForCharacter,
   getRangedAttackDataForCharacter,
   getSavingThrowBonusForCharacter,
 } from "../../lib/characterUtils";
@@ -58,6 +61,7 @@ import { EditCXPDeductibleDialog } from "./EditCXPDeductibleDialog";
 import { EditStoragesSubPanel } from "./EditStoragesSubPanel";
 import { EditCostOfLivingDialog } from "./EditCostOfLivingDialog";
 import { CharacterContractsDialog } from "./CharacterContractsDialog";
+import { SharedLoadbearing } from "../../staticData/classFeatures/SharedLoadbearing";
 
 interface ReactProps {
   characterId: number;
@@ -735,7 +739,9 @@ class ACharacterSheet extends React.Component<Props> {
         this.props.allItems,
         this.props.allItemDefs
       );
-      const speed = getCombatSpeedForCharacter(this.props.characterId);
+      const speeds = getCombatSpeedsForCharacter(this.props.characterId);
+      const speedIndex = getEncumbranceLevelForCharacter(this.props.characterId);
+      const speed = speeds[speedIndex];
 
       return (
         <div className={styles.speedPanel}>
@@ -934,31 +940,40 @@ class ACharacterSheet extends React.Component<Props> {
 
   private renderSpeedTooltip(): React.ReactNode {
     const maxEncumbrance: Stones = getCharacterMaxEncumbrance(this.props.character);
-    const baseSpeed = getCombatSpeedForCharacter(this.props.characterId);
-    // TODO: Running?  Thrassians?
-    const lowEncumbranceStyle = baseSpeed === 40 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
-    const midEncumbranceStyle = baseSpeed === 30 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
-    const highEncumbranceStyle = baseSpeed === 20 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
-    const maxEncumbranceStyle = baseSpeed === 10 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
-    const immobileStyle = baseSpeed === 0 ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+    const speeds = getCombatSpeedsForCharacter(this.props.characterId);
+    const speedIndex = getEncumbranceLevelForCharacter(this.props.characterId);
+
+    const noEncumbranceStyle =
+      speedIndex === EncumbranceLevel.None ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+    const lightEncumbranceStyle =
+      speedIndex === EncumbranceLevel.Light ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+    const mediumEncumbranceStyle =
+      speedIndex === EncumbranceLevel.Medium ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+    const heavyEncumbranceStyle =
+      speedIndex === EncumbranceLevel.Heavy ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+    const overloadedStyle =
+      speedIndex === EncumbranceLevel.Overloaded ? styles.speedTooltipActiveEntry : styles.speedTooltipInactiveEntry;
+
+    // LoadBearing alters the weight for each encumbrance level.
+    const encumbranceReduction = 2 * getProficiencyRankForCharacter(this.props.characterId, SharedLoadbearing.id);
 
     return (
       <div className={styles.speedTooltipRoot}>
         <div className={styles.speedTooltipEncumbranceColumn}>
-          <div className={styles.speedTooltipTitle}>Encumbrance</div>
-          <div className={lowEncumbranceStyle}>5 stone or less</div>
-          <div className={midEncumbranceStyle}>7 stone or less</div>
-          <div className={highEncumbranceStyle}>10 stone or less</div>
-          <div className={maxEncumbranceStyle}>{`${maxEncumbrance[0]} stone or less`}</div>
-          <div className={immobileStyle}>{`More than ${maxEncumbrance[0]} stone`}</div>
+          <div className={styles.speedTooltipTitle}>{"Encumbrance"}</div>
+          <div className={noEncumbranceStyle}>{`${5 + encumbranceReduction} stone or less`}</div>
+          <div className={lightEncumbranceStyle}>{`${7 + encumbranceReduction} stone or less`}</div>
+          <div className={mediumEncumbranceStyle}>{`${10 + encumbranceReduction} stone or less`}</div>
+          <div className={heavyEncumbranceStyle}>{`${maxEncumbrance[0]} stone or less`}</div>
+          <div className={overloadedStyle}>{`More than ${maxEncumbrance[0]} stone`}</div>
         </div>
         <div className={styles.speedTooltipSpeedColumn}>
-          <div className={styles.speedTooltipTitle}>Speed</div>
-          <div className={lowEncumbranceStyle}>40' / 120'</div>
-          <div className={midEncumbranceStyle}>30' / 90'</div>
-          <div className={highEncumbranceStyle}>20' / 60'</div>
-          <div className={maxEncumbranceStyle}>10' / 30'</div>
-          <div className={immobileStyle}>0' / 0'</div>
+          <div className={styles.speedTooltipTitle}>{"Speed"}</div>
+          <div className={noEncumbranceStyle}>{`${speeds[0]}' / ${speeds[0] * 3}'`}</div>
+          <div className={lightEncumbranceStyle}>{`${speeds[1]}' / ${speeds[1] * 3}'`}</div>
+          <div className={mediumEncumbranceStyle}>{`${speeds[2]}' / ${speeds[2] * 3}'`}</div>
+          <div className={heavyEncumbranceStyle}>{`${speeds[3]}' / ${speeds[3] * 3}'`}</div>
+          <div className={overloadedStyle}>{`${speeds[4]}' / ${speeds[4] * 3}'`}</div>
         </div>
       </div>
     );

@@ -21,7 +21,7 @@ import { ActivityOutcomesList } from "./ActivityOutcomeList";
 import { CreateActivitySubPanel } from "./CreateActivitySubPanel";
 import { SheetRoot } from "../SheetRoot";
 import { getBattleRatingForTroopDefAndCount } from "../../lib/armyUtils";
-import { getCombatSpeedForCharacter } from "../../lib/characterUtils";
+import { getCombatSpeedsForCharacter, getEncumbranceLevelForCharacter } from "../../lib/characterUtils";
 import { sortActivityOutcomes } from "../../lib/activityUtils";
 
 interface ReactProps {
@@ -228,7 +228,9 @@ class AActivitySheet extends React.Component<Props> {
     if (this.props.activity) {
       let slowestAdventurerSpeed = this.props.activity.participants.reduce<number>(
         (slowestSoFar: number, participant: ActivityAdventurerParticipant) => {
-          const currentSpeed = getCombatSpeedForCharacter(participant.characterId);
+          const speeds = getCombatSpeedsForCharacter(participant.characterId);
+          const speedIndex = getEncumbranceLevelForCharacter(participant.characterId);
+          const currentSpeed = speeds[speedIndex];
 
           if (slowestSoFar === 0) {
             return currentSpeed;

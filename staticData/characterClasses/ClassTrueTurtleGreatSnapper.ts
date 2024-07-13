@@ -1,11 +1,15 @@
-import { FighterBattlefieldProwess } from "../classFeatures/FighterBattlefieldProwess";
 import { SharedAgeless } from "../classFeatures/SharedAgeless";
 import { SharedBrutality } from "../classFeatures/SharedBrutality";
+import { SharedChitinousCarapace } from "../classFeatures/SharedChitinousCarapace";
+import { SharedDiscomfitedByCivilization } from "../classFeatures/SharedDiscomfitedByCivilization";
 import { SharedInhumanity } from "../classFeatures/SharedInhumanity";
+import { SharedInvulnerable } from "../classFeatures/SharedInvulnerable";
+import { SharedLoadbearing } from "../classFeatures/SharedLoadbearing";
 import { SharedMeleeDamageBonus } from "../classFeatures/SharedMeleeDamageBonus";
 import { SharedNaturalAttackPower } from "../classFeatures/SharedNaturalAttackPower";
-import { SharedRangedDamageBonus } from "../classFeatures/SharedRangedDamageBonus";
 import { SharedSavageResilience } from "../classFeatures/SharedSavageResilience";
+import { TrueTurtleBoneBreakingBite } from "../classFeatures/TrueTurtleBoneBreakingBite";
+import { TrueTurtleRunicScutes } from "../classFeatures/TrueTurtleRunicScutes";
 import { ProficiencyAcrobatics } from "../proficiencies/ProficiencyAcrobatics";
 import { ProficiencyAdventuring } from "../proficiencies/ProficiencyAdventuring";
 import { ProficiencyAlertness } from "../proficiencies/ProficiencyAlertness";
@@ -73,10 +77,16 @@ export const ClassTrueTurtleGreatSnapper: CharacterClass = {
     { def: ProficiencyLanguage, subtype: "Turtle", rank: 1, minLevel: 1 },
     { def: SharedInhumanity, rank: 1, minLevel: 1 },
     { def: SharedAgeless, rank: 1, minLevel: 1 },
+    { def: SharedChitinousCarapace, rank: 5, minLevel: 1 },
     { def: SharedSavageResilience, rank: 1, minLevel: 1 },
+    { def: TrueTurtleRunicScutes, rank: 1, minLevel: 1 },
+    { def: SharedLoadbearing, rank: 1, minLevel: 1 },
+    { def: SharedInvulnerable, rank: 3, minLevel: 1 },
+    { def: SharedDiscomfitedByCivilization, rank: 1, minLevel: 1 },
     { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 2 },
     { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 3 },
     { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 4 },
+    { def: TrueTurtleBoneBreakingBite, rank: 1, minLevel: 5 },
     { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 6 },
     { def: SharedBrutality, rank: 1, minLevel: 7 },
     { def: SharedNaturalAttackPower, subtype: "Bite", rank: 1, minLevel: 8 },
