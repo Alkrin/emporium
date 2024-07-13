@@ -1511,7 +1511,5 @@ export function getEncumbranceLevelForCharacter(characterId: number): Encumbranc
     encumbranceLevel = EncumbranceLevel.Light;
   }
 
-  // TODO: LoadBearing reduces encumbrance level?
-
   return encumbranceLevel;
 }
