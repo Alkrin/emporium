@@ -740,6 +740,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       location_id: this.state.locationId,
       maintenance_paid: 0,
       maintenance_date: getFirstOfThisMonthDateString(),
+      xp_reserve: 0,
+
       // EquipmentData values are ignored when editing a character.
       ...emptyEquipmentData,
     };

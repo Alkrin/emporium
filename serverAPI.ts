@@ -67,6 +67,7 @@ import {
   RequestBody_EditContract,
   RequestBody_ExerciseContract as RequestBody_ExerciseContracts,
   RequestBody_PayCostOfLiving,
+  RequestBody_SetXPReserve,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -211,6 +212,7 @@ export interface CharacterData extends CharacterEquipmentData {
   constitution: number;
   charisma: number;
   xp: number;
+  xp_reserve: number;
   hp: number;
   hit_dice: number[];
   henchmaster_id: number;
@@ -519,13 +521,34 @@ export interface MapData {
   max_y: number;
 }
 
+export enum MapHexRoadType {
+  Dirt = 0,
+  Paved = 1,
+}
+export interface MapHexRoadData {
+  type: MapHexRoadType;
+  start: string;
+  end: string;
+}
+export interface MapHexRiverData {
+  width: number;
+  start: string;
+  end: string;
+}
 export interface MapHexData {
   id: number;
   map_id: number;
   x: number;
   y: number;
   type: string;
+  roads: MapHexRoadData[];
+  rivers: MapHexRiverData[];
 }
+
+export type ServerMapHexData = Omit<MapHexData, "roads" | "rivers"> & {
+  roads: string;
+  rivers: string;
+};
 
 export interface LocationData {
   id: number;
@@ -679,7 +702,7 @@ export type ProficienciesResult = ServerError | ProficiencyData[];
 export type SpellbooksResult = ServerError | SpellbookEntryData[];
 export type RepertoiresResult = ServerError | RepertoireEntryData[];
 export type MapsResult = ServerError | MapData[];
-export type MapHexesResult = ServerError | MapHexData[];
+export type MapHexesResult = ServerError | ServerMapHexData[];
 export type LocationsResult = ServerError | ServerLocationData[];
 export type LocationCitiesResult = ServerError | LocationCityData[];
 export type LocationLairsResult = ServerError | LocationLairData[];
@@ -691,6 +714,7 @@ export type TroopInjuriesResult = ServerError | TroopInjuryData[];
 export type SetHPResult = ServerError | HPChange;
 export type SetMoneyResult = ServerError | MoneyChange;
 export type SetXPResult = ServerError | XPChange;
+export type SetXPReserveResult = ServerError | XPChange;
 export type GetURLsResult = ServerError | string[];
 export type MultiModifyResult = ServerError | (ServerError | EditRowResult | InsertRowResult | DeleteRowResult)[];
 export type InsertRowResult = ServerError | RowAdded;
@@ -1423,6 +1447,21 @@ class AServerAPI {
     return await res.json();
   }
 
+  async setXPReserve(characterId: number, xp_reserve: number): Promise<SetXPResult> {
+    const requestBody: RequestBody_SetXPReserve = {
+      characterId,
+      xp_reserve,
+    };
+    const res = await fetch("/api/setXPReserve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
   async setCharacterRemainingCXPDeductible(
     characterId: number,
     remainingCXPDeductible: number
@@ -1835,6 +1874,8 @@ class AServerAPI {
   async createMapHex(hex: MapHexData): Promise<InsertRowResult> {
     const requestBody: RequestBody_CreateMapHex = {
       ...hex,
+      rivers: hex.rivers.map((data) => data.width.toString() + data.start + data.end).join(","),
+      roads: hex.roads.map((data) => data.type.toString() + data.start + data.end).join(","),
     };
     const res = await fetch("/api/createMapHex", {
       method: "POST",
@@ -1849,6 +1890,8 @@ class AServerAPI {
   async editMapHex(hex: MapHexData): Promise<EditRowResult> {
     const requestBody: RequestBody_EditMapHex = {
       ...hex,
+      rivers: hex.rivers.map((data) => data.width.toString() + data.start + data.end).join(","),
+      roads: hex.roads.map((data) => data.type.toString() + data.start + data.end).join(","),
     };
     const res = await fetch("/api/editMapHex", {
       method: "POST",

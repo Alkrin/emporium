@@ -107,23 +107,15 @@
   width: 15vmin;
 }
 
-.locationsTitle {
-  color: wheat;
-  text-align: center;
-  font-size: 1.3rem;
-}
-
 .locationsAddButton {
-  position: absolute;
-  top: 0.7vmin;
-  right: 0.5vmin;
-  width: 2vmin;
-  height: 2vmin;
+  position: relative;
+  margin-top: 0.5vmin;
+  align-self: center;
   box-sizing: border-box;
   border-radius: 0.25vmin;
-  font-size: 1.65rem;
+  font-size: 0.9rem;
+  padding: 0 0.5vmin 0 0.5vmin;
   text-align: center;
-  line-height: 1.85vmin;
   color: wheat;
   border: 2px solid wheat;
   border-radius: 0.5vmin;
@@ -139,16 +131,9 @@
   }
 }
 
-.locationsDivider {
-  position: relative;
-  background-color: gray;
-  height: 2px;
-  margin-top: 0.25vmin;
-}
-
 .locationsList {
   position: relative;
-  margin: 0.75vmin 0.25vmin 0.25vmin;
+  margin: 0;
   height: 10vmin;
   box-sizing: border-box;
   padding-top: 0.5vmin;
@@ -255,4 +240,28 @@
   margin-left: 1vmin;
   color: white;
   font-size: 1rem;
+}
+
+.hexModeRoot {
+  @extend .hexDataSection;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.hexModeButton {
+  position: relative;
+  margin: 0 0.5vmin 0 0.5vmin;
+  padding: 0.25vmin;
+  font-size: 0.9rem;
+  border: 2px solid rgba(245, 222, 179, 0.5);
+  border-radius: 0.5vmin;
+  color: gray;
+  cursor: pointer;
+
+  &.selected {
+    color: white;
+    border-color: wheat;
+    background-color: rgba(245, 222, 179, 0.5);
+  }
 }

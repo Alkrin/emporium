@@ -9,8 +9,8 @@ import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import styles from "./EditXPDialog.module.scss";
 
 interface State {
-  xpTotal: number;
-  xpDelta: number;
+  xpTotalString: string;
+  xpDeltaString: string;
   saving: boolean;
 }
 
@@ -28,8 +28,8 @@ class AEditXPDialog extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      xpTotal: -1,
-      xpDelta: 0,
+      xpTotalString: props.character.xp.toString(),
+      xpDeltaString: "0",
       saving: false,
     };
   }
@@ -39,54 +39,50 @@ class AEditXPDialog extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <div className={styles.row}>
-          <div className={styles.rowText}>Set Exact XP Value</div>
+          <div className={styles.rowText}>{"Set Exact XP Value"}</div>
           <input
             className={styles.xpTextField}
             type={"number"}
-            value={this.state.xpTotal}
+            value={this.state.xpTotalString}
             min={0}
             onChange={(e) => {
-              this.setState({ xpTotal: +e.target.value });
+              this.setState({ xpTotalString: e.target.value });
             }}
             tabIndex={1}
             autoFocus
           />
           <div className={styles.dialogButton} onClick={this.onSetXPTotalClicked.bind(this)}>
-            Apply
+            {"Apply"}
           </div>
         </div>
-        <div className={styles.orText}>- or -</div>
+        <div className={styles.orText}>{"- or -"}</div>
         <div className={styles.row}>
-          <div className={styles.rowText}>Add XP Value</div>
+          <div className={styles.rowText}>{"Add XP Value"}</div>
           <input
             className={styles.xpTextField}
             type={"number"}
-            value={this.state.xpDelta}
+            value={this.state.xpDeltaString}
             min={0}
             onChange={(e) => {
-              this.setState({ xpDelta: +e.target.value });
+              this.setState({ xpDeltaString: e.target.value });
             }}
             tabIndex={2}
           />
           <div className={styles.dialogButton} onClick={this.onAddXPClicked.bind(this)}>
-            Apply
+            {"Apply"}
           </div>
         </div>
 
         {xpBonus > 0 && (
-          <div className={styles.xpBonusReminder}>{`Don't forget your XP bonus! ${this.state.xpDelta} × ${
+          <div className={styles.xpBonusReminder}>{`Don't forget your XP bonus! ${this.state.xpDeltaString} × ${
             1 + xpBonus
-          } = ${Math.ceil(this.state.xpDelta * (1 + xpBonus))}`}</div>
+          } = ${Math.ceil(+this.state.xpDeltaString * (1 + xpBonus))}`}</div>
         )}
         <div className={styles.closeButton} onClick={this.onCloseClicked.bind(this)}>
-          Close
+          {"Close"}
         </div>
       </div>
     );
-  }
-
-  componentDidMount(): void {
-    this.setState({ xpTotal: this.props.character.xp });
   }
 
   private getXPBonus(): number {
@@ -112,7 +108,7 @@ class AEditXPDialog extends React.Component<Props, State> {
       return;
     }
     this.setState({ saving: true });
-    const result = await ServerAPI.setXP(this.props.character.id, this.state.xpTotal);
+    const result = await ServerAPI.setXP(this.props.character.id, +this.state.xpTotalString);
 
     if ("error" in result) {
       this.props.dispatch?.(
@@ -137,7 +133,7 @@ class AEditXPDialog extends React.Component<Props, State> {
       return;
     }
     this.setState({ saving: true });
-    const result = await ServerAPI.setXP(this.props.character.id, this.props.character.xp + this.state.xpDelta);
+    const result = await ServerAPI.setXP(this.props.character.id, this.props.character.xp + +this.state.xpDeltaString);
 
     if ("error" in result) {
       this.props.dispatch?.(

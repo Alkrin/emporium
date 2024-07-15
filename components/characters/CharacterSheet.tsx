@@ -55,13 +55,14 @@ import { FittingView } from "../FittingView";
 import { EditInjuriesDialog } from "./EditInjuriesDialog";
 import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
-import { setCharacterLocation } from "../../redux/charactersSlice";
+import { setCharacterLocation, setCharacterXPReserve } from "../../redux/charactersSlice";
 import { SheetRoot } from "../SheetRoot";
 import { EditCXPDeductibleDialog } from "./EditCXPDeductibleDialog";
 import { EditStoragesSubPanel } from "./EditStoragesSubPanel";
 import { EditCostOfLivingDialog } from "./EditCostOfLivingDialog";
 import { CharacterContractsDialog } from "./CharacterContractsDialog";
 import { SharedLoadbearing } from "../../staticData/classFeatures/SharedLoadbearing";
+import { InputSingleNumberOfTwoDialog } from "../dialogs/InputSingleNumberOfTwoDialog";
 
 interface ReactProps {
   characterId: number;
@@ -108,6 +109,8 @@ class ACharacterSheet extends React.Component<Props> {
                   {this.renderXPPanel()}
                   <div className={styles.verticalSpacer} />
                   {this.renderDeductiblePanel()}
+                  <div className={styles.verticalSpacer} />
+                  {this.renderXPReservePanel()}
                 </div>
                 <div className={styles.horizontalSpacer} />
                 <div className={styles.column}>
@@ -414,6 +417,26 @@ class ACharacterSheet extends React.Component<Props> {
     }
   }
 
+  private renderXPReservePanel(): React.ReactNode {
+    if (this.props.character) {
+      return (
+        <div className={styles.xpPanel}>
+          <div className={styles.xpContainer}>
+            <div className={styles.centeredRow}>
+              <div className={styles.xpTitle}>XP Reserve:</div>
+              <div className={styles.xpNumbers}>
+                <div className={styles.xpValue}>{this.props.character.xp_reserve}</div>
+              </div>
+              <div className={styles.xpEditButton} onClick={this.onXPReserveEditClicked.bind(this)} />
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   private renderHPPanel(): React.ReactNode {
     if (this.props.character) {
       const maxHP = getCharacterMaxHP(this.props.character);
@@ -695,6 +718,72 @@ class ACharacterSheet extends React.Component<Props> {
         id: "xpEdit",
         content: () => {
           return <EditXPDialog />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onXPReserveEditClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "xpReserveEdit",
+        content: () => {
+          return (
+            <InputSingleNumberOfTwoDialog
+              initialFirstValue={this.props.character.xp_reserve}
+              firstNumberPrompt={"Set Exact Reserve XP Value"}
+              secondNumberPrompt={"Add To Reserve XP"}
+              applyFirstNumber={async (value: number) => {
+                const result = await ServerAPI.setXPReserve(this.props.character.id, value);
+
+                if ("error" in result) {
+                  this.props.dispatch?.(
+                    showModal({
+                      id: "setXPReserve Error",
+                      content: {
+                        title: "Error!",
+                        message: "Failed to update XP Reserve.  Please check your network connection and try again.",
+                      },
+                      escapable: true,
+                    })
+                  );
+                  return false;
+                } else {
+                  this.props.dispatch?.(setCharacterXPReserve({ characterId: this.props.character.id, xp: value }));
+                  return true;
+                }
+              }}
+              applySecondNumber={async (value: number) => {
+                const result = await ServerAPI.setXPReserve(
+                  this.props.character.id,
+                  this.props.character.xp_reserve + value
+                );
+
+                if ("error" in result) {
+                  this.props.dispatch?.(
+                    showModal({
+                      id: "setXPReserve Error",
+                      content: {
+                        title: "Error!",
+                        message: "Failed to update XP Reserve.  Please check your network connection and try again.",
+                      },
+                      escapable: true,
+                    })
+                  );
+                  return false;
+                } else {
+                  this.props.dispatch?.(
+                    setCharacterXPReserve({
+                      characterId: this.props.character.id,
+                      xp: this.props.character.xp_reserve + value,
+                    })
+                  );
+                  return true;
+                }
+              }}
+            />
+          );
         },
         escapable: true,
       })
