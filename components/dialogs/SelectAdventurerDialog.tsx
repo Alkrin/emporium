@@ -68,6 +68,7 @@ class ASelectAdventurerDialog extends React.Component<Props, State> {
                   location_id: 0,
                   maintenance_paid: 0,
                   maintenance_date: "",
+                  xp_reserve: 0,
                   ...emptyEquipmentData,
                 },
                 -1
