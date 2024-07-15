@@ -206,23 +206,32 @@ class AHexEditor extends React.Component<Props, State> {
               this.setState({ startPoint: point });
             } else {
               // Only start a delete if they clicked a node that is in use.
-              if (
-                hex[this.props.type].find((data) => {
-                  return data.start === point || data.end === point;
-                })
-              ) {
+              const isValidNode =
+                // Valid river node?
+                (this.props.type === "rivers" &&
+                  hex.rivers.find((data) => data.start === point || data.end === point)) ||
+                // Valid road node?
+                (this.props.type === "roads" && hex.roads.find((data) => data.start === point || data.end === point));
+              if (isValidNode) {
                 this.setState({ startPoint: point });
               }
             }
           } else {
             if (this.state.startPoint !== point) {
               // See if the segment already exists.
-              const segment = hex[this.props.type].find((data) => {
+              const riverSegment = hex.rivers.find((data) => {
                 return (
                   (data.start === this.state.startPoint && data.end === point) ||
                   (data.start === point && data.end === this.state.startPoint)
                 );
               });
+              const roadSegment = hex.roads.find((data) => {
+                return (
+                  (data.start === this.state.startPoint && data.end === point) ||
+                  (data.start === point && data.end === this.state.startPoint)
+                );
+              });
+              const segment = this.props.type === "rivers" ? riverSegment : roadSegment;
               // If the selectedPoint is not the startPoint, add/delete as appropriate.
               if (this.state.mode === "add") {
                 if (segment) {
