@@ -16,6 +16,7 @@ import {
   ServerActivityData,
   ServerActivityOutcomeData,
   ServerItemDefData,
+  ServerMapHexData,
   ServerSpellDefData,
   StorageData,
   StructureComponentData,
@@ -112,6 +113,11 @@ export interface RequestBody_LogIn {
 export interface RequestBody_SetXP {
   characterId: number;
   xp: number;
+}
+
+export interface RequestBody_SetXPReserve {
+  characterId: number;
+  xp_reserve: number;
 }
 
 export interface RequestBody_SetHP {
@@ -258,8 +264,8 @@ export type RequestBody_EditLocation = LocationData & LocationEx;
 export type RequestBody_CreateMap = Omit<MapData, "id">;
 export type RequestBody_EditMap = MapData;
 // MapHex
-export type RequestBody_CreateMapHex = Omit<MapHexData, "id">;
-export type RequestBody_EditMapHex = MapHexData;
+export type RequestBody_CreateMapHex = Omit<ServerMapHexData, "id">;
+export type RequestBody_EditMapHex = ServerMapHexData;
 // SpellDef
 export type RequestBody_CreateSpellDef = Omit<ServerSpellDefData, "id">;
 export type RequestBody_EditSpellDef = ServerSpellDefData;

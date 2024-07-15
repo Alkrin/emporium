@@ -6,6 +6,7 @@ import { LocationCityData, LocationData, MapData, MapHexData } from "../../serve
 import styles from "./HexMap.module.scss";
 import { Dictionary } from "../../lib/dictionary";
 import { MapHexTypes } from "./MapHexConstants";
+import { HexDisplay } from "./HexDisplay";
 
 export interface HexMapSettings {
   showCoordinates: boolean;
@@ -130,7 +131,7 @@ class AHexMap extends React.Component<Props, State> {
   }
 
   private renderHexOverlay(x: number, y: number): React.ReactNode {
-    const hex = this.state.hexLookup[x]?.[y];
+    const hex = this.getHexDataAt(x, y);
 
     const shouldShowCityNames = this.props.settings.showCityNames;
 
@@ -141,8 +142,23 @@ class AHexMap extends React.Component<Props, State> {
     );
   }
 
+  private getHexDataAt(x: number, y: number): MapHexDataEx {
+    const hex: MapHexDataEx = this.state.hexLookup[x]?.[y] ?? {
+      id: 0,
+      map_id: this.props.mapID,
+      x,
+      y,
+      type: MapHexTypes.Undefined,
+      roads: [],
+      rivers: [],
+      locations: [],
+      cityName: "",
+    };
+    return hex;
+  }
+
   private renderHex(x: number, y: number): React.ReactNode {
-    const hex = this.state.hexLookup[x]?.[y];
+    const hex = this.getHexDataAt(x, y);
     const type = styles[hex?.type ?? MapHexTypes.Undefined];
     const selectedStyle = x === this.state.selectedX && y === this.state.selectedY ? styles.selected : "";
 
@@ -150,9 +166,11 @@ class AHexMap extends React.Component<Props, State> {
     const shouldShowIcons = hex?.locations?.length > 0 && this.props.settings.showLocations;
 
     return (
-      <div
+      <HexDisplay
         key={y}
         className={`${styles.hexRoot} ${type} ${selectedStyle}`}
+        data={hex}
+        height={"6vmin"}
         onClick={this.onHexClicked.bind(this, x, y)}
       >
         {shouldShowIcons ? this.renderHexIcon(hex) : null}
@@ -161,7 +179,7 @@ class AHexMap extends React.Component<Props, State> {
             {x},{y}
           </div>
         ) : null}
-      </div>
+      </HexDisplay>
     );
   }
 
@@ -267,7 +285,7 @@ class AHexMap extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const map = state.maps.maps[props.mapID];
-  const hexes = state.maps.mapHexesByMap[props.mapID];
+  const hexes = state.maps.mapHexesByMap[props.mapID] ?? [];
   const locations = state.locations.locations;
   const cities = state.locations.cities;
   return {

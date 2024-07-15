@@ -15,12 +15,20 @@ import { updateMapHex } from "../../redux/mapsSlice";
 import { LocationEditSubPanel } from "./LocationEditSubPanel";
 import TooltipSource from "../TooltipSource";
 import { LocationTooltip } from "../tooltips/LocationTooltip";
+import { HexEditor } from "./HexEditor";
+
+enum HexMode {
+  POIs,
+  Rivers,
+  Roads,
+}
 
 interface State {
-  mapID: number;
+  mapId: number;
   selectedX: number;
   selectedY: number;
   mapSettings: HexMapSettings;
+  hexMode: HexMode;
 }
 
 interface ReactProps {}
@@ -37,9 +45,8 @@ type Props = ReactProps & InjectedProps;
 class AWorldPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-
     this.state = {
-      mapID: -1,
+      mapId: -1,
       selectedX: Number.MIN_SAFE_INTEGER,
       selectedY: Number.MIN_SAFE_INTEGER,
       mapSettings: {
@@ -47,6 +54,7 @@ class AWorldPanel extends React.Component<Props, State> {
         showLocations: true,
         showCityNames: true,
       },
+      hexMode: HexMode.POIs,
     };
   }
 
@@ -54,7 +62,7 @@ class AWorldPanel extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <HexMap
-          mapID={this.state.mapID}
+          mapID={this.state.mapId}
           onHexSelected={this.onHexSelected.bind(this)}
           settings={this.state.mapSettings}
         />
@@ -62,10 +70,10 @@ class AWorldPanel extends React.Component<Props, State> {
           <div className={styles.mapSelectorTitle}>{"Map"}</div>
           <select
             className={styles.mapSelector}
-            value={this.state.mapID}
+            value={this.state.mapId}
             onChange={(e) => {
               this.setState({
-                mapID: +e.target.value,
+                mapId: +e.target.value,
                 selectedX: Number.MIN_SAFE_INTEGER,
                 selectedY: Number.MIN_SAFE_INTEGER,
               });
@@ -155,31 +163,89 @@ class AWorldPanel extends React.Component<Props, State> {
             </div>
           ) : null}
         </div>
-        {this.state.selectedX > Number.MIN_SAFE_INTEGER ? (
-          <div className={styles.hexDataSection}>
-            <div className={styles.locationsTitle}>{"Locations"}</div>
-            <div className={styles.locationsAddButton} onClick={this.onAddLocationClicked.bind(this)}>
-              {"+"}
-            </div>
-            <div className={styles.locationsDivider} />
-            <div className={styles.locationsList}>
-              {this.getLocationsForSelectedHex().map((data) => {
-                return (
-                  <TooltipSource
-                    className={styles.locationRow}
-                    key={data.id}
-                    tooltipParams={{ id: `Location${data.id}`, content: () => <LocationTooltip data={data} /> }}
-                  >
-                    <div className={styles.locationDataRow}>
-                      <div className={styles.locationName}>{data.name}</div>
-                    </div>
-                    <div className={styles.locationEditButton} onClick={this.onEditLocationClicked.bind(this, data)} />
-                  </TooltipSource>
-                );
-              })}
-            </div>
+        <div className={styles.hexModeRoot}>
+          <div
+            className={`${styles.hexModeButton} ${this.state.hexMode === HexMode.POIs ? styles.selected : ""}`}
+            onClick={() => this.setState({ hexMode: HexMode.POIs })}
+          >
+            {"POIs"}
           </div>
-        ) : null}
+          <div
+            className={`${styles.hexModeButton} ${this.state.hexMode === HexMode.Rivers ? styles.selected : ""}`}
+            onClick={() => this.setState({ hexMode: HexMode.Rivers })}
+          >
+            {"Rivers"}
+          </div>
+          <div
+            className={`${styles.hexModeButton} ${this.state.hexMode === HexMode.Roads ? styles.selected : ""}`}
+            onClick={() => this.setState({ hexMode: HexMode.Roads })}
+          >
+            {"Roads"}
+          </div>
+        </div>
+        {this.renderHexModePanel()}
+      </div>
+    );
+  }
+
+  private renderHexModePanel(): React.ReactNode {
+    if (this.state.selectedX === Number.MIN_SAFE_INTEGER) {
+      return null;
+    }
+
+    switch (this.state.hexMode) {
+      case HexMode.POIs: {
+        return this.renderPOIsPanel();
+      }
+      case HexMode.Rivers: {
+        return this.renderRiversPanel();
+      }
+      case HexMode.Roads: {
+        return this.renderRoadsPanel();
+      }
+    }
+  }
+
+  private renderPOIsPanel(): React.ReactNode {
+    return (
+      <div className={styles.hexDataSection}>
+        <div className={styles.locationsList}>
+          {this.getLocationsForSelectedHex().map((data) => {
+            return (
+              <TooltipSource
+                className={styles.locationRow}
+                key={data.id}
+                tooltipParams={{ id: `Location${data.id}`, content: () => <LocationTooltip data={data} /> }}
+              >
+                <div className={styles.locationDataRow}>
+                  <div className={styles.locationName}>{data.name}</div>
+                </div>
+                <div className={styles.locationEditButton} onClick={this.onEditLocationClicked.bind(this, data)} />
+              </TooltipSource>
+            );
+          })}
+        </div>
+        <div className={styles.locationsAddButton} onClick={this.onAddLocationClicked.bind(this)}>
+          {"Create New POI"}
+        </div>
+      </div>
+    );
+  }
+
+  private renderRiversPanel(): React.ReactNode {
+    const hex = this.getSelectedHexData();
+    return (
+      <div className={styles.hexDataSection}>
+        <HexEditor mapId={this.state.mapId} x={hex.x} y={hex.y} type={"rivers"} />
+      </div>
+    );
+  }
+
+  private renderRoadsPanel(): React.ReactNode {
+    const hex = this.getSelectedHexData();
+    return (
+      <div className={styles.hexDataSection}>
+        <HexEditor mapId={this.state.mapId} x={hex.x} y={hex.y} type={"roads"} />
       </div>
     );
   }
@@ -189,7 +255,7 @@ class AWorldPanel extends React.Component<Props, State> {
       showSubPanel({
         id: "Locations",
         content: () => {
-          return <LocationEditSubPanel mapId={this.state.mapID} hexId={data.hex_id} locationId={data.id} />;
+          return <LocationEditSubPanel mapId={this.state.mapId} hexId={data.hex_id} locationId={data.id} />;
         },
         escapable: true,
       })
@@ -225,7 +291,7 @@ class AWorldPanel extends React.Component<Props, State> {
       showSubPanel({
         id: "Locations",
         content: () => {
-          return <LocationEditSubPanel mapId={this.state.mapID} hexId={hexData.id} />;
+          return <LocationEditSubPanel mapId={this.state.mapId} hexId={hexData.id} />;
         },
         escapable: true,
       })
@@ -235,13 +301,15 @@ class AWorldPanel extends React.Component<Props, State> {
   private getSelectedHexData(): MapHexData {
     const emptyHex: MapHexData = {
       id: 0,
-      map_id: this.state.mapID,
+      map_id: this.state.mapId,
       x: this.state.selectedX,
       y: this.state.selectedY,
       type: MapHexTypes.Undefined,
+      rivers: [],
+      roads: [],
     };
 
-    const currentHex = this.props.mapHexesByMap[this.state.mapID]?.find((hex) => {
+    const currentHex = this.props.mapHexesByMap[this.state.mapId]?.find((hex) => {
       return hex.x === this.state.selectedX && hex.y === this.state.selectedY;
     });
 

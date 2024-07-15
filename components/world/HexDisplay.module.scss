@@ -1,0 +1,75 @@
+.root {
+  aspect-ratio: 1.1547 / 1;
+}
+
+.hexRoot {
+  position: absolute;
+  flex-shrink: 0;
+  height: 100%;
+  width: 100%;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+
+  pointer-events: all;
+
+  display: flex;
+  user-select: none;
+  background-size: 95% 95%;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  /**
+   *  Start of Hex Types. (see MapHexConstants.ts)
+   */
+  &.Undefined {
+    background-color: #222;
+  }
+  &.Ashland {
+    background-color: #7f7f7f;
+    background-image: url("/images/TerrainAshland.png");
+  }
+  &.Desert {
+    background-color: #f5f186;
+    background-image: url("/images/TerrainDesert.png");
+  }
+  &.Forest {
+    background-color: #6b872c;
+    background-image: url("/images/TerrainForest.png");
+  }
+  &.Grassland {
+    background-color: #99cc66;
+  }
+  &.Hills {
+    background-color: #e4ce5d;
+    background-image: url("/images/TerrainHills.png");
+  }
+  &.Marsh {
+    background-color: #b2dda5;
+    background-image: url("/images/TerrainMarsh.png");
+  }
+  &.Mountain {
+    background-color: #ad7f10;
+    background-image: url("/images/TerrainMountain.png");
+  }
+  &.MountainSnowy {
+    background-color: #ad7f10;
+    background-image: url("/images/TerrainMountainSnowy.png");
+  }
+  &.Ocean {
+    background-color: #0f3365;
+  }
+  &.Scrubland {
+    background-color: #d7db81;
+    background-image: url("/images/TerrainScrubland.png");
+  }
+  /**
+   *  End of Hex Types. (see MapHexConstants.ts)
+   */
+}
+
+.riversAndRoads {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

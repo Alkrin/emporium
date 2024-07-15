@@ -1,0 +1,195 @@
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.root {
+  @extend .column;
+  position: relative;
+  align-self: center;
+  width: 22vmin;
+}
+
+.hexWindow {
+  position: relative;
+  box-sizing: border-box;
+  width: 22vmin;
+  height: 22vmin;
+  border: 2px solid gray;
+  overflow: hidden;
+}
+
+.hexCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hexTop {
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hexRightTop {
+  position: absolute;
+  top: 15%;
+  left: 111%;
+  transform: translate(-50%, -50%);
+}
+
+.hexRightBottom {
+  position: absolute;
+  top: 85%;
+  left: 111%;
+  transform: translate(-50%, -50%);
+}
+
+.hexBottom {
+  position: absolute;
+  top: 120%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hexLeftTop {
+  position: absolute;
+  top: 15%;
+  left: -11%;
+  transform: translate(-50%, -50%);
+}
+
+.hexLeftBottom {
+  position: absolute;
+  top: 85%;
+  left: -11%;
+  transform: translate(-50%, -50%);
+}
+
+.modeRow {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.modeButton {
+  position: relative;
+  margin: 0 0.5vmin 0 0.5vmin;
+  padding: 0.25vmin;
+  font-size: 0.9rem;
+  border: 2px solid rgba(245, 222, 179, 0.5);
+  border-radius: 0.5vmin;
+  color: gray;
+  cursor: pointer;
+
+  &.selected {
+    color: white;
+    border-color: wheat;
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.toggleRow {
+  position: relative;
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.pointButton {
+  position: absolute;
+  width: 2vmin;
+  height: 2vmin;
+  border-radius: 1vmin;
+  background-color: darkred;
+  opacity: 0.5;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+
+  &.selected {
+    background-color: red;
+    opacity: 1;
+  }
+
+  &:hover {
+    box-shadow: 0 0 0 2px red;
+  }
+}
+
+.riverWidthButton {
+  position: relative;
+  margin: 0 0.5vmin 0 0.5vmin;
+  padding: 0.25vmin;
+  width: 3.5vmin;
+  height: 3.5vmin;
+  border: 2px solid rgba(245, 222, 179, 0.5);
+  border-radius: 0.5vmin;
+  color: gray;
+  cursor: pointer;
+
+  &.selected {
+    color: white;
+    border-color: wheat;
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.riverWidthIcon {
+  position: absolute;
+  background-color: blue;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  &.one {
+    width: 1vmin;
+    height: 1vmin;
+  }
+
+  &.two {
+    width: 2vmin;
+    height: 2vmin;
+  }
+
+  &.three {
+    width: 3vmin;
+    height: 3vmin;
+  }
+}
+
+.roadTypeButton {
+  position: relative;
+  margin: 0 0.5vmin 0 0.5vmin;
+  padding: 0.25vmin;
+  width: 3.5vmin;
+  height: 3.5vmin;
+  border: 2px solid rgba(245, 222, 179, 0.5);
+  border-radius: 0.5vmin;
+  color: gray;
+  cursor: pointer;
+
+  &.selected {
+    color: white;
+    border-color: wheat;
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.roadTypeIcon {
+  position: absolute;
+  width: 2vmin;
+  height: 2vmin;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

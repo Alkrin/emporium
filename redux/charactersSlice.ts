@@ -93,6 +93,11 @@ export const charactersSlice = createSlice({
         state.characters[action.payload.characterId].xp = action.payload.xp;
       }
     },
+    setCharacterXPReserve: (state: CharactersReduxState, action: PayloadAction<SetXPParams>) => {
+      if (state.characters[action.payload.characterId]) {
+        state.characters[action.payload.characterId].xp_reserve = action.payload.xp;
+      }
+    },
     setCharacterRemainingCXPDeductible: (
       state: CharactersReduxState,
       action: PayloadAction<SetRemainingCXPDeductibleParams>
@@ -130,6 +135,7 @@ export const {
   setCharacterHP,
   setCharacterLocation,
   setCharacterXP,
+  setCharacterXPReserve,
   setEquipment,
   setHenchmaster,
   setCharacterRemainingCXPDeductible,
