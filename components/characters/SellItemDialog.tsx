@@ -174,9 +174,9 @@ class ASellItemDialog extends React.Component<Props, State> {
   }
 
   private getMarketText(): string {
-    // TODO: Check if there is a city with a market at this item's location.
-    // TODO: Note that the item can only be sold if it is in a Storage, and a Storage is either
-    //       a Personal Pile (and thus at the character's location) or directly at a location already.
+    // Check if there is a city with a market at this item's location.
+    // Note that the item can only be sold if it is in a Storage, and a Storage is either
+    // a Personal Pile (and thus at the character's location) or directly at a location already.
     const storage = this.props.allStorages[this.props.item.storage_id];
     let locationId: number = storage.location_id;
     if (locationId === 0) {
