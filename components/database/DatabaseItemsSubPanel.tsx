@@ -38,6 +38,9 @@ interface State {
   cost_gp: number;
   cost_sp: number;
   cost_cp: number;
+  sale_gp: number;
+  sale_sp: number;
+  sale_cp: number;
 }
 
 const defaultState: State = {
@@ -68,6 +71,9 @@ const defaultState: State = {
   cost_gp: 0,
   cost_sp: 0,
   cost_cp: 0,
+  sale_gp: 0,
+  sale_sp: 0,
+  sale_cp: 0,
 };
 
 interface ReactProps {}
@@ -94,7 +100,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
 
     return (
       <div className={styles.root}>
-        <div className={styles.panelTitle}>Item Database</div>
+        <div className={styles.panelTitle}>{"Item Database"}</div>
         <SearchableDefList
           className={styles.itemListRoot}
           selectedDefId={this.state.selectedItemId}
@@ -265,7 +271,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     return (
       <div className={styles.column}>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>Price</div>
+          <div className={styles.firstLabel}>{"Purchase Price"}</div>
           <input
             className={styles.gpInputField}
             type={"number"}
@@ -276,7 +282,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
               this.setState({ cost_gp: +e.target.value });
             }}
           />
-          <div className={styles.secondLabel}>gp</div>
+          <div className={styles.secondLabel}>{"gp"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -287,7 +293,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
               this.setState({ cost_sp: +e.target.value });
             }}
           />
-          <div className={styles.secondLabel}>sp</div>
+          <div className={styles.secondLabel}>{"sp"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -298,7 +304,43 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
               this.setState({ cost_cp: +e.target.value });
             }}
           />
-          <div className={styles.secondLabel}>cp</div>
+          <div className={styles.secondLabel}>{"cp"}</div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.firstLabel}>{"Sale Price"}</div>
+          <input
+            className={styles.gpInputField}
+            type={"number"}
+            value={this.state.sale_gp}
+            min={0}
+            tabIndex={this.nextTabIndex++}
+            onChange={(e) => {
+              this.setState({ sale_gp: +e.target.value });
+            }}
+          />
+          <div className={styles.secondLabel}>{"gp"}</div>
+          <input
+            className={styles.smallInputField}
+            type={"number"}
+            value={this.state.sale_sp}
+            min={0}
+            tabIndex={this.nextTabIndex++}
+            onChange={(e) => {
+              this.setState({ sale_sp: +e.target.value });
+            }}
+          />
+          <div className={styles.secondLabel}>{"sp"}</div>
+          <input
+            className={styles.smallInputField}
+            type={"number"}
+            value={this.state.sale_cp}
+            min={0}
+            tabIndex={this.nextTabIndex++}
+            onChange={(e) => {
+              this.setState({ sale_cp: +e.target.value });
+            }}
+          />
+          <div className={styles.secondLabel}>{"cp"}</div>
         </div>
         <div className={styles.row}>
           <div className={styles.firstLabel}>Purchase Quantity</div>
@@ -562,6 +604,9 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
       cost_gp: this.state.cost_gp,
       cost_sp: this.state.cost_sp,
       cost_cp: this.state.cost_cp,
+      sale_gp: this.state.sale_gp,
+      sale_sp: this.state.sale_sp,
+      sale_cp: this.state.sale_cp,
     };
 
     if (this.state.selectedItemId === -1) {

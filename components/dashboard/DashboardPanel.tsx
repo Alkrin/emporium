@@ -3,12 +3,12 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
 import styles from "./DashboardPanel.module.scss";
-import ServerAPI, { CharacterData, ContractData, StorageData } from "../../serverAPI";
+import ServerAPI, { CharacterData, ContractData, ItemData, StorageData } from "../../serverAPI";
 import { EditButton } from "../EditButton";
 import { showModal } from "../../redux/modalsSlice";
 import { SelectAdventurerDialog } from "../dialogs/SelectAdventurerDialog";
 import { dashboardLocalStore } from "../../localStores/dashboardLocalStore";
-import { setDashboardCharacterId } from "../../redux/charactersSlice";
+import { setActiveCharacterId, setDashboardCharacterId } from "../../redux/charactersSlice";
 import { addCommasToNumber, getCostOfLivingForCharacter, getPersonalPile } from "../../lib/characterUtils";
 import { Dictionary } from "../../lib/dictionary";
 import { getStorageDisplayName } from "../../lib/storageUtils";
@@ -26,6 +26,10 @@ import { SavingVeil } from "../SavingVeil";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
 import { InfoButton } from "../InfoButton";
 import { EditMoneyDialog } from "../characters/EditMoneyDialog";
+import { showSubPanel } from "../../redux/subPanelsSlice";
+import { SubPanelPane } from "../SubPanelPane";
+import { EditStoragesSubPanel } from "../characters/EditStoragesSubPanel";
+import { setActiveStorageId } from "../../redux/storageSlice";
 
 interface State {
   isSaving: boolean;
@@ -37,6 +41,7 @@ interface InjectedProps {
   character: CharacterData;
   dashboardCharacterId: number;
   allStorages: Dictionary<StorageData>;
+  allItems: Dictionary<ItemData>;
   allCharacters: Dictionary<CharacterData>;
   contractsByDefByPartyAId: Dictionary<Dictionary<ContractData[]>>;
   contractsByDefByPartyBId: Dictionary<Dictionary<ContractData[]>>;
@@ -50,6 +55,8 @@ type Props = ReactProps & InjectedProps;
 class ADashboardPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+
+    this.props.dispatch?.(setActiveCharacterId(props.dashboardCharacterId));
 
     this.state = {
       isSaving: false,
@@ -66,6 +73,7 @@ class ADashboardPanel extends React.Component<Props, State> {
         </div>
         {this.renderFinancesPanel()}
         {this.renderCostOfLivingPanel()}
+        <SubPanelPane />
         <SavingVeil show={this.state.isSaving} textOverride={"Making Payments..."} />
       </div>
     );
@@ -139,8 +147,50 @@ class ADashboardPanel extends React.Component<Props, State> {
               );
             })}
           </div>
+          <div className={styles.storageOtherColumn}>
+            <div className={styles.storageHeader}>{"Armories"}</div>
+            {storages.map((s, index) => {
+              const rowStyle = index % 2 ? styles.odd : "";
+              return (
+                <div className={`${styles.storageCell} ${rowStyle}`} key={index}>
+                  {"\xa0\xa0\xa0\xa0\xa0"}
+                  <EditButton className={styles.editButtonInline} onClick={this.onViewItemsClick.bind(this, s.id)} />
+                  {"\xa0"}
+                </div>
+              );
+            })}
+          </div>
+          <div className={styles.storageOtherColumn}>
+            <div className={styles.storageHeader}>{"For Sale"}</div>
+            {storages.map((s, index) => {
+              const itemsForSale = Object.values(this.props.allItems).filter((item) => {
+                return item.is_for_sale && item.storage_id === s.id;
+              });
+              const rowStyle = index % 2 ? styles.odd : "";
+              return (
+                <div className={`${styles.storageCell} ${rowStyle}`} key={index}>
+                  <div className={styles.forSaleCount}>
+                    {itemsForSale.length === 0 ? "\xa0" : addCommasToNumber(itemsForSale.length, 0)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
+    );
+  }
+
+  private onViewItemsClick(storageId: number): void {
+    this.props.dispatch?.(setActiveStorageId(storageId));
+    this.props.dispatch?.(
+      showSubPanel({
+        id: "EditStorages",
+        content: () => {
+          return <EditStoragesSubPanel />;
+        },
+        escapable: true,
+      })
     );
   }
 
@@ -471,6 +521,7 @@ class ADashboardPanel extends React.Component<Props, State> {
               onSelectionConfirmed={async (characterId: number) => {
                 dashboardLocalStore.setDashboardCharacterId(characterId);
                 this.props.dispatch?.(setDashboardCharacterId(characterId));
+                this.props.dispatch?.(setActiveCharacterId(characterId));
               }}
             />
           );
@@ -525,11 +576,13 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { activeRole } = state.hud;
   const currentUserId = state.user.currentUser.id;
   const { contractsByDefByPartyAId, contractsByDefByPartyBId } = state.contracts;
+  const allItems = state.items.allItems;
   return {
     ...props,
     character,
     dashboardCharacterId,
     allStorages,
+    allItems,
     allCharacters,
     contractsByDefByPartyAId,
     contractsByDefByPartyBId,

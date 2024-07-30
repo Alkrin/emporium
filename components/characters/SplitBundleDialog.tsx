@@ -95,7 +95,7 @@ class ASplitBundleDialog extends React.Component<Props, State> {
     this.setState({ isSaving: true });
 
     const result = await ServerAPI.splitBundleItems(
-      this.props.item.id,
+      this.props.item,
       this.props.item.container_id,
       this.props.item.storage_id,
       this.state.newBundleCount,
@@ -121,6 +121,10 @@ class ASplitBundleDialog extends React.Component<Props, State> {
             id: result[1].insertId,
             storage_id: this.props.item.storage_id,
             container_id: this.props.item.container_id,
+            notes: this.props.item.notes,
+            is_for_sale: this.props.item.is_for_sale,
+            owner_ids: [...this.props.item.owner_ids],
+            is_unused: this.props.item.is_unused,
           })
         );
         this.props.dispatch?.(hideModal());

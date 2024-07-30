@@ -1,9 +1,32 @@
 import store from "../redux/store";
 import { CharacterData, CharacterEquipmentSlots, ItemData, ItemDefData } from "../serverAPI";
+import { addCommasToNumber } from "./characterUtils";
 import { Dictionary } from "./dictionary";
 import { EquipmentSlotTag, WeaponCategoryTag, WeaponTypeTag } from "./tags";
 
 const kAccuracy = 10000;
+
+/** Values: 1gp or less, 2-10gp, 11-100gp, 101-1000gp, 1001-10000gp, 10000+gp */
+export const ItemAvailabilityByMarketClass: Record<number, number[]> = {
+  0: [2750, 300, 20, 7, 2, 0.25],
+  1: [2750, 300, 20, 7, 2, 0.25],
+  2: [700, 70, 5, 2, 1, 0.1],
+  3: [425, 35, 2, 1, 0.25, 0.03],
+  4: [100, 10, 1, 0.25, 0.1, 0.01],
+  5: [35, 3, 0.25, 0.1, 0.05, 0],
+  6: [15, 1, 0.1, 0.05, 0.01, 0, 0],
+};
+
+export function getItemAvailabilityText(marketClass: number, priceIndex: number): string {
+  const value = ItemAvailabilityByMarketClass[marketClass][priceIndex];
+  if (value <= 0) {
+    return "---";
+  } else if (value < 1) {
+    return `${value * 100}%`;
+  } else {
+    return addCommasToNumber(value);
+  }
+}
 
 export type Stones = [number, number];
 // Converts a Stones value to an easily comparable number.

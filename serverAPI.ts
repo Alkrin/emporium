@@ -68,6 +68,8 @@ import {
   RequestBody_ExerciseContract as RequestBody_ExerciseContracts,
   RequestBody_PayCostOfLiving,
   RequestBody_SetXPReserve,
+  RequestBody_EditItem,
+  RequestBody_SellItem,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -109,6 +111,9 @@ export interface ItemDefData {
   cost_gp: number;
   cost_sp: number;
   cost_cp: number;
+  sale_gp: number;
+  sale_sp: number;
+  sale_cp: number;
 }
 
 export type ServerItemDefData = Omit<ItemDefData, "storage_filters" | "tags"> & {
@@ -122,7 +127,15 @@ export interface ItemData {
   count: number;
   container_id: number;
   storage_id: number;
+  notes: string;
+  is_for_sale: boolean;
+  owner_ids: number[];
+  is_unused: boolean;
 }
+
+export type ServerItemData = Omit<ItemData, "owner_ids"> & {
+  owner_ids: string;
+};
 
 export interface StorageData {
   id: number;
@@ -896,8 +909,23 @@ class AServerAPI {
       },
     });
 
-    const data: ServerError | ItemData[] = await res.json();
-    return data;
+    const data: ServerError | ServerItemData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      // owner_ids are stored in the db as comma separated strings, but in Redux as a number array,
+      // so we have to convert before passing the results along.
+      const itemData: ItemData[] = [];
+      data.forEach((sItemData) => {
+        sItemData.owner_ids = sItemData.owner_ids.trim();
+        itemData.push({
+          ...sItemData,
+          owner_ids: sItemData.owner_ids.length > 0 ? sItemData.owner_ids.split(",").map((sID) => +sID) : [],
+        });
+      });
+
+      return itemData;
+    }
   }
 
   async fetchSpellbooks(): Promise<SpellbooksResult> {
@@ -1103,8 +1131,24 @@ class AServerAPI {
   async createItem(data: ItemData): Promise<InsertRowResult> {
     const requestBody: RequestBody_CreateItem = {
       ...data,
+      owner_ids: data.owner_ids.join(","),
     };
     const res = await fetch("/api/createItem", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editItem(data: ItemData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditItem = {
+      ...data,
+      owner_ids: data.owner_ids.join(","),
+    };
+    const res = await fetch("/api/editItem", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1119,6 +1163,34 @@ class AServerAPI {
       item_ids,
     };
     const res = await fetch("/api/deleteItems", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async sellItem(
+    item: ItemData,
+    sellCount: number,
+    activity: ActivityData,
+    outcome: ActivityOutcomeData,
+    resolution: ActivityResolution,
+    storageId: number,
+    gpGained: number
+  ): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_SellItem = {
+      item,
+      sellCount,
+      activity,
+      outcome: convertActivityOutcomeForServer(outcome),
+      resolution,
+      storageId,
+      gpGained,
+    };
+    const res = await fetch("/api/sellItem", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1533,13 +1605,13 @@ class AServerAPI {
 
   /** Whichever of destContainerId and destStorageId is wrong, set to zero.  Returns the id of the newly created bundle item. */
   async splitBundleItems(
-    srcItemId: number,
+    srcItem: ItemData,
     destContainerId: number,
     destStorageId: number,
     count: number,
     itemDefId: number
   ): Promise<MultiModifyResult> {
-    const requestBody: RequestBody_SplitBundleItems = { srcItemId, destContainerId, destStorageId, count, itemDefId };
+    const requestBody: RequestBody_SplitBundleItems = { srcItem, destContainerId, destStorageId, count, itemDefId };
     const res = await fetch("/api/splitBundleItems", {
       method: "POST",
       headers: {

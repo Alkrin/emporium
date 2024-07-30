@@ -7,14 +7,15 @@ import {
   ContractData,
   EquipmentSetData,
   EquipmentSetItemData,
+  ItemData,
   LocationCityData,
   LocationData,
   LocationLairData,
   MapData,
-  MapHexData,
   ProficiencyData,
   ServerActivityData,
   ServerActivityOutcomeData,
+  ServerItemData,
   ServerItemDefData,
   ServerMapHexData,
   ServerSpellDefData,
@@ -88,6 +89,16 @@ export interface RequestBody_DeleteItems {
   item_ids: number[];
 }
 
+export interface RequestBody_SellItem {
+  item: ItemData;
+  sellCount: number;
+  activity: ActivityData;
+  outcome: ServerActivityOutcomeData;
+  resolution: ActivityResolution;
+  storageId: number;
+  gpGained: number;
+}
+
 export interface RequestBody_SetHenchmaster {
   masterCharacterId: number;
   minionCharacterId: number;
@@ -99,7 +110,13 @@ export interface RequestBody_CreateItem {
   count: number;
   container_id: number;
   storage_id: number;
+  notes: string;
+  is_for_sale: boolean;
+  owner_ids: string;
+  is_unused: boolean;
 }
+
+export type RequestBody_EditItem = ServerItemData;
 
 export interface RequestBody_EncryptString {
   text: string;
@@ -191,7 +208,7 @@ export interface RequestBody_MergeBundleItems {
 }
 
 export interface RequestBody_SplitBundleItems {
-  srcItemId: number;
+  srcItem: ItemData;
   destContainerId: number;
   destStorageId: number;
   count: number;

@@ -721,29 +721,6 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
       })
     );
   }
-
-  private buildDisplayDataForProficiency(def: AbilityOrProficiency, subtype?: string): AbilityDisplayData {
-    let displayName: string = def.name;
-    if (subtype && subtype.length > 0) {
-      displayName = `${def.name} (${subtype})`;
-    }
-
-    const data: AbilityDisplayData = {
-      name: displayName,
-      def,
-      rank: 1,
-      minLevel: 1,
-      subtype,
-    };
-    return data;
-  }
-
-  private getSortedLocations(): LocationData[] {
-    const locations = Object.values(this.props.allLocations).sort(({ name: nameA }, { name: nameB }) => {
-      return nameA.localeCompare(nameB);
-    });
-    return locations;
-  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {

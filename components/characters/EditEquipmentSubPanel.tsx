@@ -49,6 +49,13 @@ import {
   whereIsItemEquipped,
 } from "../../lib/characterUtils";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
+import { EditButton } from "../EditButton";
+import { SplitButton } from "../SplitButton";
+import { SpellbookButton } from "../SpellbookButton";
+import { EditItemDialog } from "./EditItemDialog";
+import { SellButton } from "../SellButton";
+import { SellItemDialog } from "./SellItemDialog";
+import { setActiveStorageId } from "../../redux/storageSlice";
 
 export const DropTypeItem = "DropTypeItem";
 
@@ -127,6 +134,11 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         <SubPanelCloseButton />
       </div>
     );
+  }
+
+  componentDidMount(): void {
+    // We need this value to be set for the SellItemDialog to function properly.
+    this.props.dispatch?.(setActiveStorageId(getPersonalPile(this.props.character.id).id));
   }
 
   private getContainerIds(): number[] {
@@ -240,6 +252,10 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     });
 
     items.sort((itemA, itemB) => {
+      if (itemA.is_for_sale !== itemB.is_for_sale) {
+        return itemA.is_for_sale ? -1 : 1;
+      }
+
       const nameA = this.props.allItemDefs[itemA.def_id]?.name ?? "";
       const nameB = this.props.allItemDefs[itemB.def_id]?.name ?? "";
       return nameA.localeCompare(nameB);
@@ -290,18 +306,41 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
   private renderPersonalPileRowContents(item: ItemData, def: ItemDefData): React.ReactNode {
     const isSpellbook = def.tags.includes(Tag.Spellbook);
     return (
-      <div className={styles.personalPileRowContentWrapper}>
+      <div className={`${styles.personalPileRowContentWrapper}  ${item.is_for_sale ? styles.forSale : ""}`}>
         <div className={styles.personalPileItemName}>{getItemNameText(item, def)}</div>
         {def.bundleable && item.count > 1 && (
-          <div className={styles.personalPileBundleButton} onClick={this.onBundleButtonClick.bind(this, item, def)} />
+          <SplitButton className={styles.editButton} onClick={this.onBundleButtonClick.bind(this, item, def)} />
         )}
         {isSpellbook && (
-          <div
-            className={styles.personalPileSpellbookButton}
-            onClick={this.onSpellbookButtonClick.bind(this, item, def)}
-          />
+          <SpellbookButton className={styles.editButton} onClick={this.onSpellbookButtonClick.bind(this, item, def)} />
         )}
+        <EditButton className={styles.editButton} onClick={this.onItemEditButtonClick.bind(this, item, def)} />
+        <SellButton className={styles.editButton} onClick={this.onSellItemButtonClick.bind(this, item, def)} />
       </div>
+    );
+  }
+
+  private onSellItemButtonClick(item: ItemData, def: ItemDefData): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "sellItemDialog",
+        content: () => {
+          return <SellItemDialog item={item} def={def} />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onItemEditButtonClick(item: ItemData, def: ItemDefData): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "editItemDialog",
+        content: () => {
+          return <EditItemDialog item={item} def={def} />;
+        },
+        escapable: true,
+      })
     );
   }
 
@@ -589,7 +628,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
           const countToMove = getMaxBundleItemsForRoom(def, availableRoom);
           if (countToMove > 0) {
             // Move as many items as possible into a new bundle in the target container.
-            const result = await ServerAPI.splitBundleItems(item.id, containerId, 0, countToMove, def.id);
+            const result = await ServerAPI.splitBundleItems(item, containerId, 0, countToMove, def.id);
             if ("error" in result) {
               this.showServerErrorToaster(result.error);
             } else if (result.length !== 2) {
@@ -610,6 +649,10 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
                     id: result[1].insertId,
                     storage_id: 0,
                     container_id: containerId,
+                    notes: item.notes,
+                    is_for_sale: item.is_for_sale,
+                    owner_ids: [...item.owner_ids],
+                    is_unused: item.is_unused,
                   })
                 );
               }
@@ -974,7 +1017,17 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
           const insertResult = result[result.length - 2];
           if ("insertId" in insertResult) {
             this.props.dispatch?.(
-              updateItem({ id: insertResult.insertId, def_id: def.id, count: 1, container_id: 0, storage_id: 0 })
+              updateItem({
+                id: insertResult.insertId,
+                def_id: def.id,
+                count: 1,
+                container_id: 0,
+                storage_id: 0,
+                notes: item.notes,
+                is_for_sale: false,
+                owner_ids: [],
+                is_unused: false,
+              })
             );
             this.props.dispatch(
               setEquipment({ characterId: this.props.character.id, itemId: insertResult.insertId, slot: slotId })
@@ -1045,6 +1098,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         content: () => {
           return <CreateItemDialog storageId={getPersonalPile(this.props.character.id).id} />;
         },
+        widthVmin: 62,
         escapable: true,
       })
     );

@@ -16,6 +16,9 @@ import { showModal } from "../../redux/modalsSlice";
 import { SplitBundleDialog } from "./SplitBundleDialog";
 import { Tag } from "../../lib/tags";
 import { SpellbookDialog } from "./SpellbookDialog";
+import { SplitButton } from "../SplitButton";
+import { EditButton } from "../EditButton";
+import { SpellbookButton } from "../SpellbookButton";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
   containerIds: number[];
@@ -182,10 +185,10 @@ class AInventoriesList extends React.Component<Props> {
       <div className={styles.containedItemRowContentWrapper} style={{ marginLeft: `${depth}vmin` }}>
         <div className={styles.containedItemName}>{getItemNameText(item, def)}</div>
         {def.bundleable && item.count > 1 && (
-          <div className={styles.bundleButton} onClick={this.onBundleButtonClick.bind(this, item, def)} />
+          <SplitButton className={styles.editButton} onClick={this.onBundleButtonClick.bind(this, item, def)} />
         )}
         {isSpellbook && (
-          <div className={styles.spellbookButton} onClick={this.onSpellbookButtonClick.bind(this, item, def)} />
+          <SpellbookButton className={styles.editButton} onClick={this.onSpellbookButtonClick.bind(this, item, def)} />
         )}
       </div>
     );
