@@ -40,3 +40,32 @@
   font-size: 0.8rem;
   color: #447722;
 }
+
+.notesSection {
+  position: relative;
+  border: 1px solid gray;
+  padding: 0.5vmin;
+  margin: 0.5vmin;
+  color: gray;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+}
+
+.forSale {
+  position: relative;
+  font-size: 0.8rem;
+  color: darkgoldenrod;
+}
+
+.grantsXP {
+  position: relative;
+  font-size: 0.8rem;
+  color: darkcyan;
+}
+
+.ownersLabel {
+  position: relative;
+  font-size: 0.8rem;
+  color: yellowgreen;
+  white-space: pre-wrap;
+}

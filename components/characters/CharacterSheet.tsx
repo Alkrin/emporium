@@ -63,6 +63,7 @@ import { EditCostOfLivingDialog } from "./EditCostOfLivingDialog";
 import { CharacterContractsDialog } from "./CharacterContractsDialog";
 import { SharedLoadbearing } from "../../staticData/classFeatures/SharedLoadbearing";
 import { InputSingleNumberOfTwoDialog } from "../dialogs/InputSingleNumberOfTwoDialog";
+import { setActiveStorageId } from "../../redux/storageSlice";
 
 interface ReactProps {
   characterId: number;
@@ -595,6 +596,7 @@ class ACharacterSheet extends React.Component<Props> {
   }
 
   private onEditStorageClicked(): void {
+    this.props.dispatch?.(setActiveStorageId(getPersonalPile(this.props.character.id).id));
     this.props.dispatch?.(
       showSubPanel({
         id: "EditStorages",

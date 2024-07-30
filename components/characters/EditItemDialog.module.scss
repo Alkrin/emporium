@@ -56,7 +56,7 @@
   width: 15vmin;
 }
 
-.createButton {
+.saveButton {
   @extend .dialogButton;
   margin-top: 1.5vmin;
   width: 15vmin;
@@ -70,14 +70,6 @@
 .itemListRoot {
   width: 30vmin;
   height: 30vmin;
-}
-
-.asteriskRow {
-  position: relative;
-  margin-top: 1.5vmin;
-  white-space: pre-wrap;
-  text-align: center;
-  color: lime;
 }
 
 .countRow {
@@ -95,16 +87,26 @@
   width: 10vmin;
 }
 
-.instancePanel {
-  @extend .column;
-  align-items: flex-start;
-  align-self: flex-start;
+.itemName {
   position: relative;
-  margin-left: 1vmin;
+  font-size: 1.5rem;
+  color: wheat;
+}
+
+.itemDescription {
+  position: relative;
+  padding: 0.5vmin;
+  font-size: 1rem;
+  font-style: italic;
+  color: gray;
+  text-align: center;
+  background-color: black;
+  border-radius: 0.5vmin;
 }
 
 .notesLabel {
   position: relative;
+  margin-top: 1vmin;
 }
 
 .notesField {

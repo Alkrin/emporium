@@ -151,7 +151,7 @@ class AStoragesList extends React.Component<Props, State> {
       return true;
     });
 
-    const personalPileId = getPersonalPile(this.props.activeCharacterId).id;
+    const personalPileId = getPersonalPile(this.props.activeCharacterId)?.id ?? 0;
     filteredStorages.sort((storageA, storageB) => {
       // The selected character's Personal Pile is always first.
       if (storageA.id === personalPileId) {

@@ -56,7 +56,7 @@
   width: 15vmin;
 }
 
-.createButton {
+.saveButton {
   @extend .dialogButton;
   margin-top: 1.5vmin;
   width: 15vmin;
@@ -72,17 +72,9 @@
   height: 30vmin;
 }
 
-.asteriskRow {
-  position: relative;
-  margin-top: 1.5vmin;
-  white-space: pre-wrap;
-  text-align: center;
-  color: lime;
-}
-
 .countRow {
   @extend .row;
-  margin-top: 1.5vmin;
+  margin-top: 0.5vmin;
 }
 
 .countLabel {
@@ -90,21 +82,36 @@
   color: wheat;
 }
 
+.valueLabel {
+  font-size: 1;
+  color: yellow;
+}
+
 .countField {
   margin-left: 0.5vmin;
   width: 10vmin;
 }
 
-.instancePanel {
-  @extend .column;
-  align-items: flex-start;
-  align-self: flex-start;
+.itemName {
   position: relative;
-  margin-left: 1vmin;
+  font-size: 1.5rem;
+  color: wheat;
+}
+
+.itemDescription {
+  position: relative;
+  padding: 0.5vmin;
+  font-size: 1rem;
+  font-style: italic;
+  color: gray;
+  text-align: center;
+  background-color: black;
+  border-radius: 0.5vmin;
 }
 
 .notesLabel {
   position: relative;
+  margin-top: 1vmin;
 }
 
 .notesField {
@@ -201,4 +208,63 @@
   color: wheat;
   text-align: left;
   flex-grow: 1;
+}
+
+.availabilityTable {
+  @extend .row;
+  position: relative;
+  margin-top: 0.5vmin;
+}
+
+.availabilityEntry {
+  position: relative;
+  color: wheat;
+  padding: 0.25vmin;
+}
+
+.availabilityHeader {
+  position: relative;
+  color: wheat;
+  padding: 0.25vmin;
+  border: 1px solid wheat;
+  align-self: normal;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-wrap: nowrap;
+}
+
+.availabilityPriceEntry {
+  position: relative;
+  color: white;
+  padding: 0.25vmin;
+  border: 1px solid wheat;
+  align-self: normal;
+  text-align: right;
+  font-size: 0.7rem;
+  text-wrap: nowrap;
+}
+
+.availabilityValueEntry {
+  position: relative;
+  color: yellow;
+  padding: 0.25vmin;
+  border: 1px solid wheat;
+  align-self: normal;
+  text-align: right;
+  font-size: 0.7rem;
+  text-wrap: nowrap;
+}
+
+.sidePanel {
+  position: absolute;
+  left: 101%;
+  top: 0;
+  padding: 1vmin;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 1vmin;
+  border: 2px solid white;
+  background-color: #222;
 }

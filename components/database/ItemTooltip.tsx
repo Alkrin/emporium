@@ -2,7 +2,7 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
-import { ItemData, ItemDefData } from "../../serverAPI";
+import { CharacterData, ItemData, ItemDefData } from "../../serverAPI";
 import styles from "./ItemTooltip.module.scss";
 import { getItemContainedWeight, getItemNameText, getItemTotalWeight } from "../../lib/itemUtils";
 import { Dictionary } from "../../lib/dictionary";
@@ -24,6 +24,7 @@ interface InjectedProps {
   itemDef?: ItemDefData;
   allItems: Dictionary<ItemData>;
   allItemDefs: Dictionary<ItemDefData>;
+  allCharacters: Dictionary<CharacterData>;
   dispatch?: Dispatch;
 }
 
@@ -54,7 +55,7 @@ class AItemTooltip extends React.Component<Props> {
         <div className={styles.row}>
           {itemDef.ac > 0 && <div className={styles.segment}>{`AC: ${itemDef.ac + itemDef.magic_bonus}`}</div>}
           {itemDef.range_increment > 0 && (
-            <div className={styles.segment}>{`Range: ${itemDef.range_increment}' / ${itemDef.range_increment * 2}' / ${
+            <div className={styles.segment}>{`Range: ${itemDef.range_increment}/${itemDef.range_increment * 2}/${
               itemDef.range_increment * 3
             }'`}</div>
           )}
@@ -69,6 +70,17 @@ class AItemTooltip extends React.Component<Props> {
           )}
         </div>
         <div className={styles.description}>{itemDef.description}</div>
+        {(this.props.item?.notes?.length ?? 0) > 0 ? (
+          <div className={styles.notesSection}>{this.props.item?.notes}</div>
+        ) : null}
+        {this.props.item?.is_for_sale ? <div className={styles.forSale}>{"Marked For Sale"}</div> : null}
+        {this.props.item?.is_unused ? <div className={styles.grantsXP}>{"Grants XP when sold"}</div> : null}
+        {(this.props.item?.owner_ids?.length ?? 0) > 0 ? (
+          <div className={styles.ownersLabel}>
+            {"If this item is Sold, the following characters will receive a share.\n\xa0" +
+              this.props.item?.owner_ids?.map((id) => this.props.allCharacters[id]?.name)?.join("\n\xa0")}
+          </div>
+        ) : null}
         {"itemId" in this.props && this.props.itemId && <div className={styles.itemId}>#{this.props.itemId}</div>}
       </div>
     );
@@ -140,6 +152,7 @@ class AItemTooltip extends React.Component<Props> {
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allItems } = state.items;
   const allItemDefs = state.gameDefs.items;
+  const allCharacters = state.characters.characters;
   if ("itemId" in props) {
     const item = allItems[props.itemId];
     const itemDef = allItemDefs[item?.def_id];
@@ -149,6 +162,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
       itemDef,
       allItems,
       allItemDefs,
+      allCharacters,
     };
   } else {
     const itemDef = allItemDefs[props.itemDefId];
@@ -157,6 +171,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
       itemDef,
       allItems,
       allItemDefs,
+      allCharacters,
     };
   }
 }

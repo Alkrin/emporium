@@ -8,7 +8,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     const results = await executeQuery<any>(
       `INSERT INTO item_defs (name,description,stones,sixth_stones,storage_stones,storage_sixth_stones,storage_filters,bundleable,` +
         `number_per_stone,ac,damage_die,damage_dice,damage_die_2h,damage_dice_2h,range_increment,fixed_weight,magic_bonus,conditional_magic_bonus,` +
-        `conditional_magic_bonus_type,max_cleaves,tags,purchase_quantity,cost_gp,cost_sp,cost_cp) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        `conditional_magic_bonus_type,max_cleaves,tags,purchase_quantity,cost_gp,cost_sp,cost_cp,sale_gp,sale_sp,sale_cp) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         b.name,
         b.description,
@@ -35,6 +35,9 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         b.cost_gp,
         b.cost_sp,
         b.cost_cp,
+        b.sale_gp,
+        b.sale_sp,
+        b.sale_cp,
       ]
     );
 

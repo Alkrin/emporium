@@ -201,52 +201,23 @@
   font-size: 1rem;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   cursor: move;
+
+  &.forSale {
+    background-color: rgba(255, 255, 100, 0.25);
+  }
 }
 
 .personalPileItemName {
   color: white;
+  flex-grow: 1;
 }
 
-.personalPileBundleButton {
+.editButton {
   position: relative;
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-  background-image: url("/images/EditIcon.png");
-  background-size: contain;
-  pointer-events: all;
-  cursor: pointer;
-  opacity: 0.5;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:active {
-    opacity: 1;
-  }
-}
-
-.personalPileSpellbookButton {
-  position: relative;
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-  background-image: url("/images/EditIcon.png");
-  background-size: contain;
-  pointer-events: all;
-  cursor: pointer;
-  opacity: 0.5;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:active {
-    opacity: 1;
-  }
+  margin-left: 0.25vmin;
+  width: 1rem !important;
+  height: 1rem !important;
 }
 
 .equippedItemRow {

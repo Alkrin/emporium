@@ -6,8 +6,8 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
   try {
     const b = req.body as RequestBody_CreateItem;
     const results = await executeQuery<any>(
-      `INSERT INTO items (def_id,count,container_id,storage_id) VALUES (?,?,?,?)`,
-      [b.def_id, b.count, b.container_id, b.storage_id]
+      `INSERT INTO items (def_id,count,container_id,storage_id,notes,is_for_sale,owner_ids,is_unused) VALUES (?,?,?,?,?,?,?,?)`,
+      [b.def_id, b.count, b.container_id, b.storage_id, b.notes, b.is_for_sale, b.owner_ids, b.is_unused]
     );
 
     res.status(200).json(results);
