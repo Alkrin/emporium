@@ -6,7 +6,7 @@ import { Dictionary } from "../../lib/dictionary";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { showToaster } from "../../redux/toastersSlice";
-import ServerAPI, { CharacterData, ItemData, ItemDefData, StorageData } from "../../serverAPI";
+import ServerAPI, { CharacterData, ItemData, ItemDefData, SpellDefData, StorageData } from "../../serverAPI";
 import { ItemTooltip } from "../database/ItemTooltip";
 import { SearchableDefList } from "../database/SearchableDefList";
 import styles from "./CreateItemDialog.module.scss";
@@ -14,6 +14,8 @@ import { getStorageDisplayName } from "../../lib/storageUtils";
 import { EditButton } from "../EditButton";
 import { SavingVeil } from "../SavingVeil";
 import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
+import { SelectSpellsDialog } from "../dialogs/SelectSpellsDialog";
+import { ResizeDetector } from "../ResizeDetector";
 
 interface State {
   isSaving: boolean;
@@ -21,8 +23,10 @@ interface State {
   numToCreate: number;
   notes: string;
   isForSale: boolean;
-  ownerIDs: number[];
+  ownerIds: number[];
   isUnused: boolean;
+  spellIds: number[];
+  columnHeight: number;
 }
 
 interface ReactProps {
@@ -34,6 +38,7 @@ interface InjectedProps {
   allStorages: Dictionary<StorageData>;
   allItemDefs: Dictionary<ItemDefData>;
   allCharacters: Dictionary<CharacterData>;
+  allSpellDefs: Dictionary<SpellDefData>;
   dispatch?: Dispatch;
 }
 
@@ -49,20 +54,23 @@ class ACreateItemDialog extends React.Component<Props, State> {
       numToCreate: 1,
       notes: "",
       isForSale: false,
-      ownerIDs: [],
+      ownerIds: [],
       isUnused: true,
+      spellIds: [],
+      columnHeight: 0,
     };
   }
 
   render(): React.ReactNode {
     const canCreateClass = this.state.selectedItemId > 0 && !this.state.isSaving ? "" : styles.disabled;
-    const canEditCount = this.state.selectedItemId > 0 && this.props.allItemDefs[this.state.selectedItemId]?.bundleable;
+    const itemDef = this.props.allItemDefs[this.state.selectedItemId];
     return (
       <div className={styles.root}>
         <div className={styles.row}>
           <div className={styles.column}>
             <SearchableDefList
               className={styles.itemListRoot}
+              style={{ height: `${this.state.columnHeight}px` }}
               allDefs={this.props.allItemDefs}
               selectedDefId={this.state.selectedItemId}
               onDefSelected={(selectedItemId) => {
@@ -74,6 +82,11 @@ class ACreateItemDialog extends React.Component<Props, State> {
             />
           </div>
           <div className={styles.instancePanel}>
+            <ResizeDetector
+              onResize={(_, columnHeight) => {
+                this.setState({ columnHeight });
+              }}
+            />
             <div className={styles.notesLabel}>{"Notes"}</div>
             <textarea
               className={styles.notesField}
@@ -82,6 +95,20 @@ class ACreateItemDialog extends React.Component<Props, State> {
                 this.setState({ notes: e.target.value });
               }}
             />
+            <div className={styles.row}>
+              <div className={styles.ownersLabel}>{"Associated Spells"}</div>
+              <EditButton className={styles.inlineEditButton} onClick={this.onEditAssociatedSpellsClicked.bind(this)} />
+            </div>
+            {this.state.spellIds.length > 0 && (
+              <div className={styles.associatedSpells}>
+                {this.state.spellIds
+                  .map((sid) => {
+                    const def = this.props.allSpellDefs[sid];
+                    return def.name;
+                  })
+                  .join(", ")}
+              </div>
+            )}
             <div className={styles.flagRow}>
               <div className={styles.normalText}>{"Is For Sale?"}</div>
               <input
@@ -112,26 +139,25 @@ class ACreateItemDialog extends React.Component<Props, State> {
           </div>
         </div>
         <div className={styles.countRow}>
-          <div className={styles.countLabel}>Num to Create</div>
+          <div className={styles.countLabel}>{itemDef?.has_charges ? "Num Charges" : "Item Count"}</div>
           <input
             className={styles.countField}
             type={"number"}
             value={this.state.numToCreate}
-            min={1}
+            min={0}
             onChange={(e) => {
               this.setState({ numToCreate: +e.target.value });
             }}
-            disabled={!canEditCount}
           />
         </div>
         <div className={styles.asteriskRow}>
           {`Created Items will be added to\n` + `${getStorageDisplayName(this.props.storageId)}`}
         </div>
         <div className={`${styles.createButton} ${canCreateClass}`} onClick={this.onCreateClicked.bind(this)}>
-          Create
+          {"Create"}
         </div>
         <div className={styles.closeButton} onClick={this.onCloseClicked.bind(this)}>
-          Close
+          {"Close"}
         </div>
         <SavingVeil show={this.state.isSaving} />
       </div>
@@ -149,7 +175,7 @@ class ACreateItemDialog extends React.Component<Props, State> {
   }
 
   private getSortedOwners(): CharacterData[] {
-    const sorted = [...this.state.ownerIDs].sort((a, b) => {
+    const sorted = [...this.state.ownerIds].sort((a, b) => {
       const characterA = this.props.allCharacters[a];
       const characterB = this.props.allCharacters[b];
 
@@ -175,13 +201,32 @@ class ACreateItemDialog extends React.Component<Props, State> {
         content: () => {
           return (
             <SelectAdventurersDialog
-              preselectedAdventurerIDs={this.state.ownerIDs}
+              preselectedAdventurerIDs={this.state.ownerIds}
               onSelectionConfirmed={(adventurerIDs: number[]) => {
-                this.setState({ ownerIDs: adventurerIDs });
+                this.setState({ ownerIds: adventurerIDs });
               }}
             />
           );
         },
+      })
+    );
+  }
+
+  private onEditAssociatedSpellsClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "EditAssociatedSpells",
+        content: () => {
+          return (
+            <SelectSpellsDialog
+              preselectedSpellIds={this.state.spellIds}
+              onSelectionConfirmed={(spellIds) => {
+                this.setState({ spellIds });
+              }}
+            />
+          );
+        },
+        widthVmin: 45,
       })
     );
   }
@@ -198,8 +243,9 @@ class ACreateItemDialog extends React.Component<Props, State> {
       storage_id: this.props.storageId,
       notes: this.state.notes,
       is_for_sale: this.state.isForSale,
-      owner_ids: this.state.ownerIDs,
+      owner_ids: this.state.ownerIds,
       is_unused: this.state.isUnused,
+      spell_ids: this.state.spellIds,
     };
 
     let toasterTitle: string = "";
@@ -231,12 +277,14 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allStorages } = state.storages;
   const allItemDefs = state.gameDefs.items;
   const allCharacters = state.characters.characters;
+  const allSpellDefs = state.gameDefs.spells;
   return {
     ...props,
     character,
     allStorages,
     allItemDefs,
     allCharacters,
+    allSpellDefs,
   };
 }
 

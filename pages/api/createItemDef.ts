@@ -6,9 +6,10 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
   try {
     const b = req.body as RequestBody_CreateItemDef;
     const results = await executeQuery<any>(
-      `INSERT INTO item_defs (name,description,stones,sixth_stones,storage_stones,storage_sixth_stones,storage_filters,bundleable,` +
+      `INSERT INTO item_defs (name,description,stones,sixth_stones,storage_stones,storage_sixth_stones,storage_filters,has_charges,` +
         `number_per_stone,ac,damage_die,damage_dice,damage_die_2h,damage_dice_2h,range_increment,fixed_weight,magic_bonus,conditional_magic_bonus,` +
-        `conditional_magic_bonus_type,max_cleaves,tags,purchase_quantity,cost_gp,cost_sp,cost_cp,sale_gp,sale_sp,sale_cp) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        `conditional_magic_bonus_type,max_cleaves,tags,purchase_quantity,cost_gp,cost_sp,cost_cp,sale_gp,sale_sp,sale_cp,spell_ids) ` +
+        `VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         b.name,
         b.description,
@@ -17,7 +18,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         b.storage_stones,
         b.storage_sixth_stones,
         b.storage_filters,
-        b.bundleable,
+        b.has_charges,
         b.number_per_stone,
         b.ac,
         b.damage_die,
@@ -38,6 +39,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         b.sale_gp,
         b.sale_sp,
         b.sale_cp,
+        b.spell_ids,
       ]
     );
 

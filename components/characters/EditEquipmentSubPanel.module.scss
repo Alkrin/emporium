@@ -57,6 +57,7 @@
 }
 
 .equipmentSlotRoot {
+  position: relative;
   margin-left: 0.5vmin;
   flex-grow: 1;
   background-color: rgba(0, 0, 0, 0.8);
@@ -96,8 +97,10 @@
   top: 5vmin;
   left: 1.5vmin;
   width: 27vmin;
+  height: 60vmin;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .equipmentRow {
@@ -174,12 +177,18 @@
   }
 }
 
-.fullDraggableHandle {
+.fullDropTarget {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+}
+
+.draggableHandle {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .personalPileRow {
@@ -196,6 +205,7 @@
 }
 
 .personalPileRowContentWrapper {
+  position: relative;
   padding: 0vmin 0.5vmin;
   background-color: rgba(255, 255, 255, 0.1);
   font-size: 1rem;
@@ -213,6 +223,15 @@
   flex-grow: 1;
 }
 
+.associatedSpellRow {
+  position: relative;
+  margin-left: 1vmin;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(100, 255, 255, 0.1);
+  font-size: 1rem;
+  color: cyan;
+}
+
 .editButton {
   position: relative;
   margin-left: 0.25vmin;
@@ -221,24 +240,29 @@
 }
 
 .equippedItemRow {
+  position: relative;
   display: flex;
   flex-direction: row;
   color: white;
   font-size: 1rem;
   padding-left: 0.5vmin;
   cursor: move;
+  box-sizing: border-box;
 }
 
 .equipmentSlotContentWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
   margin-right: 0.5vmin;
   padding: 0vmin 0.5vmin;
   background-color: rgba(255, 255, 255, 0.1);
   font-size: 1rem;
-  flex-grow: 1;
 }
 
 .equipmentSlotItemName {
   color: white;
+  flex-grow: 1;
 }
 
 .equipmentCategorySpacer {

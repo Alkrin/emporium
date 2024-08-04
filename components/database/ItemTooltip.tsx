@@ -101,7 +101,7 @@ class AItemTooltip extends React.Component<Props> {
       }
     } else if (itemDef) {
       // This is just an itemDef, so we only show generic values.
-      if (itemDef.bundleable) {
+      if (itemDef.number_per_stone > 0) {
         return `${itemDef.number_per_stone} per stone`;
       } else {
         // If only stones, show only stones.

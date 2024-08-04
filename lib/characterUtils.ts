@@ -34,7 +34,7 @@ import {
 } from "../staticData/types/characterClasses";
 import { WeaponCategory, WeaponType } from "../staticData/types/items";
 import { Dictionary } from "./dictionary";
-import { Stones, StonesToNumber, getTotalEquippedWeight } from "./itemUtils";
+import { Stones, StonesToSixths, getTotalEquippedWeight } from "./itemUtils";
 import { EquipmentSlotTag, Tag } from "./tags";
 import { DwarvenFuryFleshRunes } from "../staticData/classFeatures/DwarvenFuryFleshRunes";
 import { SharedMeleeAccuracyBonus } from "../staticData/classFeatures/SharedMeleeAccuracyBonus";
@@ -1501,13 +1501,13 @@ export function getEncumbranceLevelForCharacter(characterId: number): Encumbranc
   const encumbranceReduction = 2 * getProficiencyRankForCharacter(characterId, SharedLoadbearing.id);
 
   let encumbranceLevel = EncumbranceLevel.None;
-  if (StonesToNumber(encumbrance) > StonesToNumber(maxEncumbrance)) {
+  if (StonesToSixths(encumbrance) > StonesToSixths(maxEncumbrance)) {
     encumbranceLevel = EncumbranceLevel.Overloaded;
-  } else if (StonesToNumber(encumbrance) > StonesToNumber([10 + encumbranceReduction, 0])) {
+  } else if (StonesToSixths(encumbrance) > StonesToSixths([10 + encumbranceReduction, 0])) {
     encumbranceLevel = EncumbranceLevel.Heavy;
-  } else if (StonesToNumber(encumbrance) > StonesToNumber([7 + encumbranceReduction, 0])) {
+  } else if (StonesToSixths(encumbrance) > StonesToSixths([7 + encumbranceReduction, 0])) {
     encumbranceLevel = EncumbranceLevel.Medium;
-  } else if (StonesToNumber(encumbrance) > StonesToNumber([5 + encumbranceReduction, 0])) {
+  } else if (StonesToSixths(encumbrance) > StonesToSixths([5 + encumbranceReduction, 0])) {
     encumbranceLevel = EncumbranceLevel.Light;
   }
 

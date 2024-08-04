@@ -80,7 +80,7 @@ class AEquipmentSetInventoriesList extends React.Component<Props> {
       });
 
       let itemNameText = def.name;
-      if (def.bundleable) {
+      if (def.purchase_quantity > 1) {
         itemNameText = `${def.name} ×${def.purchase_quantity}`;
       }
 
@@ -116,7 +116,7 @@ class AEquipmentSetInventoriesList extends React.Component<Props> {
         return this.renderContainerSection(item, depth);
       } else {
         let itemNameText = def.name;
-        if (def.bundleable) {
+        if (def.purchase_quantity > 1) {
           itemNameText = `${def.name} x${def.purchase_quantity}`;
         }
         return (

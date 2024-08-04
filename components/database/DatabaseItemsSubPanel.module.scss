@@ -1,5 +1,5 @@
 .root {
-  width: 57vmin;
+  width: 59vmin;
   height: 70.5vmin;
   border-radius: 1vmin;
   border: 2px solid white;
@@ -99,10 +99,10 @@
   position: absolute;
   top: 8vmin;
   right: 2vmin;
-  width: 32vmin;
+  width: 34vmin;
+  height: 55.5vmin;
   background-color: rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
+  padding-bottom: 0.5vmin;
 }
 
 .textInput {
@@ -130,11 +130,6 @@
 
 .trailingCheckbox {
   margin-left: 0.5vmin;
-}
-
-.sizePanel {
-  @extend .row;
-  justify-content: flex-start;
 }
 
 .sizeStonesField {
@@ -185,26 +180,14 @@
   resize: none;
 }
 
-.savingVeil {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  pointer-events: all;
-}
-
-.savingLabel {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: wheat;
-  font-size: 3rem;
-}
-
 .gpInputField {
   @extend .smallInputField;
   width: 5vmin;
+}
+
+.associatedSpells {
+  padding: 0.5vmin;
+  background-color: black;
+  font-size: 0.9rem;
+  color: yellow;
 }

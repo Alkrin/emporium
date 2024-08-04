@@ -10,6 +10,7 @@ import ServerAPI, {
   CharacterEquipmentSlots,
   ItemData,
   ItemDefData,
+  SpellDefData,
   StorageData,
 } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
@@ -26,7 +27,8 @@ import { deleteItem, updateItem } from "../../redux/itemsSlice";
 import { WeaponStyle } from "../../staticData/types/characterClasses";
 import { InventoriesList } from "./InventoriesList";
 import {
-  StonesToNumber,
+  StonesToSixths,
+  canItemsBeStacked,
   getAvailableRoomForContainer,
   getItemNameText,
   getItemTotalWeight,
@@ -56,6 +58,8 @@ import { EditItemDialog } from "./EditItemDialog";
 import { SellButton } from "../SellButton";
 import { SellItemDialog } from "./SellItemDialog";
 import { setActiveStorageId } from "../../redux/storageSlice";
+import { SpellTooltip } from "../database/SpellTooltip";
+import { ScrollArea } from "../ScrollArea";
 
 export const DropTypeItem = "DropTypeItem";
 
@@ -68,6 +72,7 @@ interface InjectedProps {
   character: CharacterData;
   allStorages: Dictionary<StorageData>;
   allItemDefs: Dictionary<ItemDefData>;
+  allSpellDefs: Dictionary<SpellDefData>;
   allItems: Dictionary<ItemData>;
   currentDraggableId: string;
   dispatch?: Dispatch;
@@ -83,8 +88,8 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
 
     return (
       <div className={styles.root}>
-        <div className={styles.equipmentSlotsTitle}>Equipment Slots</div>
-        <div className={styles.equipmentSlotList}>
+        <div className={styles.equipmentSlotsTitle}>{"Equipment Slots"}</div>
+        <ScrollArea className={styles.equipmentSlotList}>
           {this.renderEquipmentSlot("Melee Weapon", EquipmentSlotTag.Melee, "slot_melee1")}
           {this.renderEquipmentSlot("Melee Weapon", EquipmentSlotTag.Melee, "slot_melee2")}
           {this.renderEquipmentSlot("Ranged Weapon", EquipmentSlotTag.Ranged, "slot_ranged")}
@@ -108,13 +113,13 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
           {this.renderEquipmentSlot("Ring", EquipmentSlotTag.Ring, "slot_ring2")}
           {this.renderEquipmentSlot("Waist", EquipmentSlotTag.Waist, "slot_waist")}
           {this.renderEquipmentSlot("Wrists", EquipmentSlotTag.Wrists, "slot_wrists")}
-        </div>
+        </ScrollArea>
         {personalPile && (
           <>
             <div className={styles.createItemsButton} onClick={this.onCreateItemsClicked.bind(this)}>
-              Create Items
+              {"Create Items"}
             </div>
-            <div className={styles.personalPileTitle}>Personal Pile</div>
+            <div className={styles.personalPileTitle}>{"Personal Pile"}</div>
             <DropTarget dropId={DropTargetPersonalPile} dropTypes={[DropTypeItem]} className={styles.personalPileRoot}>
               {this.getPersonalPileItems().map((item) => {
                 return this.renderPersonalPileItemRow(item);
@@ -125,7 +130,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
             <div className={styles.trashCanWarning}>{"Items placed in the Trash Can will be destroyed."}</div>
           </>
         )}
-        <div className={styles.inventoriesTitle}>Inventories</div>
+        <div className={styles.inventoriesTitle}>{"Inventories"}</div>
         <InventoriesList
           className={styles.inventoriesListRoot}
           containerIds={this.getContainerIds()}
@@ -160,8 +165,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
       if (itemId && !containerIds.includes(itemId)) {
         const item = this.props.allItems[itemId];
         if (!item) {
-          // When moving bundleable equipment directly into a bundle, we temporarily get an invalid equipment id
-          // while the bundles are being merged.
+          // When combining item stacks, we temporarily get an invalid equipment id while the stacks are being merged.
           return;
         }
         const def = this.props.allItemDefs[item.def_id];
@@ -207,7 +211,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
           {equippedItemDef && (
             <Draggable className={styles.equippedItemRow} draggableId={draggableId}>
               <DraggableHandle
-                className={styles.fullDraggableHandle}
+                className={styles.draggableHandle}
                 draggableId={draggableId}
                 dropTypes={[DropTypeItem]}
                 draggingRender={() => {
@@ -217,18 +221,8 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
                   this.handleItemDropped(dropTargetIds, equippedItem, equippedItemDef);
                 }}
               >
-                <TooltipSource
-                  tooltipParams={{
-                    id: `item${equippedItem.id}`,
-                    content: () => {
-                      return <ItemTooltip itemId={equippedItem.id} />;
-                    },
-                  }}
-                  className={styles.fullDraggableHandle}
-                  key={`item${equippedItem.id}`}
-                />
+                {this.renderEquipmentSlotContents(equippedItem, equippedItemDef)}
               </DraggableHandle>
-              {this.renderEquipmentSlotContents(equippedItem, equippedItemDef)}
             </Draggable>
           )}
         </DropTarget>
@@ -238,9 +232,40 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
 
   private renderEquipmentSlotContents(item: ItemData, def: ItemDefData): React.ReactNode {
     return (
-      <div className={styles.equipmentSlotContentWrapper}>
-        <div className={styles.equipmentSlotItemName}>{getItemNameText(item, def)}</div>
-      </div>
+      <>
+        <TooltipSource
+          tooltipParams={{
+            id: `item${item.id}`,
+            content: () => {
+              return <ItemTooltip itemId={item.id} />;
+            },
+          }}
+          className={styles.equipmentSlotContentWrapper}
+        >
+          <div className={styles.equipmentSlotItemName}>{getItemNameText(item, def)}</div>
+        </TooltipSource>
+        {[...def.spell_ids, ...item.spell_ids].map((sid, spellIndex) => {
+          const spellDef = this.props.allSpellDefs[sid];
+          if (spellDef) {
+            return (
+              <TooltipSource
+                key={`spell${spellIndex}`}
+                className={styles.associatedSpellRow}
+                tooltipParams={{
+                  id: `${spellDef.id} ${spellIndex}`,
+                  content: () => {
+                    return <SpellTooltip spellId={sid} />;
+                  },
+                }}
+              >
+                {spellDef.name}
+              </TooltipSource>
+            );
+          } else {
+            return null;
+          }
+        })}
+      </>
     );
   }
 
@@ -272,11 +297,14 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
       const draggableId = `personalPile${item.id}`;
       return (
         <Draggable className={styles.personalPileRowDraggable} draggableId={draggableId} key={draggableId}>
-          {def.bundleable && (
-            <DropTarget dropId={`Bundle${item.id}`} dropTypes={[DropTypeItem]} className={styles.fullDraggableHandle} />
-          )}
+          {
+            // Charged items cannot be stacked because each needs to track its charges separately.
+            !def.has_charges && (
+              <DropTarget dropId={`Bundle${item.id}`} dropTypes={[DropTypeItem]} className={styles.fullDropTarget} />
+            )
+          }
           <DraggableHandle
-            className={styles.fullDraggableHandle}
+            className={styles.draggableHandle}
             draggableId={draggableId}
             dropTypes={[DropTypeItem]}
             draggingRender={() => {
@@ -286,18 +314,8 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
               this.handleItemDropped(dropTargetIds, item, def);
             }}
           >
-            <TooltipSource
-              tooltipParams={{
-                id: `item${item.id}`,
-                content: () => {
-                  return <ItemTooltip itemId={item.id} />;
-                },
-              }}
-              className={styles.fullDraggableHandle}
-              key={`item${item.id}`}
-            />
+            {this.renderPersonalPileRowContents(item, def)}
           </DraggableHandle>
-          {this.renderPersonalPileRowContents(item, def)}
         </Draggable>
       );
     }
@@ -306,33 +324,89 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
   private renderPersonalPileRowContents(item: ItemData, def: ItemDefData): React.ReactNode {
     const isSpellbook = def.tags.includes(Tag.Spellbook);
     return (
-      <div className={`${styles.personalPileRowContentWrapper}  ${item.is_for_sale ? styles.forSale : ""}`}>
-        <div className={styles.personalPileItemName}>{getItemNameText(item, def)}</div>
-        {def.bundleable && item.count > 1 && (
-          <SplitButton className={styles.editButton} onClick={this.onBundleButtonClick.bind(this, item, def)} />
-        )}
-        {isSpellbook && (
-          <SpellbookButton className={styles.editButton} onClick={this.onSpellbookButtonClick.bind(this, item, def)} />
-        )}
-        <EditButton className={styles.editButton} onClick={this.onItemEditButtonClick.bind(this, item, def)} />
-        <SellButton className={styles.editButton} onClick={this.onSellItemButtonClick.bind(this, item, def)} />
-      </div>
+      <>
+        <TooltipSource
+          tooltipParams={{
+            id: `item${item.id}`,
+            content: () => {
+              return <ItemTooltip itemId={item.id} />;
+            },
+          }}
+          className={`${styles.personalPileRowContentWrapper}  ${item.is_for_sale ? styles.forSale : ""}`}
+        >
+          <div className={styles.personalPileItemName}>{getItemNameText(item, def)}</div>
+          {
+            // A charged item cannot be stacked or split, only spent.
+            !def.has_charges && item.count > 1 && (
+              <SplitButton className={styles.editButton} onMouseDown={this.onBundleButtonClick.bind(this, item, def)} />
+            )
+          }
+          {isSpellbook && (
+            <SpellbookButton
+              className={styles.editButton}
+              onMouseDown={this.onSpellbookButtonClick.bind(this, item, def)}
+            />
+          )}
+          <EditButton className={styles.editButton} onMouseDown={this.onItemEditButtonClick.bind(this, item, def)} />
+          <SellButton className={styles.editButton} onMouseDown={this.onSellItemButtonClick.bind(this, item, def)} />
+        </TooltipSource>
+        {[...def.spell_ids, ...item.spell_ids].map((sid, spellIndex) => {
+          const spellDef = this.props.allSpellDefs[sid];
+          if (spellDef) {
+            return (
+              <TooltipSource
+                key={`spell${spellIndex}`}
+                className={styles.associatedSpellRow}
+                tooltipParams={{
+                  id: `${spellDef.id} ${spellIndex}`,
+                  content: () => {
+                    return <SpellTooltip spellId={sid} />;
+                  },
+                }}
+              >
+                {spellDef.name}
+              </TooltipSource>
+            );
+          } else {
+            return null;
+          }
+        })}
+      </>
     );
   }
 
-  private onSellItemButtonClick(item: ItemData, def: ItemDefData): void {
-    this.props.dispatch?.(
-      showModal({
-        id: "sellItemDialog",
-        content: () => {
-          return <SellItemDialog item={item} def={def} />;
-        },
-        escapable: true,
-      })
-    );
+  private onSellItemButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
+    const itemIds = getAllItemAssociatedItemIds(item.id);
+    if (itemIds.length > 1) {
+      this.props.dispatch?.(
+        showToaster({
+          id: "ContainerFull",
+          content: {
+            title: "Unable to Sell",
+            message: `Please empty the ${def.name} before selling it.`,
+          },
+        })
+      );
+    } else {
+      this.props.dispatch?.(
+        showModal({
+          id: "sellItemDialog",
+          content: () => {
+            return <SellItemDialog item={item} def={def} />;
+          },
+          escapable: true,
+        })
+      );
+    }
   }
 
-  private onItemEditButtonClick(item: ItemData, def: ItemDefData): void {
+  private onItemEditButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
     this.props.dispatch?.(
       showModal({
         id: "editItemDialog",
@@ -344,7 +418,10 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     );
   }
 
-  private onBundleButtonClick(item: ItemData, def: ItemDefData): void {
+  private onBundleButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
     this.props.dispatch?.(
       showModal({
         id: "splitBundleDialog",
@@ -356,7 +433,10 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     );
   }
 
-  private onSpellbookButtonClick(item: ItemData, def: ItemDefData): void {
+  private onSpellbookButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
     this.props.dispatch?.(
       showModal({
         id: "spellbookDialog",
@@ -425,7 +505,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     }
 
     const bundleItem = this.props.allItems[bundleItemId];
-    if (bundleItem?.def_id === def.id) {
+    if (canItemsBeStacked(bundleItem, item, this.props.allItemDefs)) {
       // Same item type.  Merge bundles as much as possible.
       // How many items can fit into the place where the target bundle is contained?
       let countToMove: number = item.count;
@@ -622,8 +702,9 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
       ]);
       const itemWeight = getItemTotalWeight(item.id, this.props.allItems, this.props.allItemDefs, []);
 
-      if (StonesToNumber(itemWeight) > StonesToNumber(availableRoom)) {
-        if (def.bundleable) {
+      if (StonesToSixths(itemWeight) > StonesToSixths(availableRoom)) {
+        // Charged items can't be split.
+        if (!def.has_charges) {
           // If we're dropping a bundle, can we split the bundle to fit some items in?
           const countToMove = getMaxBundleItemsForRoom(def, availableRoom);
           if (countToMove > 0) {
@@ -653,6 +734,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
                     is_for_sale: item.is_for_sale,
                     owner_ids: [...item.owner_ids],
                     is_unused: item.is_unused,
+                    spell_ids: item.spell_ids,
                   })
                 );
               }
@@ -970,7 +1052,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
 
     // Assign the item to the equipment slot from some non-equipped location.  That data is stored on the item's entry,
     // so we don't have to specify a src here.
-    const srcSplit = def.bundleable && item.count > 1; // If the source item is a bundle, we split one item off to equip.
+    const srcSplit = !def.has_charges && item.count > 1; // If the source item is a bundle, we split one item off to equip.
     const equipItem: ItemMoveParams = {
       itemId: item.id,
       srcSplit,
@@ -1025,8 +1107,9 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
                 storage_id: 0,
                 notes: item.notes,
                 is_for_sale: false,
-                owner_ids: [],
-                is_unused: false,
+                owner_ids: item.owner_ids,
+                is_unused: false, // Just equipped it, so no longer unused.
+                spell_ids: item.spell_ids,
               })
             );
             this.props.dispatch(
@@ -1036,6 +1119,8 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         } else {
           // Not a split, so we're keeping the original itemId.
           this.props.dispatch(setEquipment({ characterId: this.props.character.id, itemId: item.id, slot: slotId }));
+          // But mark the equipped item as used.
+          this.props.dispatch(updateItem({ ...item, is_unused: false, storage_id: 0, container_id: 0 }));
         }
       }
     }
@@ -1109,6 +1194,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const character = state.characters.characters[state.characters.activeCharacterId];
   const { allStorages } = state.storages;
   const allItemDefs = state.gameDefs.items;
+  const allSpellDefs = state.gameDefs.spells;
   const { allItems } = state.items;
   const { currentDraggableId } = state.dragAndDrop;
 
@@ -1117,6 +1203,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     character,
     allStorages,
     allItemDefs,
+    allSpellDefs,
     allItems,
     currentDraggableId: currentDraggableId ?? "",
   };

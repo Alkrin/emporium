@@ -6,7 +6,7 @@ import { RootState } from "../../redux/store";
 import { EquipmentSetItemData, ItemDefData } from "../../serverAPI";
 import styles from "./EquipmentSetCreateItemDialog.module.scss";
 import { Dictionary } from "../../lib/dictionary";
-import { Stones, StonesAMinusB, StonesAPlusB, StonesToNumber, getBundleWeight } from "../../lib/itemUtils";
+import { Stones, StonesAMinusB, StonesAPlusB, StonesToSixths, getBundleWeight } from "../../lib/itemUtils";
 
 interface State {
   selectedItemDefId: number;
@@ -68,10 +68,10 @@ class AEquipmentSetCreateItemDialog extends React.Component<Props, State> {
           })}
         </select>
         <div className={styles.closeButton} onClick={this.onCreateClicked.bind(this)}>
-          Create Item
+          {"Create Item"}
         </div>
         <div className={styles.closeButton} onClick={this.onCloseClicked.bind(this)}>
-          Close
+          {"Close"}
         </div>
       </div>
     );
@@ -90,7 +90,7 @@ class AEquipmentSetCreateItemDialog extends React.Component<Props, State> {
 
     const maxContentSize: Stones = [containerDef.storage_stones, containerDef.storage_sixth_stones];
     const currContentSize = this.getContentsSize(this.props.container.item_id);
-    const remainingCapacityRaw = StonesToNumber(StonesAMinusB(maxContentSize, currContentSize));
+    const remainingCapacityRaw = StonesToSixths(StonesAMinusB(maxContentSize, currContentSize));
 
     const items: ItemDefData[] = Object.values(this.props.allItemDefs).filter((def) => {
       // If there is a storage filter, only include items that match the filter.
@@ -105,7 +105,7 @@ class AEquipmentSetCreateItemDialog extends React.Component<Props, State> {
       }
 
       // Validate against available room in the container.
-      const itemSizeRaw = StonesToNumber(this.getItemDefSize(def.id));
+      const itemSizeRaw = StonesToSixths(this.getItemDefSize(def.id));
       if (itemSizeRaw > remainingCapacityRaw) {
         return false;
       }
@@ -137,12 +137,10 @@ class AEquipmentSetCreateItemDialog extends React.Component<Props, State> {
   private getItemDefSize(defId: number): Stones {
     const def = this.props.allItemDefs[defId];
 
-    // Most items have a personal size.
-    let size: Stones = [def.stones, def.sixth_stones];
-    if (def.bundleable) {
-      // But if it's a bundle, assume one purchase unit of items.
-      size = StonesAPlusB(size, getBundleWeight(def, def.purchase_quantity));
-    }
+    // Purchase quantity will usually be one, but for things like arrows that are sold in bundles,
+    // the def weight is for one purchase unit (20 arrows).
+    let size: Stones = getBundleWeight(def, def.purchase_quantity);
+
     return size;
   }
 
