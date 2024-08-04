@@ -5,20 +5,22 @@ import { Dictionary } from "../../lib/dictionary";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { showToaster } from "../../redux/toastersSlice";
-import ServerAPI, { CharacterData, ItemData, ItemDefData, StorageData } from "../../serverAPI";
+import ServerAPI, { CharacterData, ItemData, ItemDefData, SpellDefData, StorageData } from "../../serverAPI";
 import styles from "./EditItemDialog.module.scss";
 import { EditButton } from "../EditButton";
 import { SavingVeil } from "../SavingVeil";
 import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
 import { updateItem } from "../../redux/itemsSlice";
+import { SelectSpellsDialog } from "../dialogs/SelectSpellsDialog";
 
 interface State {
   isSaving: boolean;
   itemCount: number;
   notes: string;
   isForSale: boolean;
-  ownerIDs: number[];
+  ownerIds: number[];
   isUnused: boolean;
+  spellIds: number[];
 }
 
 interface ReactProps {
@@ -28,6 +30,7 @@ interface ReactProps {
 
 interface InjectedProps {
   allCharacters: Dictionary<CharacterData>;
+  allSpellDefs: Dictionary<SpellDefData>;
   dispatch?: Dispatch;
 }
 
@@ -42,14 +45,13 @@ class AEditItemDialog extends React.Component<Props, State> {
       itemCount: props.item.count,
       notes: props.item.notes,
       isForSale: props.item.is_for_sale,
-      ownerIDs: props.item.owner_ids,
+      ownerIds: props.item.owner_ids,
       isUnused: props.item.is_unused,
+      spellIds: props.item.spell_ids,
     };
   }
 
   render(): React.ReactNode {
-    const canEditCount = this.props.def.bundleable;
-
     return (
       <div className={styles.root}>
         <div className={styles.itemName}>{this.props.def.name}</div>
@@ -62,6 +64,20 @@ class AEditItemDialog extends React.Component<Props, State> {
             this.setState({ notes: e.target.value });
           }}
         />
+        <div className={styles.row}>
+          <div className={styles.ownersLabel}>{"Associated Spells"}</div>
+          <EditButton className={styles.inlineEditButton} onClick={this.onEditAssociatedSpellsClicked.bind(this)} />
+        </div>
+        {this.state.spellIds.length > 0 && (
+          <div className={styles.associatedSpells}>
+            {this.state.spellIds
+              .map((sid) => {
+                const def = this.props.allSpellDefs[sid];
+                return def.name;
+              })
+              .join(", ")}
+          </div>
+        )}
         <div className={styles.flagRow}>
           <div className={styles.normalText}>{"Is For Sale?"}</div>
           <input
@@ -96,21 +112,39 @@ class AEditItemDialog extends React.Component<Props, State> {
             className={styles.countField}
             type={"number"}
             value={this.state.itemCount}
-            min={1}
+            min={0}
             onChange={(e) => {
               this.setState({ itemCount: +e.target.value });
             }}
-            disabled={!canEditCount}
           />
         </div>
         <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
-          Save
+          {"Save"}
         </div>
         <div className={styles.closeButton} onClick={this.onCloseClicked.bind(this)}>
-          Close
+          {"Close"}
         </div>
         <SavingVeil show={this.state.isSaving} />
       </div>
+    );
+  }
+
+  private onEditAssociatedSpellsClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "EditAssociatedSpells",
+        content: () => {
+          return (
+            <SelectSpellsDialog
+              preselectedSpellIds={this.state.spellIds}
+              onSelectionConfirmed={(spellIds) => {
+                this.setState({ spellIds });
+              }}
+            />
+          );
+        },
+        widthVmin: 45,
+      })
     );
   }
 
@@ -125,7 +159,7 @@ class AEditItemDialog extends React.Component<Props, State> {
   }
 
   private getSortedOwners(): CharacterData[] {
-    const sorted = [...this.state.ownerIDs].sort((a, b) => {
+    const sorted = [...this.state.ownerIds].sort((a, b) => {
       const characterA = this.props.allCharacters[a];
       const characterB = this.props.allCharacters[b];
 
@@ -151,9 +185,9 @@ class AEditItemDialog extends React.Component<Props, State> {
         content: () => {
           return (
             <SelectAdventurersDialog
-              preselectedAdventurerIDs={this.state.ownerIDs}
+              preselectedAdventurerIDs={this.state.ownerIds}
               onSelectionConfirmed={(adventurerIDs: number[]) => {
-                this.setState({ ownerIDs: adventurerIDs });
+                this.setState({ ownerIds: adventurerIDs });
               }}
             />
           );
@@ -171,8 +205,9 @@ class AEditItemDialog extends React.Component<Props, State> {
       count: this.state.itemCount,
       notes: this.state.notes,
       is_for_sale: this.state.isForSale,
-      owner_ids: this.state.ownerIDs,
+      owner_ids: this.state.ownerIds,
       is_unused: this.state.isUnused,
+      spell_ids: this.state.spellIds,
     };
 
     let toasterTitle: string = "";
@@ -200,9 +235,11 @@ class AEditItemDialog extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allCharacters = state.characters.characters;
+  const allSpellDefs = state.gameDefs.spells;
   return {
     ...props,
     allCharacters,
+    allSpellDefs,
   };
 }
 

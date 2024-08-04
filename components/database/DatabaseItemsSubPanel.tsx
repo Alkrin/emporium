@@ -5,10 +5,14 @@ import { Dictionary } from "../../lib/dictionary";
 import { deleteItemDef, updateItemDef } from "../../redux/gameDefsSlice";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
-import ServerAPI, { ItemDefData } from "../../serverAPI";
+import ServerAPI, { ItemDefData, SpellDefData } from "../../serverAPI";
 import styles from "./DatabaseItemsSubPanel.module.scss";
 import { SearchableDefList } from "./SearchableDefList";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
+import { ScrollArea } from "../ScrollArea";
+import { SavingVeil } from "../SavingVeil";
+import { EditButton } from "../EditButton";
+import { SelectSpellsDialog } from "../dialogs/SelectSpellsDialog";
 
 interface State {
   selectedItemId: number;
@@ -20,7 +24,7 @@ interface State {
   storage_stones: number;
   storage_sixth_stones: number;
   storage_filters: string;
-  bundleable: boolean;
+  has_charges: boolean;
   number_per_stone: number;
   ac: number;
   damage_die: number;
@@ -41,6 +45,7 @@ interface State {
   sale_gp: number;
   sale_sp: number;
   sale_cp: number;
+  spell_ids: number[];
 }
 
 const defaultState: State = {
@@ -53,7 +58,7 @@ const defaultState: State = {
   storage_stones: 0,
   storage_sixth_stones: 0,
   storage_filters: "",
-  bundleable: false,
+  has_charges: false,
   number_per_stone: 0,
   ac: 0,
   damage_die: 0,
@@ -74,12 +79,14 @@ const defaultState: State = {
   sale_gp: 0,
   sale_sp: 0,
   sale_cp: 0,
+  spell_ids: [],
 };
 
 interface ReactProps {}
 
 interface InjectedProps {
   allItemDefs: Dictionary<ItemDefData>;
+  allSpellDefs: Dictionary<SpellDefData>;
   dispatch?: Dispatch;
 }
 
@@ -119,30 +126,27 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
             }
           }}
         />
-        <div className={styles.dataPanelRoot}>
+        <ScrollArea className={styles.dataPanelRoot}>
           {this.renderIdSection()}
           {this.renderNameSection()}
           {this.renderDescriptionSection()}
           {this.renderSizeSection()}
           {this.renderPriceSection()}
+          {this.renderChargeSection()}
           {this.renderStorageSection()}
           {this.renderEquipmentSection()}
           {this.renderTagsSection()}
-        </div>
+        </ScrollArea>
         <div className={styles.createNewButton} onClick={this.onCreateNewClicked.bind(this)}>
-          Create New
+          {"Create New"}
         </div>
         <div className={`${styles.deleteButton} ${deletableClass}`} onClick={this.onDeleteClicked.bind(this)}>
-          Delete
+          {"Delete"}
         </div>
         <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
-          Save
+          {"Save"}
         </div>
-        {this.state.isSaving && (
-          <div className={styles.savingVeil}>
-            <div className={styles.savingLabel}>Saving...</div>
-          </div>
-        )}
+        <SavingVeil show={this.state.isSaving} />
         <SubPanelCloseButton />
       </div>
     );
@@ -151,7 +155,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
   private renderIdSection(): React.ReactNode {
     return (
       <div className={styles.row}>
-        <div className={styles.firstLabel}>ID</div>
+        <div className={styles.firstLabel}>{"ID"}</div>
         <input
           className={styles.idField}
           type={"text"}
@@ -165,7 +169,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
   private renderNameSection(): React.ReactNode {
     return (
       <div className={styles.row}>
-        <div className={styles.firstLabel}>Name</div>
+        <div className={styles.firstLabel}>{"Name"}</div>
         <input
           className={styles.nameField}
           type={"text"}
@@ -183,7 +187,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
   private renderDescriptionSection(): React.ReactNode {
     return (
       <div className={styles.column}>
-        <div className={styles.labelText}>Description</div>
+        <div className={styles.labelText}>{"Description"}</div>
         <textarea
           className={styles.descriptionField}
           value={this.state.description}
@@ -196,72 +200,80 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     );
   }
 
+  private renderChargeSection(): React.ReactNode {
+    return (
+      <div className={styles.column}>
+        <div className={styles.row}>
+          <div className={styles.labelText}>{"Has Charges?"}</div>
+          <input
+            className={styles.trailingCheckbox}
+            type={"checkbox"}
+            checked={this.state.has_charges}
+            tabIndex={this.nextTabIndex++}
+            onChange={(e) => {
+              this.setState({ has_charges: e.target.checked });
+            }}
+          />
+        </div>
+        <div className={styles.row}>
+          <div className={styles.labelText}>{"Associated Spells\xa0"}</div>
+          <EditButton onClick={this.onEditAssociatedSpellsClick.bind(this)} />
+        </div>
+        {this.state.spell_ids.length > 0 && (
+          <div className={styles.associatedSpells}>
+            {this.state.spell_ids
+              .map((sid) => {
+                const def = this.props.allSpellDefs[sid];
+                return def.name;
+              })
+              .join(", ")}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   private renderSizeSection(): React.ReactNode {
     return (
       <div className={styles.column}>
         <div className={styles.row}>
-          <div className={styles.labelText}>Bundleable?</div>
+          <div className={styles.firstLabel}>{"Size"}</div>
           <input
-            className={styles.trailingCheckbox}
-            type={"checkbox"}
-            checked={this.state.bundleable}
+            className={styles.sizeStonesField}
+            type={"number"}
+            value={this.state.stones}
+            min={0}
             tabIndex={this.nextTabIndex++}
             onChange={(e) => {
-              this.setState({ bundleable: e.target.checked });
-              if (e.target.checked) {
-                // Bundleable, so clear the non-bundle size fields.
-                this.setState({ stones: 0, sixth_stones: 0 });
-              } else {
-                // Non-bundleable, so clear the bundle size fields.
-                this.setState({ number_per_stone: 0 });
-              }
+              this.setState({ stones: +e.target.value });
             }}
           />
+          <div className={styles.secondLabel}>{"and"}</div>
+          <input
+            className={styles.sizeSixthStonesField}
+            type={"number"}
+            value={this.state.sixth_stones}
+            min={0}
+            max={5}
+            tabIndex={this.nextTabIndex++}
+            onChange={(e) => {
+              this.setState({ sixth_stones: +e.target.value });
+            }}
+          />
+          <div className={styles.secondLabel}>{"/ 6 stone"}</div>
         </div>
-        <div className={styles.sizePanel}>
-          {this.state.bundleable ? (
-            <>
-              <div className={styles.firstLabel}>Number per Stone</div>
-              <input
-                className={styles.numberPerStoneField}
-                type={"number"}
-                value={this.state.number_per_stone}
-                min={0}
-                tabIndex={this.nextTabIndex++}
-                onChange={(e) => {
-                  this.setState({ number_per_stone: +e.target.value });
-                }}
-              />
-            </>
-          ) : (
-            <>
-              <div className={styles.firstLabel}>Size</div>
-
-              <input
-                className={styles.sizeStonesField}
-                type={"number"}
-                value={this.state.stones}
-                min={0}
-                tabIndex={this.nextTabIndex++}
-                onChange={(e) => {
-                  this.setState({ stones: +e.target.value });
-                }}
-              />
-              <div className={styles.secondLabel}>and</div>
-              <input
-                className={styles.sizeSixthStonesField}
-                type={"number"}
-                value={this.state.sixth_stones}
-                min={0}
-                max={5}
-                tabIndex={this.nextTabIndex++}
-                onChange={(e) => {
-                  this.setState({ sixth_stones: +e.target.value });
-                }}
-              />
-              <div className={styles.secondLabel}>/ 6 stone</div>
-            </>
-          )}
+        <div className={styles.row}>
+          <div className={styles.firstLabel}>{"\xa0\xa0\xa0\xa0or Number per Stone"}</div>
+          <input
+            className={styles.numberPerStoneField}
+            type={"number"}
+            value={this.state.number_per_stone}
+            min={0}
+            tabIndex={this.nextTabIndex++}
+            onChange={(e) => {
+              this.setState({ number_per_stone: +e.target.value });
+            }}
+          />
         </div>
       </div>
     );
@@ -343,7 +355,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           <div className={styles.secondLabel}>{"cp"}</div>
         </div>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>Purchase Quantity</div>
+          <div className={styles.firstLabel}>{"Purchase Quantity"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -363,7 +375,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     return (
       <div className={styles.column}>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>Storage</div>
+          <div className={styles.firstLabel}>{"Storage"}</div>
           <input
             className={styles.storageStonesField}
             type={"number"}
@@ -374,7 +386,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
               this.setState({ storage_stones: +e.target.value });
             }}
           />
-          <div className={styles.secondLabel}>and</div>
+          <div className={styles.secondLabel}>{"and"}</div>
           <input
             className={styles.storageSixthStonesField}
             type={"number"}
@@ -386,7 +398,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
               this.setState({ storage_sixth_stones: +e.target.value });
             }}
           />
-          <div className={styles.secondLabel}>/ 6 stone</div>
+          <div className={styles.secondLabel}>{"/ 6 stone"}</div>
         </div>
         <div className={styles.labelText}>{"Storage Filters (comma separated)"}</div>
         <textarea
@@ -398,7 +410,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           }}
         />
         <div className={styles.row}>
-          <div className={styles.firstLabel}>Stored Items Are Weightless?</div>
+          <div className={styles.firstLabel}>{"Stored Items Are Weightless?"}</div>
           <input
             className={styles.trailingCheckbox}
             type={"checkbox"}
@@ -417,7 +429,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     return (
       <div className={styles.column}>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>Armor Class</div>
+          <div className={styles.firstLabel}>{"Armor Class"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -430,7 +442,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           />
         </div>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>1H Attack Damage</div>
+          <div className={styles.firstLabel}>{"1H Attack Damage"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -441,7 +453,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
               this.setState({ damage_dice: +e.target.value });
             }}
           />
-          <div className={styles.secondLabel}>d</div>
+          <div className={styles.secondLabel}>{"d"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -454,7 +466,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           />
         </div>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>2H Attack Damage</div>
+          <div className={styles.firstLabel}>{"2H Attack Damage"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -465,7 +477,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
               this.setState({ damage_dice_2h: +e.target.value });
             }}
           />
-          <div className={styles.secondLabel}>d</div>
+          <div className={styles.secondLabel}>{"d"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -478,7 +490,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           />
         </div>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>Range Increment</div>
+          <div className={styles.firstLabel}>{"Range Increment"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -489,10 +501,10 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
               this.setState({ range_increment: +e.target.value });
             }}
           />
-          <div className={styles.secondLabel}>feet</div>
+          <div className={styles.secondLabel}>{"feet"}</div>
         </div>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>Max Cleaves</div>
+          <div className={styles.firstLabel}>{"Max Cleaves"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -517,7 +529,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           />
         </div>
         <div className={styles.row}>
-          <div className={styles.firstLabel}>Conditional Magical Bonus +</div>
+          <div className={styles.firstLabel}>{"Conditional Magical Bonus +"}</div>
           <input
             className={styles.smallInputField}
             type={"number"}
@@ -530,7 +542,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
           />
         </div>
         <div className={styles.column}>
-          <div className={styles.firstLabel}>Condition (e.g. Undead, Evil, etc.)</div>
+          <div className={styles.firstLabel}>{"Condition (e.g. Undead, Evil, etc.)"}</div>
           <input
             className={styles.textInput}
             type={"text"}
@@ -548,7 +560,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
   private renderTagsSection(): React.ReactNode {
     return (
       <div className={styles.column}>
-        <div className={styles.labelText}>Tags</div>
+        <div className={styles.labelText}>{"Tags"}</div>
         <textarea
           className={styles.tagsField}
           value={this.state.tags}
@@ -586,7 +598,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
       storage_stones: this.state.storage_stones,
       storage_sixth_stones: this.state.storage_sixth_stones,
       storage_filters: this.state.storage_filters.split(","),
-      bundleable: this.state.bundleable,
+      has_charges: this.state.has_charges,
       number_per_stone: this.state.number_per_stone,
       ac: this.state.ac,
       damage_die: this.state.damage_die,
@@ -607,6 +619,7 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
       sale_gp: this.state.sale_gp,
       sale_sp: this.state.sale_sp,
       sale_cp: this.state.sale_cp,
+      spell_ids: this.state.spell_ids,
     };
 
     if (this.state.selectedItemId === -1) {
@@ -641,6 +654,25 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
     }
 
     this.setState({ isSaving: false });
+  }
+
+  private onEditAssociatedSpellsClick(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "EditAssociatedSpells",
+        content: () => {
+          return (
+            <SelectSpellsDialog
+              preselectedSpellIds={this.state.spell_ids}
+              onSelectionConfirmed={(spell_ids) => {
+                this.setState({ spell_ids });
+              }}
+            />
+          );
+        },
+        widthVmin: 45,
+      })
+    );
   }
 
   private onDeleteClicked(): void {
@@ -687,9 +719,11 @@ class ADatabaseItemsSubPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allItemDefs = state.gameDefs.items;
+  const allSpellDefs = state.gameDefs.spells;
   return {
     ...props,
     allItemDefs,
+    allSpellDefs,
   };
 }
 

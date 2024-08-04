@@ -36,7 +36,9 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         if (move.srcSplit) {
           // We are equipping a single item from a bundle, so we need to generate a new bundle containing that single item...
           queries.push({
-            query: `INSERT INTO items (def_id,count,container_id,storage_id) SELECT def_id,1,0,0 FROM items WHERE id=?`,
+            query:
+              `INSERT INTO items (def_id,count,container_id,storage_id,notes,is_for_sale,owner_ids,is_unused,spell_ids) ` +
+              `SELECT def_id,1,0,0,notes,is_for_sale,owner_ids,0,spell_ids FROM items WHERE id=?`,
             values: [move.itemId],
           });
           // ...and then equip the new item.
@@ -49,6 +51,10 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
           queries.push({
             query: `UPDATE characters SET ${move.destEquipmentSlot}=? WHERE id=?`,
             values: [move.itemId, move.destCharacterId],
+          });
+          queries.push({
+            query: `UPDATE items SET is_unused=? WHERE id=?`,
+            values: [0, move.itemId],
           });
         }
       } else if (move.destContainerId) {

@@ -15,7 +15,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     });
     // Place the items into a brand new bundle.
     queries.push({
-      query: `INSERT INTO items (def_id,count,container_id,storage_id,notes,is_for_sale,owner_ids,is_unused) VALUES (?,?,?,?,?,?,?,?)`,
+      query: `INSERT INTO items (def_id,count,container_id,storage_id,notes,is_for_sale,owner_ids,is_unused,spell_ids) VALUES (?,?,?,?,?,?,?,?,?)`,
       values: [
         itemDefId,
         count,
@@ -25,6 +25,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         srcItem.is_for_sale,
         srcItem.owner_ids.join(","),
         srcItem.is_unused,
+        srcItem.spell_ids.join(","),
       ],
     });
 

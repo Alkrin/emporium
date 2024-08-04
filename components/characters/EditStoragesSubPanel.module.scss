@@ -109,7 +109,7 @@
   }
 }
 
-.fullDraggableHandle {
+.fullDropTarget {
   position: absolute;
   top: 0;
   left: 0;
@@ -117,7 +117,12 @@
   bottom: 0;
 }
 
+.draggableHandle {
+  position: relative;
+}
+
 .selectedStorageRowContentWrapper {
+  position: relative;
   padding: 0vmin 0.5vmin;
   background-color: rgba(255, 255, 255, 0.1);
   font-size: 1rem;
@@ -320,4 +325,13 @@
 
 .moneyEditButton {
   margin-left: 0.5vmin;
+}
+
+.associatedSpellRow {
+  position: relative;
+  margin-left: 1vmin;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(100, 255, 255, 0.1);
+  font-size: 1rem;
+  color: cyan;
 }

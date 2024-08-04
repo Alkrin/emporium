@@ -93,7 +93,7 @@ export interface ItemDefData {
   storage_stones: number;
   storage_sixth_stones: number;
   storage_filters: string[];
-  bundleable: boolean;
+  has_charges: boolean;
   number_per_stone: number;
   ac: number;
   damage_die: number;
@@ -114,11 +114,13 @@ export interface ItemDefData {
   sale_gp: number;
   sale_sp: number;
   sale_cp: number;
+  spell_ids: number[];
 }
 
-export type ServerItemDefData = Omit<ItemDefData, "storage_filters" | "tags"> & {
+export type ServerItemDefData = Omit<ItemDefData, "storage_filters" | "tags" | "spell_ids"> & {
   storage_filters: string;
   tags: string;
+  spell_ids: string;
 };
 
 export interface ItemData {
@@ -131,10 +133,12 @@ export interface ItemData {
   is_for_sale: boolean;
   owner_ids: number[];
   is_unused: boolean;
+  spell_ids: number[];
 }
 
-export type ServerItemData = Omit<ItemData, "owner_ids"> & {
+export type ServerItemData = Omit<ItemData, "owner_ids" | "spell_ids"> & {
   owner_ids: string;
+  spell_ids: string;
 };
 
 export interface StorageData {
@@ -894,6 +898,7 @@ class AServerAPI {
           ...sItemData,
           tags: sItemData.tags.length > 0 ? sItemData.tags.split(",") : [],
           storage_filters: sItemData.storage_filters.length > 0 ? sItemData.storage_filters.split(",") : [],
+          spell_ids: sItemData.spell_ids.length > 0 ? sItemData.spell_ids.split(",").map((s) => +s) : [],
         });
       });
 
@@ -921,6 +926,7 @@ class AServerAPI {
         itemData.push({
           ...sItemData,
           owner_ids: sItemData.owner_ids.length > 0 ? sItemData.owner_ids.split(",").map((sID) => +sID) : [],
+          spell_ids: sItemData.spell_ids.length > 0 ? sItemData.spell_ids.split(",").map((sID) => +sID) : [],
         });
       });
 
@@ -1132,6 +1138,7 @@ class AServerAPI {
     const requestBody: RequestBody_CreateItem = {
       ...data,
       owner_ids: data.owner_ids.join(","),
+      spell_ids: data.spell_ids.join(","),
     };
     const res = await fetch("/api/createItem", {
       method: "POST",
@@ -1147,6 +1154,7 @@ class AServerAPI {
     const requestBody: RequestBody_EditItem = {
       ...data,
       owner_ids: data.owner_ids.join(","),
+      spell_ids: data.spell_ids.join(","),
     };
     const res = await fetch("/api/editItem", {
       method: "POST",
@@ -1206,6 +1214,7 @@ class AServerAPI {
       // Stored on the server as a comma separated string.
       storage_filters: def.storage_filters.join(","),
       tags: def.tags.join(","),
+      spell_ids: def.spell_ids.join(","),
     };
     const res = await fetch("/api/createItemDef", {
       method: "POST",
@@ -1266,6 +1275,7 @@ class AServerAPI {
       // Stored on the server as a comma separated string.
       storage_filters: def.storage_filters.join(","),
       tags: def.tags.join(","),
+      spell_ids: def.spell_ids.join(","),
     };
     const res = await fetch("/api/editItemDef", {
       method: "POST",

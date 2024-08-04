@@ -38,7 +38,7 @@
   cursor: move;
 }
 
-.fullDraggableHandle {
+.fullDropTarget {
   position: absolute;
   top: 0;
   left: 0;
@@ -46,8 +46,12 @@
   bottom: 0;
 }
 
+.draggableHandle {
+  position: relative;
+}
+
 .containerRowContentWrapper {
-  padding: 0.5vmin;
+  padding: 0vmin 0.5vmin;
   background-color: #442222;
   display: flex;
   flex-direction: row;
@@ -60,22 +64,30 @@
 }
 
 .containedItemRowContentWrapper {
-  padding: 0.5vmin;
+  padding: 0vmin 0.5vmin;
   background-color: #884444;
   border-top: 1px solid #442222;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  cursor: pointer;
+  cursor: move;
 }
 
 .containedItemName {
   color: white;
   font-size: 1rem;
+  flex-grow: 1;
 }
 
 .editButton {
   position: relative;
   width: 1.2rem;
   height: 1.2rem;
+}
+
+.associatedSpellRow {
+  position: relative;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(100, 255, 255, 0.1);
+  font-size: 1rem;
+  color: cyan;
 }

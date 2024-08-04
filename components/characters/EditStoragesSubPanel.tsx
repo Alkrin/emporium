@@ -4,7 +4,14 @@ import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
 import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData, CharacterEquipmentSlots, ItemData, ItemDefData, StorageData } from "../../serverAPI";
+import ServerAPI, {
+  CharacterData,
+  CharacterEquipmentSlots,
+  ItemData,
+  ItemDefData,
+  SpellDefData,
+  StorageData,
+} from "../../serverAPI";
 import { ItemTooltip } from "../database/ItemTooltip";
 import Draggable from "../Draggable";
 import { DraggableHandle } from "../DraggableHandle";
@@ -17,7 +24,8 @@ import { ItemMoveParams } from "../../serverRequestTypes";
 import { deleteItem, updateItem } from "../../redux/itemsSlice";
 import { InventoriesList } from "./InventoriesList";
 import {
-  StonesToNumber,
+  StonesToSixths,
+  canItemsBeStacked,
   getAvailableRoomForContainer,
   getItemNameText,
   getItemTotalWeight,
@@ -39,6 +47,7 @@ import { SpellbookButton } from "../SpellbookButton";
 import { EditItemDialog } from "./EditItemDialog";
 import { SellButton } from "../SellButton";
 import { SellItemDialog } from "./SellItemDialog";
+import { SpellTooltip } from "../database/SpellTooltip";
 
 export const DropTypeItem = "DropTypeItem";
 
@@ -51,6 +60,7 @@ interface InjectedProps {
   character: CharacterData;
   allStorages: Dictionary<StorageData>;
   allItemDefs: Dictionary<ItemDefData>;
+  allSpellDefs: Dictionary<SpellDefData>;
   allItems: Dictionary<ItemData>;
   currentDraggableId: string;
   activeStorageId: number;
@@ -170,11 +180,14 @@ class AEditStoragesSubPanel extends React.Component<Props> {
       const draggableId = `selectedStorage${item.id}`;
       return (
         <Draggable className={styles.selectedStorageRowDraggable} draggableId={draggableId} key={draggableId}>
-          {def.bundleable && (
-            <DropTarget dropId={`Bundle${item.id}`} dropTypes={[DropTypeItem]} className={styles.fullDraggableHandle} />
-          )}
+          {
+            // Charged items cannot be stacked because each needs to track its charges separately.
+            !def.has_charges && (
+              <DropTarget dropId={`Bundle${item.id}`} dropTypes={[DropTypeItem]} className={styles.fullDropTarget} />
+            )
+          }
           <DraggableHandle
-            className={styles.fullDraggableHandle}
+            className={styles.draggableHandle}
             draggableId={draggableId}
             dropTypes={[DropTypeItem]}
             draggingRender={() => {
@@ -184,18 +197,8 @@ class AEditStoragesSubPanel extends React.Component<Props> {
               this.handleItemDropped(dropTargetIds, item, def);
             }}
           >
-            <TooltipSource
-              tooltipParams={{
-                id: `item${item.id}`,
-                content: () => {
-                  return <ItemTooltip itemId={item.id} />;
-                },
-              }}
-              className={styles.fullDraggableHandle}
-              key={`item${item.id}`}
-            />
+            {this.renderSelectedStorageRowContents(item, def)}
           </DraggableHandle>
-          {this.renderSelectedStorageRowContents(item, def)}
         </Draggable>
       );
     }
@@ -204,45 +207,98 @@ class AEditStoragesSubPanel extends React.Component<Props> {
   private renderSelectedStorageRowContents(item: ItemData, def: ItemDefData): React.ReactNode {
     const isSpellbook = def.tags.includes(Tag.Spellbook);
     return (
-      <div className={`${styles.selectedStorageRowContentWrapper} ${item.is_for_sale ? styles.forSale : ""}`}>
-        <div className={styles.selectedStorageItemName}>{getItemNameText(item, def)}</div>
-        {def.bundleable && item.count > 1 && (
-          <SplitButton
+      <>
+        <TooltipSource
+          tooltipParams={{
+            id: `item${item.id}`,
+            content: () => {
+              return <ItemTooltip itemId={item.id} />;
+            },
+          }}
+          className={`${styles.selectedStorageRowContentWrapper} ${item.is_for_sale ? styles.forSale : ""}`}
+        >
+          <div className={styles.selectedStorageItemName}>{getItemNameText(item, def)}</div>
+          {
+            // A charged item cannot be stacked or split, only spent.
+            !def.has_charges && item.count > 1 && (
+              <SplitButton
+                className={styles.selectedStorageActionButton}
+                onMouseDown={this.onBundleButtonClick.bind(this, item, def)}
+              />
+            )
+          }
+          {isSpellbook && (
+            <SpellbookButton
+              className={styles.selectedStorageActionButton}
+              onMouseDown={this.onSpellbookButtonClick.bind(this, item, def)}
+            />
+          )}
+          <EditButton
             className={styles.selectedStorageActionButton}
-            onClick={this.onBundleButtonClick.bind(this, item, def)}
+            onMouseDown={this.onItemEditButtonClick.bind(this, item, def)}
           />
-        )}
-        {isSpellbook && (
-          <SpellbookButton
+          <SellButton
             className={styles.selectedStorageActionButton}
-            onClick={this.onSpellbookButtonClick.bind(this, item, def)}
+            onMouseDown={this.onSellItemButtonClick.bind(this, item, def)}
           />
-        )}
-        <EditButton
-          className={styles.selectedStorageActionButton}
-          onClick={this.onItemEditButtonClick.bind(this, item, def)}
-        />
-        <SellButton
-          className={styles.selectedStorageActionButton}
-          onClick={this.onSellItemButtonClick.bind(this, item, def)}
-        />
-      </div>
+        </TooltipSource>
+        {[...def.spell_ids, ...item.spell_ids].map((sid, spellIndex) => {
+          const spellDef = this.props.allSpellDefs[sid];
+          if (spellDef) {
+            return (
+              <TooltipSource
+                key={`spell${spellIndex}`}
+                className={styles.associatedSpellRow}
+                tooltipParams={{
+                  id: `${spellDef.id} ${spellIndex}`,
+                  content: () => {
+                    return <SpellTooltip spellId={sid} />;
+                  },
+                }}
+              >
+                {spellDef.name}
+              </TooltipSource>
+            );
+          } else {
+            return null;
+          }
+        })}
+      </>
     );
   }
 
-  private onSellItemButtonClick(item: ItemData, def: ItemDefData): void {
-    this.props.dispatch?.(
-      showModal({
-        id: "sellItemDialog",
-        content: () => {
-          return <SellItemDialog item={item} def={def} />;
-        },
-        escapable: true,
-      })
-    );
+  private onSellItemButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
+    const itemIds = getAllItemAssociatedItemIds(item.id);
+    if (itemIds.length > 1) {
+      this.props.dispatch?.(
+        showToaster({
+          id: "ContainerFull",
+          content: {
+            title: "Unable to Sell",
+            message: `Please empty the ${def.name} before selling it.`,
+          },
+        })
+      );
+    } else {
+      this.props.dispatch?.(
+        showModal({
+          id: "sellItemDialog",
+          content: () => {
+            return <SellItemDialog item={item} def={def} />;
+          },
+          escapable: true,
+        })
+      );
+    }
   }
 
-  private onItemEditButtonClick(item: ItemData, def: ItemDefData): void {
+  private onItemEditButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
     this.props.dispatch?.(
       showModal({
         id: "editItemDialog",
@@ -254,7 +310,10 @@ class AEditStoragesSubPanel extends React.Component<Props> {
     );
   }
 
-  private onBundleButtonClick(item: ItemData, def: ItemDefData): void {
+  private onBundleButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
     this.props.dispatch?.(
       showModal({
         id: "splitBundleDialog",
@@ -266,7 +325,10 @@ class AEditStoragesSubPanel extends React.Component<Props> {
     );
   }
 
-  private onSpellbookButtonClick(item: ItemData, def: ItemDefData): void {
+  private onSpellbookButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
     this.props.dispatch?.(
       showModal({
         id: "spellbookDialog",
@@ -329,7 +391,7 @@ class AEditStoragesSubPanel extends React.Component<Props> {
     }
 
     const bundleItem = this.props.allItems[bundleItemId];
-    if (bundleItem?.def_id === def.id) {
+    if (canItemsBeStacked(bundleItem, item, this.props.allItemDefs)) {
       // Same item type.  Merge bundles as much as possible.
       // How many items can fit into the place where the target bundle is contained?
       let countToMove: number = item.count;
@@ -550,8 +612,9 @@ class AEditStoragesSubPanel extends React.Component<Props> {
       ]);
       const itemWeight = getItemTotalWeight(item.id, this.props.allItems, this.props.allItemDefs, []);
 
-      if (StonesToNumber(itemWeight) > StonesToNumber(availableRoom)) {
-        if (def.bundleable) {
+      if (StonesToSixths(itemWeight) > StonesToSixths(availableRoom)) {
+        // Charged items can't be split
+        if (!def.has_charges) {
           // If we're dropping a bundle, can we split the bundle to fit some items in?
           const countToMove = getMaxBundleItemsForRoom(def, availableRoom);
           if (countToMove > 0) {
@@ -581,6 +644,7 @@ class AEditStoragesSubPanel extends React.Component<Props> {
                     is_for_sale: item.is_for_sale,
                     owner_ids: [...item.owner_ids],
                     is_unused: item.is_unused,
+                    spell_ids: item.spell_ids,
                   })
                 );
               }
@@ -674,6 +738,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const character = state.characters.characters[state.characters.activeCharacterId];
   const { allStorages, activeStorageId } = state.storages;
   const allItemDefs = state.gameDefs.items;
+  const allSpellDefs = state.gameDefs.spells;
   const { allItems } = state.items;
   const { currentDraggableId } = state.dragAndDrop;
 
@@ -682,6 +747,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     character,
     allStorages,
     allItemDefs,
+    allSpellDefs,
     allItems,
     currentDraggableId: currentDraggableId ?? "",
     activeStorageId,

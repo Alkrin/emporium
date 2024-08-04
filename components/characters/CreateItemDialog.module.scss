@@ -68,8 +68,8 @@
 }
 
 .itemListRoot {
+  position: relative;
   width: 30vmin;
-  height: 30vmin;
 }
 
 .asteriskRow {
@@ -201,4 +201,11 @@
   color: wheat;
   text-align: left;
   flex-grow: 1;
+}
+
+.associatedSpells {
+  padding: 0.5vmin;
+  background-color: black;
+  font-size: 0.9rem;
+  color: yellow;
 }

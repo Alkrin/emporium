@@ -30,28 +30,36 @@ export function getItemAvailabilityText(marketClass: number, priceIndex: number)
 
 export type Stones = [number, number];
 // Converts a Stones value to an easily comparable number.
-export function StonesToNumber(s: Stones): number {
+export function StonesToSixths(s: Stones): number {
   return s[0] * 6 + s[1];
 }
 export function StonesAPlusB(a: Stones, b: Stones): Stones {
-  const raw = StonesToNumber(a) + StonesToNumber(b);
+  const raw = StonesToSixths(a) + StonesToSixths(b);
   const sixths = raw % 6;
   const stones = (raw - sixths) / 6; // Should always be an integer.
   return [stones, sixths];
 }
 export function StonesAMinusB(a: Stones, b: Stones): Stones {
-  const raw = StonesToNumber(a) - StonesToNumber(b);
+  const raw = StonesToSixths(a) - StonesToSixths(b);
   const sixths = raw % 6;
   const stones = (raw - sixths) / 6; // Should always be an integer.
   return [stones, sixths];
 }
 
 export function getBundleWeight(def: ItemDefData, count: number): Stones {
-  // For bundles, we get a combined weight based on how many items are in the bundle.
-  const rawStones = Math.floor((count * kAccuracy) / def.number_per_stone);
-  const justStones = Math.floor(rawStones / kAccuracy);
-  const justSixths = Math.ceil(((rawStones - justStones * kAccuracy) * 6) / kAccuracy);
-  return [justStones, justSixths];
+  if (def.number_per_stone > 0) {
+    // Weights not in stones/sixths may have rounding errors during calculation, so we temporarily inflate the count
+    // in order to make sure the rounding errors occur in digits that we can safely ignore.
+    const rawStones = Math.floor((count * kAccuracy) / def.number_per_stone);
+    const justStones = Math.floor(rawStones / kAccuracy);
+    const justSixths = Math.ceil(((rawStones - justStones * kAccuracy) * 6) / kAccuracy);
+    return [justStones, justSixths];
+  } else {
+    let stones: Stones = [def.stones * count, def.sixth_stones * count];
+    // Adding [0,0] will convert excessive sixths to stones for us.
+    stones = StonesAPlusB(stones, [0, 0]);
+    return stones;
+  }
 }
 
 export function getItemTotalWeight(
@@ -71,15 +79,8 @@ export function getItemTotalWeight(
   const def = allItemDefs[item?.def_id];
   if (def && item) {
     // Add the item's own weight.
-    if (def.bundleable) {
-      // For bundles, we get a combined weight based on how many items are in the bundle.
-      const bundleWeight = getBundleWeight(def, item.count);
-      stones = StonesAPlusB(stones, bundleWeight);
-    } else {
-      // For single items, we add their explicit weight.
-      stones[0] += def.stones;
-      stones[1] += def.sixth_stones;
-    }
+    const bundleWeight = getBundleWeight(def, item.count);
+    stones = StonesAPlusB(stones, bundleWeight);
 
     // If this is a container (and not something like a bag of holding), add the weight of contained items.
     if ((def.storage_stones > 0 || def.storage_sixth_stones > 0) && !def.fixed_weight) {
@@ -162,7 +163,7 @@ export function getAvailableRoomForContainer(
     // If this is inside another container, get that container's available room.
     if (container.container_id > 0) {
       const parentRoom = getAvailableRoomForContainer(container.container_id, allItems, allItemDefs, itemIdsToIgnore);
-      if (StonesToNumber(parentRoom) < StonesToNumber(room)) {
+      if (StonesToSixths(parentRoom) < StonesToSixths(room)) {
         room = parentRoom;
       }
     }
@@ -173,26 +174,32 @@ export function getAvailableRoomForContainer(
 }
 
 export function getItemNameText(item?: ItemData, def?: ItemDefData): string {
-  if (def && item && def.bundleable) {
-    return `${def.name} x${item.count}`;
-  } else {
-    return def?.name ?? "";
+  // Show a count for ChargedItems and anything with more than one item in it.
+  if (def && item) {
+    if (def.has_charges) {
+      return `${def.name}, ${item.count} charge${item.count > 1 ? "s" : ""}`;
+    } else if (item.count > 1) {
+      return `${def.name} x${item.count}`;
+    }
   }
+  return def?.name ?? "";
 }
 
 export function getMaxBundleItemsForRoom(def: ItemDefData, room: Stones): number {
   const [stones, sixthStones] = room;
   const rawStones = stones + sixthStones / 6;
-  const guessBundleSize = Math.round(rawStones * def.number_per_stone);
+  const singleWeight = def.number_per_stone > 0 ? 1 / def.number_per_stone : def.stones + def.sixth_stones / 6;
+
+  const guessBundleSize = Math.round(rawStones / singleWeight);
   // Even accounting for floating point errors, the calculated result should be within one of the actual value.
   // For efficiency, we'll start at the biggest guess and move backward until we find a good one.
-  if (StonesToNumber(getBundleWeight(def, guessBundleSize + 1)) <= StonesToNumber(room)) {
+  if (StonesToSixths(getBundleWeight(def, guessBundleSize + 1)) <= StonesToSixths(room)) {
     return guessBundleSize + 1;
   }
-  if (StonesToNumber(getBundleWeight(def, guessBundleSize)) <= StonesToNumber(room)) {
+  if (StonesToSixths(getBundleWeight(def, guessBundleSize)) <= StonesToSixths(room)) {
     return guessBundleSize;
   }
-  if (StonesToNumber(getBundleWeight(def, guessBundleSize - 1)) <= StonesToNumber(room)) {
+  if (StonesToSixths(getBundleWeight(def, guessBundleSize - 1)) <= StonesToSixths(room)) {
     return guessBundleSize - 1;
   }
 
@@ -225,6 +232,25 @@ export function doesItemGrantMagicDamageBonus(itemId: number): boolean {
     if (def.tags.includes(WeaponCategoryTag.BowCrossbow) || def.tags.includes(WeaponTypeTag.Sling)) {
       return false;
     }
+  }
+
+  return true;
+}
+
+export function canItemsBeStacked(a: ItemData, b: ItemData, allItemDefs: Dictionary<ItemDefData>): boolean {
+  // Must have same def.
+  if (a.def_id !== b.def_id) {
+    return false;
+  }
+
+  // Charged items never stack because their charge count uses the `count` field on ItemData.
+  if (allItemDefs[a.def_id]?.has_charges || allItemDefs[b.def_id]?.has_charges) {
+    return false;
+  }
+
+  // Must have same associated spells. e.g. can't stack Potions of Flight and Invisibility together.
+  if (a.spell_ids.length !== b.spell_ids.length || !!a.spell_ids.find((asid) => !b.spell_ids.includes(asid))) {
+    return false;
   }
 
   return true;

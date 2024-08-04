@@ -3,7 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
 import { RootState } from "../../redux/store";
-import { CharacterData, ItemData, ItemDefData, StorageData } from "../../serverAPI";
+import { CharacterData, ItemData, ItemDefData, SpellDefData, StorageData } from "../../serverAPI";
 import styles from "./InventoriesList.module.scss";
 import Draggable from "../Draggable";
 import { DraggableHandle } from "../DraggableHandle";
@@ -19,6 +19,8 @@ import { SpellbookDialog } from "./SpellbookDialog";
 import { SplitButton } from "../SplitButton";
 import { EditButton } from "../EditButton";
 import { SpellbookButton } from "../SpellbookButton";
+import { EditItemDialog } from "./EditItemDialog";
+import { SpellTooltip } from "../database/SpellTooltip";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
   containerIds: number[];
@@ -29,6 +31,7 @@ interface InjectedProps {
   character: CharacterData;
   allStorages: Dictionary<StorageData>;
   allItemDefs: Dictionary<ItemDefData>;
+  allSpellDefs: Dictionary<SpellDefData>;
   allItems: Dictionary<ItemData>;
   currentDraggableId: string;
   dispatch?: Dispatch;
@@ -91,7 +94,7 @@ class AInventoriesList extends React.Component<Props> {
           <DropTarget dropId={draggableId} dropTypes={[DropTypeItem]}>
             <Draggable className={styles.containerRowDraggable} draggableId={draggableId}>
               <DraggableHandle
-                className={styles.fullDraggableHandle}
+                className={styles.draggableHandle}
                 draggableId={draggableId}
                 dropTypes={[DropTypeItem]}
                 draggingRender={() => {
@@ -101,17 +104,8 @@ class AInventoriesList extends React.Component<Props> {
                   this.props.handleItemDropped(dropTargetIds, item, def);
                 }}
               >
-                <TooltipSource
-                  tooltipParams={{
-                    id: `container${containerId}`,
-                    content: () => {
-                      return <ItemTooltip itemId={containerId} />;
-                    },
-                  }}
-                  className={styles.fullDraggableHandle}
-                />
+                {this.renderContainerRowContents(item, def, depth)}
               </DraggableHandle>
-              {this.renderContainerRowContents(item, def, depth)}
             </Draggable>
           </DropTarget>
           {containedItems.map((it) => {
@@ -126,9 +120,18 @@ class AInventoriesList extends React.Component<Props> {
 
   private renderContainerRowContents(item: ItemData, def: ItemDefData, depth: number): React.ReactNode {
     return (
-      <div className={styles.containerRowContentWrapper} style={{ marginLeft: `${depth}vmin` }}>
+      <TooltipSource
+        tooltipParams={{
+          id: `container${item.id}`,
+          content: () => {
+            return <ItemTooltip itemId={item.id} />;
+          },
+        }}
+        className={styles.containerRowContentWrapper}
+        style={{ marginLeft: `${depth}vmin` }}
+      >
         <div className={styles.containerName}>{getItemNameText(item, def)}</div>
-      </div>
+      </TooltipSource>
     );
   }
 
@@ -142,15 +145,14 @@ class AInventoriesList extends React.Component<Props> {
 
         return (
           <Draggable className={styles.containedItemRowDraggable} draggableId={draggableId} key={draggableId}>
-            {def.bundleable && (
-              <DropTarget
-                dropId={`Bundle${item.id}`}
-                dropTypes={[DropTypeItem]}
-                className={styles.fullDraggableHandle}
-              />
-            )}
+            {
+              // Charged items cannot be stacked because each needs to track its charges separately.
+              !def.has_charges && (
+                <DropTarget dropId={`Bundle${item.id}`} dropTypes={[DropTypeItem]} className={styles.fullDropTarget} />
+              )
+            }
             <DraggableHandle
-              className={styles.fullDraggableHandle}
+              className={styles.draggableHandle}
               draggableId={draggableId}
               dropTypes={[DropTypeItem]}
               draggingRender={() => {
@@ -160,17 +162,8 @@ class AInventoriesList extends React.Component<Props> {
                 this.props.handleItemDropped(dropTargetIds, item, def);
               }}
             >
-              <TooltipSource
-                tooltipParams={{
-                  id: `contained${item.id}`,
-                  content: () => {
-                    return <ItemTooltip itemId={item.id} />;
-                  },
-                }}
-                className={styles.fullDraggableHandle}
-              />
+              {this.renderContainedItemRowContents(item, def, depth)}
             </DraggableHandle>
-            {this.renderContainedItemRowContents(item, def, depth)}
           </Draggable>
         );
       }
@@ -182,19 +175,62 @@ class AInventoriesList extends React.Component<Props> {
   private renderContainedItemRowContents(item: ItemData, def: ItemDefData, depth: number): React.ReactNode {
     const isSpellbook = def.tags.includes(Tag.Spellbook);
     return (
-      <div className={styles.containedItemRowContentWrapper} style={{ marginLeft: `${depth}vmin` }}>
-        <div className={styles.containedItemName}>{getItemNameText(item, def)}</div>
-        {def.bundleable && item.count > 1 && (
-          <SplitButton className={styles.editButton} onClick={this.onBundleButtonClick.bind(this, item, def)} />
-        )}
-        {isSpellbook && (
-          <SpellbookButton className={styles.editButton} onClick={this.onSpellbookButtonClick.bind(this, item, def)} />
-        )}
-      </div>
+      <>
+        <TooltipSource
+          tooltipParams={{
+            id: `contained${item.id}`,
+            content: () => {
+              return <ItemTooltip itemId={item.id} />;
+            },
+          }}
+          className={styles.containedItemRowContentWrapper}
+          style={{ marginLeft: `${depth}vmin` }}
+        >
+          <div className={styles.containedItemName}>{getItemNameText(item, def)}</div>
+          {
+            // A charged item cannot be stacked or split, only spent.
+            !def.has_charges && item.count > 1 && (
+              <SplitButton className={styles.editButton} onMouseDown={this.onBundleButtonClick.bind(this, item, def)} />
+            )
+          }
+          {isSpellbook && (
+            <SpellbookButton
+              className={styles.editButton}
+              onMouseDown={this.onSpellbookButtonClick.bind(this, item, def)}
+            />
+          )}
+          <EditButton className={styles.editButton} onMouseDown={this.onItemEditButtonClick.bind(this, item, def)} />
+        </TooltipSource>
+        {[...def.spell_ids, ...item.spell_ids].map((sid, spellIndex) => {
+          const spellDef = this.props.allSpellDefs[sid];
+          if (spellDef) {
+            return (
+              <TooltipSource
+                key={`spell${spellIndex}`}
+                className={styles.associatedSpellRow}
+                tooltipParams={{
+                  id: `${spellDef.id} ${spellIndex}`,
+                  content: () => {
+                    return <SpellTooltip spellId={sid} />;
+                  },
+                }}
+                style={{ marginLeft: `${depth + 1}vmin` }}
+              >
+                {spellDef.name}
+              </TooltipSource>
+            );
+          } else {
+            return null;
+          }
+        })}
+      </>
     );
   }
 
-  private onBundleButtonClick(item: ItemData, def: ItemDefData): void {
+  private onBundleButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
     this.props.dispatch?.(
       showModal({
         id: "splitBundleDialog",
@@ -206,7 +242,10 @@ class AInventoriesList extends React.Component<Props> {
     );
   }
 
-  private onSpellbookButtonClick(item: ItemData, def: ItemDefData): void {
+  private onSpellbookButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
     this.props.dispatch?.(
       showModal({
         id: "spellbookDialog",
@@ -218,12 +257,28 @@ class AInventoriesList extends React.Component<Props> {
       })
     );
   }
+
+  private onItemEditButtonClick(item: ItemData, def: ItemDefData, e: React.MouseEvent): void {
+    // We are inside a DraggableHandle, so we are consuming the event here to prevent a drag.
+    e.stopPropagation();
+
+    this.props.dispatch?.(
+      showModal({
+        id: "editItemDialog",
+        content: () => {
+          return <EditItemDialog item={item} def={def} />;
+        },
+        escapable: true,
+      })
+    );
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const character = state.characters.characters[state.characters.activeCharacterId];
   const { allStorages } = state.storages;
   const allItemDefs = state.gameDefs.items;
+  const allSpellDefs = state.gameDefs.spells;
   const { allItems } = state.items;
   const { currentDraggableId } = state.dragAndDrop;
 
@@ -232,6 +287,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     character,
     allStorages,
     allItemDefs,
+    allSpellDefs,
     allItems,
     currentDraggableId: currentDraggableId ?? "",
   };

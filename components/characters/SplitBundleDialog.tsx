@@ -125,6 +125,7 @@ class ASplitBundleDialog extends React.Component<Props, State> {
             is_for_sale: this.props.item.is_for_sale,
             owner_ids: [...this.props.item.owner_ids],
             is_unused: this.props.item.is_unused,
+            spell_ids: this.props.item.spell_ids,
           })
         );
         this.props.dispatch?.(hideModal());

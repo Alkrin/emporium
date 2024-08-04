@@ -114,6 +114,7 @@ export interface RequestBody_CreateItem {
   is_for_sale: boolean;
   owner_ids: string;
   is_unused: boolean;
+  spell_ids: string;
 }
 
 export type RequestBody_EditItem = ServerItemData;
