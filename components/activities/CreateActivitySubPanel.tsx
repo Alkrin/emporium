@@ -78,7 +78,6 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
         // Load the selected activity.
         const a = props.activities[props.activeActivityId];
         const durationInDays = getDaysBetweenDateStrings(a.start_date, a.end_date);
-        console.log(a.start_date, a.end_date, durationInDays);
         this.state = {
           activity: {
             // When cloning, we copy everything except the id.
