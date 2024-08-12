@@ -1,0 +1,44 @@
+.root {
+  position: relative;
+  box-sizing: border-box;
+  width: 2vmin;
+  height: 2vmin;
+  flex-shrink: 0;
+  font-size: 100%;
+  text-align: center;
+  line-height: 90%;
+  color: wheat;
+  border: 1px solid wheat;
+  border-radius: 0.25vmin;
+  cursor: pointer;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.icon {
+  position: absolute;
+  width: 50%;
+  height: 10%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: wheat;
+}
+
+.cross {
+  position: absolute;
+  width: 10%;
+  height: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: wheat;
+}

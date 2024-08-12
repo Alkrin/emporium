@@ -26,6 +26,7 @@ interface State {
 interface ReactProps {
   item: ItemData;
   def: ItemDefData;
+  onValuesConfirmed?: (item: ItemData) => Promise<void>;
 }
 
 interface InjectedProps {
@@ -213,14 +214,18 @@ class AEditItemDialog extends React.Component<Props, State> {
     let toasterTitle: string = "";
     let toasterMessage: string = `Item updated!`;
 
-    const result = await ServerAPI.editItem(newItem);
-    if ("error" in result) {
-      toasterTitle = "ERROR!";
-      toasterMessage = "Item update failed!";
+    if (!this.props.onValuesConfirmed) {
+      const result = await ServerAPI.editItem(newItem);
+      if ("error" in result) {
+        toasterTitle = "ERROR!";
+        toasterMessage = "Item update failed!";
+      } else {
+        // Item was successfully updated on the server, so update locally!
+        this.props.dispatch?.(updateItem(newItem));
+        this.props.dispatch?.(hideModal());
+      }
     } else {
-      // Item was successfully updated on the server, so update locally!
-      this.props.dispatch?.(updateItem(newItem));
-      this.props.dispatch?.(hideModal());
+      await this.props.onValuesConfirmed(newItem);
     }
 
     this.props.dispatch?.(showToaster({ content: { title: toasterTitle, message: toasterMessage } }));

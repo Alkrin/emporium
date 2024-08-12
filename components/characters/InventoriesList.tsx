@@ -47,6 +47,7 @@ class AInventoriesList extends React.Component<Props> {
       character,
       allStorages,
       allItemDefs,
+      allSpellDefs,
       allItems,
       currentDraggableId,
       handleItemDropped,

@@ -5,13 +5,17 @@ import { ContractId } from "../../../redux/gameDefsSlice";
 import { ActivityData, ActivityData_ParticipantToString, ServerActivityOutcomeData } from "../../../serverAPI";
 import dateFormat from "dateformat";
 import { ProficiencySource } from "../../../staticData/types/abilitiesAndProficiencies";
+import { addDaysToDateString, dayInMillis } from "../../../lib/timeUtils";
+import { generateQueriesCreateItem } from "./generateQueriesCreateItem";
+import { convertItemForServer } from "../../../lib/itemUtils";
+import { generateQueriesEditItem } from "./generateQueriesEditItem";
 
 export function generateQueriesResolveActivity(
   activity: ActivityData,
   outcomes: ServerActivityOutcomeData[],
   resolution: ActivityResolution
 ): SQLQuery[] {
-  const queries: SQLQuery[] = [];
+  let queries: SQLQuery[] = [];
 
   const isAnonymous = activity.id === 0;
 
@@ -135,20 +139,19 @@ export function generateQueriesResolveActivity(
 
   // Character injuries have been grouped by type.
   // "Bed Rest" activities start the next day after the activity ends.
-  const dayInMillis = 60 * 60 * 24 * 1000;
-  const startDate = new Date(new Date(activity.end_date).getTime() + dayInMillis);
+  const startDate = addDaysToDateString(activity.end_date, 1);
   Object.entries(resolution.characterInjuries).forEach(([injuryId, characterIds]) => {
     switch (injuryId) {
       case "OneDay": {
-        const endDate = new Date(startDate.getTime() + dayInMillis);
+        const endDate = addDaysToDateString(startDate, 1);
         queries.push({
           query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
           values: [
             activity.user_id,
             "Injuries",
             `Minimal injuries incurred during #${activity.id}.  Requires one day of bed rest.`,
-            dateFormat(startDate, "yyyy-mm-dd"),
-            dateFormat(endDate, "yyyy-mm-dd"),
+            startDate,
+            endDate,
             characterIds
               .map((characterId) => {
                 const participant = activity.participants.find((p) => {
@@ -167,15 +170,15 @@ export function generateQueriesResolveActivity(
         break;
       }
       case "OneWeek": {
-        const endDate = new Date(startDate.getTime() + dayInMillis * 7);
+        const endDate = addDaysToDateString(startDate, 7);
         queries.push({
           query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
           values: [
             activity.user_id,
             "Injuries",
             `Minor injuries incurred during #${activity.id}.  Requires one week of bed rest.`,
-            dateFormat(startDate, "yyyy-mm-dd"),
-            dateFormat(endDate, "yyyy-mm-dd"),
+            startDate,
+            endDate,
             characterIds
               .map((characterId) => {
                 const participant = activity.participants.find((p) => {
@@ -194,15 +197,15 @@ export function generateQueriesResolveActivity(
         break;
       }
       case "TwoWeeks": {
-        const endDate = new Date(startDate.getTime() + dayInMillis * 14);
+        const endDate = addDaysToDateString(startDate, 14);
         queries.push({
           query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
           values: [
             activity.user_id,
             "Injuries",
             `Moderate injuries incurred during #${activity.id}.  Requires two weeks of bed rest.`,
-            dateFormat(startDate, "yyyy-mm-dd"),
-            dateFormat(endDate, "yyyy-mm-dd"),
+            startDate,
+            endDate,
             characterIds
               .map((characterId) => {
                 const participant = activity.participants.find((p) => {
@@ -221,15 +224,15 @@ export function generateQueriesResolveActivity(
         break;
       }
       case "FourWeeks": {
-        const endDate = new Date(startDate.getTime() + dayInMillis * 28);
+        const endDate = addDaysToDateString(startDate, 28);
         queries.push({
           query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants) VALUES (?,?,?,?,?,?)`,
           values: [
             activity.user_id,
             "Injuries",
             `Major injuries incurred during #${activity.id}.  Requires four weeks of bed rest.`,
-            dateFormat(startDate, "yyyy-mm-dd"),
-            dateFormat(endDate, "yyyy-mm-dd"),
+            startDate,
+            endDate,
             characterIds
               .map((characterId) => {
                 const participant = activity.participants.find((p) => {
@@ -323,6 +326,16 @@ export function generateQueriesResolveActivity(
       query: "UPDATE contracts SET target_a_id=? WHERE id=?",
       values: [resolution.transferStorageId, contractId],
     });
+  });
+
+  // New items.
+  resolution.newItems.forEach((item) => {
+    queries = queries.concat(generateQueriesCreateItem(convertItemForServer(item)));
+  });
+
+  // Updated items.
+  resolution.updatedItems.forEach((item) => {
+    queries = queries.concat(generateQueriesEditItem(convertItemForServer(item)));
   });
 
   return queries;

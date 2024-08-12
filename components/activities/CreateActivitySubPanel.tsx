@@ -23,8 +23,6 @@ import { refetchActivities, refetchExpectedOutcomes } from "../../dataSources/Ac
 import { deleteActivity, deleteOutcomesForActivity, setActiveActivityId } from "../../redux/activitiesSlice";
 import dateFormat from "dateformat";
 import { UserRole } from "../../redux/userSlice";
-import { AbilityDisplayData } from "../characters/EditProficienciesSubPanel";
-import { AbilityOrProficiency } from "../../staticData/types/abilitiesAndProficiencies";
 import { ActivityPreparednessDisplay } from "./ActivityPreparednessDisplay";
 import { FilterType, FilterValueAny, FilterValueBusyStatus, FilterValues } from "../FilterDropdowns";
 import { EditButton } from "../EditButton";
@@ -41,6 +39,7 @@ import { getBattleRatingForTroopDefAndCount } from "../../lib/armyUtils";
 import { getCombatSpeedsForCharacter, getEncumbranceLevelForCharacter } from "../../lib/characterUtils";
 import { CreateActivityOutcomeDialog } from "./CreateActivityOutcomeDialog";
 import { ActivityOutcomesList } from "./ActivityOutcomeList";
+import { addDaysToDateString, dayInMillis, getDaysBetweenDateStrings } from "../../lib/timeUtils";
 
 interface State {
   activity: ActivityData;
@@ -78,6 +77,8 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
       if (props.activeActivityId > 0) {
         // Load the selected activity.
         const a = props.activities[props.activeActivityId];
+        const durationInDays = getDaysBetweenDateStrings(a.start_date, a.end_date);
+        console.log(a.start_date, a.end_date, durationInDays);
         this.state = {
           activity: {
             // When cloning, we copy everything except the id.
@@ -85,8 +86,9 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
             user_id: a.user_id,
             name: a.name,
             description: a.description,
-            start_date: a.start_date,
-            end_date: a.end_date,
+            // A cloned activity starts the day after the original ends, and has the same duration.
+            start_date: props.isClone ? addDaysToDateString(a.end_date, 1) : a.start_date,
+            end_date: props.isClone ? addDaysToDateString(a.end_date, durationInDays + 1) : a.end_date,
             participants: [...a.participants],
             army_participants: [...a.army_participants],
             lead_from_behind_id: a.lead_from_behind_id,

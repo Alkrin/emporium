@@ -1,6 +1,7 @@
 import { ActivityResolution, convertActivityOutcomeForServer, convertServerActivityOutcome } from "./lib/activityUtils";
 import { getAllCharacterAssociatedItemIds } from "./lib/characterUtils";
 import { Dictionary } from "./lib/dictionary";
+import { convertItemForServer, convertServerItem } from "./lib/itemUtils";
 import { UserRole } from "./redux/userSlice";
 import {
   RequestBody_SetXP,
@@ -441,6 +442,7 @@ export enum ActivityOutcomeType {
   Invalid = "---",
   ChangeLocation = "ChangeLocation",
   Description = "Description",
+  GrantItems = "GrantItems",
   InjuriesAndDeaths = "InjuriesAndDeaths",
   LootAndXP = "LootAndXP",
   MergeArmies = "MergeArmies",
@@ -466,6 +468,8 @@ export function ActivityOutcomeData_StringToType(s: string): ActivityOutcomeType
       return ActivityOutcomeType.ChangeLocation;
     case ActivityOutcomeType.Description:
       return ActivityOutcomeType.Description;
+    case ActivityOutcomeType.GrantItems:
+      return ActivityOutcomeType.GrantItems;
     case ActivityOutcomeType.InjuriesAndDeaths:
       return ActivityOutcomeType.InjuriesAndDeaths;
     case ActivityOutcomeType.LootAndXP:
@@ -494,6 +498,12 @@ export interface ActivityOutcomeData_ChangeLocation extends ActivityOutcomeData 
 export interface ActivityOutcomeData_Description extends ActivityOutcomeData {
   type: ActivityOutcomeType.Description;
   description: string;
+}
+
+export interface ActivityOutcomeData_GrantItems extends ActivityOutcomeData {
+  type: ActivityOutcomeType.GrantItems;
+  items: ItemData[];
+  storageId: number;
 }
 
 export interface ActivityOutcomeData_InjuriesAndDeaths extends ActivityOutcomeData {
@@ -918,18 +928,7 @@ class AServerAPI {
     if ("error" in data) {
       return data;
     } else {
-      // owner_ids are stored in the db as comma separated strings, but in Redux as a number array,
-      // so we have to convert before passing the results along.
-      const itemData: ItemData[] = [];
-      data.forEach((sItemData) => {
-        sItemData.owner_ids = sItemData.owner_ids.trim();
-        itemData.push({
-          ...sItemData,
-          owner_ids: sItemData.owner_ids.length > 0 ? sItemData.owner_ids.split(",").map((sID) => +sID) : [],
-          spell_ids: sItemData.spell_ids.length > 0 ? sItemData.spell_ids.split(",").map((sID) => +sID) : [],
-        });
-      });
-
+      const itemData: ItemData[] = data.map(convertServerItem);
       return itemData;
     }
   }
@@ -1136,9 +1135,7 @@ class AServerAPI {
 
   async createItem(data: ItemData): Promise<InsertRowResult> {
     const requestBody: RequestBody_CreateItem = {
-      ...data,
-      owner_ids: data.owner_ids.join(","),
-      spell_ids: data.spell_ids.join(","),
+      item: convertItemForServer(data),
     };
     const res = await fetch("/api/createItem", {
       method: "POST",
@@ -1152,9 +1149,7 @@ class AServerAPI {
 
   async editItem(data: ItemData): Promise<EditRowResult> {
     const requestBody: RequestBody_EditItem = {
-      ...data,
-      owner_ids: data.owner_ids.join(","),
-      spell_ids: data.spell_ids.join(","),
+      item: convertItemForServer(data),
     };
     const res = await fetch("/api/editItem", {
       method: "POST",

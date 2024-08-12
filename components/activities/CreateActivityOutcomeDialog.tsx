@@ -26,11 +26,25 @@ import {
   ActivityOutcomeData_MergeArmies,
   ActivityOutcomeData_TransferEmporiumContracts,
   StorageData,
+  ItemData,
+  ActivityOutcomeData_GrantItems,
+  ItemDefData,
+  SpellDefData,
 } from "../../serverAPI";
 import { InputSingleNumberDialog } from "../dialogs/InputSingleNumberDialog";
 import { getBonusForStat, getBonusString } from "../../lib/characterUtils";
 import { SelectAdventurerInjuryDialog } from "../dialogs/SelectAdventurerInjuryDialog";
 import { SelectArmyDialog } from "../dialogs/SelectArmyDialog";
+import { getStorageDisplayName } from "../../lib/storageUtils";
+import { SelectStorageDialog } from "../dialogs/SelectStorageDialog";
+import { CreateItemDialog } from "../characters/CreateItemDialog";
+import { ScrollArea } from "../ScrollArea";
+import TooltipSource from "../TooltipSource";
+import { ItemTooltip } from "../database/ItemTooltip";
+import { getItemNameText } from "../../lib/itemUtils";
+import { SpellTooltip } from "../database/SpellTooltip";
+import { EditItemDialog } from "../characters/EditItemDialog";
+import { DeleteButton } from "../DeleteButton";
 
 interface State {
   type: ActivityOutcomeType;
@@ -52,11 +66,14 @@ interface State {
   campaignXPString: string;
   primaryArmyId: number;
   subordinateArmyId: number;
+  storageId: number;
+  items: ItemData[];
 }
 
 interface ReactProps {
   activity: ActivityData;
   initialValues?: ActivityOutcomeData;
+  allowedTypes?: ActivityOutcomeType[];
   disallowedTypes?: ActivityOutcomeType[];
   onValuesConfirmed: (values: ActivityOutcomeData) => Promise<void>;
 }
@@ -68,6 +85,8 @@ interface InjectedProps {
   allStorages: Dictionary<StorageData>;
   troopsByArmy: Dictionary<TroopData[]>;
   troopDefs: Dictionary<TroopDefData>;
+  itemDefs: Dictionary<ItemDefData>;
+  spellDefs: Dictionary<SpellDefData>;
   dispatch?: Dispatch;
 }
 
@@ -94,6 +113,8 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
           campaignXPString: `${(iv as ActivityOutcomeData_LootAndXP).campaignXP ?? 0}`,
           primaryArmyId: (iv as ActivityOutcomeData_MergeArmies).primaryArmyId ?? 0,
           subordinateArmyId: (iv as ActivityOutcomeData_MergeArmies).subordinateArmyId ?? 0,
+          storageId: (iv as ActivityOutcomeData_GrantItems).storageId ?? 0,
+          items: (iv as ActivityOutcomeData_GrantItems).items ?? [],
         }
       : {
           type: ActivityOutcomeType.Invalid,
@@ -110,6 +131,8 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
           campaignXPString: "0",
           primaryArmyId: 0,
           subordinateArmyId: 0,
+          storageId: 0,
+          items: [],
         };
   }
 
@@ -131,7 +154,13 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
             disabled={!!this.props.initialValues}
           >
             {SortedActivityOutcomeTypes.filter((type) => {
-              return !(this.props.disallowedTypes ?? []).includes(type);
+              if (this.props.allowedTypes) {
+                return this.props.allowedTypes.includes(type);
+              } else if (this.props.disallowedTypes) {
+                return !this.props.disallowedTypes.includes(type);
+              } else {
+                return true;
+              }
             }).map((type: ActivityOutcomeType, index: number) => {
               return (
                 <option value={type} key={index}>
@@ -164,6 +193,9 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
       }
       case ActivityOutcomeType.Description: {
         return this.renderTypeFieldsDescription();
+      }
+      case ActivityOutcomeType.GrantItems: {
+        return this.renderTypeFieldsGrantItems();
       }
       case ActivityOutcomeType.InjuriesAndDeaths: {
         return this.renderTypeFieldsInjuriesAndDeaths();
@@ -219,6 +251,98 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
           spellCheck={false}
         />
       </>
+    );
+  }
+
+  private renderTypeFieldsGrantItems(): React.ReactNode {
+    return (
+      <>
+        <div className={styles.outcomeFieldHeader}>
+          {
+            "Items will be created and added to the specified Storage.  Where possible, they will be merged into existing item stacks."
+          }
+        </div>
+        <div className={styles.rowWithSpacer}>
+          <div className={styles.outcomeFieldValue}>{`Storage: ${getStorageDisplayName(this.state.storageId)}`}</div>
+          <EditButton className={styles.editButton} onClick={this.onSelectStorageClicked.bind(this)} />
+        </div>
+        <div className={styles.rowWithSpacer}>
+          <div className={styles.outcomeFieldHeader}>{"Items"}</div>
+          <EditButton className={styles.editButton} onClick={this.onCreateItemClicked.bind(this)} />
+        </div>
+        <ScrollArea className={styles.itemList}>{this.state.items.map(this.renderItemRow.bind(this))}</ScrollArea>
+      </>
+    );
+  }
+
+  private renderItemRow(item: ItemData, index: number): React.ReactNode {
+    const def = this.props.itemDefs[item.def_id];
+    return (
+      <div className={styles.itemContentWrapper}>
+        <TooltipSource
+          className={styles.row}
+          tooltipParams={{
+            id: `Item${index}`,
+            content: () => {
+              return <ItemTooltip itemData={item} />;
+            },
+          }}
+        >
+          <div className={styles.itemName}>{getItemNameText(item, def)}</div>
+          <EditButton className={styles.itemActionButton} onClick={this.onEditItemClicked.bind(this, item, index)} />
+          <DeleteButton className={styles.itemActionButton} onClick={this.onDeleteItemClicked.bind(this, index)} />
+        </TooltipSource>
+        {[...def.spell_ids, ...item.spell_ids].map((sid, spellIndex) => {
+          const spellDef = this.props.spellDefs[sid];
+          if (spellDef) {
+            return (
+              <TooltipSource
+                key={`spell${spellIndex}`}
+                className={styles.associatedSpellRow}
+                tooltipParams={{
+                  id: `${spellDef.id} ${spellIndex}`,
+                  content: () => {
+                    return <SpellTooltip spellId={sid} />;
+                  },
+                }}
+              >
+                {spellDef.name}
+              </TooltipSource>
+            );
+          } else {
+            return null;
+          }
+        })}
+      </div>
+    );
+  }
+
+  private onDeleteItemClicked(index: number): void {
+    this.setState({ items: this.state.items.filter((_, index2) => index !== index2) });
+  }
+
+  private onEditItemClicked(item: ItemData, index: number): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "CreateItem",
+        content: () => {
+          // Setting 'onValuesConfirmed' overrides the default behavior of editing server data immediately.
+          return (
+            <EditItemDialog
+              item={item}
+              def={this.props.itemDefs[item.def_id]}
+              onValuesConfirmed={async (newItem: ItemData) => {
+                // Add the generated item data to the item list.
+                const items: ItemData[] = [...this.state.items];
+                items[index] = newItem;
+                this.setState({ items });
+              }}
+            />
+          );
+        },
+        widthVmin: 62,
+        escapable: true,
+      })
     );
   }
 
@@ -638,6 +762,49 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
     this.setState({ transferLocationId });
   }
 
+  private onCreateItemClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "CreateItem",
+        content: () => {
+          // A zero storageId means the items won't be added to the database right now.
+          return (
+            <CreateItemDialog
+              storageId={0}
+              preselectedOwnerIds={this.props.activity.participants.map((p) => p.characterId)}
+              onValuesConfirmed={async (item: ItemData) => {
+                // Add the generated item data to the item list.
+                this.setState({ items: [...this.state.items, item] });
+              }}
+            />
+          );
+        },
+        widthVmin: 62,
+        escapable: true,
+      })
+    );
+  }
+
+  private onSelectStorageClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "selectStorage",
+        content: () => {
+          return (
+            <SelectStorageDialog
+              preselectedStorageId={this.state.storageId}
+              onSelectionConfirmed={async (storageId: number) => {
+                this.setState({ storageId });
+              }}
+            />
+          );
+        },
+        escapable: true,
+        widthVmin: 45,
+      })
+    );
+  }
+
   private onConfirmClicked(): void {
     switch (this.state.type) {
       case ActivityOutcomeType.ChangeLocation: {
@@ -658,6 +825,17 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
           description: this.state.description,
         };
         this.props.onValuesConfirmed(dd);
+        break;
+      }
+      case ActivityOutcomeType.GrantItems: {
+        const dgi: ActivityOutcomeData_GrantItems = {
+          id: this.props.initialValues?.id ?? 0,
+          activity_id: this.props.activity.id,
+          type: this.state.type,
+          storageId: this.state.storageId,
+          items: this.state.items,
+        };
+        this.props.onValuesConfirmed(dgi);
         break;
       }
       case ActivityOutcomeType.InjuriesAndDeaths: {
@@ -725,6 +903,8 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allStorages = state.storages.allStorages;
   const troopsByArmy = state.armies.troopsByArmy;
   const troopDefs = state.gameDefs.troops;
+  const itemDefs = state.gameDefs.items;
+  const spellDefs = state.gameDefs.spells;
   return {
     ...props,
     allArmies,
@@ -733,6 +913,8 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     allStorages,
     troopsByArmy,
     troopDefs,
+    itemDefs,
+    spellDefs,
   };
 }
 

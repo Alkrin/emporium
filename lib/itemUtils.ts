@@ -1,5 +1,5 @@
 import store from "../redux/store";
-import { CharacterData, CharacterEquipmentSlots, ItemData, ItemDefData } from "../serverAPI";
+import { CharacterData, CharacterEquipmentSlots, ItemData, ItemDefData, ServerItemData } from "../serverAPI";
 import { addCommasToNumber } from "./characterUtils";
 import { Dictionary } from "./dictionary";
 import { EquipmentSlotTag, WeaponCategoryTag, WeaponTypeTag } from "./tags";
@@ -63,7 +63,7 @@ export function getBundleWeight(def: ItemDefData, count: number): Stones {
 }
 
 export function getItemTotalWeight(
-  itemId: number,
+  item: ItemData,
   allItems: Dictionary<ItemData>,
   allItemDefs: Dictionary<ItemDefData>,
   itemIdsToIgnore: number[]
@@ -71,11 +71,10 @@ export function getItemTotalWeight(
   let stones: Stones = [0, 0];
 
   // If this item is to be ignored, return zero now!
-  if (itemIdsToIgnore.includes(itemId)) {
+  if (itemIdsToIgnore.includes(item.id)) {
     return [0, 0];
   }
 
-  const item = allItems[itemId];
   const def = allItemDefs[item?.def_id];
   if (def && item) {
     // Add the item's own weight.
@@ -84,7 +83,7 @@ export function getItemTotalWeight(
 
     // If this is a container (and not something like a bag of holding), add the weight of contained items.
     if ((def.storage_stones > 0 || def.storage_sixth_stones > 0) && !def.fixed_weight) {
-      const containedStones = getItemContainedWeight(itemId, allItems, allItemDefs, itemIdsToIgnore);
+      const containedStones = getItemContainedWeight(item.id, allItems, allItemDefs, itemIdsToIgnore);
       stones = StonesAPlusB(stones, containedStones);
     }
   }
@@ -105,7 +104,7 @@ export function getItemContainedWeight(
   });
 
   containedItems.forEach((contained) => {
-    const itemStones = getItemTotalWeight(contained.id, allItems, allItemDefs, itemIdsToIgnore);
+    const itemStones = getItemTotalWeight(contained, allItems, allItemDefs, itemIdsToIgnore);
     stones = StonesAPlusB(stones, itemStones);
   });
 
@@ -176,13 +175,26 @@ export function getAvailableRoomForContainer(
 export function getItemNameText(item?: ItemData, def?: ItemDefData): string {
   // Show a count for ChargedItems and anything with more than one item in it.
   if (def && item) {
+    const redux = store.getState();
+    const spellText =
+      item.spell_ids.length === 0
+        ? ""
+        : " " +
+          item.spell_ids
+            .map((sid) => {
+              const spellDef = redux.gameDefs.spells[sid];
+              return spellDef?.name ?? "Unknown";
+            })
+            .join(", ");
     if (def.has_charges) {
-      return `${def.name}, ${item.count} charge${item.count > 1 ? "s" : ""}`;
+      return `${def.name}${spellText}, ${item.count} charge${item.count > 1 ? "s" : ""}`;
     } else if (item.count > 1) {
-      return `${def.name} x${item.count}`;
+      return `${def.name}${spellText} x${item.count}`;
+    } else {
+      return `${def.name}${spellText}`;
     }
   }
-  return def?.name ?? "";
+  return "";
 }
 
 export function getMaxBundleItemsForRoom(def: ItemDefData, room: Stones): number {
@@ -211,11 +223,14 @@ export function getTotalEquippedWeight(
   allItems: Dictionary<ItemData>,
   allItemDefs: Dictionary<ItemDefData>
 ): Stones {
+  const redux = store.getState();
+
   let weight: Stones = [0, 0];
 
   CharacterEquipmentSlots.forEach((key) => {
     const itemId = character[key];
-    const itemWeight = getItemTotalWeight(itemId, allItems, allItemDefs, []);
+    const item = redux.items.allItems[itemId];
+    const itemWeight: [number, number] = item ? getItemTotalWeight(item, allItems, allItemDefs, []) : [0, 0];
     weight = StonesAPlusB(weight, itemWeight);
   });
 
@@ -238,8 +253,21 @@ export function doesItemGrantMagicDamageBonus(itemId: number): boolean {
 }
 
 export function canItemsBeStacked(a: ItemData, b: ItemData, allItemDefs: Dictionary<ItemDefData>): boolean {
+  const redux = store.getState();
+
   // Must have same def.
   if (a.def_id !== b.def_id) {
+    return false;
+  }
+
+  // If either item is a container with stuff inside it, then they can't be stacked.
+  // Only empty containers stack.
+  const aHasContents = getAllItemAssociatedItemIds(a.id).length > 1;
+  if (aHasContents) {
+    return false;
+  }
+  const bHasContents = getAllItemAssociatedItemIds(b.id).length > 1;
+  if (bHasContents) {
     return false;
   }
 
@@ -254,4 +282,80 @@ export function canItemsBeStacked(a: ItemData, b: ItemData, allItemDefs: Diction
   }
 
   return true;
+}
+
+export function getRootItemsInStorage(storageId: number): ItemData[] {
+  const redux = store.getState();
+  const storage = redux.storages.allStorages[storageId];
+  if (!storage) return [];
+
+  const items: ItemData[] = Object.values(redux.items.allItems).filter((item) => {
+    return item.storage_id === storageId;
+  });
+
+  items.sort((itemA, itemB) => {
+    if (itemA.is_for_sale !== itemB.is_for_sale) {
+      return itemA.is_for_sale ? -1 : 1;
+    }
+
+    const nameA = redux.gameDefs.items[itemA.def_id]?.name ?? "";
+    const nameB = redux.gameDefs.items[itemB.def_id]?.name ?? "";
+    return nameA.localeCompare(nameB);
+  });
+
+  return items;
+}
+
+export function convertServerItem(serverItem: ServerItemData): ItemData {
+  const item: ItemData = {
+    ...serverItem,
+    owner_ids:
+      serverItem.owner_ids.trim().length > 0
+        ? serverItem.owner_ids
+            .trim()
+            .split(",")
+            .map((sID) => +sID)
+        : [],
+    spell_ids:
+      serverItem.spell_ids.trim().length > 0
+        ? serverItem.spell_ids
+            .trim()
+            .split(",")
+            .map((sID) => +sID)
+        : [],
+  };
+  return item;
+}
+
+export function convertItemForServer(item: ItemData): ServerItemData {
+  const serverItem: ServerItemData = {
+    ...item,
+    owner_ids: item.owner_ids.join(","),
+    spell_ids: item.spell_ids.join(","),
+  };
+  return serverItem;
+}
+
+export function getAllItemAssociatedItemIds(itemId: number): number[] {
+  const redux = store.getState();
+
+  // Start by getting items directly contained in the storage.
+  const finalItemIds: number[] = [itemId];
+
+  // Contained items.
+  // Breadth First Search to find all nested items.
+  let activeItemIds: number[] = [...finalItemIds];
+  while (activeItemIds.length > 0) {
+    // Find all items contained inside the active items.
+    const containedItems = Object.values(redux.items.allItems).filter((item) => {
+      return activeItemIds.includes(item.container_id);
+    });
+    // Save this layer of items and dig down to the next.
+    activeItemIds = containedItems.map((i) => {
+      return i.id;
+    });
+    finalItemIds.push(...activeItemIds);
+  }
+
+  return finalItemIds;
 }

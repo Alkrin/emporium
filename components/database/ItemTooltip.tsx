@@ -17,7 +17,11 @@ interface ReactPropsItemDef extends React.HTMLAttributes<HTMLDivElement> {
   itemDefId: number;
 }
 
-type ReactProps = ReactPropsItem | ReactPropsItemDef;
+interface ReactPropsItemData extends React.HTMLAttributes<HTMLDivElement> {
+  itemData: ItemData;
+}
+
+type ReactProps = ReactPropsItem | ReactPropsItemDef | ReactPropsItemData;
 
 interface InjectedProps {
   item?: ItemData;
@@ -90,7 +94,7 @@ class AItemTooltip extends React.Component<Props> {
     const { item, itemDef } = this.props;
     if (item && itemDef) {
       // We have a properly instantiated item, so we can show its current status.
-      const [stones, sixthStones] = getItemTotalWeight(item.id, this.props.allItems, this.props.allItemDefs, []);
+      const [stones, sixthStones] = getItemTotalWeight(item, this.props.allItems, this.props.allItemDefs, []);
       // If only stones, show only stones.
       if (sixthStones === 0) {
         return `${stones} stone`;
@@ -153,7 +157,18 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allItems } = state.items;
   const allItemDefs = state.gameDefs.items;
   const allCharacters = state.characters.characters;
-  if ("itemId" in props) {
+  if ("itemData" in props) {
+    const item = props.itemData;
+    const itemDef = allItemDefs[item?.def_id];
+    return {
+      ...props,
+      item,
+      itemDef,
+      allItems,
+      allItemDefs,
+      allCharacters,
+    };
+  } else if ("itemId" in props) {
     const item = allItems[props.itemId];
     const itemDef = allItemDefs[item?.def_id];
     return {
