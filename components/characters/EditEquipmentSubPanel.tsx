@@ -29,6 +29,7 @@ import { InventoriesList } from "./InventoriesList";
 import {
   StonesToSixths,
   canItemsBeStacked,
+  getAllItemAssociatedItemIds,
   getAvailableRoomForContainer,
   getItemNameText,
   getItemTotalWeight,
@@ -43,7 +44,6 @@ import {
   canCharacterDualWield,
   canCharacterEquipShields,
   canCharacterEquipWeapon,
-  getAllItemAssociatedItemIds,
   getMaxBaseArmorForCharacter,
   getPersonalPile,
   isCharacterDualWielding,
@@ -654,6 +654,18 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
     let container = this.props.allItems[containerId];
     let containerDef = this.props.allItemDefs[container?.def_id];
     if (containerDef) {
+      if (container.count > 1) {
+        this.props.dispatch?.(
+          showToaster({
+            id: "InvalidByStacked",
+            content: {
+              title: "Unable to Add",
+              message: `Cannot add items to stacked containers.  Split one off from the stack first.`,
+            },
+          })
+        );
+        return;
+      }
       // See if the container permits the dropped item's tags.
       if (containerDef.storage_filters.length > 0) {
         let isPermitted: boolean = false;
@@ -700,7 +712,7 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         // We ignore the item being moved so that it doesn't block itself from being moved around.
         item.id,
       ]);
-      const itemWeight = getItemTotalWeight(item.id, this.props.allItems, this.props.allItemDefs, []);
+      const itemWeight = getItemTotalWeight(item, this.props.allItems, this.props.allItemDefs, []);
 
       if (StonesToSixths(itemWeight) > StonesToSixths(availableRoom)) {
         // Charged items can't be split.

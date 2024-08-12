@@ -14,6 +14,8 @@ import {
   UniqueActivityOutcomeTypes,
   ActivityOutcomeData_MergeArmies,
   ActivityOutcomeData_TransferEmporiumContracts,
+  ActivityOutcomeData_GrantItems,
+  ItemData,
 } from "../serverAPI";
 import {
   addCommasToNumber,
@@ -33,6 +35,8 @@ import dateFormat from "dateformat";
 import { getFirstOfThisMonthDateString } from "./stringUtils";
 import { ContractId } from "../redux/gameDefsSlice";
 import { getTroopAvailableUnitCount } from "./armyUtils";
+import { getStorageDisplayName } from "./storageUtils";
+import { canItemsBeStacked, getItemNameText, getRootItemsInStorage } from "./itemUtils";
 
 export interface ActivityResolutionData_ArmyDeath {
   troopId: number;
@@ -89,6 +93,8 @@ export interface ActivityResolution {
   transferArmyWageContractIds: number[];
   transferCharacterWageContractIds: number[];
   transferActivityLootContractIds: number[];
+  newItems: ItemData[];
+  updatedItems: ItemData[];
 }
 
 export function generateActivityResolution(
@@ -114,6 +120,8 @@ export function generateActivityResolution(
     transferArmyWageContractIds: [],
     transferCharacterWageContractIds: [],
     transferActivityLootContractIds: [],
+    newItems: [],
+    updatedItems: [],
   };
 
   // Any outcome could in theory have multiple instances.  For most, only the first matters.
@@ -132,6 +140,27 @@ export function generateActivityResolution(
   if (changeLocationData) {
     resolution.destinationId = changeLocationData.locationId;
   }
+
+  // Generate Items.
+  outcomesByType[ActivityOutcomeType.GrantItems]?.forEach((o) => {
+    const gio = o as ActivityOutcomeData_GrantItems;
+
+    const storageItems = getRootItemsInStorage(gio.storageId);
+    gio.items.forEach((item) => {
+      const existingStack = storageItems.find((existingItem) => {
+        return canItemsBeStacked(item, existingItem, redux.gameDefs.items);
+      });
+      if (existingStack) {
+        // If there is already a compatible item stack in the target storage, add the new item(s) to that stack.
+        const updatedItem: ItemData = { ...existingStack, count: existingStack.count + item.count };
+        resolution.updatedItems.push(updatedItem);
+      } else {
+        // Otherwise, generate a new item/stack in the target storage.
+        const newItem: ItemData = { ...item, storage_id: gio.storageId };
+        resolution.newItems.push(newItem);
+      }
+    });
+  });
 
   // Transfer Emporium Contracts.
   const transferEmporiumContractsData = outcomesByType[
@@ -615,6 +644,18 @@ export function getDisplayTextForExpectedOutcome(data: ActivityOutcomeData): str
       const dd = data as ActivityOutcomeData_Description;
       return dd.description;
     }
+    case ActivityOutcomeType.GrantItems: {
+      const dgi = data as ActivityOutcomeData_GrantItems;
+      return (
+        `Items added to ${getStorageDisplayName(dgi.storageId)}` +
+        dgi.items
+          .map((item) => {
+            const def = redux.gameDefs.items[item.def_id];
+            return `\n\xa0\xa0${getItemNameText(item, def)}`;
+          })
+          .join("")
+      );
+    }
     case ActivityOutcomeType.InjuriesAndDeaths: {
       const diad = data as ActivityOutcomeData_InjuriesAndDeaths;
       return (
@@ -676,6 +717,19 @@ export function convertServerActivityOutcome(seo: ServerActivityOutcomeData): Ac
         id: seo.id,
         activity_id: seo.activity_id,
         description: seo.data,
+      };
+      return o;
+    }
+    case ActivityOutcomeType.GrantItems: {
+      const splitAt = seo.data.indexOf("|");
+      const storageId = +seo.data.substring(0, splitAt);
+      const items = JSON.parse(seo.data.substring(splitAt + 1));
+      const o: ActivityOutcomeData_GrantItems = {
+        type: seo.type,
+        id: seo.id,
+        activity_id: seo.activity_id,
+        storageId,
+        items,
       };
       return o;
     }
@@ -796,6 +850,11 @@ export function convertActivityOutcomeForServer(eo: ActivityOutcomeData): Server
     case ActivityOutcomeType.Description: {
       const teo = eo as ActivityOutcomeData_Description;
       seo.data = teo.description;
+      break;
+    }
+    case ActivityOutcomeType.GrantItems: {
+      const geo = eo as ActivityOutcomeData_GrantItems;
+      seo.data = `${geo.storageId}|${JSON.stringify(geo.items)}`;
       break;
     }
     case ActivityOutcomeType.InjuriesAndDeaths: {

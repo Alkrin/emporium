@@ -106,18 +106,12 @@ export interface RequestBody_SetHenchmaster {
 }
 
 export interface RequestBody_CreateItem {
-  def_id: number;
-  count: number;
-  container_id: number;
-  storage_id: number;
-  notes: string;
-  is_for_sale: boolean;
-  owner_ids: string;
-  is_unused: boolean;
-  spell_ids: string;
+  item: ServerItemData;
 }
 
-export type RequestBody_EditItem = ServerItemData;
+export interface RequestBody_EditItem {
+  item: ServerItemData;
+}
 
 export interface RequestBody_EncryptString {
   text: string;

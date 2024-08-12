@@ -30,6 +30,7 @@ import {
   getItemNameText,
   getItemTotalWeight,
   getMaxBundleItemsForRoom,
+  getRootItemsInStorage,
   isContainerAInContainerB,
 } from "../../lib/itemUtils";
 import { setEquipment } from "../../redux/charactersSlice";
@@ -38,7 +39,7 @@ import { Tag } from "../../lib/tags";
 import { SpellbookDialog } from "./SpellbookDialog";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { EditButton } from "../EditButton";
-import { getAllItemAssociatedItemIds } from "../../lib/characterUtils";
+import { getAllItemAssociatedItemIds } from "../../lib/itemUtils";
 import { StoragesList } from "./StoragesList";
 import { EditMoneyDialog } from "./EditMoneyDialog";
 import { getStorageDisplayName } from "../../lib/storageUtils";
@@ -84,7 +85,7 @@ class AEditStoragesSubPanel extends React.Component<Props> {
         <div className={styles.horizontalSpacer} />
         <div className={styles.column}>
           <div className={styles.createItemsButton} onClick={this.onCreateItemsClicked.bind(this)}>
-            Create Items
+            {"Create Items"}
           </div>
           <div className={styles.selectedStorageTitle}>{storageName}</div>
           <div className={styles.moneyRow}>
@@ -103,7 +104,7 @@ class AEditStoragesSubPanel extends React.Component<Props> {
             dropTypes={[DropTypeItem]}
             className={styles.selectedStorageRoot}
           >
-            {this.getSelectedStorageItems().map((item) => {
+            {getRootItemsInStorage(this.props.activeStorageId).map((item) => {
               return this.renderSelectedStorageItemRow(item);
             })}
           </DropTarget>
@@ -113,7 +114,7 @@ class AEditStoragesSubPanel extends React.Component<Props> {
         </div>
         <div className={styles.horizontalSpacer} />
         <div className={styles.column}>
-          <div className={styles.inventoriesTitle}>Inventories</div>
+          <div className={styles.inventoriesTitle}>{"Inventories"}</div>
           <InventoriesList
             className={styles.inventoriesListRoot}
             containerIds={this.getContainerIds()}
@@ -139,7 +140,7 @@ class AEditStoragesSubPanel extends React.Component<Props> {
 
   private getContainerIds(): number[] {
     // All selected storage containers.
-    const containerIds: number[] = this.getSelectedStorageItems()
+    const containerIds: number[] = getRootItemsInStorage(this.props.activeStorageId)
       .filter((item) => {
         const def = this.props.allItemDefs[item.def_id];
         return def.storage_stones > 0 || def.storage_sixth_stones > 0;
@@ -149,27 +150,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
       });
 
     return containerIds;
-  }
-
-  private getSelectedStorageItems(): ItemData[] {
-    const selectedStorage = this.props.allStorages[this.props.activeStorageId];
-    if (!selectedStorage) return [];
-
-    const items: ItemData[] = Object.values(this.props.allItems).filter((item) => {
-      return item.storage_id === selectedStorage.id;
-    });
-
-    items.sort((itemA, itemB) => {
-      if (itemA.is_for_sale !== itemB.is_for_sale) {
-        return itemA.is_for_sale ? -1 : 1;
-      }
-
-      const nameA = this.props.allItemDefs[itemA.def_id]?.name ?? "";
-      const nameB = this.props.allItemDefs[itemB.def_id]?.name ?? "";
-      return nameA.localeCompare(nameB);
-    });
-
-    return items;
   }
 
   private renderSelectedStorageItemRow(item: ItemData): React.ReactNode {
@@ -564,6 +544,18 @@ class AEditStoragesSubPanel extends React.Component<Props> {
     let container = this.props.allItems[containerId];
     let containerDef = this.props.allItemDefs[container?.def_id];
     if (containerDef) {
+      if (container.count > 1) {
+        this.props.dispatch?.(
+          showToaster({
+            id: "InvalidByStacked",
+            content: {
+              title: "Unable to Add",
+              message: `Cannot add items to stacked containers.  Split one off from the stack first.`,
+            },
+          })
+        );
+        return;
+      }
       // See if the container permits the dropped item's tags.
       if (containerDef.storage_filters.length > 0) {
         let isPermitted: boolean = false;
@@ -610,7 +602,7 @@ class AEditStoragesSubPanel extends React.Component<Props> {
         // We ignore the item being moved so that it doesn't block itself from being moved around.
         item.id,
       ]);
-      const itemWeight = getItemTotalWeight(item.id, this.props.allItems, this.props.allItemDefs, []);
+      const itemWeight = getItemTotalWeight(item, this.props.allItems, this.props.allItemDefs, []);
 
       if (StonesToSixths(itemWeight) > StonesToSixths(availableRoom)) {
         // Charged items can't be split

@@ -9,11 +9,14 @@ import ServerAPI, {
   ActivityAdventurerParticipant,
   ActivityArmyParticipant,
   ActivityData,
+  ActivityOutcomeData,
+  ActivityOutcomeData_GrantItems,
   ActivityOutcomeData_InjuriesAndDeaths,
   ActivityOutcomeData_LootAndXP,
   ActivityOutcomeType,
   ArmyData,
   CharacterData,
+  StorageData,
   TroopData,
   TroopDefData,
 } from "../../serverAPI";
@@ -36,15 +39,25 @@ import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../../dataSo
 import { refetchActivities } from "../../dataSources/ActivitiesDataSource";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
 import { getBonusForStat, getBonusString } from "../../lib/characterUtils";
+import { refetchContracts } from "../../dataSources/ContractsDataSource";
+import { ActivityOutcomesList } from "../activities/ActivityOutcomeList";
+import { CreateActivityOutcomeDialog } from "../activities/CreateActivityOutcomeDialog";
+import { AddButton } from "../AddButton";
+import { getStorageDisplayName } from "../../lib/storageUtils";
+import { EditButton } from "../EditButton";
+import { SelectStorageDialog } from "../dialogs/SelectStorageDialog";
 
 interface State {
   isSaving: boolean;
   activity: ActivityData;
   laxOutcome: ActivityOutcomeData_LootAndXP;
   painOutcome: ActivityOutcomeData_InjuriesAndDeaths;
+  itemOutcomes: ActivityOutcomeData_GrantItems[];
 
   goldFoundString: string;
   xpEarnedString: string;
+
+  targetStorageId: number;
 }
 
 const defaultState: State = {
@@ -68,8 +81,10 @@ const defaultState: State = {
     troopDeathsByArmy: {},
     troopInjuriesByArmy: {},
   },
+  itemOutcomes: [],
   goldFoundString: "0",
   xpEarnedString: "0",
+  targetStorageId: 0,
 };
 
 interface ReactProps {}
@@ -77,6 +92,7 @@ interface ReactProps {}
 interface InjectedProps {
   allArmies: Dictionary<ArmyData>;
   allCharacters: Dictionary<CharacterData>;
+  allStorages: Dictionary<StorageData>;
   troopsByArmy: Dictionary<TroopData[]>;
   troopDefs: Dictionary<TroopDefData>;
   dispatch?: Dispatch;
@@ -219,6 +235,20 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
             }}
           />
         </div>
+        <div className={styles.row}>
+          <div className={styles.firstLabel}>{"Items Found"}</div>
+          <AddButton className={styles.itemsAddButton} onClick={this.onItemOutcomeAddClicked.bind(this)} />
+          <div className={styles.firstLabel}>{"Target Storage:\xa0"}</div>
+          <div className={styles.valueText}>{getStorageDisplayName(this.state.targetStorageId)}</div>
+          <EditButton className={styles.itemsAddButton} onClick={this.onSelectTargetStoreClicked.bind(this)} />
+        </div>
+        <ActivityOutcomesList
+          className={styles.itemsFoundList}
+          outcomes={this.state.itemOutcomes}
+          canEdit={true}
+          onEditRowClicked={this.onItemOutcomeEditClicked.bind(this)}
+          onDeleteRowClicked={this.onItemOutcomeDeleteClicked.bind(this)}
+        />
         <div className={styles.applyButton} onClick={this.onApplyOutcomesClick.bind(this)}>
           {"Apply Outcomes and Adjust Participants"}
         </div>
@@ -231,6 +261,79 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         <SubPanelCloseButton />
       </div>
     );
+  }
+
+  private onSelectTargetStoreClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "selectTargetStorage",
+        content: () => {
+          return (
+            <SelectStorageDialog
+              preselectedStorageId={this.state.targetStorageId}
+              onSelectionConfirmed={async (targetStorageId: number) => {
+                this.setState({ targetStorageId });
+              }}
+            />
+          );
+        },
+        escapable: true,
+        widthVmin: 45,
+      })
+    );
+  }
+
+  private onItemOutcomeAddClicked(): void {
+    const defaultOutcome: ActivityOutcomeData_GrantItems = {
+      id: 0,
+      type: ActivityOutcomeType.GrantItems,
+      activity_id: 0,
+      items: [],
+      storageId: this.state.targetStorageId,
+    };
+    this.props.dispatch?.(
+      showModal({
+        id: "EditExpectedOutcome",
+        content: () => {
+          return (
+            <CreateActivityOutcomeDialog
+              activity={this.state.activity}
+              initialValues={defaultOutcome}
+              onValuesConfirmed={async (outcome: ActivityOutcomeData) => {
+                const newOutcomes = [...this.state.itemOutcomes, outcome as ActivityOutcomeData_GrantItems];
+                this.setState({ itemOutcomes: newOutcomes });
+              }}
+              allowedTypes={[ActivityOutcomeType.GrantItems]}
+            />
+          );
+        },
+      })
+    );
+  }
+
+  private onItemOutcomeEditClicked(data: ActivityOutcomeData, index: number): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "EditExpectedOutcome",
+        content: () => {
+          return (
+            <CreateActivityOutcomeDialog
+              activity={this.state.activity}
+              initialValues={data}
+              onValuesConfirmed={async (outcome: ActivityOutcomeData) => {
+                const newOutcomes = [...this.state.itemOutcomes];
+                newOutcomes[index] = outcome as ActivityOutcomeData_GrantItems;
+                this.setState({ itemOutcomes: newOutcomes });
+              }}
+            />
+          );
+        },
+      })
+    );
+  }
+
+  private onItemOutcomeDeleteClicked(data: ActivityOutcomeData, index: number): void {
+    this.setState({ itemOutcomes: this.state.itemOutcomes.filter((_, findex) => findex !== index) });
   }
 
   private renderArmyParticipantRows(p: ActivityArmyParticipant, index: number): React.ReactNode {
@@ -393,7 +496,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
 
     this.setState({ isSaving: true });
 
-    const outcomes = [this.state.painOutcome, this.state.laxOutcome];
+    const outcomes: ActivityOutcomeData[] = [this.state.painOutcome, this.state.laxOutcome, ...this.state.itemOutcomes];
     const resolution = generateActivityResolution(this.state.activity, outcomes, this.state.activity.end_date);
 
     const res = await ServerAPI.resolveActivity(this.state.activity, outcomes, resolution);
@@ -425,6 +528,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         await refetchArmies(this.props.dispatch);
         await refetchTroops(this.props.dispatch);
         await refetchTroopInjuries(this.props.dispatch);
+        await refetchContracts(this.props.dispatch);
       }
       // Remove injured and dead characters.
       const remainingAdventurers = this.state.activity.participants.filter((a) => {
@@ -456,6 +560,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         troopDeathsByArmy: {},
         troopInjuriesByArmy: {},
       },
+      itemOutcomes: [],
       goldFoundString: "0",
       xpEarnedString: "0",
     });
@@ -799,6 +904,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allCharacters = state.characters.characters;
+  const allStorages = state.storages.allStorages;
   const { troopsByArmy, armies: allArmies } = state.armies;
   const troopDefs = state.gameDefs.troops;
 
@@ -806,6 +912,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     ...props,
     allArmies,
     allCharacters,
+    allStorages,
     troopsByArmy,
     troopDefs,
   };

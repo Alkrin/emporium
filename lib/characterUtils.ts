@@ -139,30 +139,6 @@ export function getCharacterMaxEncumbrance(character: CharacterData): Stones {
   return [20 + getBonusForStat(character.strength) + encumbranceReduction, 0];
 }
 
-export function getAllItemAssociatedItemIds(itemId: number): number[] {
-  const redux = store.getState();
-
-  // Start by getting items directly contained in the storage.
-  const finalItemIds: number[] = [itemId];
-
-  // Contained items.
-  // Breadth First Search to find all nested items.
-  let activeItemIds: number[] = [...finalItemIds];
-  while (activeItemIds.length > 0) {
-    // Find all items contained inside the active items.
-    const containedItems = Object.values(redux.items.allItems).filter((item) => {
-      return activeItemIds.includes(item.container_id);
-    });
-    // Save this layer of items and dig down to the next.
-    activeItemIds = containedItems.map((i) => {
-      return i.id;
-    });
-    finalItemIds.push(...activeItemIds);
-  }
-
-  return finalItemIds;
-}
-
 export function getAllCharacterAssociatedItemIds(characterId: number, excludeStorages?: boolean): number[] {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];

@@ -150,7 +150,7 @@ class ASelectSpellsDialog extends React.Component<Props, State> {
       <div key={typeAndLevel}>
         <div className={styles.spellListHeader}>{typeAndLevel}</div>
         {spells.map((spellDef) => {
-          const draggableId = `spell${spellDef.id}`;
+          const draggableId = `spell,${typeAndLevel},${spellDef.id}`;
           return (
             <Draggable className={styles.spellListRowDraggable} draggableId={draggableId} key={draggableId}>
               <DraggableHandle

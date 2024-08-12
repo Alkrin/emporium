@@ -16,6 +16,7 @@ import { SavingVeil } from "../SavingVeil";
 import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
 import { SelectSpellsDialog } from "../dialogs/SelectSpellsDialog";
 import { ResizeDetector } from "../ResizeDetector";
+import { getItemNameText } from "../../lib/itemUtils";
 
 interface State {
   isSaving: boolean;
@@ -31,6 +32,8 @@ interface State {
 
 interface ReactProps {
   storageId: number;
+  preselectedOwnerIds?: number[];
+  onValuesConfirmed?: (item: ItemData) => Promise<void>;
 }
 
 interface InjectedProps {
@@ -54,7 +57,7 @@ class ACreateItemDialog extends React.Component<Props, State> {
       numToCreate: 1,
       notes: "",
       isForSale: false,
-      ownerIds: [],
+      ownerIds: props.preselectedOwnerIds ?? [],
       isUnused: true,
       spellIds: [],
       columnHeight: 0,
@@ -150,9 +153,11 @@ class ACreateItemDialog extends React.Component<Props, State> {
             }}
           />
         </div>
-        <div className={styles.asteriskRow}>
-          {`Created Items will be added to\n` + `${getStorageDisplayName(this.props.storageId)}`}
-        </div>
+        {this.props.storageId !== 0 ? (
+          <div className={styles.asteriskRow}>
+            {`Created Items will be added to\n` + `${getStorageDisplayName(this.props.storageId)}`}
+          </div>
+        ) : null}
         <div className={`${styles.createButton} ${canCreateClass}`} onClick={this.onCreateClicked.bind(this)}>
           {"Create"}
         </div>
@@ -249,20 +254,28 @@ class ACreateItemDialog extends React.Component<Props, State> {
     };
 
     let toasterTitle: string = "";
-    let toasterMessage: string = `${this.props.allItemDefs[this.state.selectedItemId]?.name ?? "Item"} created!`;
+    let toasterMessage: string = `${getItemNameText(
+      newItem,
+      this.props.allItemDefs[this.state.selectedItemId]
+    )} created!`;
 
-    const result = await ServerAPI.createItem(newItem);
-    if ("error" in result) {
-      toasterTitle = "ERROR!";
-      toasterMessage = "Item creation failed!";
-    } else {
-      // Item was successfully created, so refetch!
-      if (this.props.dispatch) {
-        await refetchItems(this.props.dispatch);
+    // Only actually create the item if it is being assigned to a Storage.
+    if (this.props.storageId !== 0) {
+      const result = await ServerAPI.createItem(newItem);
+      if ("error" in result) {
+        toasterTitle = "ERROR!";
+        toasterMessage = "Item creation failed!";
+      } else {
+        // Item was successfully created, so refetch!
+        if (this.props.dispatch) {
+          await refetchItems(this.props.dispatch);
+        }
       }
     }
 
     this.props.dispatch?.(showToaster({ content: { title: toasterTitle, message: toasterMessage } }));
+
+    await this.props.onValuesConfirmed?.(newItem);
 
     this.setState({ isSaving: false });
   }

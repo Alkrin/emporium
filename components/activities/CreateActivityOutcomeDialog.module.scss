@@ -22,6 +22,11 @@
   flex-direction: column;
 }
 
+.rowWithSpacer {
+  @extend .row;
+  margin-top: 1vmin;
+}
+
 .dialogButton {
   position: relative;
   box-sizing: border-box;
@@ -283,4 +288,42 @@
   left: 20.75vmin;
   font-size: 0.8rem;
   color: yellow;
+}
+
+.itemList {
+  position: relative;
+  height: 15vmin;
+  width: 100%;
+}
+
+.itemContentWrapper {
+  position: relative;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.itemName {
+  position: relative;
+  color: white;
+  flex-grow: 1;
+}
+
+.itemActionButton {
+  position: relative;
+  margin-left: 0.25vmin;
+  width: 1rem !important;
+  height: 1rem !important;
+  flex-shrink: 0;
+}
+
+.associatedSpellRow {
+  position: relative;
+  margin-left: 1vmin;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(100, 255, 255, 0.1);
+  font-size: 1rem;
+  color: cyan;
 }
