@@ -20,6 +20,7 @@ import { SavingVeil } from "../SavingVeil";
 import { refetchCharacters } from "../../dataSources/CharactersDataSource";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
 import { showToaster } from "../../redux/toastersSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   sourceStorageId: number;
@@ -139,10 +140,9 @@ class AEditCostOfLivingDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "payCharacterMaintenanceInvalid",
-          content: {
-            title: "Error!",
-            message: "You must select a payment source and a valid payment amount!",
-          },
+          content: () => (
+            <BasicDialog title={"Error!"} prompt={"You must select a payment source and a valid payment amount!"} />
+          ),
           escapable: true,
         })
       );
@@ -161,10 +161,12 @@ class AEditCostOfLivingDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "payCharacterMaintenanceError",
-          content: {
-            title: "Error!",
-            message: "Failed to make the payment.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to make the payment.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );
@@ -201,7 +203,6 @@ class AEditCostOfLivingDialog extends React.Component<Props, State> {
           );
         },
         escapable: true,
-        widthVmin: 45,
       })
     );
   }

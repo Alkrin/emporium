@@ -9,6 +9,7 @@ import styles from "./EditStructureComponentSubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
 import { deleteStructureComponent, updateStructureComponent } from "../../redux/structuresSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   countString: string;
@@ -122,11 +123,7 @@ class AEditStructureComponentSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoCountError",
-          content: {
-            title: "Error!",
-            message: "Please enter a non-zero component quantity!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please enter a non-zero component quantity!"} />,
         })
       );
       this.setState({ isSaving: false });

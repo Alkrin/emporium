@@ -58,10 +58,10 @@ class AItemTooltip extends React.Component<Props> {
         </div>
         <div className={styles.row}>
           {itemDef.ac > 0 && <div className={styles.segment}>{`AC: ${itemDef.ac + itemDef.magic_bonus}`}</div>}
-          {itemDef.range_increment > 0 && (
-            <div className={styles.segment}>{`Range: ${itemDef.range_increment}/${itemDef.range_increment * 2}/${
-              itemDef.range_increment * 3
-            }'`}</div>
+          {itemDef.range_short > 0 && (
+            <div
+              className={styles.segment}
+            >{`Range: ${itemDef.range_short}/${itemDef.range_medium}/${itemDef.range_long}'`}</div>
           )}
         </div>
         <div className={styles.row}>

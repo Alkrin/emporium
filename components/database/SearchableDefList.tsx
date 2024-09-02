@@ -9,6 +9,7 @@ import styles from "./SearchableDefList.module.scss";
 export interface SearchableDef {
   id: number;
   name: string;
+  [key: string]: any;
 }
 
 interface State {

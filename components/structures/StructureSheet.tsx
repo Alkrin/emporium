@@ -29,6 +29,7 @@ import dateFormat from "dateformat";
 import { PayStructureMaintenanceDialog } from "./PayStructureMaintenanceDialog";
 import { ContractId } from "../../redux/gameDefsSlice";
 import { EditStructureMaintenanceContractDialog } from "./EditStructureMaintenanceContractDialog";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface ReactProps {
   structureId: number;
@@ -192,7 +193,6 @@ class AStructureSheet extends React.Component<Props> {
     this.props.dispatch?.(
       showModal({
         id: "SelectLocation",
-        widthVmin: 61,
         content: () => {
           return (
             <SelectLocationDialog
@@ -205,10 +205,12 @@ class AStructureSheet extends React.Component<Props> {
                   this.props.dispatch?.(
                     showModal({
                       id: "EditStructureError",
-                      content: {
-                        title: "Error",
-                        message: "An Error occurred while attempting to change structure location.",
-                      },
+                      content: () => (
+                        <BasicDialog
+                          title={"Error!"}
+                          prompt={"An Error occurred while attempting to change structure location."}
+                        />
+                      ),
                     })
                   );
                 } else {

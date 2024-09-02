@@ -16,6 +16,7 @@ import { LocationEditSubPanel } from "./LocationEditSubPanel";
 import TooltipSource from "../TooltipSource";
 import { LocationTooltip } from "../tooltips/LocationTooltip";
 import { HexEditor } from "./HexEditor";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 enum HexMode {
   POIs,
@@ -324,7 +325,12 @@ class AWorldPanel extends React.Component<Props, State> {
         this.props.dispatch?.(
           showModal({
             id: "HexCreateError",
-            content: { message: "An error occurred while attempting to create this hex.  Please try again." },
+            content: () => (
+              <BasicDialog
+                title={"Error!"}
+                prompt={"An error occurred while attempting to create this hex.  Please try again."}
+              />
+            ),
           })
         );
         return false;
@@ -337,7 +343,12 @@ class AWorldPanel extends React.Component<Props, State> {
         this.props.dispatch?.(
           showModal({
             id: "HexEditError",
-            content: { message: "An error occurred while attempting to update this hex.  Please try again." },
+            content: () => (
+              <BasicDialog
+                title={"Error!"}
+                prompt={"An error occurred while attempting to update this hex.  Please try again."}
+              />
+            ),
           })
         );
         return false;

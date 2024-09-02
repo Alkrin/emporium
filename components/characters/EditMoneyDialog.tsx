@@ -7,6 +7,7 @@ import ServerAPI, { StorageData } from "../../serverAPI";
 import styles from "./EditMoneyDialog.module.scss";
 import { updateStorage } from "../../redux/storageSlice";
 import { getStorageDisplayName } from "../../lib/storageUtils";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   gpTotalString: string;
@@ -91,10 +92,12 @@ class AEditMoneyDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setMoney Error",
-          content: {
-            title: "Error!",
-            message: "Failed to update money.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to update money.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );
@@ -125,10 +128,12 @@ class AEditMoneyDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setMoney Error",
-          content: {
-            title: "Error!",
-            message: "Failed to update money.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to update money.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );

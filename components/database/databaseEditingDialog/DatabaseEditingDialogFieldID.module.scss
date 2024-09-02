@@ -1,0 +1,32 @@
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1vmin;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  position: relative;
+  margin-top: 0.2vmin;
+  font-size: 1rem;
+  color: wheat;
+  user-select: none;
+}
+
+.field {
+  position: relative;
+  margin-left: 0.5vmin;
+  opacity: 0.3;
+  resize: none;
+}

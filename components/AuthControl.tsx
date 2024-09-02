@@ -7,6 +7,7 @@ import TooltipSource from "./TooltipSource";
 import { Dispatch } from "@reduxjs/toolkit";
 import { hideModal, showModal } from "../redux/modalsSlice";
 import { setCurrentUser } from "../redux/userSlice";
+import { BasicDialog } from "./dialogs/BasicDialog";
 
 interface ReactProps {}
 interface InjectedProps {
@@ -29,34 +30,33 @@ class AAuthControl extends React.Component<Props> {
           this.props.dispatch?.(
             showModal({
               id: "LogOut",
-              content: {
-                title: this.props.user.name,
-                buttonText: "Log Out",
-                onButtonClick: () => {
-                  this.props.dispatch?.(
-                    setCurrentUser({
-                      id: 0,
-                      name: "",
-                      role: "player",
-                    })
-                  );
-                  this.props.dispatch?.(hideModal());
-                },
-                extraButtons: [
-                  {
-                    text: "Stay!",
-                    onClick: () => this.props.dispatch?.(hideModal()),
-                  },
-                ],
-              },
+              content: () => (
+                <BasicDialog
+                  title={this.props.user.name}
+                  buttons={[
+                    {
+                      text: "Log Out",
+                      onClick: async () => {
+                        this.props.dispatch?.(
+                          setCurrentUser({
+                            id: 0,
+                            name: "",
+                            role: "player",
+                          })
+                        );
+                        this.props.dispatch?.(hideModal());
+                      },
+                    },
+                    { text: "Stay!" },
+                  ]}
+                />
+              ),
               escapable: true,
             })
           );
         }}
       >
-        <div className={styles.initialContainer}>
-          {this.props.user.name.charAt(0)}
-        </div>
+        <div className={styles.initialContainer}>{this.props.user.name.charAt(0)}</div>
       </TooltipSource>
     );
   }

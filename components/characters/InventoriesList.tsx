@@ -254,7 +254,6 @@ class AInventoriesList extends React.Component<Props> {
           return <SpellbookDialog item={item} def={def} />;
         },
         escapable: true,
-        widthVmin: 50,
       })
     );
   }

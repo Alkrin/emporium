@@ -8,6 +8,7 @@ import { hexPointCoords, MapHexTypes, roadColors } from "./MapHexConstants";
 import { HexDisplay } from "./HexDisplay";
 import { updateMapHex } from "../../redux/mapsSlice";
 import { showModal } from "../../redux/modalsSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   mode: "add" | "delete";
@@ -288,7 +289,12 @@ class AHexEditor extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "HexCreateError",
-          content: { message: "An error occurred while attempting to create this hex.  Please try again." },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"An error occurred while attempting to create this hex.  Please try again."}
+            />
+          ),
         })
       );
     } else {

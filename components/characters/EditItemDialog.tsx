@@ -74,7 +74,11 @@ class AEditItemDialog extends React.Component<Props, State> {
             {this.state.spellIds
               .map((sid) => {
                 const def = this.props.allSpellDefs[sid];
-                return def.name;
+                const level = Object.values(def.type_levels).reduce<number>(
+                  (lowestLevel: number, currLevel: number) => Math.min(lowestLevel, currLevel),
+                  Number.MAX_SAFE_INTEGER
+                );
+                return `L${level} ${def.name}`;
               })
               .join(", ")}
           </div>
@@ -144,7 +148,6 @@ class AEditItemDialog extends React.Component<Props, State> {
             />
           );
         },
-        widthVmin: 45,
       })
     );
   }
@@ -182,7 +185,6 @@ class AEditItemDialog extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "Adventurers",
-        widthVmin: 60,
         content: () => {
           return (
             <SelectAdventurersDialog

@@ -34,6 +34,7 @@ import dateFormat from "dateformat";
 import { PayArmyMaintenanceDialog } from "./PayArmyMaintenanceDialog";
 import { ContractId } from "../../redux/gameDefsSlice";
 import { EditArmyWageContractDialog } from "./EditArmyWageContractDialog";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface ReactProps {
   armyId: number;
@@ -218,7 +219,6 @@ class AArmySheet extends React.Component<Props> {
     this.props.dispatch?.(
       showModal({
         id: "SelectLocation",
-        widthVmin: 61,
         content: () => {
           return (
             <SelectLocationDialog
@@ -231,10 +231,12 @@ class AArmySheet extends React.Component<Props> {
                   this.props.dispatch?.(
                     showModal({
                       id: "EditLocationError",
-                      content: {
-                        title: "Error",
-                        message: "An Error occurred while attempting to change army location.",
-                      },
+                      content: () => (
+                        <BasicDialog
+                          title={"Error"}
+                          prompt={"An Error occurred while attempting to change army location."}
+                        />
+                      ),
                     })
                   );
                 } else {

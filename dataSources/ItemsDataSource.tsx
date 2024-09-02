@@ -4,6 +4,7 @@ import ExternalDataSource from "../redux/externalDataSource";
 import { updateItems } from "../redux/itemsSlice";
 import { showModal } from "../redux/modalsSlice";
 import ServerAPI from "../serverAPI";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchItems(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchItems();
@@ -12,10 +13,7 @@ export async function refetchItems(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Item Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Item data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Item data"} />,
         escapable: true,
       })
     );

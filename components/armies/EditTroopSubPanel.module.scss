@@ -186,19 +186,17 @@
 
 .gearContainer {
   position: relative;
-  height: 4.5vmin;
+  max-height: 6vmin;
   flex-shrink: 0;
   margin-bottom: 0.5vmin;
   border-bottom: 1px solid wheat;
+  overflow-y: auto;
 }
 
 .gearLabel {
-  position: absolute;
+  position: relative;
   width: 100%;
   color: gray;
   font-size: 0.8rem;
   text-align: center;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 }

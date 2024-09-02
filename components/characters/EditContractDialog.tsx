@@ -11,6 +11,7 @@ import dateFormat from "dateformat";
 import { ContractEditor } from "../ContractEditor";
 import { deleteContract, updateContract } from "../../redux/contractsSlice";
 import { Dictionary } from "../../lib/dictionary";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   isEditing: boolean;
@@ -131,7 +132,7 @@ class AEditContractDialog extends React.Component<Props, State> {
           this.props.dispatch?.(
             showModal({
               id: "EditContractError",
-              content: { title: "Error", message: "An Error occurred during contract alteration." },
+              content: () => <BasicDialog title={"Error!"} prompt={"An Error occurred during contract alteration."} />,
             })
           );
         } else {
@@ -145,7 +146,7 @@ class AEditContractDialog extends React.Component<Props, State> {
           this.props.dispatch?.(
             showModal({
               id: "CreateContractError",
-              content: { title: "Error", message: "An Error occurred during contract creation." },
+              content: () => <BasicDialog title={"Error!"} prompt={"An Error occurred during contract creation."} />,
             })
           );
         } else {
@@ -160,14 +161,62 @@ class AEditContractDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "DeleteContract",
-          content: {
-            title: "Delete Contract?",
-            message: "These contract terms are invalid.  Do you wish to delete the contract?",
-            buttonText: "Cancel",
-            onButtonClick: async () => {
-              this.props.dispatch?.(hideModal());
-            },
-            extraButtons: [
+          content: () => (
+            <BasicDialog
+              title={"Delete Contract?"}
+              prompt={"These contract terms are invalid.  Do you wish to delete the contract?"}
+              buttons={[
+                {
+                  text: "Delete",
+                  onClick: async () => {
+                    const dres = await ServerAPI.deleteContract(this.state.contract.id);
+                    if ("error" in dres) {
+                      this.props.dispatch?.(
+                        showModal({
+                          id: "DeleteContractError",
+                          content: () => (
+                            <BasicDialog title={"Error!"} prompt={"An Error occurred during contract deletion."} />
+                          ),
+                        })
+                      );
+                    } else {
+                      this.props.dispatch?.(deleteContract(this.state.contract.id));
+                      // Close the confirmation dialog.
+                      this.props.dispatch?.(hideModal());
+                      // Close the contract dialog.
+                      this.props.dispatch?.(hideModal());
+                    }
+                  },
+                },
+                { text: "Cancel" },
+              ]}
+            />
+          ),
+          escapable: true,
+        })
+      );
+    } else {
+      this.props.dispatch?.(
+        showModal({
+          id: "CreateContractError",
+          content: () => (
+            <BasicDialog title={"Error!"} prompt={"All Terms must be specified in order to create a contract."} />
+          ),
+        })
+      );
+    }
+  }
+
+  private async onDeleteClicked(): Promise<void> {
+    // Prompt to delete.
+    this.props.dispatch?.(
+      showModal({
+        id: "DeleteContract",
+        content: () => (
+          <BasicDialog
+            title={"Delete Contract?"}
+            prompt={"Are you sure you wish to delete the contract?"}
+            buttons={[
               {
                 text: "Delete",
                 onClick: async () => {
@@ -176,7 +225,9 @@ class AEditContractDialog extends React.Component<Props, State> {
                     this.props.dispatch?.(
                       showModal({
                         id: "DeleteContractError",
-                        content: { title: "Error", message: "An Error occurred during contract deletion." },
+                        content: () => (
+                          <BasicDialog title={"Error!"} prompt={"An Error occurred during contraction deletion."} />
+                        ),
                       })
                     );
                   } else {
@@ -188,56 +239,10 @@ class AEditContractDialog extends React.Component<Props, State> {
                   }
                 },
               },
-            ],
-          },
-          escapable: true,
-        })
-      );
-    } else {
-      this.props.dispatch?.(
-        showModal({
-          id: "CreateContractError",
-          content: { title: "Error", message: "All Terms must be specified in order to create a contract." },
-        })
-      );
-    }
-  }
-
-  private async onDeleteClicked(): Promise<void> {
-    // Prompt to delete.
-    this.props.dispatch?.(
-      showModal({
-        id: "DeleteContract",
-        content: {
-          title: "Delete Contract?",
-          message: "Are you sure you wish to delete the contract?",
-          buttonText: "Cancel",
-          onButtonClick: async () => {
-            this.props.dispatch?.(hideModal());
-          },
-          extraButtons: [
-            {
-              text: "Delete",
-              onClick: async () => {
-                const dres = await ServerAPI.deleteContract(this.state.contract.id);
-                if ("error" in dres) {
-                  this.props.dispatch?.(
-                    showModal({
-                      id: "DeleteContractError",
-                      content: { title: "Error", message: "An Error occurred during contract deletion." },
-                    })
-                  );
-                } else {
-                  this.props.dispatch?.(deleteContract(this.state.contract.id));
-                  // Close the confirmation dialog.
-                  this.props.dispatch?.(hideModal());
-                  // Close the contract dialog.
-                  this.props.dispatch?.(hideModal());
-                }
-              },
-            },
-          ],
-        },
+              { text: "Cancel" },
+            ]}
+          />
+        ),
         escapable: true,
       })
     );

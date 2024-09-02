@@ -5,6 +5,7 @@ import { showModal } from "../redux/modalsSlice";
 import ServerAPI, { LocationCityData, LocationData, LocationLairData, StringToNumbers } from "../serverAPI";
 import { Dictionary } from "../lib/dictionary";
 import { updateLocationCities, updateLocationLairs, updateLocations } from "../redux/locationsSlice";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchLocations(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchLocations();
@@ -13,10 +14,7 @@ export async function refetchLocations(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Location Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Location data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Location data"} />,
         escapable: true,
       })
     );
@@ -40,10 +38,7 @@ export async function refetchLocationCities(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Location: Cities Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Location: Cities data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Location: Cities data"} />,
         escapable: true,
       })
     );
@@ -63,10 +58,7 @@ export async function refetchLocationLairs(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Location: Lairs Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Location: Lairs data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Location: Lairs data"} />,
         escapable: true,
       })
     );

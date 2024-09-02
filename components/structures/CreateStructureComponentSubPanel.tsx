@@ -9,6 +9,8 @@ import styles from "./CreateStructureComponentSubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
 import { updateStructureComponent } from "../../redux/structuresSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
+import { SavingVeil } from "../SavingVeil";
 
 interface State {
   componentDefId: number;
@@ -73,7 +75,7 @@ class ACreateStructureComponentSubPanel extends React.Component<Props, State> {
           </div>
         </div>
         <div className={styles.countRow}>
-          <div className={styles.countLabel}>Quantity</div>
+          <div className={styles.countLabel}>{"Quantity"}</div>
           <input
             className={styles.countTextField}
             type={"number"}
@@ -90,12 +92,7 @@ class ACreateStructureComponentSubPanel extends React.Component<Props, State> {
             {"Create"}
           </div>
         </div>
-
-        {this.state.isSaving && (
-          <div className={styles.savingVeil}>
-            <div className={styles.savingLabel}>Saving...</div>
-          </div>
-        )}
+        <SavingVeil show={this.state.isSaving} />
         <SubPanelCloseButton />
       </div>
     );
@@ -135,11 +132,7 @@ class ACreateStructureComponentSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoTypeError",
-          content: {
-            title: "Error!",
-            message: "Please select a Type for this structure component!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please select a Type for this structure component!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -151,11 +144,7 @@ class ACreateStructureComponentSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoCountError",
-          content: {
-            title: "Error!",
-            message: "Please enter a non-zero component quantity!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please enter a non-zero component quantity!"} />,
         })
       );
       this.setState({ isSaving: false });

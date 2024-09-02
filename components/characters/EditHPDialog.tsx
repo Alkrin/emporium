@@ -7,6 +7,7 @@ import { RootState } from "../../redux/store";
 import ServerAPI, { CharacterData } from "../../serverAPI";
 import styles from "./EditHPDialog.module.scss";
 import { getCharacterMaxHP } from "../../lib/characterUtils";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   hpTotal: number;
@@ -92,10 +93,12 @@ class AEditHPDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setHP Error",
-          content: {
-            title: "Error!",
-            message: "Failed to update HP.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to update HP.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );
@@ -120,10 +123,12 @@ class AEditHPDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setHP Error",
-          content: {
-            title: "Error!",
-            message: "Failed to update HP.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to update HP.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );

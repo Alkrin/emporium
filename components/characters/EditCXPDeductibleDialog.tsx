@@ -12,6 +12,7 @@ import {
   getCampaignXPDeductibleCapForLevel,
   getCharacterMaxHP,
 } from "../../lib/characterUtils";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   deductiblePaidString: string;
@@ -108,10 +109,12 @@ class AEditCXPDeductibleDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setDeductible Error",
-          content: {
-            title: "Error!",
-            message: `The deductible paid amount must be between 0 and ${maxDeductible}.  Please enter a valid value.`,
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={`The deductible paid amount must be between 0 and ${maxDeductible}.  Please enter a valid value.`}
+            />
+          ),
           escapable: true,
         })
       );
@@ -128,10 +131,12 @@ class AEditCXPDeductibleDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setDeductible Error",
-          content: {
-            title: "Error!",
-            message: "Failed to update CXP Deductible.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to update CXP Deductible.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );
@@ -159,10 +164,12 @@ class AEditCXPDeductibleDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setDeductible Error",
-          content: {
-            title: "Error!",
-            message: `The deductible remaining amount must be between 0 and ${maxDeductible}.  Please enter a valid value.`,
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={`The deductible remaining amount must be between 0 and ${maxDeductible}.  Please enter a valid value.`}
+            />
+          ),
           escapable: true,
         })
       );
@@ -176,10 +183,12 @@ class AEditCXPDeductibleDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setDeductible Error",
-          content: {
-            title: "Error!",
-            message: "Failed to update CXP Deductible.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to update CXP Deductible.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );

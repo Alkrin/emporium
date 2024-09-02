@@ -11,6 +11,7 @@ import { refetchLocationCities, refetchLocationLairs, refetchLocations } from ".
 import { hideSubPanel } from "../../redux/subPanelsSlice";
 import { ImagePickerDialog } from "../ImagePickerDialog";
 import { Dictionary } from "../../lib/dictionary";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 type LocationType = "---" | "City" | "Lair";
 
@@ -351,7 +352,7 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "CreateLocationFailure",
-          content: { title: "Error!", message: "Unable to create.  Locations must have a name." },
+          content: () => <BasicDialog title={"Error!"} prompt={"Unable to create.  Locations must have a name."} />,
         })
       );
       return;
@@ -401,7 +402,7 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
         this.props.dispatch?.(
           showModal({
             id: "CreateLocationFailure",
-            content: { title: "Error!", message: "Location creation failed.  Please try again." },
+            content: () => <BasicDialog title={"Error!"} prompt={"Location creation failed.  Please try again."} />,
           })
         );
       } else {
@@ -427,7 +428,7 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
         this.props.dispatch?.(
           showModal({
             id: "EditLocationFailure",
-            content: { title: "Error!", message: "Location update failed.  Please try again." },
+            content: () => <BasicDialog title={"Error!"} prompt={"Location update failed.  Please try again."} />,
           })
         );
       } else {
@@ -473,31 +474,39 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "DeleteLocation",
-        content: {
-          title: "Please Confirm",
-          message: `Are you sure you wish to delete "${this.state.name}", id ${this.props.locationId}?  This cannot be undone.`,
-          buttonText: "Cancel",
-          onButtonClick: () => {
-            this.props.dispatch?.(hideModal());
-          },
-          extraButtons: [
-            {
-              text: "Delete",
-              onClick: async () => {
-                this.setState({ isSaving: true });
-                this.props.dispatch?.(hideModal());
-                const res = await ServerAPI.deleteLocation(this.props.locationId ?? 0);
+        content: () => (
+          <BasicDialog
+            title={"Please Confirm"}
+            prompt={`Are you sure you wish to delete "${this.state.name}", id ${this.props.locationId}?  This cannot be undone.`}
+            buttons={[
+              {
+                text: "Delete",
+                onClick: async () => {
+                  this.setState({ isSaving: true });
+                  this.props.dispatch?.(hideModal());
+                  const res = await ServerAPI.deleteLocation(this.props.locationId ?? 0);
 
-                if ("affectedRows" in res) {
-                  // Delete successful, so deselect and close.
-                  this.props.dispatch?.(deleteLocation(this.props.locationId ?? 0));
-                  // TODO: Delete locationType data.
-                  this.props.dispatch?.(hideSubPanel());
-                }
+                  if ("affectedRows" in res) {
+                    // Delete successful, so deselect and close.
+                    this.props.dispatch?.(deleteLocation(this.props.locationId ?? 0));
+                    // TODO: Delete locationType data.
+                    this.props.dispatch?.(hideSubPanel());
+                  } else {
+                    this.props.dispatch?.(
+                      showModal({
+                        id: "locationDeleteError",
+                        content: () => (
+                          <BasicDialog title={"Error!"} prompt={"Location deletion failed.  Please try again."} />
+                        ),
+                      })
+                    );
+                  }
+                },
               },
-            },
-          ],
-        },
+              { text: "Cancel" },
+            ]}
+          />
+        ),
       })
     );
   }

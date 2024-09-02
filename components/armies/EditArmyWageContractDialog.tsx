@@ -10,6 +10,7 @@ import { ContractDefData, ContractId, ContractTerm } from "../../redux/gameDefsS
 import dateFormat from "dateformat";
 import { ContractEditor } from "../ContractEditor";
 import { deleteContract, updateContract } from "../../redux/contractsSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   contract: ContractData;
@@ -88,7 +89,7 @@ class AEditArmyWageContractDialog extends React.Component<Props, State> {
           this.props.dispatch?.(
             showModal({
               id: "EditContractError",
-              content: { title: "Error", message: "An Error occurred during contract alteration." },
+              content: () => <BasicDialog title={"Error!"} prompt={"An Error occurred during contract alteration."} />,
             })
           );
         } else {
@@ -102,7 +103,7 @@ class AEditArmyWageContractDialog extends React.Component<Props, State> {
           this.props.dispatch?.(
             showModal({
               id: "CreateContractError",
-              content: { title: "Error", message: "An Error occurred during contract creation." },
+              content: () => <BasicDialog title={"Error!"} prompt={"An Error occurred during contract creation."} />,
             })
           );
         } else {
@@ -117,36 +118,37 @@ class AEditArmyWageContractDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "DeleteContract",
-          content: {
-            title: "Delete Contract?",
-            message: "These contract terms are invalid.  Do you wish to delete the contract?",
-            buttonText: "Cancel",
-            onButtonClick: async () => {
-              this.props.dispatch?.(hideModal());
-            },
-            extraButtons: [
-              {
-                text: "Delete",
-                onClick: async () => {
-                  const dres = await ServerAPI.deleteContract(this.state.contract.id);
-                  if ("error" in dres) {
-                    this.props.dispatch?.(
-                      showModal({
-                        id: "DeleteContractError",
-                        content: { title: "Error", message: "An Error occurred during contract deletion." },
-                      })
-                    );
-                  } else {
-                    this.props.dispatch?.(deleteContract(this.state.contract.id));
-                    // Close the confirmation dialog.
-                    this.props.dispatch?.(hideModal());
-                    // Close the contract dialog.
-                    this.props.dispatch?.(hideModal());
-                  }
+          content: () => (
+            <BasicDialog
+              title={"Delete Contract?"}
+              prompt={"These contract terms are invalid.  Do you wish to delete the contract?"}
+              buttons={[
+                {
+                  text: "Delete",
+                  onClick: async () => {
+                    const dres = await ServerAPI.deleteContract(this.state.contract.id);
+                    if ("error" in dres) {
+                      this.props.dispatch?.(
+                        showModal({
+                          id: "DeleteContractError",
+                          content: () => (
+                            <BasicDialog title={"Error!"} prompt={"An Error occurred during contract deletion."} />
+                          ),
+                        })
+                      );
+                    } else {
+                      this.props.dispatch?.(deleteContract(this.state.contract.id));
+                      // Close the confirmation dialog.
+                      this.props.dispatch?.(hideModal());
+                      // Close the contract dialog.
+                      this.props.dispatch?.(hideModal());
+                    }
+                  },
                 },
-              },
-            ],
-          },
+                { text: "Cancel" },
+              ]}
+            />
+          ),
           escapable: true,
         })
       );
@@ -154,7 +156,9 @@ class AEditArmyWageContractDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "CreateContractError",
-          content: { title: "Error", message: "All Terms must be specified in order to create a contract." },
+          content: () => (
+            <BasicDialog title={"Error!"} prompt={"All Terms must be specified in order to create a contract."} />
+          ),
         })
       );
     }

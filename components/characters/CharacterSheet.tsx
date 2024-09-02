@@ -64,6 +64,7 @@ import { CharacterContractsDialog } from "./CharacterContractsDialog";
 import { SharedLoadbearing } from "../../staticData/classFeatures/SharedLoadbearing";
 import { InputSingleNumberOfTwoDialog } from "../dialogs/InputSingleNumberOfTwoDialog";
 import { setActiveStorageId } from "../../redux/storageSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface ReactProps {
   characterId: number;
@@ -319,7 +320,6 @@ class ACharacterSheet extends React.Component<Props> {
           );
         },
         escapable: true,
-        widthVmin: 45,
       })
     );
   }
@@ -743,10 +743,12 @@ class ACharacterSheet extends React.Component<Props> {
                   this.props.dispatch?.(
                     showModal({
                       id: "setXPReserve Error",
-                      content: {
-                        title: "Error!",
-                        message: "Failed to update XP Reserve.  Please check your network connection and try again.",
-                      },
+                      content: () => (
+                        <BasicDialog
+                          title={"Error!"}
+                          prompt={"Failed to update XP Reserve.  Please check your network connection and try again."}
+                        />
+                      ),
                       escapable: true,
                     })
                   );
@@ -766,10 +768,12 @@ class ACharacterSheet extends React.Component<Props> {
                   this.props.dispatch?.(
                     showModal({
                       id: "setXPReserve Error",
-                      content: {
-                        title: "Error!",
-                        message: "Failed to update XP Reserve.  Please check your network connection and try again.",
-                      },
+                      content: () => (
+                        <BasicDialog
+                          title={"Error!"}
+                          prompt={"Failed to update XP Reserve.  Please check your network connection and try again."}
+                        />
+                      ),
                       escapable: true,
                     })
                   );
@@ -1228,7 +1232,6 @@ class ACharacterSheet extends React.Component<Props> {
           return <EditInjuriesDialog character={this.props.character} />;
         },
         escapable: true,
-        widthVmin: 45,
       })
     );
   }
@@ -1256,7 +1259,6 @@ class ACharacterSheet extends React.Component<Props> {
     this.props.dispatch?.(
       showModal({
         id: "SelectLocation",
-        widthVmin: 61,
         content: () => {
           return (
             <SelectLocationDialog
@@ -1268,10 +1270,12 @@ class ACharacterSheet extends React.Component<Props> {
                   this.props.dispatch?.(
                     showModal({
                       id: "setLocation Error",
-                      content: {
-                        title: "Error!",
-                        message: "Failed to update Location.  Please check your network connection and try again.",
-                      },
+                      content: () => (
+                        <BasicDialog
+                          title={"Error!"}
+                          prompt={"Failed to update Location.  Please check your network connection and try again."}
+                        />
+                      ),
                       escapable: true,
                     })
                   );

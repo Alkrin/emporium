@@ -4,6 +4,7 @@ import ExternalDataSource from "../redux/externalDataSource";
 import { showModal } from "../redux/modalsSlice";
 import { updateUser } from "../redux/userSlice";
 import ServerAPI from "../serverAPI";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchUsers(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchUsers();
@@ -12,10 +13,7 @@ export async function refetchUsers(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "User Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch User data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch User data"} />,
         escapable: true,
       })
     );

@@ -184,7 +184,6 @@ class AContractEditor extends React.Component<Props, State> {
               );
             },
             escapable: true,
-            widthVmin: 45,
           })
         );
         break;
@@ -205,7 +204,6 @@ class AContractEditor extends React.Component<Props, State> {
               );
             },
             escapable: true,
-            widthVmin: 45,
           })
         );
         break;
@@ -247,7 +245,6 @@ class AContractEditor extends React.Component<Props, State> {
               );
             },
             escapable: true,
-            widthVmin: 45,
           })
         );
         break;
@@ -268,7 +265,6 @@ class AContractEditor extends React.Component<Props, State> {
               );
             },
             escapable: true,
-            widthVmin: 45,
           })
         );
         break;

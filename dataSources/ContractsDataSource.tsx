@@ -5,6 +5,7 @@ import { showModal } from "../redux/modalsSlice";
 import ServerAPI, { ContractData } from "../serverAPI";
 import { Dictionary } from "../lib/dictionary";
 import { updateContracts } from "../redux/contractsSlice";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchContracts(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchContracts();
@@ -13,10 +14,7 @@ export async function refetchContracts(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Contract Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Contract data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Contract data"} />,
         escapable: true,
       })
     );

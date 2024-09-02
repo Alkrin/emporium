@@ -1,9 +1,7 @@
 .root {
-  width: 50vmin;
+  position: relative;
+  width: 79vmin;
   height: 66.2vmin;
-  border-radius: 1vmin;
-  border: 2px solid white;
-  background-color: #222;
 }
 
 .labelText {
@@ -34,7 +32,7 @@
 }
 
 .panelTitle {
-  font-size: 3rem;
+  font-size: 2.2rem;
   color: wheat;
   position: absolute;
   top: 1vmin;
@@ -45,7 +43,7 @@
   user-select: none;
 }
 
-.spellListRoot {
+.setListRoot {
   position: absolute;
   top: 8vmin;
   left: 2vmin;
@@ -98,7 +96,7 @@
 .dataPanelRoot {
   position: absolute;
   top: 8vmin;
-  right: 2vmin;
+  left: 24vmin;
   width: 25vmin;
   height: 30vmin;
   background-color: rgba(0, 0, 0, 0.1);
@@ -182,4 +180,31 @@
   transform: translate(-50%, -50%);
   color: wheat;
   font-size: 3rem;
+}
+
+.classSelector {
+  position: relative;
+  margin-left: 0.5vmin;
+  flex-grow: 1;
+}
+
+.itemSelector {
+  position: relative;
+  margin-left: 0.5vmin;
+  flex-grow: 1;
+}
+
+.containersPanelRoot {
+  position: absolute;
+  top: 8vmin;
+  left: 51vmin;
+  width: 27vmin;
+  height: 51vmin;
+  background-color: rgba(255, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.inventoryList {
+  height: 100%;
 }

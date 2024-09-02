@@ -7,26 +7,12 @@
 import * as React from "react";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export interface ModalButtonModel {
-  text: string;
-  onClick: () => void;
-}
-
-export interface ModalModel {
-  title?: string;
-  message?: string;
-  buttonText?: string;
-  onButtonClick?: () => void;
-  extraButtons?: ModalButtonModel[];
-}
-
 export interface ModalParams {
   id: string;
-  content: (() => React.ReactNode) | ModalModel;
+  content: () => React.ReactNode;
   // If true, this modal will close itself in response to the Escape key,
   // (or whichever key is bound to the Menu action).
   escapable?: boolean;
-  widthVmin?: number;
 }
 
 export interface ModalsState {

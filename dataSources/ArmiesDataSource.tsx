@@ -5,6 +5,7 @@ import { showModal } from "../redux/modalsSlice";
 import ServerAPI, { ArmyData } from "../serverAPI";
 import { Dictionary } from "../lib/dictionary";
 import { updateArmies, updateTroopInjuries, updateTroops } from "../redux/armiesSlice";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchArmies(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchArmies();
@@ -13,10 +14,7 @@ export async function refetchArmies(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Army Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Army data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Army data"} />,
         escapable: true,
       })
     );
@@ -36,10 +34,7 @@ export async function refetchTroops(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Troop Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Troop data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Troop data"} />,
         escapable: true,
       })
     );
@@ -55,10 +50,7 @@ export async function refetchTroopInjuries(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "TroopInjury Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch TroopInjury data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch TroopInjury data"} />,
         escapable: true,
       })
     );

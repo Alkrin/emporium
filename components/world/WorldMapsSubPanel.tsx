@@ -9,6 +9,7 @@ import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { SearchableDefList } from "../database/SearchableDefList";
 import { deleteMap, updateMap } from "../../redux/mapsSlice";
 import { Dictionary } from "../../lib/dictionary";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   selectedMapId: number;
@@ -232,7 +233,7 @@ class AWorldMapsSubPanel extends React.Component<Props, State> {
         this.props.dispatch?.(
           showModal({
             id: "EditMapFailure",
-            content: { title: "Error!", message: "Changes were not saved.  Please try again." },
+            content: () => <BasicDialog title={"Error!"} prompt={"Changes were not saved.  Please try again."} />,
           })
         );
       } else {
@@ -257,30 +258,41 @@ class AWorldMapsSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "DeleteMap",
-        content: {
-          title: "Please Confirm",
-          message: `Are you sure you wish to delete "${this.state.name}", id ${this.state.selectedMapId}?  This cannot be undone.`,
-          buttonText: "Cancel",
-          onButtonClick: () => {
-            this.props.dispatch?.(hideModal());
-          },
-          extraButtons: [
-            {
-              text: "Delete",
-              onClick: async () => {
-                this.setState({ isSaving: true });
-                this.props.dispatch?.(hideModal());
-                const res = await ServerAPI.deleteMap(this.state.selectedMapId);
+        content: () => (
+          <BasicDialog
+            title={"Please Confirm"}
+            prompt={`Are you sure you wish to delete "${this.state.name}", id ${this.state.selectedMapId}?  This cannot be undone.`}
+            buttons={[
+              {
+                text: "Delete",
+                onClick: async () => {
+                  this.setState({ isSaving: true });
+                  this.props.dispatch?.(hideModal());
+                  const res = await ServerAPI.deleteMap(this.state.selectedMapId);
 
-                if ("affectedRows" in res) {
-                  // Delete successful, so deselect and delete locally.
-                  this.props.dispatch?.(deleteMap(this.state.selectedMapId));
-                  this.setState(defaultState);
-                }
+                  if ("affectedRows" in res) {
+                    // Delete successful, so deselect and delete locally.
+                    this.props.dispatch?.(deleteMap(this.state.selectedMapId));
+                    this.setState(defaultState);
+                  } else {
+                    this.props.dispatch?.(
+                      showModal({
+                        id: "EditMapFailure",
+                        content: () => (
+                          <BasicDialog
+                            title={"Error!"}
+                            prompt={"An Error occurred during Map deletion.  Please try again."}
+                          />
+                        ),
+                      })
+                    );
+                  }
+                },
               },
-            },
-          ],
-        },
+              { text: "Cancel" },
+            ]}
+          />
+        ),
       })
     );
   }

@@ -46,6 +46,7 @@ import { AddButton } from "../AddButton";
 import { getStorageDisplayName } from "../../lib/storageUtils";
 import { EditButton } from "../EditButton";
 import { SelectStorageDialog } from "../dialogs/SelectStorageDialog";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   isSaving: boolean;
@@ -278,7 +279,6 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
           );
         },
         escapable: true,
-        widthVmin: 45,
       })
     );
   }
@@ -510,11 +510,12 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "ResolutionFailed",
-          content: {
-            title: "Error!",
-            message: "An error occurred while attempting to distribute rewards.  State not updated.",
-            buttonText: "Okay",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"An error occurred while attempting to distribute rewards.  State not updated."}
+            />
+          ),
         })
       );
       console.error("Resolution Error", res);
@@ -599,34 +600,40 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "AdventurerDeath",
-        content: {
-          title: "Death",
-          message: `Was ${this.props.allCharacters[p.characterId].name} slain?`,
-          buttonText: "No",
-          onButtonClick: () => {
-            this.setState({
-              painOutcome: {
-                ...this.state.painOutcome,
-                deadCharacterIds: this.state.painOutcome.deadCharacterIds.filter((dcid) => dcid !== p.characterId),
+        content: () => (
+          <BasicDialog
+            title={"Death"}
+            prompt={`Was ${this.props.allCharacters[p.characterId].name} slain?`}
+            buttons={[
+              {
+                text: "Yes",
+                onClick: async () => {
+                  this.setState({
+                    painOutcome: {
+                      ...this.state.painOutcome,
+                      deadCharacterIds: [...this.state.painOutcome.deadCharacterIds, p.characterId],
+                    },
+                  });
+                  this.props.dispatch?.(hideModal());
+                },
               },
-            });
-            this.props.dispatch?.(hideModal());
-          },
-          extraButtons: [
-            {
-              text: "Yes",
-              onClick: () => {
-                this.setState({
-                  painOutcome: {
-                    ...this.state.painOutcome,
-                    deadCharacterIds: [...this.state.painOutcome.deadCharacterIds, p.characterId],
-                  },
-                });
-                this.props.dispatch?.(hideModal());
+              {
+                text: "No",
+                onClick: async () => {
+                  this.setState({
+                    painOutcome: {
+                      ...this.state.painOutcome,
+                      deadCharacterIds: this.state.painOutcome.deadCharacterIds.filter(
+                        (dcid) => dcid !== p.characterId
+                      ),
+                    },
+                  });
+                  this.props.dispatch?.(hideModal());
+                },
               },
-            },
-          ],
-        },
+            ]}
+          />
+        ),
       })
     );
   }
@@ -798,7 +805,6 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "Adventurers",
-        widthVmin: 60,
         content: () => {
           return (
             <SelectAdventurersDialog
@@ -856,7 +862,6 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "Armies",
-        widthVmin: 60,
         content: () => {
           return (
             <SelectArmiesDialog

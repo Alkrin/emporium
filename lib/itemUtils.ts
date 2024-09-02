@@ -47,15 +47,18 @@ export function StonesAMinusB(a: Stones, b: Stones): Stones {
 }
 
 export function getBundleWeight(def: ItemDefData, count: number): Stones {
+  // The charges of charged items are kept in their `count` field, so a charged item is always just a singleton.
+  const actualCount = def.has_charges ? 1 : count;
+
   if (def.number_per_stone > 0) {
     // Weights not in stones/sixths may have rounding errors during calculation, so we temporarily inflate the count
     // in order to make sure the rounding errors occur in digits that we can safely ignore.
-    const rawStones = Math.floor((count * kAccuracy) / def.number_per_stone);
+    const rawStones = Math.floor((actualCount * kAccuracy) / def.number_per_stone);
     const justStones = Math.floor(rawStones / kAccuracy);
     const justSixths = Math.ceil(((rawStones - justStones * kAccuracy) * 6) / kAccuracy);
     return [justStones, justSixths];
   } else {
-    let stones: Stones = [def.stones * count, def.sixth_stones * count];
+    let stones: Stones = [def.stones * actualCount, def.sixth_stones * actualCount];
     // Adding [0,0] will convert excessive sixths to stones for us.
     stones = StonesAPlusB(stones, [0, 0]);
     return stones;
@@ -183,7 +186,15 @@ export function getItemNameText(item?: ItemData, def?: ItemDefData): string {
           item.spell_ids
             .map((sid) => {
               const spellDef = redux.gameDefs.spells[sid];
-              return spellDef?.name ?? "Unknown";
+              if (spellDef) {
+                const level = Object.values(spellDef.type_levels).reduce<number>(
+                  (lowestLevel: number, currLevel: number) => Math.min(lowestLevel, currLevel),
+                  Number.MAX_SAFE_INTEGER
+                );
+                return `L${level} ${spellDef.name}`;
+              } else {
+                return "Unknown";
+              }
             })
             .join(", ");
     if (def.has_charges) {

@@ -7,6 +7,7 @@ import { RootState } from "../../redux/store";
 import ServerAPI, { CharacterData } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
 import styles from "./EditXPDialog.module.scss";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   xpTotalString: string;
@@ -114,10 +115,12 @@ class AEditXPDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setXP Error",
-          content: {
-            title: "Error!",
-            message: "Failed to update XP.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to update XP.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );
@@ -139,10 +142,12 @@ class AEditXPDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "setXP Error",
-          content: {
-            title: "Error!",
-            message: "Failed to update XP.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to update XP.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );

@@ -4,6 +4,7 @@ import ExternalDataSource from "../redux/externalDataSource";
 import { showModal } from "../redux/modalsSlice";
 import ServerAPI from "../serverAPI";
 import { updateSpellbooks } from "../redux/spellbooksSlice";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchSpellbooks(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchSpellbooks();
@@ -12,10 +13,7 @@ export async function refetchSpellbooks(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Spellbook Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Spellbook data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Spellbook data"} />,
         escapable: true,
       })
     );

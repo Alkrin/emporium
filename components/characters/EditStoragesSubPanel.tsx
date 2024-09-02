@@ -316,7 +316,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
           return <SpellbookDialog item={item} def={def} />;
         },
         escapable: true,
-        widthVmin: 50,
       })
     );
   }
@@ -719,7 +718,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
         content: () => {
           return <CreateItemDialog storageId={this.props.activeStorageId} />;
         },
-        widthVmin: 62,
         escapable: true,
       })
     );

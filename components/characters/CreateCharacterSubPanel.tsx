@@ -35,6 +35,7 @@ import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
 import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
 import { refetchContracts } from "../../dataSources/ContractsDataSource";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   nameText: string;
@@ -664,11 +665,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoNameError",
-          content: {
-            title: "Error!",
-            message: "Please enter a Name for this character!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please enter a Name for this character!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -680,11 +677,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoClassError",
-          content: {
-            title: "Error!",
-            message: "Please select a Class for this character!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please select a Class for this character!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -703,11 +696,9 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoSelectableError",
-          content: {
-            title: "Error!",
-            message: "Please choose an option for all Selectable Features!",
-            buttonText: "Okay",
-          },
+          content: () => (
+            <BasicDialog title={"Error!"} prompt={"Please choose an option for all Selectable Features!"} />
+          ),
         })
       );
       this.setState({ isSaving: false });
@@ -817,70 +808,78 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "DeleteCharacterConfirmation",
-        content: {
-          title: "Delete Character",
-          message: `Are you sure you wish to delete ${this.props.selectedCharacter?.name}?  This will also destroy associated records like items, storages, etc.  Deletion cannot be undone.`,
-          buttonText: "Delete",
-          onButtonClick: async () => {
-            // Guaranteed true, but have to check to make intellisense shut up.
-            if (this.props.selectedCharacter) {
-              const res = await ServerAPI.deleteCharacter(this.props.selectedCharacter);
+        content: () => {
+          return (
+            <BasicDialog
+              title={"Delete Character"}
+              prompt={`Are you sure you wish to delete ${this.props.selectedCharacter?.name}?  This will also destroy associated records like items, storages, etc.  Deletion cannot be undone.`}
+              buttons={[
+                {
+                  text: "Delete",
+                  onClick: async () => {
+                    // Guaranteed true, but have to check to make intellisense shut up.
+                    if (this.props.selectedCharacter) {
+                      const res = await ServerAPI.deleteCharacter(this.props.selectedCharacter);
 
-              // Get rid of the confirmation modal.
-              this.props.dispatch?.(hideModal());
-              if ("error" in res) {
-                // Error modal.
-                this.props.dispatch?.(
-                  showModal({
-                    id: "DeleteCharacterError",
-                    content: { title: "Error", message: "An Error occurred during character deletion." },
-                  })
-                );
-              } else {
-                // Close the subPanel.
-                this.props.dispatch?.(hideSubPanel());
-                // Delay so the subpanel is fully gone before we clear out the local character data.
-                setTimeout(() => {
-                  // Guaranteed true, but have to check to make intellisense shut up.
-                  if (this.props.selectedCharacter) {
-                    // Deselect the character.
-                    this.props.dispatch?.(setActiveCharacterId(0));
+                      // Get rid of the confirmation modal.
+                      this.props.dispatch?.(hideModal());
+                      if ("error" in res) {
+                        // Error modal.
+                        this.props.dispatch?.(
+                          showModal({
+                            id: "DeleteCharacterError",
+                            content: () => (
+                              <BasicDialog title={"Error!"} prompt={"An Error occurred during character deltion."} />
+                            ),
+                          })
+                        );
+                      } else {
+                        // Close the subPanel.
+                        this.props.dispatch?.(hideSubPanel());
+                        // Delay so the subpanel is fully gone before we clear out the local character data.
+                        setTimeout(() => {
+                          // Guaranteed true, but have to check to make intellisense shut up.
+                          if (this.props.selectedCharacter) {
+                            // Deselect the character.
+                            this.props.dispatch?.(setActiveCharacterId(0));
 
-                    // Update all local data.
-                    // Proficiencies.
-                    this.props.dispatch?.(deleteProficienciesForCharacter(this.props.selectedCharacter.id));
-                    // Items.
-                    const itemIds = getAllCharacterAssociatedItemIds(this.props.selectedCharacter.id);
-                    itemIds.forEach((itemId) => {
-                      // Spellbook data, if any.  No-op if it's not a spellbook.
-                      this.props.dispatch?.(deleteSpellbook(itemId));
-                      // The item itself.
-                      this.props.dispatch?.(deleteItem(itemId));
-                    });
-                    // Repertoire.
-                    this.props.dispatch?.(deleteRepertoireForCharacter(this.props.selectedCharacter.id));
-                    // Henchmen.
-                    this.props.dispatch?.(unsetAllHenchmenForCharacter(this.props.selectedCharacter.id));
-                    // The character itself.
-                    this.props.dispatch?.(deleteCharacter(this.props.selectedCharacter.id));
-                    if (this.props.dispatch) {
-                      refetchContracts(this.props.dispatch);
+                            // Update all local data.
+                            // Proficiencies.
+                            this.props.dispatch?.(deleteProficienciesForCharacter(this.props.selectedCharacter.id));
+                            // Items.
+                            const itemIds = getAllCharacterAssociatedItemIds(this.props.selectedCharacter.id);
+                            itemIds.forEach((itemId) => {
+                              // Spellbook data, if any.  No-op if it's not a spellbook.
+                              this.props.dispatch?.(deleteSpellbook(itemId));
+                              // The item itself.
+                              this.props.dispatch?.(deleteItem(itemId));
+                            });
+                            // Repertoire.
+                            this.props.dispatch?.(deleteRepertoireForCharacter(this.props.selectedCharacter.id));
+                            // Henchmen.
+                            this.props.dispatch?.(unsetAllHenchmenForCharacter(this.props.selectedCharacter.id));
+                            // The character itself.
+                            this.props.dispatch?.(deleteCharacter(this.props.selectedCharacter.id));
+                            if (this.props.dispatch) {
+                              refetchContracts(this.props.dispatch);
+                            }
+                          }
+                        }, 300);
+                      }
+                      this.setState({ isSaving: false });
                     }
-                  }
-                }, 300);
-              }
-              this.setState({ isSaving: false });
-            }
-          },
-          extraButtons: [
-            {
-              text: "Cancel",
-              onClick: () => {
-                this.props.dispatch?.(hideModal());
-                this.setState({ isSaving: false });
-              },
-            },
-          ],
+                  },
+                },
+                {
+                  text: "Cancel",
+                  onClick: async () => {
+                    this.props.dispatch?.(hideModal());
+                    this.setState({ isSaving: false });
+                  },
+                },
+              ]}
+            />
+          );
         },
       })
     );
@@ -940,7 +939,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "SelectLocation",
-        widthVmin: 61,
         content: () => {
           return (
             <SelectLocationDialog

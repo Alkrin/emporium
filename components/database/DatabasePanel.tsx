@@ -2,14 +2,14 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
-import { showSubPanel } from "../../redux/subPanelsSlice";
 import { SubPanelPane } from "../SubPanelPane";
-import { DatabaseItemsSubPanel } from "./DatabaseItemsSubPanel";
-import { DatabaseSpellsSubPanel } from "./DatabaseSpellsSubPanel";
+import { DatabaseItemsDialog } from "./DatabaseItemsDialog";
+import { DatabaseSpellsDialog } from "./DatabaseSpellsDialog";
 import styles from "./DatabasePanel.module.scss";
-import { DatabaseEquipmentSetsSubPanel } from "./DatabaseEquipmentSetsSubPanel";
-import { DatabaseTroopsSubPanel } from "./DatabaseTroopsSubPanel";
-import { DatabaseStructureComponentsSubPanel } from "./DatabaseStructureComponentsSubPanel";
+import { DatabaseEquipmentSetsDialog } from "./DatabaseEquipmentSetsDialog";
+import { DatabaseTroopsDialog } from "./DatabaseTroopsDialog";
+import { DatabaseStructureComponentsDialog } from "./DatabaseStructureComponentsDialog";
+import { showModal } from "../../redux/modalsSlice";
 
 interface ReactProps {}
 
@@ -24,19 +24,19 @@ class ADatabasePanel extends React.Component<Props> {
     return (
       <div className={styles.root}>
         <div className={styles.dataButton} onClick={this.onEquipmentSetsClicked.bind(this)}>
-          Equipment Sets
+          {"Equipment Sets"}
         </div>
         <div className={styles.dataButton} onClick={this.onItemsClicked.bind(this)}>
-          Items
+          {"Items"}
         </div>
         <div className={styles.dataButton} onClick={this.onSpellsClicked.bind(this)}>
-          Spells
+          {"Spells"}
         </div>
         <div className={styles.dataButton} onClick={this.onStructureComponentsClicked.bind(this)}>
-          Structure Components
+          {"Structure Components"}
         </div>
         <div className={styles.dataButton} onClick={this.onTroopsClicked.bind(this)}>
-          Troops
+          {"Troops"}
         </div>
         <SubPanelPane />
       </div>
@@ -45,10 +45,10 @@ class ADatabasePanel extends React.Component<Props> {
 
   private onEquipmentSetsClicked(): void {
     this.props.dispatch?.(
-      showSubPanel({
+      showModal({
         id: "DatabaseEquipmentSets",
         content: () => {
-          return <DatabaseEquipmentSetsSubPanel />;
+          return <DatabaseEquipmentSetsDialog />;
         },
         escapable: true,
       })
@@ -57,10 +57,10 @@ class ADatabasePanel extends React.Component<Props> {
 
   private onItemsClicked(): void {
     this.props.dispatch?.(
-      showSubPanel({
+      showModal({
         id: "DatabaseItems",
         content: () => {
-          return <DatabaseItemsSubPanel />;
+          return <DatabaseItemsDialog />;
         },
         escapable: true,
       })
@@ -69,10 +69,10 @@ class ADatabasePanel extends React.Component<Props> {
 
   private onSpellsClicked(): void {
     this.props.dispatch?.(
-      showSubPanel({
+      showModal({
         id: "DatabaseSpells",
         content: () => {
-          return <DatabaseSpellsSubPanel />;
+          return <DatabaseSpellsDialog />;
         },
         escapable: true,
       })
@@ -81,10 +81,10 @@ class ADatabasePanel extends React.Component<Props> {
 
   private onStructureComponentsClicked(): void {
     this.props.dispatch?.(
-      showSubPanel({
+      showModal({
         id: "DatabaseStructureComponents",
         content: () => {
-          return <DatabaseStructureComponentsSubPanel />;
+          return <DatabaseStructureComponentsDialog />;
         },
         escapable: true,
       })
@@ -93,10 +93,10 @@ class ADatabasePanel extends React.Component<Props> {
 
   private onTroopsClicked(): void {
     this.props.dispatch?.(
-      showSubPanel({
+      showModal({
         id: "DatabaseTroops",
         content: () => {
-          return <DatabaseTroopsSubPanel />;
+          return <DatabaseTroopsDialog />;
         },
         escapable: true,
       })

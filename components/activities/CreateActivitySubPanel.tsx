@@ -40,6 +40,7 @@ import { getCombatSpeedsForCharacter, getEncumbranceLevelForCharacter } from "..
 import { CreateActivityOutcomeDialog } from "./CreateActivityOutcomeDialog";
 import { ActivityOutcomesList } from "./ActivityOutcomeList";
 import { addDaysToDateString, dayInMillis, getDaysBetweenDateStrings } from "../../lib/timeUtils";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   activity: ActivityData;
@@ -372,7 +373,6 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "Adventurers",
-        widthVmin: 60,
         content: () => {
           return (
             <SelectAdventurersDialog
@@ -401,7 +401,6 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "Armies",
-        widthVmin: 60,
         content: () => {
           const armyIDs: Dictionary<number> = {};
           this.state.activity.army_participants.forEach((p) => {
@@ -617,11 +616,7 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoNameError",
-          content: {
-            title: "Error!",
-            message: "Please enter a Name for this activity!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please enter a Name for this activity!"} />,
         })
       );
       return;
@@ -669,55 +664,63 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "DeleteActivityConfirmation",
-        content: {
-          title: "Delete Activity",
-          message: `Are you sure you wish to delete #${this.state.activity.id}: ${this.state.activity.name}?  This will also destroy associated outcome records.  Deletion cannot be undone.`,
-          buttonText: "Delete",
-          onButtonClick: async () => {
-            // Guaranteed true, but have to check to make intellisense shut up.
-            if (this.props.activeActivityId) {
-              const res = await ServerAPI.deleteActivity(this.props.activeActivityId);
+        content: () => {
+          return (
+            <BasicDialog
+              title={"Delete Activity"}
+              prompt={`Are you sure you wish to delete #${this.state.activity.id}: ${this.state.activity.name}?  This will also destroy associated outcome records.  Deletion cannot be undone.`}
+              buttons={[
+                {
+                  text: "Delete",
+                  onClick: async () => {
+                    // Guaranteed true, but have to check to make intellisense shut up.
+                    if (this.props.activeActivityId) {
+                      const res = await ServerAPI.deleteActivity(this.props.activeActivityId);
 
-              // Get rid of the confirmation modal.
-              this.props.dispatch?.(hideModal());
-              if ("error" in res) {
-                // Error modal.
-                this.props.dispatch?.(
-                  showModal({
-                    id: "DeleteActivityError",
-                    content: { title: "Error", message: "An Error occurred during activity deletion." },
-                  })
-                );
-              } else {
-                // Close the subPanel.
-                this.props.dispatch?.(hideSubPanel());
-                // Delay so the subpanel is fully gone before we clear out the local character data.
-                setTimeout(() => {
-                  // Guaranteed true, but have to check to make intellisense shut up.
-                  if (this.props.activeActivityId) {
-                    // Deselect the character.
-                    this.props.dispatch?.(setActiveActivityId(0));
+                      // Get rid of the confirmation modal.
+                      this.props.dispatch?.(hideModal());
+                      if ("error" in res) {
+                        // Error modal.
+                        this.props.dispatch?.(
+                          showModal({
+                            id: "DeleteActivityError",
+                            content: () => (
+                              <BasicDialog title={"Error"} prompt={"An Error occurred during activity deletion."} />
+                            ),
+                          })
+                        );
+                      } else {
+                        // Close the subPanel.
+                        this.props.dispatch?.(hideSubPanel());
+                        // Delay so the subpanel is fully gone before we clear out the local character data.
+                        setTimeout(() => {
+                          // Guaranteed true, but have to check to make intellisense shut up.
+                          if (this.props.activeActivityId) {
+                            // Deselect the character.
+                            this.props.dispatch?.(setActiveActivityId(0));
 
-                    // Update all local data.
-                    // Outcomes
-                    this.props.dispatch?.(deleteOutcomesForActivity(this.props.activeActivityId));
-                    // The activity itself.
-                    this.props.dispatch?.(deleteActivity(this.props.activeActivityId));
-                  }
-                }, 300);
-              }
-              this.setState({ isSaving: false });
-            }
-          },
-          extraButtons: [
-            {
-              text: "Cancel",
-              onClick: () => {
-                this.props.dispatch?.(hideModal());
-                this.setState({ isSaving: false });
-              },
-            },
-          ],
+                            // Update all local data.
+                            // Outcomes
+                            this.props.dispatch?.(deleteOutcomesForActivity(this.props.activeActivityId));
+                            // The activity itself.
+                            this.props.dispatch?.(deleteActivity(this.props.activeActivityId));
+                          }
+                        }, 300);
+                      }
+                      this.setState({ isSaving: false });
+                    }
+                  },
+                },
+                {
+                  text: "Cancel",
+                  onClick: async () => {
+                    this.props.dispatch?.(hideModal());
+                    this.setState({ isSaving: false });
+                  },
+                },
+              ]}
+            />
+          );
         },
       })
     );

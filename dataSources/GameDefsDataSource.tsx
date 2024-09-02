@@ -11,6 +11,7 @@ import {
 } from "../redux/gameDefsSlice";
 import { showModal } from "../redux/modalsSlice";
 import ServerAPI from "../serverAPI";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchItemDefs(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchItemDefs();
@@ -19,10 +20,7 @@ export async function refetchItemDefs(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "ItemDef Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch ItemDef data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ItemDef data"} />,
         escapable: true,
       })
     );
@@ -44,10 +42,7 @@ export async function refetchSpellDefs(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "SpellDef Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch SpellDef data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch SpellDef data"} />,
         escapable: true,
       })
     );
@@ -64,10 +59,7 @@ export async function refetchEquipmentSets(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "EquipmentSets Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch EquipmentSets data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch EquipmentSets data"} />,
         escapable: true,
       })
     );
@@ -84,10 +76,7 @@ export async function refetchEquipmentSetItems(dispatch: Dispatch): Promise<void
     dispatch(
       showModal({
         id: "EquipmentSetItems Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch EquipmentSetItems data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch EquipmentSetItems data"} />,
         escapable: true,
       })
     );
@@ -104,10 +93,7 @@ export async function refetchStructureComponentDefs(dispatch: Dispatch): Promise
     dispatch(
       showModal({
         id: "StructureComponentDef Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch StructureComponentDef data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch StructureComponentDef data"} />,
         escapable: true,
       })
     );
@@ -124,10 +110,7 @@ export async function refetchTroopDefs(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "TroopDef Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch TroopDef data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch TroopDef data"} />,
         escapable: true,
       })
     );

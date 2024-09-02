@@ -9,6 +9,7 @@ import styles from "./EditTroopSubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
 import { deleteTroop, updateTroop } from "../../redux/armiesSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   count: number;
@@ -149,11 +150,7 @@ class AEditTroopSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoCountError",
-          content: {
-            title: "Error!",
-            message: "Please enter a non-zero troop count!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please enter a non-zero troop count!"} />,
         })
       );
       this.setState({ isSaving: false });

@@ -14,6 +14,7 @@ import { getPersonalPile } from "../../lib/characterUtils";
 import { deleteSpellbook } from "../../redux/spellbooksSlice";
 import { deleteItem } from "../../redux/itemsSlice";
 import { getAllStorageAssociatedItemIds } from "../../lib/storageUtils";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   isSaving: boolean;
@@ -71,7 +72,7 @@ class ACreateStorageDialog extends React.Component<Props, State> {
 
     return (
       <div className={styles.root}>
-        <div className={styles.title}>{"Create Storage"}</div>
+        <div className={styles.title}>{this.props.isEditMode ? "Edit Storage" : "Create Storage"}</div>
         <div className={styles.fieldRow}>
           <div className={styles.fieldName}>{"Owner"}</div>
           <input
@@ -97,7 +98,7 @@ class ACreateStorageDialog extends React.Component<Props, State> {
               if (newName.includes("Personal Pile")) {
                 this.props.dispatch?.(
                   showToaster({
-                    content: { title: "ERROR!", message: "Custom storages cannot be named Personal Pile!" },
+                    content: { title: "Error!", message: "Custom storages cannot be named Personal Pile!" },
                   })
                 );
                 newName = newName.replace("Personal Pile", "");
@@ -159,7 +160,6 @@ class ACreateStorageDialog extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "SelectLocation",
-        widthVmin: 61,
         content: () => {
           return (
             <SelectLocationDialog
@@ -237,55 +237,63 @@ class ACreateStorageDialog extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "DeleteStorageConfirmation",
-        content: {
-          title: "Delete Storage",
-          message: `Are you sure you wish to delete ${this.state.name}?  This will also destroy all contained items and money.  Deletion cannot be undone.`,
-          buttonText: "Delete",
-          onButtonClick: async () => {
-            const containedItemIds = getAllStorageAssociatedItemIds(this.props.activeStorageId);
-            const res = await ServerAPI.deleteStorage(this.props.activeStorageId, containedItemIds);
+        content: () => {
+          return (
+            <BasicDialog
+              title={"Delete Storage"}
+              prompt={`Are you sure you wish to delete ${this.state.name}?  This will also destroy all contained items and money.  Deletion cannot be undone.`}
+              buttons={[
+                {
+                  text: "Delete",
+                  onClick: async () => {
+                    const containedItemIds = getAllStorageAssociatedItemIds(this.props.activeStorageId);
+                    const res = await ServerAPI.deleteStorage(this.props.activeStorageId, containedItemIds);
 
-            // Get rid of the confirmation modal.
-            this.props.dispatch?.(hideModal());
-            if ("error" in res || res.find((r) => "error" in r)) {
-              // Error modal.
-              this.props.dispatch?.(
-                showModal({
-                  id: "DeleteStorageError",
-                  content: { title: "Error", message: "An Error occurred during storage deletion." },
-                })
-              );
-            } else {
-              // Close the create dialog.
-              this.props.dispatch?.(hideModal());
-              // Delay so the modal is fully gone before we clear out the local data.
-              setTimeout(() => {
-                // Update all local data.
-                // Items.
-                containedItemIds.forEach((itemId) => {
-                  // Spellbook data, if any.  No-op if it's not a spellbook.
-                  this.props.dispatch?.(deleteSpellbook(itemId));
-                  // The item itself.
-                  this.props.dispatch?.(deleteItem(itemId));
-                });
-                // The storage itself.
-                this.props.dispatch?.(deleteStorage(this.props.activeStorageId));
+                    // Get rid of the confirmation modal.
+                    this.props.dispatch?.(hideModal());
+                    if ("error" in res || res.find((r) => "error" in r)) {
+                      // Error modal.
+                      this.props.dispatch?.(
+                        showModal({
+                          id: "DeleteStorageError",
+                          content: () => (
+                            <BasicDialog title={"Error"} prompt={"An Error occurred during storage deletion."} />
+                          ),
+                        })
+                      );
+                    } else {
+                      // Close the create dialog.
+                      this.props.dispatch?.(hideModal());
+                      // Delay so the modal is fully gone before we clear out the local data.
+                      setTimeout(() => {
+                        // Update all local data.
+                        // Items.
+                        containedItemIds.forEach((itemId) => {
+                          // Spellbook data, if any.  No-op if it's not a spellbook.
+                          this.props.dispatch?.(deleteSpellbook(itemId));
+                          // The item itself.
+                          this.props.dispatch?.(deleteItem(itemId));
+                        });
+                        // The storage itself.
+                        this.props.dispatch?.(deleteStorage(this.props.activeStorageId));
 
-                // Deselect the storage (switch to selected character's personal pile, or else nothing).
-                this.props.dispatch?.(setActiveStorageId(getPersonalPile(this.props.character.id)?.id ?? 0));
-              }, 300);
-            }
-            this.setState({ isSaving: false });
-          },
-          extraButtons: [
-            {
-              text: "Cancel",
-              onClick: () => {
-                this.props.dispatch?.(hideModal());
-                this.setState({ isSaving: false });
-              },
-            },
-          ],
+                        // Deselect the storage (switch to selected character's personal pile, or else nothing).
+                        this.props.dispatch?.(setActiveStorageId(getPersonalPile(this.props.character.id)?.id ?? 0));
+                      }, 300);
+                    }
+                    this.setState({ isSaving: false });
+                  },
+                },
+                {
+                  text: "Cancel",
+                  onClick: async () => {
+                    this.props.dispatch?.(hideModal());
+                    this.setState({ isSaving: false });
+                  },
+                },
+              ]}
+            />
+          );
         },
       })
     );

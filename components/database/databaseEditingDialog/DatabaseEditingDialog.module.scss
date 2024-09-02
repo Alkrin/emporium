@@ -1,0 +1,90 @@
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.labelText {
+  font-size: 1rem;
+  color: wheat;
+  user-select: none;
+}
+
+.firstLabel {
+  @extend .labelText;
+  margin-top: 0.2vmin;
+}
+
+.secondLabel {
+  @extend .firstLabel;
+  margin-left: 0.5vmin;
+}
+
+.panelTitle {
+  font-size: 3rem;
+  color: wheat;
+  position: relative;
+  margin: 1vmin 2vmin 1vmin 2vmin;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+  user-select: none;
+}
+
+.itemListRoot {
+  position: relative;
+  margin-left: 2vmin;
+  width: 35vmin;
+  height: 55.5vmin;
+}
+
+.dataPanelRoot {
+  position: relative;
+  margin: 0 2vmin 0 2vmin;
+  width: 35vmin;
+  height: 55.5vmin;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding-bottom: 0.5vmin;
+}
+
+.buttonPanel {
+  position: relative;
+  margin: 2vmin;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.footerButton {
+  position: relative;
+  padding: 0.5vmin;
+  box-sizing: border-box;
+  background-color: black;
+  border: solid 2px #aaa;
+  border-radius: 0.5vmin;
+  font-size: 1.2rem;
+  user-select: none;
+
+  &:hover {
+    border-color: white;
+  }
+
+  &:active {
+    border-color: lime;
+  }
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.3;
+  }
+}

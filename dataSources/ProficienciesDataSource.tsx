@@ -5,6 +5,7 @@ import ExternalDataSource from "../redux/externalDataSource";
 import { showModal } from "../redux/modalsSlice";
 import { updateProficiencies } from "../redux/proficienciesSlice";
 import ServerAPI from "../serverAPI";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchProficiencies(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchProficiencies();
@@ -13,10 +14,7 @@ export async function refetchProficiencies(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Proficiency Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Proficiency data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Proficiency data"} />,
         escapable: true,
       })
     );

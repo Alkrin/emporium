@@ -56,15 +56,13 @@ class ModalPane extends React.Component<Props, State> {
   private renderAllModals(): React.ReactNode[] {
     // Render modals in stack order.
     const modals: React.ReactNode[] = this.state.visibleModals.map((mpe, index) => {
-      const widthOverride = `${mpe.widthVmin ?? 32}vmin`;
-
       const isExiting = mpe.id === this.state.exitingModalId;
 
       const animation = isExiting ? `${mpe.exitKeyframeId} 1000ms` : `${mpe.entryKeyframeId} 250ms`;
       const pointerEvents = isExiting ? "none" : "auto";
 
       return (
-        <div className={styles.modalWrapper} key={mpe.id} style={{ width: widthOverride, animation, pointerEvents }}>
+        <div className={styles.modalWrapper} key={mpe.id} style={{ animation, pointerEvents }}>
           {mpe.escapable && (
             <Escapable escapeId={`Modal_${mpe.id}`} key={`Escapable_${mpe.id}`} onEscape={this.onEscape.bind(this)} />
           )}
@@ -93,20 +91,7 @@ class ModalPane extends React.Component<Props, State> {
       return null;
     }
 
-    if (typeof modal.content === "function") {
-      return modal.content();
-    } else {
-      return (
-        <>
-          {modal.content.title && <div className={styles.titleText}>{modal.content.title}</div>}
-          {modal.content.message && <div className={styles.messageText}>{modal.content.message}</div>}
-          {modal.content.extraButtons?.map((eb) => {
-            return this.renderModalButton(eb.text, eb.onClick);
-          })}
-          {this.renderModalButton(modal.content.buttonText ?? "Close", this.onButtonClick.bind(this, modal))}
-        </>
-      );
-    }
+    return modal.content();
   }
 
   private renderModalButton(text: string, onClick: () => void): React.ReactNode {
@@ -119,17 +104,6 @@ class ModalPane extends React.Component<Props, State> {
 
   private onEscape(): void {
     this.props.dispatch?.(hideModal());
-  }
-
-  private onButtonClick(modal: ModalParams): void {
-    // Should always be true.  Just using it for the typeguard.
-    if (typeof modal.content !== "function") {
-      if (modal.content.onButtonClick) {
-        modal.content.onButtonClick();
-      } else {
-        this.props.dispatch?.(hideModal());
-      }
-    }
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {

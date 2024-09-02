@@ -76,9 +76,10 @@ class AEditInjuriesDialog extends React.Component<Props, State> {
   }
 
   private getSortedInjuries(): ProficiencyData[] {
-    const injuries = this.props.proficiencies?.filter((prof) => {
-      return prof.source === ProficiencySource.Injury;
-    });
+    const injuries =
+      this.props.proficiencies?.filter((prof) => {
+        return prof.source === ProficiencySource.Injury;
+      }) ?? [];
     injuries.sort((a, b) => {
       const injuryA = AllInjuries[a.feature_id];
       const injuryB = AllInjuries[b.feature_id];

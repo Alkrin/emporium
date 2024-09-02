@@ -102,6 +102,8 @@
   text-align: center;
   background-color: black;
   border-radius: 0.5vmin;
+  max-height: 10vmin;
+  overflow-y: scroll;
 }
 
 .notesLabel {

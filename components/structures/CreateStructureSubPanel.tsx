@@ -19,6 +19,7 @@ import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
 import { refetchStructures } from "../../dataSources/StructuresDataSource";
 import { deleteStructure, setActiveStructureId } from "../../redux/structuresSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   structure: StructureData;
@@ -145,7 +146,6 @@ class ACreateStructureSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "SelectLocation",
-        widthVmin: 61,
         content: () => {
           return (
             <SelectLocationDialog
@@ -187,11 +187,7 @@ class ACreateStructureSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoNameError",
-          content: {
-            title: "Error!",
-            message: "Please enter a Name for this structure!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error"} prompt={"Please enter a Name for this structure!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -203,11 +199,7 @@ class ACreateStructureSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoLocationError",
-          content: {
-            title: "Error!",
-            message: "Please enter a Location for this structure!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error"} prompt={"Please select a Location for this structure!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -254,53 +246,59 @@ class ACreateStructureSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "DeleteStructureConfirmation",
-        content: {
-          title: "Delete Structure",
-          message: `Are you sure you wish to delete ${this.props.selectedStructure?.name}?  This will also destroy associated structure component records.  Deletion cannot be undone.`,
-          buttonText: "Delete",
-          onButtonClick: async () => {
-            // Guaranteed true, but have to check to make intellisense shut up.
-            if (this.props.selectedStructure) {
-              const res = await ServerAPI.deleteStructure(this.props.currentStructureId);
-
-              // Get rid of the confirmation modal.
-              this.props.dispatch?.(hideModal());
-              if ("error" in res) {
-                // Error modal.
-                this.props.dispatch?.(
-                  showModal({
-                    id: "DeleteStructureError",
-                    content: { title: "Error", message: "An Error occurred during structure deletion." },
-                  })
-                );
-              } else {
-                // Close the subPanel.
-                this.props.dispatch?.(hideSubPanel());
-                // Delay so the subpanel is fully gone before we clear out the local structure data.
-                setTimeout(() => {
+        content: () => (
+          <BasicDialog
+            title={"Delete Structure"}
+            prompt={`Are you sure you wish to delete ${this.props.selectedStructure?.name}?  This will also destroy associated structure component records.  Deletion cannot be undone.`}
+            buttons={[
+              {
+                text: "Delete",
+                onClick: async () => {
                   // Guaranteed true, but have to check to make intellisense shut up.
                   if (this.props.selectedStructure) {
-                    // Deselect the structure.
-                    this.props.dispatch?.(setActiveStructureId(0));
+                    const res = await ServerAPI.deleteStructure(this.props.currentStructureId);
 
-                    // The structure itself.
-                    this.props.dispatch?.(deleteStructure(this.props.currentStructureId));
+                    // Get rid of the confirmation modal.
+                    this.props.dispatch?.(hideModal());
+                    if ("error" in res) {
+                      // Error modal.
+                      this.props.dispatch?.(
+                        showModal({
+                          id: "DeleteStructureError",
+                          content: () => (
+                            <BasicDialog title={"Error"} prompt={"An Error occurred during structure deletion."} />
+                          ),
+                        })
+                      );
+                    } else {
+                      // Close the subPanel.
+                      this.props.dispatch?.(hideSubPanel());
+                      // Delay so the subpanel is fully gone before we clear out the local structure data.
+                      setTimeout(() => {
+                        // Guaranteed true, but have to check to make intellisense shut up.
+                        if (this.props.selectedStructure) {
+                          // Deselect the structure.
+                          this.props.dispatch?.(setActiveStructureId(0));
+
+                          // The structure itself.
+                          this.props.dispatch?.(deleteStructure(this.props.currentStructureId));
+                        }
+                      }, 300);
+                    }
+                    this.setState({ isSaving: false });
                   }
-                }, 300);
-              }
-              this.setState({ isSaving: false });
-            }
-          },
-          extraButtons: [
-            {
-              text: "Cancel",
-              onClick: () => {
-                this.props.dispatch?.(hideModal());
-                this.setState({ isSaving: false });
+                },
               },
-            },
-          ],
-        },
+              {
+                text: "Cancel",
+                onClick: async () => {
+                  this.props.dispatch?.(hideModal());
+                  this.setState({ isSaving: false });
+                },
+              },
+            ]}
+          />
+        ),
       })
     );
   }

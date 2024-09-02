@@ -12,6 +12,7 @@ import { refetchArmies } from "../../dataSources/ArmiesDataSource";
 import { Dictionary } from "../../lib/dictionary";
 import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   army: ArmyData;
@@ -124,7 +125,6 @@ class ACreateArmySubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "SelectLocation",
-        widthVmin: 61,
         content: () => {
           return (
             <SelectLocationDialog
@@ -166,11 +166,7 @@ class ACreateArmySubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoNameError",
-          content: {
-            title: "Error!",
-            message: "Please enter a Name for this army!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please enter a Name for this army!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -182,11 +178,7 @@ class ACreateArmySubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoLocationError",
-          content: {
-            title: "Error!",
-            message: "Please enter a Location for this army!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please select a Location for this army!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -233,57 +225,65 @@ class ACreateArmySubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "DeleteArmyConfirmation",
-        content: {
-          title: "Delete Army",
-          message: `Are you sure you wish to delete ${this.props.selectedArmy?.name}?  This will also destroy associated troop records.  Deletion cannot be undone.`,
-          buttonText: "Delete",
-          onButtonClick: async () => {
-            // Guaranteed true, but have to check to make intellisense shut up.
-            if (this.props.selectedArmy) {
-              const res = await ServerAPI.deleteArmy(
-                this.props.currentArmyId,
-                this.props.selectedTroops.map((t) => {
-                  return t.id;
-                })
-              );
+        content: () => {
+          return (
+            <BasicDialog
+              title={"Delete Army"}
+              prompt={`Are you sure you wish to delete ${this.props.selectedArmy?.name}?  This will also destroy associated troop records.  Deletion cannot be undone.`}
+              buttons={[
+                {
+                  text: "Delete",
+                  onClick: async () => {
+                    // Guaranteed true, but have to check to make intellisense shut up.
+                    if (this.props.selectedArmy) {
+                      const res = await ServerAPI.deleteArmy(
+                        this.props.currentArmyId,
+                        this.props.selectedTroops.map((t) => {
+                          return t.id;
+                        })
+                      );
 
-              // Get rid of the confirmation modal.
-              this.props.dispatch?.(hideModal());
-              if ("error" in res) {
-                // Error modal.
-                this.props.dispatch?.(
-                  showModal({
-                    id: "DeleteArmyError",
-                    content: { title: "Error", message: "An Error occurred during army deletion." },
-                  })
-                );
-              } else {
-                // Close the subPanel.
-                this.props.dispatch?.(hideSubPanel());
-                // Delay so the subpanel is fully gone before we clear out the local character data.
-                setTimeout(() => {
-                  // Guaranteed true, but have to check to make intellisense shut up.
-                  if (this.props.selectedArmy) {
-                    // Deselect the army.
-                    this.props.dispatch?.(setActiveArmyId(0));
+                      // Get rid of the confirmation modal.
+                      this.props.dispatch?.(hideModal());
+                      if ("error" in res) {
+                        // Error modal.
+                        this.props.dispatch?.(
+                          showModal({
+                            id: "DeleteArmyError",
+                            content: () => (
+                              <BasicDialog title={"Error!"} prompt={"An Error occurred during army deletion."} />
+                            ),
+                          })
+                        );
+                      } else {
+                        // Close the subPanel.
+                        this.props.dispatch?.(hideSubPanel());
+                        // Delay so the subpanel is fully gone before we clear out the local character data.
+                        setTimeout(() => {
+                          // Guaranteed true, but have to check to make intellisense shut up.
+                          if (this.props.selectedArmy) {
+                            // Deselect the army.
+                            this.props.dispatch?.(setActiveArmyId(0));
 
-                    // The character itself.
-                    this.props.dispatch?.(deleteArmy(this.props.currentArmyId));
-                  }
-                }, 300);
-              }
-              this.setState({ isSaving: false });
-            }
-          },
-          extraButtons: [
-            {
-              text: "Cancel",
-              onClick: () => {
-                this.props.dispatch?.(hideModal());
-                this.setState({ isSaving: false });
-              },
-            },
-          ],
+                            // The character itself.
+                            this.props.dispatch?.(deleteArmy(this.props.currentArmyId));
+                          }
+                        }, 300);
+                      }
+                      this.setState({ isSaving: false });
+                    }
+                  },
+                },
+                {
+                  text: "Cancel",
+                  onClick: async () => {
+                    this.props.dispatch?.(hideModal());
+                    this.setState({ isSaving: false });
+                  },
+                },
+              ]}
+            />
+          );
         },
       })
     );

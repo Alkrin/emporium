@@ -4,6 +4,7 @@ import ExternalDataSource from "../redux/externalDataSource";
 import { showModal } from "../redux/modalsSlice";
 import ServerAPI from "../serverAPI";
 import { updateActivities, updateActivityOutcomes, updateExpectedOutcomes } from "../redux/activitiesSlice";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchActivities(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchActivities();
@@ -12,10 +13,7 @@ export async function refetchActivities(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Activities Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Activities data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Activities data"} />,
         escapable: true,
       })
     );
@@ -31,10 +29,7 @@ export async function refetchExpectedOutcomes(dispatch: Dispatch): Promise<void>
     dispatch(
       showModal({
         id: "ExpectedOutcomes Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch ExpectedOutcomes data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ExpectedOutcomes data"} />,
         escapable: true,
       })
     );
@@ -50,10 +45,7 @@ export async function refetchActivityOutcomes(dispatch: Dispatch): Promise<void>
     dispatch(
       showModal({
         id: "ActivityOutcomes Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch ActivityOutcomes data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ActivityOutcomes data"} />,
         escapable: true,
       })
     );

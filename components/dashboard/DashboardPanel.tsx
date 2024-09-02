@@ -30,6 +30,7 @@ import { showSubPanel } from "../../redux/subPanelsSlice";
 import { SubPanelPane } from "../SubPanelPane";
 import { EditStoragesSubPanel } from "../characters/EditStoragesSubPanel";
 import { setActiveStorageId } from "../../redux/storageSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   isSaving: boolean;
@@ -300,7 +301,12 @@ class ADashboardPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "PayCostOfLivingError",
-          content: { title: "Error", message: "An Error occurred while attempting to pay Cost Of Living expenses." },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"An Error occurred while attempting to pay Cost Of Living expenses."}
+            />
+          ),
         })
       );
     } else {
@@ -378,7 +384,9 @@ class ADashboardPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "ExerciseContractsError",
-          content: { title: "Error", message: "An Error occurred while attempting to exercise the contracts." },
+          content: () => (
+            <BasicDialog title={"Error!"} prompt={"An Error occurred while attempting to exercise the contracts."} />
+          ),
         })
       );
     } else {
@@ -527,7 +535,6 @@ class ADashboardPanel extends React.Component<Props, State> {
           );
         },
         escapable: true,
-        widthVmin: 45,
       })
     );
   }

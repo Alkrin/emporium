@@ -5,6 +5,7 @@ import { showModal } from "../redux/modalsSlice";
 import ServerAPI, { MapData, MapHexRiverData, MapHexRoadData } from "../serverAPI";
 import { updateMapHexes, updateMaps } from "../redux/mapsSlice";
 import { Dictionary } from "../lib/dictionary";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchMaps(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchMaps();
@@ -13,10 +14,7 @@ export async function refetchMaps(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Map Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Map data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Map data"} />,
         escapable: true,
       })
     );
@@ -36,10 +34,7 @@ export async function refetchMapHexes(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "MapHex Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch MapHex data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch MapHex data"} />,
         escapable: true,
       })
     );

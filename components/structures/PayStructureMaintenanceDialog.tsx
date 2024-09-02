@@ -16,6 +16,7 @@ import { showToaster } from "../../redux/toastersSlice";
 import { getMaintenanceStatusForStructure, getStructureMonthlyMaintenance } from "../../lib/structureUtils";
 import { refetchStructures } from "../../dataSources/StructuresDataSource";
 import { MaintenanceStatus } from "../../lib/characterUtils";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   sourceStorageId: number;
@@ -106,10 +107,9 @@ class APayStructureMaintenanceDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "payStructureMaintenanceInvalid",
-          content: {
-            title: "Error!",
-            message: "You must select a payment source and a valid payment amount!",
-          },
+          content: () => (
+            <BasicDialog title={"Error!"} prompt={"You must select a payment source and a valid payment amount!"} />
+          ),
           escapable: true,
         })
       );
@@ -128,10 +128,12 @@ class APayStructureMaintenanceDialog extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "payStructureMaintenanceError",
-          content: {
-            title: "Error!",
-            message: "Failed to make the payment.  Please check your network connection and try again.",
-          },
+          content: () => (
+            <BasicDialog
+              title={"Error!"}
+              prompt={"Failed to make the payment.  Please check your network connection and try again."}
+            />
+          ),
           escapable: true,
         })
       );
@@ -167,7 +169,6 @@ class APayStructureMaintenanceDialog extends React.Component<Props, State> {
           );
         },
         escapable: true,
-        widthVmin: 45,
       })
     );
   }

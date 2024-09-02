@@ -9,6 +9,7 @@ import styles from "./CreateTroopSubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
 import { updateTroop } from "../../redux/armiesSlice";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   troopDefId: number;
@@ -164,11 +165,7 @@ class ACreateTroopSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoTypeError",
-          content: {
-            title: "Error!",
-            message: "Please select a Type for this troop!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please select a Type for this troop!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -180,11 +177,7 @@ class ACreateTroopSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoCountError",
-          content: {
-            title: "Error!",
-            message: "Please enter a non-zero troop count!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please enter a non-zero troop count!"} />,
         })
       );
       this.setState({ isSaving: false });

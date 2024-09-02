@@ -31,7 +31,7 @@ import { refetchStorages } from "../../dataSources/StoragesDataSource";
 import { Tag } from "../../lib/tags";
 import { refetchSpellbooks } from "../../dataSources/SpellbooksDataSource";
 import { getRomanNumerals } from "../../lib/stringUtils";
-import { getItemAvailabilityText } from "../../lib/itemUtils";
+import { getItemAvailabilityText, getItemNameText } from "../../lib/itemUtils";
 import {
   ActivityResolution,
   convertActivityOutcomeForServer,
@@ -76,14 +76,14 @@ class ASellItemDialog extends React.Component<Props, State> {
       ownerIDs: props.item.owner_ids,
       isUnused: props.item.is_unused,
       numToSellString: props.item.count.toString(),
-      salePriceString: `${(props.def.sale_gp + props.def.sale_sp / 10 + props.def.sale_cp / 100) * props.item.count}`,
+      salePriceString: (props.def.sale * props.item.count).toFixed(2),
     };
   }
 
   render(): React.ReactNode {
     return (
       <div className={styles.root}>
-        <div className={styles.itemName}>{this.props.def.name}</div>
+        <div className={styles.itemName}>{getItemNameText(this.props.item, this.props.def)}</div>
         <InfoButton
           tooltipParams={{
             id: ``,
@@ -129,10 +129,7 @@ class ASellItemDialog extends React.Component<Props, State> {
             onChange={(e) => {
               this.setState({
                 numToSellString: e.target.value,
-                salePriceString: `${
-                  (this.props.def.sale_gp + this.props.def.sale_sp / 10 + this.props.def.sale_cp / 100) *
-                  +e.target.value
-                }`,
+                salePriceString: (this.props.def.sale * +e.target.value).toFixed(2),
               });
             }}
           />
@@ -248,9 +245,8 @@ class ASellItemDialog extends React.Component<Props, State> {
 
   private getPriceText(): string {
     const numToSell = +this.state.numToSellString;
-    const { sale_gp, sale_sp, sale_cp } = this.props.def;
-    const salePrice = sale_gp + sale_sp / 10 + sale_cp / 100;
-    return `${numToSell} x ${salePrice}gp = ${numToSell * salePrice}gp`;
+    const { sale } = this.props.def;
+    return `${numToSell} x ${sale}gp = ${(numToSell * sale).toFixed(2)}gp`;
   }
 
   private renderOwnerRow(owner: CharacterData, index: number): React.ReactNode {
@@ -286,7 +282,6 @@ class ASellItemDialog extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "Adventurers",
-        widthVmin: 60,
         content: () => {
           return (
             <SelectAdventurersDialog

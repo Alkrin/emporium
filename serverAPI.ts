@@ -101,7 +101,9 @@ export interface ItemDefData {
   damage_dice: number;
   damage_die_2h: number;
   damage_dice_2h: number;
-  range_increment: number;
+  range_short: number;
+  range_medium: number;
+  range_long: number;
   fixed_weight: boolean;
   magic_bonus: number;
   conditional_magic_bonus: number;
@@ -109,12 +111,8 @@ export interface ItemDefData {
   max_cleaves: number;
   tags: string[];
   purchase_quantity: number;
-  cost_gp: number;
-  cost_sp: number;
-  cost_cp: number;
-  sale_gp: number;
-  sale_sp: number;
-  sale_cp: number;
+  cost: number;
+  sale: number;
   spell_ids: number[];
 }
 

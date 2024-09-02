@@ -10,13 +10,15 @@ import ServerAPI, {
   EquipmentSetItemData,
   ItemDefData,
 } from "../../serverAPI";
-import styles from "./DatabaseEquipmentSetsSubPanel.module.scss";
+import styles from "./DatabaseEquipmentSetsDialog.module.scss";
 import { SearchableDefList } from "./SearchableDefList";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { deleteEquipmentSet, updateEquipmentSet, updateItemsForEquipmentSet } from "../../redux/gameDefsSlice";
 import { AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { getEquippableItemsForSlot } from "../../lib/characterUtils";
 import { EquipmentSetInventoriesList } from "./EquipmentSetInventoriesList";
+import { SavingVeil } from "../SavingVeil";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   selectedSetId: number;
@@ -46,7 +48,7 @@ interface InjectedProps {
 
 type Props = ReactProps & InjectedProps;
 
-class ADatabaseEquipmentSetsSubPanel extends React.Component<Props, State> {
+class ADatabaseEquipmentSetsDialog extends React.Component<Props, State> {
   private nextTabIndex: number = 1;
 
   constructor(props: Props) {
@@ -61,7 +63,7 @@ class ADatabaseEquipmentSetsSubPanel extends React.Component<Props, State> {
 
     return (
       <div className={styles.root}>
-        <div className={styles.panelTitle}>EquipmentSet Database</div>
+        <div className={styles.panelTitle}>{"EquipmentSet Database"}</div>
         <SearchableDefList
           className={styles.setListRoot}
           selectedDefId={this.state.selectedSetId}
@@ -94,20 +96,15 @@ class ADatabaseEquipmentSetsSubPanel extends React.Component<Props, State> {
           />
         </div>
         <div className={styles.createNewButton} onClick={this.onCreateNewClicked.bind(this)}>
-          Create New
+          {"Create New"}
         </div>
         <div className={`${styles.deleteButton} ${deletableClass}`} onClick={this.onDeleteClicked.bind(this)}>
-          Delete
+          {"Delete"}
         </div>
         <div className={styles.saveButton} onClick={this.onSaveClicked.bind(this)}>
-          Save
+          {"Save"}
         </div>
-        {this.state.isSaving && (
-          <div className={styles.savingVeil}>
-            <div className={styles.savingLabel}>Saving...</div>
-          </div>
-        )}
-        <SubPanelCloseButton />
+        <SavingVeil show={this.state.isSaving} />
       </div>
     );
   }
@@ -298,11 +295,7 @@ class ADatabaseEquipmentSetsSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoNameError",
-          content: {
-            title: "Error!",
-            message: "Please enter a Name for this Equipment Set!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please enter a Name for this Equipment Set!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -314,11 +307,7 @@ class ADatabaseEquipmentSetsSubPanel extends React.Component<Props, State> {
       this.props.dispatch?.(
         showModal({
           id: "NoClassError",
-          content: {
-            title: "Error!",
-            message: "Please select a Class for this Equipment Set!",
-            buttonText: "Okay",
-          },
+          content: () => <BasicDialog title={"Error!"} prompt={"Please select a Class for this Equipment Set!"} />,
         })
       );
       this.setState({ isSaving: false });
@@ -346,7 +335,7 @@ class ADatabaseEquipmentSetsSubPanel extends React.Component<Props, State> {
         this.props.dispatch?.(
           showModal({
             id: "CreateEquipmentSetFailure",
-            content: { title: "Error!", message: "EquipmentSet was not created.  Please try again." },
+            content: () => <BasicDialog title={"Error!"} prompt={"EquipmentSet was not created.  Please try again."} />,
           })
         );
       } else if (!("error" in res)) {
@@ -377,7 +366,7 @@ class ADatabaseEquipmentSetsSubPanel extends React.Component<Props, State> {
         this.props.dispatch?.(
           showModal({
             id: "EditEquipmentSetFailure",
-            content: { title: "Error!", message: "Edit EquipmentSet has failed.  Please try again." },
+            content: () => <BasicDialog title={"Error!"} prompt={"Edit EquipmentSet has failed.  Please try again."} />,
           })
         );
       } else if (!("error" in res)) {
@@ -404,44 +393,47 @@ class ADatabaseEquipmentSetsSubPanel extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "DeleteEquipmentSet",
-        content: {
-          title: "Please Confirm",
-          message: `Are you sure you wish to delete "${this.state.name}", id ${this.state.selectedSetId}?  This cannot be undone.`,
-          buttonText: "Cancel",
-          onButtonClick: () => {
-            this.props.dispatch?.(hideModal());
-          },
-          extraButtons: [
-            {
-              text: "Delete",
-              onClick: async () => {
-                this.setState({ isSaving: true });
-                this.props.dispatch?.(hideModal());
-                const res = await ServerAPI.deleteEquipmentSet(this.state.selectedSetId);
+        content: () => (
+          <BasicDialog
+            title={"Please Confirm"}
+            prompt={`Are you sure you wish to delete "${this.state.name}", id ${this.state.selectedSetId}?  This cannot be undone.`}
+            buttons={[
+              {
+                text: "Delete",
+                onClick: async () => {
+                  this.setState({ isSaving: true });
+                  this.props.dispatch?.(hideModal());
+                  const res = await ServerAPI.deleteEquipmentSet(this.state.selectedSetId);
 
-                if (
-                  "error" in res ||
-                  res.length === 0 ||
-                  !!res.find((entry) => {
-                    return "error" in entry;
-                  })
-                ) {
-                  this.props.dispatch?.(
-                    showModal({
-                      id: "DeleteEquipmentSetFailure",
-                      content: { title: "Error!", message: "Delete EquipmentSet has failed.  Please try again." },
+                  if (
+                    "error" in res ||
+                    res.length === 0 ||
+                    !!res.find((entry) => {
+                      return "error" in entry;
                     })
-                  );
-                  this.setState({ isSaving: false });
-                } else if (!("error" in res)) {
-                  // Delete successful, so deselect and delete locally.
-                  this.props.dispatch?.(deleteEquipmentSet(this.state.selectedSetId));
-                  this.setState(defaultState);
-                }
+                  ) {
+                    this.props.dispatch?.(
+                      showModal({
+                        id: "DeleteEquipmentSetFailure",
+                        content: () => (
+                          <BasicDialog title={"Error!"} prompt={"Delete EquipmentSet has failed.  Please try again."} />
+                        ),
+                      })
+                    );
+                    this.setState({ isSaving: false });
+                  } else if (!("error" in res)) {
+                    // Delete successful, so deselect and delete locally.
+                    this.props.dispatch?.(deleteEquipmentSet(this.state.selectedSetId));
+                    this.setState(defaultState);
+                  }
+                },
               },
-            },
-          ],
-        },
+              {
+                text: "Cancel",
+              },
+            ]}
+          />
+        ),
       })
     );
   }
@@ -459,4 +451,4 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   };
 }
 
-export const DatabaseEquipmentSetsSubPanel = connect(mapStateToProps)(ADatabaseEquipmentSetsSubPanel);
+export const DatabaseEquipmentSetsDialog = connect(mapStateToProps)(ADatabaseEquipmentSetsDialog);

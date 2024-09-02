@@ -5,6 +5,7 @@ import { showModal } from "../redux/modalsSlice";
 import ServerAPI, { StructureData } from "../serverAPI";
 import { Dictionary } from "../lib/dictionary";
 import { updateStructureComponents, updateStructures } from "../redux/structuresSlice";
+import { BasicDialog } from "../components/dialogs/BasicDialog";
 
 export async function refetchStructures(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchStructures();
@@ -13,10 +14,7 @@ export async function refetchStructures(dispatch: Dispatch): Promise<void> {
     dispatch(
       showModal({
         id: "Structure Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch Structure data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Structure data"} />,
         escapable: true,
       })
     );
@@ -36,10 +34,7 @@ export async function refetchStructureComponents(dispatch: Dispatch): Promise<vo
     dispatch(
       showModal({
         id: "StructureComponent Fetch Error",
-        content: {
-          title: "Error!",
-          message: "Failed to fetch StructureComponent data",
-        },
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch StructureComponent data"} />,
         escapable: true,
       })
     );

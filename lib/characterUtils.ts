@@ -953,7 +953,7 @@ function generateRangedAttack(characterId: number, weapon?: ItemData | NaturalWe
       data.name = def.name;
       data.damage.dice = def.damage_dice;
       data.damage.die = def.damage_die;
-      data.ranges = { short: def.range_increment, medium: 2 * def.range_increment, long: 3 * def.range_increment };
+      data.ranges = { short: def.range_short, medium: def.range_medium, long: def.range_long };
 
       // Magic weapon bonus/penalty.
       if (def && def.magic_bonus !== 0) {

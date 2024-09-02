@@ -45,6 +45,7 @@ import { getItemNameText } from "../../lib/itemUtils";
 import { SpellTooltip } from "../database/SpellTooltip";
 import { EditItemDialog } from "../characters/EditItemDialog";
 import { DeleteButton } from "../DeleteButton";
+import { BasicDialog } from "../dialogs/BasicDialog";
 
 interface State {
   type: ActivityOutcomeType;
@@ -340,7 +341,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
             />
           );
         },
-        widthVmin: 62,
         escapable: true,
       })
     );
@@ -484,7 +484,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
           );
         },
         escapable: true,
-        widthVmin: 45,
       })
     );
   }
@@ -504,7 +503,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
           );
         },
         escapable: true,
-        widthVmin: 45,
       })
     );
   }
@@ -624,25 +622,33 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "AdventurerDeath",
-        content: {
-          title: "Death",
-          message: `Was ${this.props.allCharacters[p.characterId].name} slain?`,
-          buttonText: "No",
-          onButtonClick: () => {
-            this.setState({ deadCharacterIds: this.state.deadCharacterIds.filter((dcid) => dcid !== p.characterId) });
-            this.props.dispatch?.(hideModal());
-          },
-          extraButtons: [
-            {
-              text: "Yes",
-              onClick: () => {
-                if (!this.state.deadCharacterIds.includes(p.characterId)) {
-                  this.setState({ deadCharacterIds: [...this.state.deadCharacterIds, p.characterId] });
-                }
-                this.props.dispatch?.(hideModal());
-              },
-            },
-          ],
+        content: () => {
+          return (
+            <BasicDialog
+              title={"Death"}
+              prompt={`Was ${this.props.allCharacters[p.characterId].name} slain?`}
+              buttons={[
+                {
+                  text: "Yes",
+                  onClick: async () => {
+                    if (!this.state.deadCharacterIds.includes(p.characterId)) {
+                      this.setState({ deadCharacterIds: [...this.state.deadCharacterIds, p.characterId] });
+                    }
+                    this.props.dispatch?.(hideModal());
+                  },
+                },
+                {
+                  text: "No",
+                  onClick: async () => {
+                    this.setState({
+                      deadCharacterIds: this.state.deadCharacterIds.filter((dcid) => dcid !== p.characterId),
+                    });
+                    this.props.dispatch?.(hideModal());
+                  },
+                },
+              ]}
+            />
+          );
         },
       })
     );
@@ -718,7 +724,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "SelectLocation",
-        widthVmin: 61,
         content: () => {
           return (
             <SelectLocationDialog
@@ -740,7 +745,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
     this.props.dispatch?.(
       showModal({
         id: "SelectEmporiumBase",
-        widthVmin: 61,
         content: () => {
           return (
             <SelectLocationDialog
@@ -779,7 +783,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
             />
           );
         },
-        widthVmin: 62,
         escapable: true,
       })
     );
@@ -800,7 +803,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
           );
         },
         escapable: true,
-        widthVmin: 45,
       })
     );
   }

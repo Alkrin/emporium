@@ -444,7 +444,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
           return <SpellbookDialog item={item} def={def} />;
         },
         escapable: true,
-        widthVmin: 50,
       })
     );
   }
@@ -1195,7 +1194,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         content: () => {
           return <CreateItemDialog storageId={getPersonalPile(this.props.character.id).id} />;
         },
-        widthVmin: 62,
         escapable: true,
       })
     );
