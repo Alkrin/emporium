@@ -293,7 +293,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     };
     this.props.dispatch?.(
       showModal({
-        id: "EditExpectedOutcome",
+        id: "ItemOutcomeAdd",
         content: () => {
           return (
             <CreateActivityOutcomeDialog
@@ -307,6 +307,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
             />
           );
         },
+        escapable: true,
       })
     );
   }
