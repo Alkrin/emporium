@@ -1,0 +1,19 @@
+.root {
+  position: relative;
+  width: 2vmin;
+  height: 2vmin;
+  flex-shrink: 0;
+  background-image: url("/images/DBIcon.png");
+  background-size: contain;
+  cursor: pointer;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}

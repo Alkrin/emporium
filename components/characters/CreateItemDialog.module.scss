@@ -11,12 +11,14 @@
 }
 
 .column {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .row {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -208,4 +210,12 @@
   background-color: black;
   font-size: 0.9rem;
   color: yellow;
+}
+
+.dbButton {
+  position: absolute;
+  top: 102%;
+  left: 40%;
+  width: 3vmin;
+  height: 3vmin;
 }
