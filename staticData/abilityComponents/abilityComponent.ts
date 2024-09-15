@@ -1,4 +1,4 @@
-import { DatabaseEditingDialogFieldDef } from "../../components/database/databaseEditingDialog/DatabaseEditingDialog";
+import { DatabaseEditingDialogFieldDef } from "../../components/database/databaseEditingDialog/databaseUtils";
 import { Dictionary } from "../../lib/dictionary";
 import { AbilityComponentArmorStatic } from "./AbilityComponentArmorStatic";
 
