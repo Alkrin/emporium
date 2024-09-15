@@ -8,7 +8,7 @@ import styles from "./InventoriesList.module.scss";
 import Draggable from "../Draggable";
 import { DraggableHandle } from "../DraggableHandle";
 import TooltipSource from "../TooltipSource";
-import { ItemTooltip } from "../database/ItemTooltip";
+import { ItemTooltip } from "../database/tooltips/ItemTooltip";
 import { DropTypeItem } from "./EditEquipmentSubPanel";
 import DropTarget from "../DropTarget";
 import { getItemNameText } from "../../lib/itemUtils";
@@ -20,7 +20,7 @@ import { SplitButton } from "../SplitButton";
 import { EditButton } from "../EditButton";
 import { SpellbookButton } from "../SpellbookButton";
 import { EditItemDialog } from "./EditItemDialog";
-import { SpellTooltip } from "../database/SpellTooltip";
+import { SpellTooltip } from "../database/tooltips/SpellTooltip";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
   containerIds: number[];

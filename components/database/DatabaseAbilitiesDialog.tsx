@@ -2,14 +2,10 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
-import { deleteSpellDef, updateSpellDef } from "../../redux/gameDefsSlice";
+import { deleteAbilityDef, updateAbilityDef } from "../../redux/gameDefsSlice";
 import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
-import ServerAPI, {
-  SpellDefData,
-  SpellDefData_StringToTypeLevels,
-  SpellDefData_TypeLevelsToString,
-} from "../../serverAPI";
+import ServerAPI, { AbilityDefData } from "../../serverAPI";
 import { SearchableDef } from "./SearchableDefList";
 import { BasicDialog } from "../dialogs/BasicDialog";
 import { DatabaseEditingDialog } from "./databaseEditingDialog/DatabaseEditingDialog";
@@ -23,18 +19,18 @@ import {
 interface ReactProps {}
 
 interface InjectedProps {
-  allSpellDefs: Dictionary<SpellDefData>;
+  allAbilityDefs: Dictionary<AbilityDefData>;
   dispatch?: Dispatch;
 }
 
 type Props = ReactProps & InjectedProps;
 
-class ADatabaseSpellsDialog extends React.Component<Props> {
+class ADatabaseAbilitiesDialog extends React.Component<Props> {
   render(): React.ReactNode {
     return (
       <DatabaseEditingDialog
-        title={"Spell Database"}
-        allDefs={this.props.allSpellDefs}
+        title={"Ability Database"}
+        allDefs={this.props.allAbilityDefs}
         fieldDefs={this.getFieldDefs.bind(this)}
         onSaveClicked={this.onSaveClicked.bind(this)}
         onDeleteConfirmed={this.onDeleteConfirmed.bind(this)}
@@ -42,57 +38,55 @@ class ADatabaseSpellsDialog extends React.Component<Props> {
     );
   }
 
-  private getFieldDefs(): DatabaseEditingDialogFieldDef[] {
+  private getFieldDefs(data: Partial<AbilityDefData>): DatabaseEditingDialogFieldDef[] {
+    // Until data is initialized, we assume there is only a single input field.
+    const maxRanks = data.max_ranks ?? 1;
+    const descriptionLabelTexts = Array(maxRanks)
+      .fill("")
+      .map((_, index) => `Description, Rank ${index + 1}`);
+
     // ID and Name are handled automatically, so we don't have to include them here.
     return [
-      { type: DatabaseEditingDialogField.LongString, labelTexts: ["Description"], fieldNames: ["description"] },
       {
-        type: DatabaseEditingDialogField.String,
-        labelTexts: ["Range"],
-        fieldNames: ["spell_range"],
+        type: DatabaseEditingDialogField.Number,
+        labelTexts: ["Max Ranks"],
+        fieldNames: ["max_ranks"],
+        defaults: [1],
+        fieldSizes: ["4vmin"],
       },
       {
-        type: DatabaseEditingDialogField.String,
-        labelTexts: ["Duration"],
-        fieldNames: ["duration"],
-      },
-      {
-        type: DatabaseEditingDialogField.LongString,
-        labelTexts: ['Type/Levels (e.g. "Arcane:1")'],
-        fieldNames: ["type_levels"],
-        convertFromString: SpellDefData_StringToTypeLevels,
-        convertLocalDataToEditableString: SpellDefData_TypeLevelsToString,
-        fieldSizes: ["3vmin"],
+        type: DatabaseEditingDialogField.LongStringArray,
+        labelTexts: descriptionLabelTexts,
+        fieldNames: ["descriptions"],
       },
       {
         type: DatabaseEditingDialogField.LongString,
-        labelTexts: ["Table Image"],
-        fieldNames: ["table_image"],
-        fieldSizes: ["1.5vmin"],
-      },
-      {
-        type: DatabaseEditingDialogField.LongString,
-        labelTexts: ["Tags"],
-        fieldNames: ["tags"],
+        labelTexts: ["Subtypes"],
+        fieldNames: ["subtypes"],
         convertFromString: Database_StringToStringArray,
         convertLocalDataToEditableString: Database_StringArrayToString,
+      },
+      {
+        type: DatabaseEditingDialogField.AbilityComponents,
+        labelTexts: ["Components"],
+        fieldNames: ["components"],
       },
     ];
   }
 
   private async onSaveClicked(untypedData: SearchableDef): Promise<number> {
-    const data = untypedData as SpellDefData;
+    const data = untypedData as AbilityDefData;
 
     if (data.id === -1) {
       // Brand new def.
-      const res = await ServerAPI.createSpellDef(data);
+      const res = await ServerAPI.createAbilityDef(data);
 
       if ("insertId" in res) {
         // Put the real id into our data.
         data.id = res.insertId;
 
         // Push the data into Redux.
-        this.props.dispatch?.(updateSpellDef(data));
+        this.props.dispatch?.(updateAbilityDef(data));
 
         return res.insertId;
       } else {
@@ -100,7 +94,7 @@ class ADatabaseSpellsDialog extends React.Component<Props> {
       }
     } else {
       // Editing old def.
-      const res = await ServerAPI.editSpellDef(data);
+      const res = await ServerAPI.editAbilityDef(data);
 
       if ("error" in res) {
         this.props.dispatch?.(
@@ -112,18 +106,18 @@ class ADatabaseSpellsDialog extends React.Component<Props> {
         return data.id;
       } else {
         // Push the modified data into Redux.
-        this.props.dispatch?.(updateSpellDef(data));
+        this.props.dispatch?.(updateAbilityDef(data));
         return data.id;
       }
     }
   }
 
   private async onDeleteConfirmed(defId: number): Promise<boolean> {
-    const res = await ServerAPI.deleteSpellDef(defId);
+    const res = await ServerAPI.deleteAbilityDef(defId);
 
     if ("affectedRows" in res) {
       // Delete successful, so deselect and delete locally.
-      this.props.dispatch?.(deleteSpellDef(defId));
+      this.props.dispatch?.(deleteAbilityDef(defId));
       return true;
     } else {
       return false;
@@ -132,11 +126,11 @@ class ADatabaseSpellsDialog extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const allSpellDefs = state.gameDefs.spells;
+  const allAbilityDefs = state.gameDefs.abilities;
   return {
     ...props,
-    allSpellDefs,
+    allAbilityDefs,
   };
 }
 
-export const DatabaseSpellsDialog = connect(mapStateToProps)(ADatabaseSpellsDialog);
+export const DatabaseAbilitiesDialog = connect(mapStateToProps)(ADatabaseAbilitiesDialog);

@@ -8,13 +8,13 @@ import { RootState } from "../../redux/store";
 import ServerAPI, { ItemDefData } from "../../serverAPI";
 import { SearchableDef } from "./SearchableDefList";
 import { BasicDialog } from "../dialogs/BasicDialog";
+import { DatabaseEditingDialog } from "./databaseEditingDialog/DatabaseEditingDialog";
 import {
   Database_StringArrayToString,
   Database_StringToStringArray,
-  DatabaseEditingDialog,
   DatabaseEditingDialogField,
   DatabaseEditingDialogFieldDef,
-} from "./databaseEditingDialog/DatabaseEditingDialog";
+} from "./databaseEditingDialog/databaseUtils";
 
 interface ReactProps {}
 
@@ -31,7 +31,7 @@ class ADatabaseItemsDialog extends React.Component<Props> {
       <DatabaseEditingDialog
         title={"Item Database"}
         allDefs={this.props.allItemDefs}
-        fieldDefs={this.getFieldDefs()}
+        fieldDefs={this.getFieldDefs.bind(this)}
         onSaveClicked={this.onSaveClicked.bind(this)}
         onDeleteConfirmed={this.onDeleteConfirmed.bind(this)}
       />
@@ -94,7 +94,7 @@ class ADatabaseItemsDialog extends React.Component<Props> {
         labelTexts: ["Storage Filters (comma separated)"],
         fieldNames: ["storage_filters"],
         convertFromString: Database_StringToStringArray,
-        convertToString: Database_StringArrayToString,
+        convertLocalDataToEditableString: Database_StringArrayToString,
         fieldSizes: ["3.5vmin"],
       },
       {
@@ -168,7 +168,7 @@ class ADatabaseItemsDialog extends React.Component<Props> {
         labelTexts: ["Tags"],
         fieldNames: ["tags"],
         convertFromString: Database_StringToStringArray,
-        convertToString: Database_StringArrayToString,
+        convertLocalDataToEditableString: Database_StringArrayToString,
         fieldSizes: ["5vmin"],
       },
     ];

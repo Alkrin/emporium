@@ -1,8 +1,8 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { RootState } from "../../redux/store";
-import { SpellDefData } from "../../serverAPI";
+import { RootState } from "../../../redux/store";
+import { SpellDefData } from "../../../serverAPI";
 import styles from "./SpellTooltip.module.scss";
 
 interface ReactProps {

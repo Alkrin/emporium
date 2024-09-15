@@ -16,41 +16,14 @@ import { hideModal, showModal } from "../../../redux/modalsSlice";
 import { BasicDialog } from "../../dialogs/BasicDialog";
 import { DatabaseEditingDialogFieldBoolean } from "./DatabaseEditingDialogFieldBoolean";
 import { DatabaseEditingDialogFieldSpells } from "./DatabaseEditingDialogFieldSpells";
-
-export enum DatabaseEditingDialogField {
-  Boolean,
-  LongString,
-  Number,
-  Spells,
-  String,
-  TwoNumbers,
-}
-
-export function Database_StringToStringArray(text: string): string[] {
-  const trimmed = text.trim();
-  if (trimmed.length > 0) {
-    return text.split(",");
-  } else {
-    return [];
-  }
-}
-
-export function Database_StringArrayToString(arr: string[]): string {
-  return arr.join(",");
-}
-
-export interface DatabaseEditingDialogFieldDef {
-  type: DatabaseEditingDialogField;
-  labelTexts: string[];
-  fieldNames: string[];
-  defaults?: any[];
-  fieldSizes?: string[];
-  decimalDigits?: number;
-  /** If the data is input as a string but stored in another format, this function will be used to convert the string data. */
-  convertToString?: (data: any) => string;
-  /** If the data is input as a string but stored in another format, this function will be used to convert the data to a string. */
-  convertFromString?: (text: string) => any;
-}
+import { DatabaseEditingDialogFieldLongStringArray } from "./DatabaseEditingDialogFieldLongStringArray";
+import { DatabaseEditingDialogFieldSelectableStrings } from "./DatabaseEditingDialogFieldSelectableStrings";
+import { DatabaseEditingDialogFieldAbilityComponents } from "./DatabaseEditingDialogFieldAbilityComponents";
+import {
+  DatabaseEditingDialogField,
+  DatabaseEditingDialogFieldDef,
+  setDefaultValuesForFieldDef,
+} from "./databaseUtils";
 
 type AnySearchableDef = SearchableDef & {
   [key: string]: any;
@@ -59,6 +32,126 @@ type AnySearchableDef = SearchableDef & {
 interface State {
   data: AnySearchableDef;
   isSaving: boolean;
+}
+
+// We use an object so we can pass the tabIndex value by reference (sort of), since each field
+// can have an arbitrary number of tabbable targets.
+export interface PassableTabIndex {
+  value: number;
+}
+
+export function renderDatabaseEditingDialogField(
+  def: DatabaseEditingDialogFieldDef,
+  index: number,
+  tabIndex: PassableTabIndex,
+  data: Dictionary<any>,
+  applyDataChange: (fieldName: string, value: any) => void
+): React.ReactNode {
+  switch (def.type) {
+    case DatabaseEditingDialogField.AbilityComponents: {
+      return (
+        <DatabaseEditingDialogFieldAbilityComponents
+          key={index}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0]]}
+          onValueChange={(value: Dictionary<Dictionary<any>>) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.Boolean: {
+      return (
+        <DatabaseEditingDialogFieldBoolean
+          key={index}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0]]}
+          onValueChange={(value: boolean) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.LongString: {
+      return (
+        <DatabaseEditingDialogFieldLongString
+          key={index}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0]]}
+          onValueChange={(value: string) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.LongStringArray: {
+      return (
+        <DatabaseEditingDialogFieldLongStringArray
+          key={index}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0]]}
+          onValueChange={(value: string[]) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.Number: {
+      return (
+        <DatabaseEditingDialogFieldNumber
+          key={index}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0]]}
+          onValueChange={(value: number) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.SelectableStrings: {
+      return (
+        <DatabaseEditingDialogFieldSelectableStrings
+          key={index}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0]]}
+          onValueChange={(value: string[]) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.Spells: {
+      return (
+        <DatabaseEditingDialogFieldSpells
+          key={index}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0]]}
+          onValueChange={(value: number[]) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.String: {
+      return (
+        <DatabaseEditingDialogFieldString
+          key={index}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0]]}
+          onValueChange={(value: string) => {
+            applyDataChange(def.fieldNames[0], value);
+          }}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.TwoNumbers: {
+      return (
+        <DatabaseEditingDialogFieldTwoNumbers
+          key={index}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0]]}
+          onValueChange={(value: number) => applyDataChange(def.fieldNames[0], value)}
+          secondValue={data[def.fieldNames[1]]}
+          onSecondValueChange={(value: number) => applyDataChange(def.fieldNames[1], value)}
+        />
+      );
+    }
+  }
 }
 
 function buildDefaultState(fieldDefs: DatabaseEditingDialogFieldDef[]) {
@@ -71,32 +164,7 @@ function buildDefaultState(fieldDefs: DatabaseEditingDialogFieldDef[]) {
   };
 
   fieldDefs.forEach((def) => {
-    switch (def.type) {
-      case DatabaseEditingDialogField.Boolean: {
-        defaultState.data[def.fieldNames[0]] = def?.defaults?.[0] ?? false;
-      }
-      case DatabaseEditingDialogField.LongString: {
-        defaultState.data[def.fieldNames[0]] = def?.defaults?.[0] ?? "";
-        break;
-      }
-      case DatabaseEditingDialogField.Number: {
-        defaultState.data[def.fieldNames[0]] = def?.defaults?.[0] ?? 0;
-        break;
-      }
-      case DatabaseEditingDialogField.Spells: {
-        defaultState.data[def.fieldNames[0]] = def?.defaults?.[0] ?? [];
-        break;
-      }
-      case DatabaseEditingDialogField.String: {
-        defaultState.data[def.fieldNames[0]] = def?.defaults?.[0] ?? "";
-        break;
-      }
-      case DatabaseEditingDialogField.TwoNumbers: {
-        defaultState.data[def.fieldNames[0]] = def?.defaults?.[0] ?? 0;
-        defaultState.data[def.fieldNames[1]] = def?.defaults?.[1] ?? 0;
-        break;
-      }
-    }
+    setDefaultValuesForFieldDef(defaultState.data, def);
   });
 
   return defaultState;
@@ -105,7 +173,7 @@ function buildDefaultState(fieldDefs: DatabaseEditingDialogFieldDef[]) {
 interface ReactProps {
   title: string;
   allDefs: Dictionary<SearchableDef>;
-  fieldDefs: DatabaseEditingDialogFieldDef[];
+  fieldDefs: (data: any) => DatabaseEditingDialogFieldDef[];
   onSaveClicked: (data: SearchableDef) => Promise<number>;
   /** Returns true if the delete is successful, false if it fails. */
   onDeleteConfirmed: (defId: number) => Promise<boolean>;
@@ -119,16 +187,14 @@ interface InjectedProps {
 type Props = ReactProps & InjectedProps;
 
 class ADatabaseEditingDialog extends React.Component<Props, State> {
-  private nextTabIndex: number = 1;
-
   constructor(props: Props) {
     super(props);
 
-    this.state = buildDefaultState(props.fieldDefs);
+    this.state = buildDefaultState(props.fieldDefs({}));
   }
 
   render(): React.ReactNode {
-    this.nextTabIndex = 1;
+    const tabIndex: PassableTabIndex = { value: 1 };
     const deletableClass = this.state.data.id === -1 ? styles.disabled : "";
 
     return (
@@ -148,9 +214,9 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
               def={{ type: DatabaseEditingDialogField.String, labelTexts: ["Name"], fieldNames: ["name"] }}
               value={this.state.data.name}
               onValueChange={this.applyDataChange.bind(this, "name")}
-              tabIndex={this.nextTabIndex++}
+              tabIndex={tabIndex}
             />
-            {this.props.fieldDefs.map(this.renderField.bind(this))}
+            {this.props.fieldDefs(this.state.data).map(this.renderField.bind(this, tabIndex))}
           </ScrollArea>
         </div>
         <div className={styles.buttonPanel}>
@@ -172,77 +238,8 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
     );
   }
 
-  private renderField(def: DatabaseEditingDialogFieldDef, index: number): React.ReactNode {
-    switch (def.type) {
-      case DatabaseEditingDialogField.Boolean: {
-        return (
-          <DatabaseEditingDialogFieldBoolean
-            key={index}
-            tabIndex={this.nextTabIndex++}
-            def={def}
-            value={this.state.data[def.fieldNames[0]]}
-            onValueChange={this.applyDataChange.bind(this, def.fieldNames[0])}
-          />
-        );
-      }
-      case DatabaseEditingDialogField.LongString: {
-        return (
-          <DatabaseEditingDialogFieldLongString
-            key={index}
-            tabIndex={this.nextTabIndex++}
-            def={def}
-            value={this.state.data[def.fieldNames[0]]}
-            onValueChange={this.applyDataChange.bind(this, def.fieldNames[0])}
-          />
-        );
-      }
-      case DatabaseEditingDialogField.Number: {
-        return (
-          <DatabaseEditingDialogFieldNumber
-            key={index}
-            tabIndex={this.nextTabIndex++}
-            def={def}
-            value={this.state.data[def.fieldNames[0]]}
-            onValueChange={this.applyDataChange.bind(this, def.fieldNames[0])}
-          />
-        );
-      }
-      case DatabaseEditingDialogField.Spells: {
-        return (
-          <DatabaseEditingDialogFieldSpells
-            key={index}
-            tabIndex={this.nextTabIndex++}
-            def={def}
-            value={this.state.data[def.fieldNames[0]]}
-            onValueChange={this.applyDataChange.bind(this, def.fieldNames[0])}
-          />
-        );
-      }
-      case DatabaseEditingDialogField.String: {
-        return (
-          <DatabaseEditingDialogFieldString
-            key={index}
-            tabIndex={this.nextTabIndex++}
-            def={def}
-            value={this.state.data[def.fieldNames[0]]}
-            onValueChange={this.applyDataChange.bind(this, def.fieldNames[0])}
-          />
-        );
-      }
-      case DatabaseEditingDialogField.TwoNumbers: {
-        return (
-          <DatabaseEditingDialogFieldTwoNumbers
-            key={index}
-            tabIndex={(this.nextTabIndex += 2)}
-            def={def}
-            value={this.state.data[def.fieldNames[0]]}
-            onValueChange={this.applyDataChange.bind(this, def.fieldNames[0])}
-            secondValue={this.state.data[def.fieldNames[1]]}
-            onSecondValueChange={this.applyDataChange.bind(this, def.fieldNames[1])}
-          />
-        );
-      }
-    }
+  private renderField(tabIndex: PassableTabIndex, def: DatabaseEditingDialogFieldDef, index: number): React.ReactNode {
+    return renderDatabaseEditingDialogField(def, index, tabIndex, this.state.data, this.applyDataChange.bind(this));
   }
 
   private applyDataChange(fieldName: string, value: any): void {
@@ -255,16 +252,16 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
 
   private onDefSelected(selectedDefId: number): void {
     if (selectedDefId === -1) {
-      this.setState(buildDefaultState(this.props.fieldDefs));
+      this.setState(buildDefaultState(this.props.fieldDefs({})));
     } else {
       const newData: AnySearchableDef = {
         ...this.props.allDefs[selectedDefId],
       };
       // Some data is input as a string but stored as something else, so we have to check for fields
       // that have conversion functions before we set the state.
-      this.props.fieldDefs.forEach((fieldDef) => {
-        if (fieldDef.convertToString) {
-          newData[fieldDef.fieldNames[0]] = fieldDef.convertToString(newData[fieldDef.fieldNames[0]]);
+      this.props.fieldDefs(newData).forEach((fieldDef) => {
+        if (fieldDef.convertLocalDataToEditableString) {
+          newData[fieldDef.fieldNames[0]] = fieldDef.convertLocalDataToEditableString(newData[fieldDef.fieldNames[0]]);
         }
       });
 
@@ -277,7 +274,7 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
       return;
     }
     // Deselects any current item and clears all data fields.
-    this.setState(buildDefaultState(this.props.fieldDefs));
+    this.setState(buildDefaultState(this.props.fieldDefs({})));
   }
 
   private onCloneClicked(): void {
@@ -300,7 +297,7 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
     const data: AnySearchableDef = {
       ...this.state.data,
     };
-    this.props.fieldDefs.forEach((fieldDef) => {
+    this.props.fieldDefs(data).forEach((fieldDef) => {
       if (fieldDef.convertFromString) {
         data[fieldDef.fieldNames[0]] = fieldDef.convertFromString(data[fieldDef.fieldNames[0]]);
       }
@@ -342,7 +339,7 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
 
                   if (wasDeleted) {
                     // Delete successful, so deselect.
-                    this.setState(buildDefaultState(this.props.fieldDefs));
+                    this.setState(buildDefaultState(this.props.fieldDefs({})));
                   } else {
                     this.setState({ isSaving: false });
                   }

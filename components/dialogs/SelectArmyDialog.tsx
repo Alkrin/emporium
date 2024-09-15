@@ -59,10 +59,10 @@ class ASelectArmyDialog extends React.Component<Props, State> {
         </div>
 
         <div className={styles.closeButton} onClick={this.onConfirmClicked.bind(this)}>
-          Confirm Selection
+          {"Confirm Selection"}
         </div>
         <div className={styles.closeButton} onClick={this.onCloseClicked.bind(this)}>
-          Cancel
+          {"Cancel"}
         </div>
       </div>
     );

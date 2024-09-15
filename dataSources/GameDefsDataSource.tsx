@@ -2,6 +2,7 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import ExternalDataSource from "../redux/externalDataSource";
 import {
+  updateAbilityDefs,
   updateEquipmentSetItems,
   updateEquipmentSets,
   updateItemDefs,
@@ -49,6 +50,23 @@ export async function refetchSpellDefs(dispatch: Dispatch): Promise<void> {
   } else {
     // Send the whole batch at once so we can axe defs that no longer exist.
     dispatch(updateSpellDefs(result));
+  }
+}
+
+export async function refetchAbilityDefs(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchAbilityDefs();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "AbilityDef Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch AbilityDef data"} />,
+        escapable: true,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe defs that no longer exist.
+    dispatch(updateAbilityDefs(result));
   }
 }
 
@@ -123,6 +141,7 @@ export async function refetchTroopDefs(dispatch: Dispatch): Promise<void> {
 export class GameDefsDataSource extends ExternalDataSource {
   async componentDidMount(): Promise<void> {
     if (this.dispatch) {
+      await refetchAbilityDefs(this.dispatch);
       await refetchEquipmentSets(this.dispatch);
       await refetchEquipmentSetItems(this.dispatch);
       await refetchItemDefs(this.dispatch);

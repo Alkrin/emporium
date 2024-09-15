@@ -12,7 +12,7 @@ import ServerAPI, {
   SpellDefData,
   StorageData,
 } from "../../serverAPI";
-import { ItemTooltip } from "../database/ItemTooltip";
+import { ItemTooltip } from "../database/tooltips/ItemTooltip";
 import Draggable from "../Draggable";
 import { DraggableHandle } from "../DraggableHandle";
 import TooltipSource from "../TooltipSource";
@@ -48,7 +48,7 @@ import { SpellbookButton } from "../SpellbookButton";
 import { EditItemDialog } from "./EditItemDialog";
 import { SellButton } from "../SellButton";
 import { SellItemDialog } from "./SellItemDialog";
-import { SpellTooltip } from "../database/SpellTooltip";
+import { SpellTooltip } from "../database/tooltips/SpellTooltip";
 
 export const DropTypeItem = "DropTypeItem";
 

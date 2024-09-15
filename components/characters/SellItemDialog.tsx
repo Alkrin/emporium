@@ -24,7 +24,7 @@ import { EditButton } from "../EditButton";
 import { SavingVeil } from "../SavingVeil";
 import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
 import { InfoButton } from "../InfoButton";
-import { ItemTooltip } from "../database/ItemTooltip";
+import { ItemTooltip } from "../database/tooltips/ItemTooltip";
 import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { refetchCharacters } from "../../dataSources/CharactersDataSource";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";

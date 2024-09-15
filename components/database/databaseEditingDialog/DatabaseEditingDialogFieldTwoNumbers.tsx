@@ -2,7 +2,8 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
 import styles from "./DatabaseEditingDialogFieldTwoNumbers.module.scss";
-import { DatabaseEditingDialogFieldDef } from "./DatabaseEditingDialog";
+import { PassableTabIndex } from "./DatabaseEditingDialog";
+import { DatabaseEditingDialogFieldDef } from "./databaseUtils";
 
 interface ReactProps {
   def: DatabaseEditingDialogFieldDef;
@@ -10,7 +11,7 @@ interface ReactProps {
   secondValue: number;
   onValueChange(value: number): void;
   onSecondValueChange(value: number): void;
-  tabIndex: number;
+  tabIndex: PassableTabIndex;
   isDisabled?: boolean;
 }
 
@@ -27,9 +28,11 @@ class ADatabaseEditingDialogFieldTwoNumbers extends React.Component<Props, State
   constructor(props: Props) {
     super(props);
 
+    const decimalDigits = this.getDecimalDigits(props.def);
+
     this.state = {
-      valueString: props.value.toFixed(this.props.def.decimalDigits ?? 0),
-      secondValueString: props.secondValue.toFixed(this.props.def.decimalDigits ?? 0),
+      valueString: props.value.toFixed(decimalDigits),
+      secondValueString: props.secondValue.toFixed(decimalDigits),
     };
   }
 
@@ -55,7 +58,7 @@ class ADatabaseEditingDialogFieldTwoNumbers extends React.Component<Props, State
             onBlur={() => {
               this.props.onValueChange(+this.state.valueString);
             }}
-            tabIndex={this.props.tabIndex}
+            tabIndex={this.props.tabIndex.value++}
           />
           <div className={styles.label}>{def.labelTexts[1]}</div>
           <input
@@ -70,7 +73,7 @@ class ADatabaseEditingDialogFieldTwoNumbers extends React.Component<Props, State
             onBlur={() => {
               this.props.onValueChange(+this.state.secondValueString);
             }}
-            tabIndex={this.props.tabIndex + 1}
+            tabIndex={this.props.tabIndex.value++}
           />
           {def.labelTexts[2] ? <div className={styles.label}>{def.labelTexts[2]}</div> : null}
         </div>
@@ -79,12 +82,22 @@ class ADatabaseEditingDialogFieldTwoNumbers extends React.Component<Props, State
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+    const decimalDigits = this.getDecimalDigits(this.props.def);
+
     if (this.props.value !== undefined && this.props.value !== prevProps.value) {
-      this.setState({ valueString: this.props.value.toFixed(this.props.def.decimalDigits ?? 0) });
+      this.setState({ valueString: this.props.value.toFixed(decimalDigits) });
     }
 
     if (this.props.secondValue !== undefined && this.props.secondValue !== prevProps.secondValue) {
-      this.setState({ secondValueString: this.props.secondValue.toFixed(this.props.def.decimalDigits ?? 0) });
+      this.setState({ secondValueString: this.props.secondValue.toFixed(decimalDigits) });
+    }
+  }
+
+  private getDecimalDigits(def: DatabaseEditingDialogFieldDef): number {
+    if (def.extra && "decimalDigits" in def.extra) {
+      return def.extra.decimalDigits;
+    } else {
+      return 0;
     }
   }
 }

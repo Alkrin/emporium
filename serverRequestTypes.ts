@@ -13,6 +13,7 @@ import {
   LocationLairData,
   MapData,
   ProficiencyData,
+  ServerAbilityDefData,
   ServerActivityData,
   ServerActivityOutcomeData,
   ServerItemData,
@@ -249,6 +250,9 @@ export interface RequestBody_DeleteSingleEntry {
   id: number;
 }
 
+// AbilityDef
+export type RequestBody_CreateAbilityDef = Omit<ServerAbilityDefData, "id">;
+export type RequestBody_EditAbilityDef = ServerAbilityDefData;
 // Activity
 export type RequestBody_CreateActivity = Omit<ServerActivityData, "id"> & {
   expectedOutcomes: ServerActivityOutcomeData[];

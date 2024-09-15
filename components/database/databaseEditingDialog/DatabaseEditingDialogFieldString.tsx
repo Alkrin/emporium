@@ -2,13 +2,14 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
 import styles from "./DatabaseEditingDialogFieldString.module.scss";
-import { DatabaseEditingDialogFieldDef } from "./DatabaseEditingDialog";
+import { PassableTabIndex } from "./DatabaseEditingDialog";
+import { DatabaseEditingDialogFieldDef } from "./databaseUtils";
 
 interface ReactProps {
   def: DatabaseEditingDialogFieldDef;
   value: string;
   onValueChange(value: string): void;
-  tabIndex: number;
+  tabIndex: PassableTabIndex;
   isDisabled?: boolean;
 }
 
@@ -36,7 +37,7 @@ class ADatabaseEditingDialogFieldString extends React.Component<Props> {
             onChange={(e) => {
               this.props.onValueChange(e.target.value);
             }}
-            tabIndex={this.props.tabIndex}
+            tabIndex={this.props.tabIndex.value++}
           />
           {def.labelTexts[1] ? <div className={styles.label}>{def.labelTexts[1]}</div> : null}
         </div>
