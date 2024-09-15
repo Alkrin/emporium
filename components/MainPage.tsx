@@ -1,6 +1,6 @@
 import * as React from "react";
 import { connect } from "react-redux";
-import { ReduxDispatch, RootState } from "../redux/store";
+import { AppDispatch, RootState } from "../redux/store";
 import { UserRole } from "../redux/userSlice";
 import { ActivitiesPanel } from "./activities/ActivitiesPanel";
 import AuthControl from "./AuthControl";
@@ -24,6 +24,7 @@ import {
 } from "../dataSources/ActivitiesDataSource";
 import { refetchCharacters } from "../dataSources/CharactersDataSource";
 import {
+  refetchAbilityDefs,
   refetchEquipmentSetItems,
   refetchEquipmentSets,
   refetchItemDefs,
@@ -52,7 +53,7 @@ import { DashboardPanel } from "./dashboard/DashboardPanel";
 interface ReactProps {}
 interface InjectedProps {
   activeRole: UserRole;
-  dispatch?: ReduxDispatch;
+  dispatch?: AppDispatch;
 }
 
 type Props = ReactProps & InjectedProps;
@@ -197,6 +198,8 @@ class AMainPage extends React.Component<Props, State> {
             tooltipParams={{ id: "ReloadButton", content: "Reload" }}
             onMouseDown={async () => {
               if (this.props.dispatch) {
+                this.setState({ isLoading: true, nowLoading: "Ability Defs" });
+                await refetchAbilityDefs(this.props.dispatch);
                 this.setState({ isLoading: true, nowLoading: "Activities" });
                 await refetchActivities(this.props.dispatch);
                 this.setState({ nowLoading: "Activity Outcomes" });

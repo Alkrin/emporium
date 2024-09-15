@@ -2,13 +2,14 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
 import styles from "./DatabaseEditingDialogFieldNumber.module.scss";
-import { DatabaseEditingDialogFieldDef } from "./DatabaseEditingDialog";
+import { PassableTabIndex } from "./DatabaseEditingDialog";
+import { DatabaseEditingDialogFieldDef } from "./databaseUtils";
 
 interface ReactProps {
   def: DatabaseEditingDialogFieldDef;
   value: number;
   onValueChange(value: number): void;
-  tabIndex: number;
+  tabIndex: PassableTabIndex;
   isDisabled?: boolean;
 }
 
@@ -24,8 +25,10 @@ class ADatabaseEditingDialogFieldNumber extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    const extra = props.def.extra ?? {};
+
     this.state = {
-      valueString: props.value.toFixed(this.props.def.decimalDigits ?? 0),
+      valueString: props.value.toFixed(this.getDecimalDigits(props.def)),
     };
   }
 
@@ -51,7 +54,7 @@ class ADatabaseEditingDialogFieldNumber extends React.Component<Props, State> {
             onBlur={() => {
               this.props.onValueChange(+this.state.valueString);
             }}
-            tabIndex={this.props.tabIndex}
+            tabIndex={this.props.tabIndex.value++}
           />
           {def.labelTexts[1] ? <div className={styles.label}>{def.labelTexts[1]}</div> : null}
         </div>
@@ -61,7 +64,15 @@ class ADatabaseEditingDialogFieldNumber extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
     if (this.props.value !== undefined && this.props.value !== prevProps.value) {
-      this.setState({ valueString: this.props.value.toFixed(this.props.def.decimalDigits ?? 0) });
+      this.setState({ valueString: this.props.value.toFixed(this.getDecimalDigits(this.props.def)) });
+    }
+  }
+
+  private getDecimalDigits(def: DatabaseEditingDialogFieldDef): number {
+    if (def.extra && "decimalDigits" in def.extra) {
+      return def.extra.decimalDigits;
+    } else {
+      return 0;
     }
   }
 }

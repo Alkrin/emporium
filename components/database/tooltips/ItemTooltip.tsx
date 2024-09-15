@@ -1,11 +1,11 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { RootState } from "../../redux/store";
-import { CharacterData, ItemData, ItemDefData } from "../../serverAPI";
+import { RootState } from "../../../redux/store";
+import { CharacterData, ItemData, ItemDefData } from "../../../serverAPI";
 import styles from "./ItemTooltip.module.scss";
-import { getItemContainedWeight, getItemNameText, getItemTotalWeight } from "../../lib/itemUtils";
-import { Dictionary } from "../../lib/dictionary";
+import { getItemContainedWeight, getItemNameText, getItemTotalWeight } from "../../../lib/itemUtils";
+import { Dictionary } from "../../../lib/dictionary";
 
 interface ReactPropsItem extends React.HTMLAttributes<HTMLDivElement> {
   // Only need one or the other.

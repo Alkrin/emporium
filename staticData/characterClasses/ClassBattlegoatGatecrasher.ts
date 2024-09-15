@@ -28,7 +28,6 @@ import { ProficiencySiegeEngineering } from "../proficiencies/ProficiencySiegeEn
 import { ProficiencySkirmishing } from "../proficiencies/ProficiencySkirmishing";
 import { ProficiencySurvival } from "../proficiencies/ProficiencySurvival";
 import { ProficiencySwashbuckling } from "../proficiencies/ProficiencySwashbuckling";
-import { ProficiencyWeaponFinesse } from "../proficiencies/ProficiencyWeaponFinesse";
 import { ProficiencyWeaponFocus } from "../proficiencies/ProficiencyWeaponFocus";
 import { WeaponStyle, CharacterClass, CharacterStat, SavingThrowType } from "../types/characterClasses";
 import { WeaponType } from "../types/items";

@@ -3,7 +3,7 @@ import { KeyboardEvent } from "react";
 import { connect } from "react-redux";
 import { authLocalStore } from "../localStores/authLocalStore";
 import { setActiveRole } from "../redux/hudSlice";
-import { ReduxDispatch, RootState } from "../redux/store";
+import { AppDispatch, RootState } from "../redux/store";
 import { setCurrentUser } from "../redux/userSlice";
 import ServerAPI from "../serverAPI";
 
@@ -19,7 +19,7 @@ interface ReactProps {}
 interface InjectedProps {
   lastAuthedUserName: string;
   currentUserId: number;
-  dispatch?: ReduxDispatch;
+  dispatch?: AppDispatch;
 }
 
 type Props = ReactProps & InjectedProps;

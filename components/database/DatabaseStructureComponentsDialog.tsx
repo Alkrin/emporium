@@ -7,12 +7,9 @@ import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import ServerAPI, { StructureComponentDefData } from "../../serverAPI";
 import { SearchableDef } from "./SearchableDefList";
-import {
-  DatabaseEditingDialog,
-  DatabaseEditingDialogField,
-  DatabaseEditingDialogFieldDef,
-} from "./databaseEditingDialog/DatabaseEditingDialog";
+import { DatabaseEditingDialog } from "./databaseEditingDialog/DatabaseEditingDialog";
 import { BasicDialog } from "../dialogs/BasicDialog";
+import { DatabaseEditingDialogField, DatabaseEditingDialogFieldDef } from "./databaseEditingDialog/databaseUtils";
 
 interface ReactProps {}
 
@@ -29,7 +26,7 @@ class ADatabaseStructureComponentsDialog extends React.Component<Props> {
       <DatabaseEditingDialog
         title={"Structure Component Database"}
         allDefs={this.props.allStructureComponentDefs}
-        fieldDefs={this.getFieldDefs()}
+        fieldDefs={this.getFieldDefs.bind(this)}
         onSaveClicked={this.onSaveClicked.bind(this)}
         onDeleteConfirmed={this.onDeleteConfirmed.bind(this)}
       />

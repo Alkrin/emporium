@@ -3,16 +3,13 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
 import { deleteTroopDef, updateTroopDef } from "../../redux/gameDefsSlice";
-import { hideModal, showModal } from "../../redux/modalsSlice";
+import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import ServerAPI, { TroopDefData } from "../../serverAPI";
-import { SearchableDef, SearchableDefList } from "./SearchableDefList";
+import { SearchableDef } from "./SearchableDefList";
 import { BasicDialog } from "../dialogs/BasicDialog";
-import {
-  DatabaseEditingDialog,
-  DatabaseEditingDialogField,
-  DatabaseEditingDialogFieldDef,
-} from "./databaseEditingDialog/DatabaseEditingDialog";
+import { DatabaseEditingDialog } from "./databaseEditingDialog/DatabaseEditingDialog";
+import { DatabaseEditingDialogField, DatabaseEditingDialogFieldDef } from "./databaseEditingDialog/databaseUtils";
 
 interface ReactProps {}
 
@@ -29,7 +26,7 @@ class ADatabaseTroopsDialog extends React.Component<Props> {
       <DatabaseEditingDialog
         title={"Troop Database"}
         allDefs={this.props.allTroopDefs}
-        fieldDefs={this.getFieldDefs()}
+        fieldDefs={this.getFieldDefs.bind(this)}
         onSaveClicked={this.onSaveClicked.bind(this)}
         onDeleteConfirmed={this.onDeleteConfirmed.bind(this)}
       />
@@ -63,14 +60,18 @@ class ADatabaseTroopsDialog extends React.Component<Props> {
         labelTexts: ["Individual BR"],
         fieldNames: ["individual_br"],
         fieldSizes: ["5vmin"],
-        decimalDigits: 3,
+        extra: {
+          decimalDigits: 3,
+        },
       },
       {
         type: DatabaseEditingDialogField.Number,
         labelTexts: ["Platoon BR"],
         fieldNames: ["platoon_br"],
         fieldSizes: ["5vmin"],
-        decimalDigits: 3,
+        extra: {
+          decimalDigits: 3,
+        },
       },
       {
         type: DatabaseEditingDialogField.Number,
@@ -83,7 +84,9 @@ class ADatabaseTroopsDialog extends React.Component<Props> {
         labelTexts: ["Wage", "GP"],
         fieldNames: ["wage"],
         fieldSizes: ["7vmin"],
-        decimalDigits: 2,
+        extra: {
+          decimalDigits: 2,
+        },
       },
     ];
   }

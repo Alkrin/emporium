@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { Dictionary } from "../lib/dictionary";
 import {
+  AbilityDefData,
   ContractData,
   EquipmentSetData,
   EquipmentSetItemData,
@@ -24,6 +25,7 @@ export interface UpdateItemsForEquipmentSetParams {
 }
 
 interface GameDefsReduxState {
+  abilities: Dictionary<AbilityDefData>;
   contracts: Dictionary<ContractDefData>;
   equipmentSets: Dictionary<EquipmentSetData>;
   equipmentSetsByClass: Dictionary<EquipmentSetData[]>;
@@ -36,6 +38,7 @@ interface GameDefsReduxState {
 
 function buildDefaultGameDefsReduxState(): GameDefsReduxState {
   const defaults: GameDefsReduxState = {
+    abilities: {},
     contracts: buildContractDefs(),
     equipmentSets: {},
     equipmentSetsByClass: {},
@@ -191,6 +194,18 @@ export const gameDefsSlice = createSlice({
     deleteSpellDef: (state: GameDefsReduxState, action: PayloadAction<number>) => {
       delete state.spells[action.payload];
     },
+    updateAbilityDefs: (state: GameDefsReduxState, action: PayloadAction<AbilityDefData[]>) => {
+      state.spells = {};
+      action.payload.forEach((add) => {
+        state.abilities[add.id] = add;
+      });
+    },
+    updateAbilityDef: (state: GameDefsReduxState, action: PayloadAction<AbilityDefData>) => {
+      state.abilities[action.payload.id] = action.payload;
+    },
+    deleteAbilityDef: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.abilities[action.payload];
+    },
     updateEquipmentSets: (state: GameDefsReduxState, action: PayloadAction<EquipmentSetData[]>) => {
       // Start empty.
       const p: Dictionary<EquipmentSetData[]> = {};
@@ -291,6 +306,9 @@ export const {
   updateSpellDefs,
   updateSpellDef,
   deleteSpellDef,
+  updateAbilityDefs,
+  updateAbilityDef,
+  deleteAbilityDef,
   updateEquipmentSets,
   updateEquipmentSetItems,
   updateEquipmentSet,

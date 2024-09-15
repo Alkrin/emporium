@@ -48,7 +48,7 @@ import {
   getSavingThrowBonusForCharacter,
 } from "../../lib/characterUtils";
 import { RepertoireDialog } from "./RepertoireDialog";
-import { SpellTooltip } from "../database/SpellTooltip";
+import { SpellTooltip } from "../database/tooltips/SpellTooltip";
 import BonusTooltip from "../BonusTooltip";
 import { EditMoneyDialog } from "./EditMoneyDialog";
 import { FittingView } from "../FittingView";

@@ -14,7 +14,7 @@ import ServerAPI, {
   StorageData,
 } from "../../serverAPI";
 import { AllClasses } from "../../staticData/characterClasses/AllClasses";
-import { ItemTooltip } from "../database/ItemTooltip";
+import { ItemTooltip } from "../database/tooltips/ItemTooltip";
 import Draggable from "../Draggable";
 import { DraggableHandle } from "../DraggableHandle";
 import TooltipSource from "../TooltipSource";
@@ -58,7 +58,7 @@ import { EditItemDialog } from "./EditItemDialog";
 import { SellButton } from "../SellButton";
 import { SellItemDialog } from "./SellItemDialog";
 import { setActiveStorageId } from "../../redux/storageSlice";
-import { SpellTooltip } from "../database/SpellTooltip";
+import { SpellTooltip } from "../database/tooltips/SpellTooltip";
 import { ScrollArea } from "../ScrollArea";
 
 export const DropTypeItem = "DropTypeItem";

@@ -8,7 +8,7 @@ import styles from "./SpellbookDialog.module.scss";
 import { showToaster } from "../../redux/toastersSlice";
 import { Dictionary } from "../../lib/dictionary";
 import TooltipSource from "../TooltipSource";
-import { SpellTooltip } from "../database/SpellTooltip";
+import { SpellTooltip } from "../database/tooltips/SpellTooltip";
 import Draggable from "../Draggable";
 import { DraggableHandle } from "../DraggableHandle";
 import DropTarget from "../DropTarget";

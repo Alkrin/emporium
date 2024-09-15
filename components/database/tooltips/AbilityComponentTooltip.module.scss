@@ -1,0 +1,27 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  max-width: 60vmin;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.name {
+  color: wheat;
+  font-size: 1rem;
+}
+
+.description {
+  color: gray;
+  font-size: 0.8rem;
+}
+
+.componentId {
+  font-size: 0.8rem;
+  color: #447722;
+}

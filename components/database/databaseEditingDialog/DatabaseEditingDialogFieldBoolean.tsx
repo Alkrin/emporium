@@ -2,13 +2,14 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
 import styles from "./DatabaseEditingDialogFieldBoolean.module.scss";
-import { DatabaseEditingDialogFieldDef } from "./DatabaseEditingDialog";
+import { PassableTabIndex } from "./DatabaseEditingDialog";
+import { DatabaseEditingDialogFieldDef } from "./databaseUtils";
 
 interface ReactProps {
   def: DatabaseEditingDialogFieldDef;
   value: boolean;
   onValueChange(value: boolean): void;
-  tabIndex: number;
+  tabIndex: PassableTabIndex;
   isDisabled?: boolean;
 }
 
@@ -31,7 +32,7 @@ class ADatabaseEditingDialogFieldBoolean extends React.Component<Props> {
             className={styles.trailingCheckbox}
             type={"checkbox"}
             checked={this.props.value}
-            tabIndex={this.props.tabIndex}
+            tabIndex={this.props.tabIndex.value++}
             onChange={(e) => {
               this.props.onValueChange(e.target.checked);
             }}

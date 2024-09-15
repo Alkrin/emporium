@@ -7,7 +7,7 @@ import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { showToaster } from "../../redux/toastersSlice";
 import ServerAPI, { CharacterData, ItemData, ItemDefData, SpellDefData, StorageData } from "../../serverAPI";
-import { ItemTooltip } from "../database/ItemTooltip";
+import { ItemTooltip } from "../database/tooltips/ItemTooltip";
 import { SearchableDefList } from "../database/SearchableDefList";
 import styles from "./CreateItemDialog.module.scss";
 import { getStorageDisplayName } from "../../lib/storageUtils";

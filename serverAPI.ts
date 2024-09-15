@@ -1,3 +1,7 @@
+import {
+  Database_StringArrayToString,
+  Database_StringToStringArray,
+} from "./components/database/databaseEditingDialog/databaseUtils";
 import { ActivityResolution, convertActivityOutcomeForServer, convertServerActivityOutcome } from "./lib/activityUtils";
 import { getAllCharacterAssociatedItemIds } from "./lib/characterUtils";
 import { Dictionary } from "./lib/dictionary";
@@ -71,6 +75,8 @@ import {
   RequestBody_SetXPReserve,
   RequestBody_EditItem,
   RequestBody_SellItem,
+  RequestBody_CreateAbilityDef,
+  RequestBody_EditAbilityDef,
 } from "./serverRequestTypes";
 import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import { SpellType } from "./staticData/types/characterClasses";
@@ -263,6 +269,22 @@ export interface SpellDefData {
   type_levels: { [type in SpellType]?: number };
   table_image: string;
 }
+
+export interface AbilityComponentData {}
+export interface AbilityDefData {
+  id: number;
+  name: string;
+  max_ranks: number;
+  descriptions: string[];
+  subtypes: string[];
+  // First key is componentId, second key is field name, value is assigned value.
+  components: Dictionary<Dictionary<any>>;
+}
+export type ServerAbilityDefData = Omit<AbilityDefData, "descriptions" | "subtypes" | "components"> & {
+  descriptions: string;
+  subtypes: string;
+  components: string;
+};
 
 export interface EquipmentSetData {
   id: number;
@@ -709,6 +731,7 @@ export interface RowDeleted {
 }
 
 export type LogInResult = ServerError | UserData;
+export type AbilityDefsResult = ServerError | AbilityDefData[];
 export type ActivitiesResult = ServerError | ActivityData[];
 export type ExpectedOutcomesResult = ServerError | ActivityOutcomeData[];
 export type ActivityOutcomesResult = ServerError | ActivityOutcomeData[];
@@ -778,6 +801,32 @@ class AServerAPI {
       body: JSON.stringify(requestBody),
     });
     return await res.json();
+  }
+
+  async fetchAbilityDefs(): Promise<AbilityDefsResult> {
+    const res = await fetch("/api/fetchAbilityDefs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerAbilityDefData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      const abilityData: AbilityDefData[] = [];
+      data.forEach((sAbilityData) => {
+        abilityData.push({
+          ...sAbilityData,
+          descriptions: JSON.parse(sAbilityData.descriptions),
+          subtypes: Database_StringToStringArray(sAbilityData.subtypes),
+          components: sAbilityData.components.length > 0 ? JSON.parse(sAbilityData.components) : {},
+        });
+      });
+
+      return abilityData;
+    }
   }
 
   async fetchActivities(): Promise<ActivitiesResult> {
@@ -1333,6 +1382,54 @@ class AServerAPI {
       id,
     };
     const res = await fetch("/api/deleteSpellDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createAbilityDef(def: AbilityDefData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateAbilityDef = {
+      ...def,
+      descriptions: JSON.stringify(def.descriptions),
+      subtypes: Database_StringArrayToString(def.subtypes),
+      components: JSON.stringify(def.components),
+    };
+    const res = await fetch("/api/createAbilityDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editAbilityDef(def: AbilityDefData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditAbilityDef = {
+      ...def,
+      descriptions: JSON.stringify(def.descriptions),
+      subtypes: Database_StringArrayToString(def.subtypes),
+      components: JSON.stringify(def.components),
+    };
+    const res = await fetch("/api/editAbilityDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteAbilityDef(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteAbilityDef", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

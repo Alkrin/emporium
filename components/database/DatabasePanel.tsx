@@ -10,6 +10,7 @@ import { DatabaseEquipmentSetsDialog } from "./DatabaseEquipmentSetsDialog";
 import { DatabaseTroopsDialog } from "./DatabaseTroopsDialog";
 import { DatabaseStructureComponentsDialog } from "./DatabaseStructureComponentsDialog";
 import { showModal } from "../../redux/modalsSlice";
+import { DatabaseAbilitiesDialog } from "./DatabaseAbilitiesDialog";
 
 interface ReactProps {}
 
@@ -23,6 +24,9 @@ class ADatabasePanel extends React.Component<Props> {
   render(): React.ReactNode {
     return (
       <div className={styles.root}>
+        <div className={styles.dataButton} onClick={this.onAbilitiesClicked.bind(this)}>
+          {"Abilities"}
+        </div>
         <div className={styles.dataButton} onClick={this.onEquipmentSetsClicked.bind(this)}>
           {"Equipment Sets"}
         </div>
@@ -40,6 +44,18 @@ class ADatabasePanel extends React.Component<Props> {
         </div>
         <SubPanelPane />
       </div>
+    );
+  }
+
+  private onAbilitiesClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseAbilities",
+        content: () => {
+          return <DatabaseAbilitiesDialog />;
+        },
+        escapable: true,
+      })
     );
   }
 
