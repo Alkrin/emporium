@@ -737,45 +737,52 @@ export function convertServerActivityOutcome(seo: ServerActivityOutcomeData): Ac
       // Major categories are separated by '|'.
       const [deadCharacterIdsData, characterInjuriesData, troopInjuriesByArmyData, troopDeathsByArmyData] =
         seo.data.split("|");
+
       // Dead character ids are a comma-separated list.
-      const deadCharacterIds = deadCharacterIdsData.split(",").map((dcidString) => +dcidString);
+      const deadCharacterIds = (deadCharacterIdsData ?? "").split(",").map((dcidString) => +dcidString);
       // Injured characters are separated by ':'.
       // The character id is separated from the injuries by '-'.
       // The injury ids are a comma-separated list.
       const characterInjuries: Dictionary<string[]> = {};
-      characterInjuriesData.split(":").forEach((characterInjuriesDatum) => {
-        const [characterIdString, injuriesData] = characterInjuriesDatum.split("-");
-        const injuryIds = injuriesData.split(",");
-        characterInjuries[+characterIdString] = injuryIds;
-      });
+      if (characterInjuriesData) {
+        characterInjuriesData.split(":").forEach((characterInjuriesDatum) => {
+          const [characterIdString, injuriesData] = characterInjuriesDatum.split("-");
+          const injuryIds = injuriesData.split(",");
+          characterInjuries[+characterIdString] = injuryIds;
+        });
+      }
       // Armies are separated by ':'.
       // ArmyId is separated from troop types by '~'.
       // Troop types are separated by ','.
       // TroopDefId is separated from the injury count by '-'.
       const troopInjuriesByArmy: Dictionary<Dictionary<number>> = {};
-      troopInjuriesByArmyData.split(":").forEach((armyInjuriesDatum) => {
-        const [armyIdString, troopTypesData] = armyInjuriesDatum.split("~");
-        const troopInjuries: Dictionary<number> = {};
-        troopTypesData.split(",").forEach((troopInjuriesDatum) => {
-          const [troopDefIdString, countString] = troopInjuriesDatum.split("-");
-          troopInjuries[+troopDefIdString] = +countString;
+      if (troopInjuriesByArmyData) {
+        troopInjuriesByArmyData.split(":").forEach((armyInjuriesDatum) => {
+          const [armyIdString, troopTypesData] = armyInjuriesDatum.split("~");
+          const troopInjuries: Dictionary<number> = {};
+          troopTypesData.split(",").forEach((troopInjuriesDatum) => {
+            const [troopDefIdString, countString] = troopInjuriesDatum.split("-");
+            troopInjuries[+troopDefIdString] = +countString;
+          });
+          troopInjuriesByArmy[+armyIdString] = troopInjuries;
         });
-        troopInjuriesByArmy[+armyIdString] = troopInjuries;
-      });
+      }
       // Armies are separated by ':'.
       // ArmyId is separated from troop types by '~'.
       // Troop types are separated by ','.
       // TroopDefId is separated from the death count by '-'.
       const troopDeathsByArmy: Dictionary<Dictionary<number>> = {};
-      troopDeathsByArmyData.split(":").forEach((armyDeathsDatum) => {
-        const [armyIdString, troopTypesData] = armyDeathsDatum.split("~");
-        const troopDeaths: Dictionary<number> = {};
-        troopTypesData.split(",").forEach((troopDeathsDatum) => {
-          const [troopDefIdString, countString] = troopDeathsDatum.split("-");
-          troopDeaths[+troopDefIdString] = +countString;
+      if (troopDeathsByArmyData) {
+        troopDeathsByArmyData.split(":").forEach((armyDeathsDatum) => {
+          const [armyIdString, troopTypesData] = armyDeathsDatum.split("~");
+          const troopDeaths: Dictionary<number> = {};
+          troopTypesData.split(",").forEach((troopDeathsDatum) => {
+            const [troopDefIdString, countString] = troopDeathsDatum.split("-");
+            troopDeaths[+troopDefIdString] = +countString;
+          });
+          troopDeathsByArmy[+armyIdString] = troopDeaths;
         });
-        troopDeathsByArmy[+armyIdString] = troopDeaths;
-      });
+      }
 
       const o: ActivityOutcomeData_InjuriesAndDeaths = {
         type: seo.type,
