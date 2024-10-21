@@ -22,7 +22,7 @@ interface State {
 }
 
 const defaultState: State = {
-  selectedMapId: -1,
+  selectedMapId: 0,
   isSaving: false,
   name: "",
   min_x: 0,

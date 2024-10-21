@@ -47,7 +47,7 @@ class AWorldPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      mapId: -1,
+      mapId: 0,
       selectedX: Number.MIN_SAFE_INTEGER,
       selectedY: Number.MIN_SAFE_INTEGER,
       mapSettings: {

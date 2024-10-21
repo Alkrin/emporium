@@ -157,7 +157,7 @@ export function renderDatabaseEditingDialogField(
 function buildDefaultState(fieldDefs: DatabaseEditingDialogFieldDef[]) {
   const defaultState: State = {
     data: {
-      id: -1,
+      id: 0,
       name: "",
     },
     isSaving: false,

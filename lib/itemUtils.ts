@@ -359,7 +359,7 @@ export function getAllItemAssociatedItemIds(itemId: number): number[] {
   while (activeItemIds.length > 0) {
     // Find all items contained inside the active items.
     const containedItems = Object.values(redux.items.allItems).filter((item) => {
-      return activeItemIds.includes(item.container_id);
+      return item.container_id > 0 && activeItemIds.includes(item.container_id);
     });
     // Save this layer of items and dig down to the next.
     activeItemIds = containedItems.map((i) => {
