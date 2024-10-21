@@ -29,7 +29,7 @@ interface State {
 }
 
 const defaultState: State = {
-  selectedSetId: -1,
+  selectedSetId: 0,
   isSaving: false,
   name: "",
   class_name: "---",

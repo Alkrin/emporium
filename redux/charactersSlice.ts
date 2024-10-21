@@ -48,7 +48,7 @@ export interface SetRemainingCXPDeductibleParams {
 function buildDefaultCharactersReduxState(): CharactersReduxState {
   const defaults: CharactersReduxState = {
     characters: {},
-    activeCharacterId: -1,
+    activeCharacterId: 0,
     dashboardCharacterId: 0,
   };
   return defaults;

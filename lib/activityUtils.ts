@@ -739,7 +739,11 @@ export function convertServerActivityOutcome(seo: ServerActivityOutcomeData): Ac
         seo.data.split("|");
 
       // Dead character ids are a comma-separated list.
-      const deadCharacterIds = (deadCharacterIdsData ?? "").split(",").map((dcidString) => +dcidString);
+      let deadCharacterIds: number[] = [];
+      if ((deadCharacterIdsData?.length ?? 0) > 0) {
+        deadCharacterIds = deadCharacterIdsData.split(",").map((dcidString) => +dcidString);
+      }
+
       // Injured characters are separated by ':'.
       // The character id is separated from the injuries by '-'.
       // The injury ids are a comma-separated list.

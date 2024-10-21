@@ -13,7 +13,7 @@ function buildDefaultStorageReduxState(): StorageReduxState {
   const defaults: StorageReduxState = {
     allStorages: {},
     storagesByCharacterId: {},
-    activeStorageId: -1,
+    activeStorageId: 0,
   };
   return defaults;
 }

@@ -55,7 +55,7 @@ class ACreateItemDialog extends React.Component<Props, State> {
 
     this.state = {
       isSaving: false,
-      selectedItemId: -1,
+      selectedItemId: 0,
       numToCreate: 1,
       notes: "",
       isForSale: false,

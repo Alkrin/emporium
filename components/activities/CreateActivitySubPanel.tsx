@@ -82,7 +82,7 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
         this.state = {
           activity: {
             // When cloning, we copy everything except the id.
-            id: props.isClone ? -1 : a.id,
+            id: props.isClone ? 0 : a.id,
             user_id: a.user_id,
             name: a.name,
             description: a.description,
@@ -113,7 +113,7 @@ class ACreateActivitySubPanel extends React.Component<Props, State> {
       // Start with blank activity data.
       this.state = {
         activity: {
-          id: -1,
+          id: 0,
           user_id: props.currentUserId,
           name: "",
           description: "",

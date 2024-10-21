@@ -279,7 +279,7 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
   private renderItemRow(item: ItemData, index: number): React.ReactNode {
     const def = this.props.itemDefs[item.def_id];
     return (
-      <div className={styles.itemContentWrapper}>
+      <div className={styles.itemContentWrapper} key={`ItemRow${index}`}>
         <TooltipSource
           className={styles.row}
           tooltipParams={{
