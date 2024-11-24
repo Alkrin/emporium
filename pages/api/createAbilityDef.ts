@@ -5,9 +5,14 @@ import { RequestBody_CreateAbilityDef } from "../../serverRequestTypes";
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any): Promise<void> {
   try {
     const b = req.body as RequestBody_CreateAbilityDef;
+
+    const fieldNames = Object.keys(b);
+    const valueSlots = fieldNames.map(() => "?");
+    const values = fieldNames.map((fn) => b[fn as keyof RequestBody_CreateAbilityDef]);
+
     const results = await executeQuery<any>(
-      `INSERT INTO ability_defs (name,max_ranks,descriptions,subtypes,components) VALUES (?,?,?,?,?)`,
-      [b.name, b.max_ranks, b.descriptions, b.subtypes, b.components]
+      `INSERT INTO ability_defs (${fieldNames.join(",")}) VALUES (${valueSlots.join(",")})`,
+      values
     );
 
     res.status(200).json(results);

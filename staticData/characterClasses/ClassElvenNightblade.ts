@@ -49,10 +49,10 @@ export const ClassElvenNightblade: CharacterClass = {
   maxBaseArmor: 2, // Leather
   cleaveMultiplier: 0.5,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [12, 12, 11, 11, 10, 10, 9, 9, 8, 8, 7],
-    [SavingThrowType.PoisonAndDeath]: [13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8],
-    [SavingThrowType.BlastAndBreath]: [16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 11],
-    [SavingThrowType.StaffsAndWands]: [14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9],
+    [SavingThrowType.Paralysis]: [12, 12, 11, 11, 10, 10, 9, 9, 8, 8, 7],
+    [SavingThrowType.Death]: [13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8],
+    [SavingThrowType.Blast]: [16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 11],
+    [SavingThrowType.Implements]: [14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9],
     [SavingThrowType.Spells]: [14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9],
   },
   toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5],

@@ -20,7 +20,7 @@ class ADatabaseEditingDialogFieldID extends React.Component<Props> {
           <input
             className={styles.field}
             type={"text"}
-            value={this.props.value === -1 ? "NEW" : `${this.props.value}`}
+            value={this.props.value === 0 ? "NEW" : `${this.props.value}`}
             readOnly={true}
           />
         </div>

@@ -21,9 +21,21 @@ export interface AbilityFilter {
   rank?: number;
   subtypes?: string[];
 }
+export interface AbilityFilterv2 {
+  abilityDefId: number;
+  rank: number;
+  subtypes: string[];
+}
 
 export interface AbilityInstance {
   def: AbilityOrProficiency;
+  rank: number;
+  subtype?: string;
+  minLevel: number;
+}
+
+export interface AbilityInstancev2 {
+  abilityDefId: number;
   rank: number;
   subtype?: string;
   minLevel: number;

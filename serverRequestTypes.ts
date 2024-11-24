@@ -16,6 +16,7 @@ import {
   ServerAbilityDefData,
   ServerActivityData,
   ServerActivityOutcomeData,
+  ServerCharacterClass,
   ServerItemData,
   ServerItemDefData,
   ServerMapHexData,
@@ -263,6 +264,9 @@ export type RequestBody_EditActivity = ServerActivityData & {
 // Army
 export type RequestBody_CreateArmy = Omit<ArmyData, "id">;
 export type RequestBody_EditArmy = ArmyData;
+// Character Classes
+export type RequestBody_CreateCharacterClass = Omit<ServerCharacterClass, "id">;
+export type RequestBody_EditCharacterClass = ServerCharacterClass;
 // Contract
 export type RequestBody_CreateContract = Omit<ContractData, "id">;
 export type RequestBody_EditContract = ContractData;

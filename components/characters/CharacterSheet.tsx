@@ -1116,10 +1116,10 @@ class ACharacterSheet extends React.Component<Props> {
         <div className={styles.savingThrowsContainer}>
           <div className={styles.savingThrowsText}>Saves</div>
           <div className={styles.horizontalLine} />
-          {this.renderSavingThrowsRow("Pet & Par", SavingThrowType.PetrificationAndParalysis)}
-          {this.renderSavingThrowsRow("Psn & Dth", SavingThrowType.PoisonAndDeath)}
-          {this.renderSavingThrowsRow("Blst & Br", SavingThrowType.BlastAndBreath)}
-          {this.renderSavingThrowsRow("Stf & Wnd", SavingThrowType.StaffsAndWands)}
+          {this.renderSavingThrowsRow("Paralysis", SavingThrowType.Paralysis)}
+          {this.renderSavingThrowsRow("Death", SavingThrowType.Death)}
+          {this.renderSavingThrowsRow("Blast", SavingThrowType.Blast)}
+          {this.renderSavingThrowsRow("Implement", SavingThrowType.Implements)}
           {this.renderSavingThrowsRow("Spells", SavingThrowType.Spells)}
         </div>
       </div>

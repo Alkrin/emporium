@@ -44,11 +44,11 @@ export const ClassNobiranWonderworker: CharacterClass = {
   name: "Nobiran Wonderworker",
   hitDieSize: 4,
   hpStep: 1,
-  primeRequisites: [CharacterStat.Intelligence, CharacterStat.Wisdom],
+  primeRequisites: [CharacterStat.Intelligence, CharacterStat.Will],
   statRequirements: {
     [CharacterStat.Strength]: 11,
     [CharacterStat.Intelligence]: 11,
-    [CharacterStat.Wisdom]: 11,
+    [CharacterStat.Will]: 11,
     [CharacterStat.Dexterity]: 11,
     [CharacterStat.Constitution]: 11,
     [CharacterStat.Charisma]: 11,
@@ -59,10 +59,10 @@ export const ClassNobiranWonderworker: CharacterClass = {
   maxBaseArmor: 0, // None
   cleaveMultiplier: 0,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8],
-    [SavingThrowType.PoisonAndDeath]: [11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8],
-    [SavingThrowType.BlastAndBreath]: [13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10],
-    [SavingThrowType.StaffsAndWands]: [9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6],
+    [SavingThrowType.Paralysis]: [11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8],
+    [SavingThrowType.Death]: [11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8],
+    [SavingThrowType.Blast]: [13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10],
+    [SavingThrowType.Implements]: [9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6],
     [SavingThrowType.Spells]: [10, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7, 7],
   },
   toHitBonus: [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3],

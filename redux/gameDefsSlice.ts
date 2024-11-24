@@ -3,6 +3,7 @@ import { PayloadAction } from "@reduxjs/toolkit/dist/createAction";
 import { Dictionary } from "../lib/dictionary";
 import {
   AbilityDefData,
+  CharacterClassv2,
   ContractData,
   EquipmentSetData,
   EquipmentSetItemData,
@@ -26,6 +27,7 @@ export interface UpdateItemsForEquipmentSetParams {
 
 interface GameDefsReduxState {
   abilities: Dictionary<AbilityDefData>;
+  characterClasses: Dictionary<CharacterClassv2>;
   contracts: Dictionary<ContractDefData>;
   equipmentSets: Dictionary<EquipmentSetData>;
   equipmentSetsByClass: Dictionary<EquipmentSetData[]>;
@@ -39,6 +41,7 @@ interface GameDefsReduxState {
 function buildDefaultGameDefsReduxState(): GameDefsReduxState {
   const defaults: GameDefsReduxState = {
     abilities: {},
+    characterClasses: {},
     contracts: buildContractDefs(),
     equipmentSets: {},
     equipmentSetsByClass: {},
@@ -170,6 +173,18 @@ export const gameDefsSlice = createSlice({
   name: "gameDefs",
   initialState: buildDefaultGameDefsReduxState(),
   reducers: {
+    updateCharacterClasses: (state: GameDefsReduxState, action: PayloadAction<CharacterClassv2[]>) => {
+      state.characterClasses = {};
+      action.payload.forEach((cc) => {
+        state.characterClasses[cc.id] = cc;
+      });
+    },
+    updateCharacterClass: (state: GameDefsReduxState, action: PayloadAction<CharacterClassv2>) => {
+      state.characterClasses[action.payload.id] = action.payload;
+    },
+    deleteCharacterClass: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.characterClasses[action.payload];
+    },
     updateItemDefs: (state: GameDefsReduxState, action: PayloadAction<ItemDefData[]>) => {
       state.items = {};
       action.payload.forEach((idd) => {
@@ -300,6 +315,9 @@ export const gameDefsSlice = createSlice({
 });
 
 export const {
+  updateCharacterClasses,
+  updateCharacterClass,
+  deleteCharacterClass,
   updateItemDefs,
   updateItemDef,
   deleteItemDef,

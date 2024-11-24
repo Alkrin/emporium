@@ -54,10 +54,10 @@ export const ClassDwarvenFury: CharacterClass = {
   maxBaseArmor: 0, // None
   cleaveMultiplier: 1,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [11, 10, 10, 9, 8, 8, 7, 6, 6, 5, 4, 4, 3],
-    [SavingThrowType.PoisonAndDeath]: [10, 9, 9, 8, 7, 7, 6, 5, 5, 4, 3, 3, 2],
-    [SavingThrowType.BlastAndBreath]: [13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6, 6, 5],
-    [SavingThrowType.StaffsAndWands]: [12, 11, 11, 10, 9, 9, 8, 7, 7, 6, 5, 5, 4],
+    [SavingThrowType.Paralysis]: [11, 10, 10, 9, 8, 8, 7, 6, 6, 5, 4, 4, 3],
+    [SavingThrowType.Death]: [10, 9, 9, 8, 7, 7, 6, 5, 5, 4, 3, 3, 2],
+    [SavingThrowType.Blast]: [13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6, 6, 5],
+    [SavingThrowType.Implements]: [12, 11, 11, 10, 9, 9, 8, 7, 7, 6, 5, 5, 4],
     [SavingThrowType.Spells]: [13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6, 6, 5],
   },
   toHitBonus: [0, 1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7, 8],

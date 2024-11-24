@@ -48,6 +48,16 @@ class ADatabaseAbilitiesDialog extends React.Component<Props> {
     // ID and Name are handled automatically, so we don't have to include them here.
     return [
       {
+        type: DatabaseEditingDialogField.Boolean,
+        labelTexts: ["Is Proficiency?"],
+        fieldNames: ["is_proficiency"],
+      },
+      {
+        type: DatabaseEditingDialogField.Boolean,
+        labelTexts: ["Is General Proficiency?"],
+        fieldNames: ["is_general_proficiency"],
+      },
+      {
         type: DatabaseEditingDialogField.Number,
         labelTexts: ["Max Ranks"],
         fieldNames: ["max_ranks"],

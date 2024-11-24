@@ -66,10 +66,10 @@ export const ClassDwarvenDelver: CharacterClass = {
   maxBaseArmor: 2, // Leather
   cleaveMultiplier: 0.5,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3],
-    [SavingThrowType.PoisonAndDeath]: [9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3],
-    [SavingThrowType.BlastAndBreath]: [13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8, 8, 7],
-    [SavingThrowType.StaffsAndWands]: [10, 10, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4],
+    [SavingThrowType.Paralysis]: [9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3],
+    [SavingThrowType.Death]: [9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3],
+    [SavingThrowType.Blast]: [13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8, 8, 7],
+    [SavingThrowType.Implements]: [10, 10, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4],
     [SavingThrowType.Spells]: [11, 11, 10, 10, 9, 9, 8, 8, 7, 7, 6, 6, 5],
   },
   toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5],
