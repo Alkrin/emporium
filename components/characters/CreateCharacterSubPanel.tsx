@@ -177,7 +177,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         this.setState({ intelligence: minIntelligence });
       });
     }
-    const minWisdom = selectedClass?.statRequirements[CharacterStat.Wisdom] ?? 3;
+    const minWisdom = selectedClass?.statRequirements[CharacterStat.Will] ?? 3;
     if (this.state.wisdom < minWisdom) {
       requestAnimationFrame(() => {
         this.setState({ wisdom: minWisdom });
@@ -405,9 +405,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 
             <div className={styles.row}>
               <div className={styles.wisdomLabel}>
-                {primeRequisites.includes(CharacterStat.Wisdom) && (
-                  <span className={styles.primeRequisiteLabel}>*</span>
-                )}
+                {primeRequisites.includes(CharacterStat.Will) && <span className={styles.primeRequisiteLabel}>*</span>}
                 WIS
               </div>
               <input
@@ -903,7 +901,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     this.setState({
       strength: this.rollStat(reqs[CharacterStat.Strength] ?? 0),
       intelligence: this.rollStat(reqs[CharacterStat.Intelligence] ?? 0),
-      wisdom: this.rollStat(reqs[CharacterStat.Wisdom] ?? 0),
+      wisdom: this.rollStat(reqs[CharacterStat.Will] ?? 0),
       dexterity: this.rollStat(reqs[CharacterStat.Dexterity] ?? 0),
       constitution: this.rollStat(reqs[CharacterStat.Constitution] ?? 0),
       charisma: this.rollStat(reqs[CharacterStat.Charisma] ?? 0),

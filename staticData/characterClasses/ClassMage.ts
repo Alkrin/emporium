@@ -48,10 +48,10 @@ export const ClassMage: CharacterClass = {
   maxBaseArmor: 0, // None
   cleaveMultiplier: 0,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9],
-    [SavingThrowType.PoisonAndDeath]: [13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9],
-    [SavingThrowType.BlastAndBreath]: [15, 15, 15, 14, 14, 14, 13, 13, 13, 12, 12, 12, 11, 11],
-    [SavingThrowType.StaffsAndWands]: [11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7],
+    [SavingThrowType.Paralysis]: [13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9],
+    [SavingThrowType.Death]: [13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9],
+    [SavingThrowType.Blast]: [15, 15, 15, 14, 14, 14, 13, 13, 13, 12, 12, 12, 11, 11],
+    [SavingThrowType.Implements]: [11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7],
     [SavingThrowType.Spells]: [12, 12, 12, 11, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8],
   },
   toHitBonus: [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4],

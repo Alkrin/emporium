@@ -122,7 +122,7 @@ export function getCharacterStat(character: CharacterData, stat: CharacterStat):
       return character.strength;
     case CharacterStat.Intelligence:
       return character.intelligence;
-    case CharacterStat.Wisdom:
+    case CharacterStat.Will:
       return character.wisdom;
     case CharacterStat.Dexterity:
       return character.dexterity;

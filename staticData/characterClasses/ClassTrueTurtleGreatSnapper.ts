@@ -64,10 +64,10 @@ export const ClassTrueTurtleGreatSnapper: CharacterClass = {
   maxBaseArmor: 0, // None
   cleaveMultiplier: 1,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [15, 14, 14, 13, 12, 12, 11, 10],
-    [SavingThrowType.PoisonAndDeath]: [14, 13, 13, 12, 11, 11, 10, 9],
-    [SavingThrowType.BlastAndBreath]: [16, 15, 15, 14, 13, 13, 12, 11],
-    [SavingThrowType.StaffsAndWands]: [16, 15, 15, 14, 13, 13, 12, 11],
+    [SavingThrowType.Paralysis]: [15, 14, 14, 13, 12, 12, 11, 10],
+    [SavingThrowType.Death]: [14, 13, 13, 12, 11, 11, 10, 9],
+    [SavingThrowType.Blast]: [16, 15, 15, 14, 13, 13, 12, 11],
+    [SavingThrowType.Implements]: [16, 15, 15, 14, 13, 13, 12, 11],
     [SavingThrowType.Spells]: [17, 16, 16, 15, 14, 14, 13, 12],
   },
   toHitBonus: [0, 1, 2, 3, 4, 5, 6, 7],

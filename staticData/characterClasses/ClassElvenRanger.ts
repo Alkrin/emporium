@@ -79,10 +79,10 @@ export const ClassElvenRanger: CharacterClass = {
   maxBaseArmor: 4, // Chain
   cleaveMultiplier: 1,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7, 7, 6],
-    [SavingThrowType.PoisonAndDeath]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7, 7, 6],
-    [SavingThrowType.BlastAndBreath]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8],
-    [SavingThrowType.StaffsAndWands]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8],
+    [SavingThrowType.Paralysis]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7, 7, 6],
+    [SavingThrowType.Death]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8, 7, 7, 6],
+    [SavingThrowType.Blast]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8],
+    [SavingThrowType.Implements]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8],
     [SavingThrowType.Spells]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10, 9, 9, 8],
   },
   toHitBonus: [0, 1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7, 8],

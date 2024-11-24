@@ -43,7 +43,7 @@ class ADatabaseItemsDialog extends React.Component<Props> {
     return [
       { type: DatabaseEditingDialogField.LongString, labelTexts: ["Description"], fieldNames: ["description"] },
       {
-        type: DatabaseEditingDialogField.TwoNumbers,
+        type: DatabaseEditingDialogField.Numbers,
         labelTexts: ["Size", "\xa0and", "\xa0/ 6 stone"],
         fieldNames: ["stones", "sixth_stones"],
         fieldSizes: ["3vmin", "2vmin"],
@@ -84,7 +84,7 @@ class ADatabaseItemsDialog extends React.Component<Props> {
         fieldNames: ["spell_ids"],
       },
       {
-        type: DatabaseEditingDialogField.TwoNumbers,
+        type: DatabaseEditingDialogField.Numbers,
         labelTexts: ["Storage", "and", " / 6 stone"],
         fieldNames: ["storage_stones", "storage_sixth_stones"],
         fieldSizes: ["3vmin", "2vmin"],
@@ -109,13 +109,13 @@ class ADatabaseItemsDialog extends React.Component<Props> {
         fieldSizes: ["3vmin"],
       },
       {
-        type: DatabaseEditingDialogField.TwoNumbers,
+        type: DatabaseEditingDialogField.Numbers,
         labelTexts: ["1h Damage", "\xa0d"],
         fieldNames: ["damage_dice", "damage_die"],
         fieldSizes: ["3vmin", "2vmin"],
       },
       {
-        type: DatabaseEditingDialogField.TwoNumbers,
+        type: DatabaseEditingDialogField.Numbers,
         labelTexts: ["2h Damage", "\xa0d"],
         fieldNames: ["damage_dice_2h", "damage_die_2h"],
         fieldSizes: ["3vmin", "2vmin"],

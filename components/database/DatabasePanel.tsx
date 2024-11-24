@@ -11,6 +11,7 @@ import { DatabaseTroopsDialog } from "./DatabaseTroopsDialog";
 import { DatabaseStructureComponentsDialog } from "./DatabaseStructureComponentsDialog";
 import { showModal } from "../../redux/modalsSlice";
 import { DatabaseAbilitiesDialog } from "./DatabaseAbilitiesDialog";
+import { DatabaseCharacterClassesDialog } from "./DatabaseCharacterClassesDialog";
 
 interface ReactProps {}
 
@@ -26,6 +27,9 @@ class ADatabasePanel extends React.Component<Props> {
       <div className={styles.root}>
         <div className={styles.dataButton} onClick={this.onAbilitiesClicked.bind(this)}>
           {"Abilities"}
+        </div>
+        <div className={styles.dataButton} onClick={this.onCharacterClassesClicked.bind(this)}>
+          {"Character Classes"}
         </div>
         <div className={styles.dataButton} onClick={this.onEquipmentSetsClicked.bind(this)}>
           {"Equipment Sets"}
@@ -53,6 +57,18 @@ class ADatabasePanel extends React.Component<Props> {
         id: "DatabaseAbilities",
         content: () => {
           return <DatabaseAbilitiesDialog />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onCharacterClassesClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseCharacterClasses",
+        content: () => {
+          return <DatabaseCharacterClassesDialog />;
         },
         escapable: true,
       })

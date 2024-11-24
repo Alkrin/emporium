@@ -6,20 +6,15 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
   try {
     const b = req.body as RequestBody_CreateActivity;
 
+    const fieldNames = Object.keys(b).filter((fn) => !["expectedOutcomes"].includes(fn));
+    const valueSlots = fieldNames.map(() => "?");
+    const values = fieldNames.map((fn) => b[fn as keyof RequestBody_CreateActivity]);
+
     const queries: SQLQuery[] = [];
 
     queries.push({
-      query: `INSERT INTO activities (user_id,name,description,start_date,end_date,participants,army_participants,lead_from_behind_id) VALUES (?,?,?,?,?,?,?,?)`,
-      values: [
-        b.user_id,
-        b.name,
-        b.description,
-        b.start_date,
-        b.end_date,
-        b.participants,
-        b.army_participants,
-        b.lead_from_behind_id,
-      ],
+      query: `INSERT INTO activities (${fieldNames.join(",")}) VALUES (${valueSlots.join(",")})`,
+      values,
     });
 
     queries.push({

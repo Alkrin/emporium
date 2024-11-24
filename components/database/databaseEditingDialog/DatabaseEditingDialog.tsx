@@ -11,7 +11,7 @@ import { DatabaseEditingDialogFieldID } from "./DatabaseEditingDialogFieldID";
 import { DatabaseEditingDialogFieldString } from "./DatabaseEditingDialogFieldString";
 import { DatabaseEditingDialogFieldLongString } from "./DatabaseEditingDialogFieldLongString";
 import { DatabaseEditingDialogFieldNumber } from "./DatabaseEditingDialogFieldNumber";
-import { DatabaseEditingDialogFieldTwoNumbers } from "./DatabaseEditingDialogFieldTwoNumbers";
+import { DatabaseEditingDialogFieldNumbers } from "./DatabaseEditingDialogFieldNumbers";
 import { hideModal, showModal } from "../../../redux/modalsSlice";
 import { BasicDialog } from "../../dialogs/BasicDialog";
 import { DatabaseEditingDialogFieldBoolean } from "./DatabaseEditingDialogFieldBoolean";
@@ -24,6 +24,13 @@ import {
   DatabaseEditingDialogFieldDef,
   setDefaultValuesForFieldDef,
 } from "./databaseUtils";
+import { DatabaseEditingDialogFieldDictionary } from "./DatabaseEditingDialogFieldDictionary";
+import { DatabaseEditingDialogFieldNumberArray } from "./DatabaseEditingDialogFieldNumberArray";
+import { DatabaseEditingDialogFieldResizableArray } from "./DatabaseEditingDialogFieldResizableArray";
+import { DatabaseEditingDialogFieldAbilityInstance } from "./DatabaseEditingDialogFieldAbilityInstance";
+import { AbilityFilterv2, AbilityInstancev2 } from "../../../staticData/types/abilitiesAndProficiencies";
+import { DatabaseEditingDialogFieldAbilityFilter } from "./DatabaseEditingDialogFieldAbilityFilter";
+import { DatabaseEditingDialogFieldNamedValues } from "./DatabaseEditingDialogFieldNamedValues";
 
 type AnySearchableDef = SearchableDef & {
   [key: string]: any;
@@ -51,32 +58,65 @@ export function renderDatabaseEditingDialogField(
     case DatabaseEditingDialogField.AbilityComponents: {
       return (
         <DatabaseEditingDialogFieldAbilityComponents
-          key={index}
+          key={def.fieldNames[0]}
           tabIndex={tabIndex}
           def={def}
-          value={data[def.fieldNames[0]]}
+          value={data[def.fieldNames[0] ?? ""]}
           onValueChange={(value: Dictionary<Dictionary<any>>) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.AbilityFilter: {
+      return (
+        <DatabaseEditingDialogFieldAbilityFilter
+          key={def.fieldNames[0]}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0] ?? ""]}
+          onValueChange={(value: AbilityFilterv2) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.AbilityInstance: {
+      return (
+        <DatabaseEditingDialogFieldAbilityInstance
+          key={def.fieldNames[0]}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0] ?? ""]}
+          onValueChange={(value: AbilityInstancev2) => applyDataChange(def.fieldNames[0], value)}
         />
       );
     }
     case DatabaseEditingDialogField.Boolean: {
       return (
         <DatabaseEditingDialogFieldBoolean
-          key={index}
+          key={def.fieldNames[0]}
           tabIndex={tabIndex}
           def={def}
-          value={data[def.fieldNames[0]]}
+          value={data[def.fieldNames[0] ?? ""]}
           onValueChange={(value: boolean) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.Dictionary: {
+      return (
+        <DatabaseEditingDialogFieldDictionary
+          key={def.fieldNames[0]}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0] ?? ""]}
+          onValueChange={(value: Dictionary<any>) => applyDataChange(def.fieldNames[0], value)}
         />
       );
     }
     case DatabaseEditingDialogField.LongString: {
       return (
         <DatabaseEditingDialogFieldLongString
-          key={index}
+          key={def.fieldNames[0]}
           tabIndex={tabIndex}
           def={def}
-          value={data[def.fieldNames[0]]}
+          value={data[def.fieldNames[0] ?? ""]}
           onValueChange={(value: string) => applyDataChange(def.fieldNames[0], value)}
         />
       );
@@ -84,43 +124,88 @@ export function renderDatabaseEditingDialogField(
     case DatabaseEditingDialogField.LongStringArray: {
       return (
         <DatabaseEditingDialogFieldLongStringArray
-          key={index}
+          key={def.fieldNames[0]}
           tabIndex={tabIndex}
           def={def}
-          value={data[def.fieldNames[0]]}
+          value={data[def.fieldNames[0] ?? ""]}
           onValueChange={(value: string[]) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.NamedValue: {
+      return (
+        <DatabaseEditingDialogFieldNamedValues
+          key={def.fieldNames[0]}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0] ?? ""]}
+          onValueChange={(value: any) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.NamedValues: {
+      return (
+        <DatabaseEditingDialogFieldNamedValues
+          key={def.fieldNames[0]}
+          tabIndex={tabIndex}
+          def={def}
+          allowMultiSelect={true}
+          value={data[def.fieldNames[0] ?? ""]}
+          onValueChange={(value: any[]) => applyDataChange(def.fieldNames[0], value)}
         />
       );
     }
     case DatabaseEditingDialogField.Number: {
       return (
         <DatabaseEditingDialogFieldNumber
-          key={index}
+          key={def.fieldNames[0]}
           tabIndex={tabIndex}
           def={def}
-          value={data[def.fieldNames[0]]}
+          value={data[def.fieldNames[0] ?? ""]}
           onValueChange={(value: number) => applyDataChange(def.fieldNames[0], value)}
         />
       );
     }
-    case DatabaseEditingDialogField.SelectableStrings: {
+    case DatabaseEditingDialogField.NumberArray: {
       return (
-        <DatabaseEditingDialogFieldSelectableStrings
-          key={index}
+        <DatabaseEditingDialogFieldNumberArray
+          key={def.fieldNames[0]}
           tabIndex={tabIndex}
           def={def}
-          value={data[def.fieldNames[0]]}
-          onValueChange={(value: string[]) => applyDataChange(def.fieldNames[0], value)}
+          value={data[def.fieldNames[0] ?? ""]}
+          onValueChange={(value: number[]) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.Numbers: {
+      return (
+        <DatabaseEditingDialogFieldNumbers
+          key={def.fieldNames[0]}
+          tabIndex={tabIndex}
+          def={def}
+          values={def.fieldNames.map((fieldName) => data[fieldName] ?? 0)}
+          onValueChange={(fieldName: string, value: number) => applyDataChange(fieldName, value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.ResizableArray: {
+      return (
+        <DatabaseEditingDialogFieldResizableArray
+          key={def.fieldNames[0]}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0] ?? []]}
+          onValueChange={(value: any[]) => applyDataChange(def.fieldNames[0], value)}
         />
       );
     }
     case DatabaseEditingDialogField.Spells: {
       return (
         <DatabaseEditingDialogFieldSpells
-          key={index}
+          key={def.fieldNames[0]}
           tabIndex={tabIndex}
           def={def}
-          value={data[def.fieldNames[0]]}
+          value={data[def.fieldNames[0] ?? ""]}
           onValueChange={(value: number[]) => applyDataChange(def.fieldNames[0], value)}
         />
       );
@@ -128,26 +213,13 @@ export function renderDatabaseEditingDialogField(
     case DatabaseEditingDialogField.String: {
       return (
         <DatabaseEditingDialogFieldString
-          key={index}
+          key={def.fieldNames[0]}
           tabIndex={tabIndex}
           def={def}
-          value={data[def.fieldNames[0]]}
+          value={data[def.fieldNames[0] ?? ""]}
           onValueChange={(value: string) => {
             applyDataChange(def.fieldNames[0], value);
           }}
-        />
-      );
-    }
-    case DatabaseEditingDialogField.TwoNumbers: {
-      return (
-        <DatabaseEditingDialogFieldTwoNumbers
-          key={index}
-          tabIndex={tabIndex}
-          def={def}
-          value={data[def.fieldNames[0]]}
-          onValueChange={(value: number) => applyDataChange(def.fieldNames[0], value)}
-          secondValue={data[def.fieldNames[1]]}
-          onSecondValueChange={(value: number) => applyDataChange(def.fieldNames[1], value)}
         />
       );
     }

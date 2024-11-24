@@ -1,10 +1,10 @@
-import { AbilityFilter, AbilityInstance } from "./abilitiesAndProficiencies";
+import { AbilityFilter, AbilityFilterv2, AbilityInstance } from "./abilitiesAndProficiencies";
 import { WeaponType, WeaponCategory } from "./items";
 
 export enum CharacterStat {
   Strength = "Strength",
   Intelligence = "Intelligence",
-  Wisdom = "Wisdom",
+  Will = "Will",
   Dexterity = "Dexterity",
   Constitution = "Constitution",
   Charisma = "Charisma",
@@ -18,10 +18,10 @@ export enum WeaponStyle {
 }
 
 export enum SavingThrowType {
-  PetrificationAndParalysis = "Petrification and Paralysis",
-  PoisonAndDeath = "Poison and Death",
-  BlastAndBreath = "Blast and Breath",
-  StaffsAndWands = "Staffs and Wands",
+  Paralysis = "Paralysis",
+  Death = "Death",
+  Blast = "Blast",
+  Implements = "Implements",
   Spells = "Spells",
 }
 
@@ -71,6 +71,10 @@ export interface LevelBasedSkill {
 export interface SelectableClassFeature {
   title: string;
   selections: AbilityFilter | AbilityFilter[];
+}
+export interface SelectableClassFeaturev2 {
+  title: string;
+  selections: AbilityFilterv2[];
 }
 
 export interface DieRoll {

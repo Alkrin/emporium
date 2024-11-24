@@ -44,7 +44,7 @@ export const ClassDwarvenCraftpriest: CharacterClass = {
   name: "Dwarven Craftpriest",
   hitDieSize: 6,
   hpStep: 2,
-  primeRequisites: [CharacterStat.Wisdom],
+  primeRequisites: [CharacterStat.Will],
   statRequirements: { [CharacterStat.Constitution]: 9 },
   xpToLevel: [0, 2400, 4800, 9600, 19200, 38400, 75000, 150000, 280000, 410000],
   weaponStyles: [WeaponStyle.OneHandOnly, WeaponStyle.TwoHanded, WeaponStyle.OneHandAndShield],
@@ -60,10 +60,10 @@ export const ClassDwarvenCraftpriest: CharacterClass = {
   maxBaseArmor: 6, // Plate
   cleaveMultiplier: 0.5,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [9, 9, 8, 8, 7, 7, 6, 6, 5, 5],
-    [SavingThrowType.PoisonAndDeath]: [6, 6, 5, 5, 4, 4, 3, 3, 2, 2],
-    [SavingThrowType.BlastAndBreath]: [13, 13, 12, 12, 11, 11, 10, 10, 9, 9],
-    [SavingThrowType.StaffsAndWands]: [9, 9, 8, 8, 7, 7, 6, 6, 5, 5],
+    [SavingThrowType.Paralysis]: [9, 9, 8, 8, 7, 7, 6, 6, 5, 5],
+    [SavingThrowType.Death]: [6, 6, 5, 5, 4, 4, 3, 3, 2, 2],
+    [SavingThrowType.Blast]: [13, 13, 12, 12, 11, 11, 10, 10, 9, 9],
+    [SavingThrowType.Implements]: [9, 9, 8, 8, 7, 7, 6, 6, 5, 5],
     [SavingThrowType.Spells]: [12, 12, 11, 11, 10, 10, 9, 9, 8, 8],
   },
   toHitBonus: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],

@@ -77,9 +77,25 @@ import {
   RequestBody_SellItem,
   RequestBody_CreateAbilityDef,
   RequestBody_EditAbilityDef,
+  RequestBody_EditCharacterClass,
+  RequestBody_CreateCharacterClass,
 } from "./serverRequestTypes";
-import { ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
-import { SpellType } from "./staticData/types/characterClasses";
+import {
+  AbilityFilterv2,
+  AbilityInstance,
+  AbilityInstancev2,
+  ProficiencySource,
+} from "./staticData/types/abilitiesAndProficiencies";
+import {
+  CharacterStat,
+  NaturalWeapon,
+  SavingThrowType,
+  SelectableClassFeature,
+  SelectableClassFeaturev2,
+  SpellType,
+  WeaponStyle,
+} from "./staticData/types/characterClasses";
+import { WeaponCategory, WeaponType } from "./staticData/types/items";
 
 export interface ServerError {
   error: string;
@@ -90,6 +106,75 @@ export interface UserData {
   name: string;
   role: UserRole;
 }
+
+export interface CharacterClassv2 {
+  id: number;
+  name: string;
+  description: string;
+  max_level: number;
+  hit_die_size: number;
+  hp_step: number;
+  prime_requisites: CharacterStat[];
+  stat_requirements: Record<CharacterStat, number>;
+  xp_to_level: number[];
+  weapon_styles: WeaponStyle[];
+  weapon_category_permissions: WeaponCategory[];
+  weapon_type_permissions: WeaponType[];
+  natural_weapons: NaturalWeapon[];
+  max_base_armor: number;
+  cleave_multiplier: number;
+  saving_throws: Record<SavingThrowType, number[]>;
+  to_hit_bonus: number[];
+  class_features: AbilityInstancev2[];
+  selectable_class_features: SelectableClassFeaturev2[];
+  class_proficiencies_at: number[];
+  class_proficiencies: AbilityFilterv2[];
+  subclasses: CharacterSubclass[];
+}
+export type ServerCharacterClass = Omit<
+  CharacterClassv2,
+  | "prime_requisites"
+  | "stat_requirements"
+  | "xp_to_level"
+  | "weapon_styles"
+  | "weapon_category_permissions"
+  | "weapon_type_permissions"
+  | "natural_weapons"
+  | "saving_throws"
+  | "to_hit_bonus"
+  | "class_features"
+  | "selectable_class_features"
+  | "subclasses"
+  | "class_proficiencies_at"
+  | "class_proficiencies"
+> & {
+  prime_requisites: string;
+  stat_requirements: string;
+  xp_to_level: string;
+  weapon_styles: string;
+  weapon_category_permissions: string;
+  weapon_type_permissions: string;
+  natural_weapons: string;
+  saving_throws: string;
+  to_hit_bonus: string;
+  class_features: string;
+  selectable_class_features: string;
+  subclasses: string;
+  class_proficiencies_at: string;
+  class_proficiencies: string;
+};
+export type CharacterSubclass = Pick<
+  CharacterClassv2,
+  | "name"
+  | "description"
+  | "weapon_styles"
+  | "weapon_category_permissions"
+  | "weapon_type_permissions"
+  | "max_base_armor"
+  | "class_features"
+  | "selectable_class_features"
+  | "class_proficiencies"
+>;
 
 export interface ItemDefData {
   id: number;
@@ -274,6 +359,8 @@ export interface AbilityComponentData {}
 export interface AbilityDefData {
   id: number;
   name: string;
+  is_proficiency: boolean;
+  is_general_proficiency: boolean;
   max_ranks: number;
   descriptions: string[];
   subtypes: string[];
@@ -733,6 +820,7 @@ export interface RowDeleted {
 export type LogInResult = ServerError | UserData;
 export type AbilityDefsResult = ServerError | AbilityDefData[];
 export type ActivitiesResult = ServerError | ActivityData[];
+export type CharacterClassesResult = ServerError | CharacterClassv2[];
 export type ExpectedOutcomesResult = ServerError | ActivityOutcomeData[];
 export type ActivityOutcomesResult = ServerError | ActivityOutcomeData[];
 export type CharactersResult = ServerError | CharacterData[];
@@ -819,6 +907,8 @@ class AServerAPI {
       data.forEach((sAbilityData) => {
         abilityData.push({
           ...sAbilityData,
+          is_proficiency: !!sAbilityData.is_proficiency,
+          is_general_proficiency: !!sAbilityData.is_general_proficiency,
           descriptions: JSON.parse(sAbilityData.descriptions),
           subtypes: Database_StringToStringArray(sAbilityData.subtypes),
           components: sAbilityData.components.length > 0 ? JSON.parse(sAbilityData.components) : {},
@@ -851,6 +941,45 @@ class AServerAPI {
       });
 
       return activityData;
+    }
+  }
+
+  async fetchCharacterClasses(): Promise<CharacterClassesResult> {
+    const res = await fetch("/api/fetchCharacterClasses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerCharacterClass[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      const classes: CharacterClassv2[] = [];
+      data.forEach((sCharacterClass) => {
+        console.log(sCharacterClass);
+        classes.push({
+          ...sCharacterClass,
+          // Convert server data to local data for all of these fields.
+          prime_requisites: JSON.parse(sCharacterClass.prime_requisites),
+          stat_requirements: JSON.parse(sCharacterClass.stat_requirements),
+          xp_to_level: JSON.parse(sCharacterClass.xp_to_level),
+          weapon_styles: JSON.parse(sCharacterClass.weapon_styles),
+          weapon_category_permissions: JSON.parse(sCharacterClass.weapon_category_permissions),
+          weapon_type_permissions: JSON.parse(sCharacterClass.weapon_type_permissions),
+          natural_weapons: JSON.parse(sCharacterClass.natural_weapons),
+          saving_throws: JSON.parse(sCharacterClass.saving_throws),
+          to_hit_bonus: JSON.parse(sCharacterClass.to_hit_bonus),
+          class_features: JSON.parse(sCharacterClass.class_features),
+          selectable_class_features: JSON.parse(sCharacterClass.selectable_class_features),
+          subclasses: JSON.parse(sCharacterClass.subclasses),
+          class_proficiencies_at: JSON.parse(sCharacterClass.class_proficiencies_at),
+          class_proficiencies: JSON.parse(sCharacterClass.class_proficiencies_at),
+        });
+      });
+
+      return classes;
     }
   }
 
@@ -1430,6 +1559,78 @@ class AServerAPI {
       id,
     };
     const res = await fetch("/api/deleteAbilityDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createCharacterClass(def: CharacterClassv2): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateCharacterClass = {
+      ...def,
+      // Convert all the wonky fields to the format the server wants.
+      prime_requisites: JSON.stringify(def.prime_requisites),
+      stat_requirements: JSON.stringify(def.stat_requirements),
+      xp_to_level: JSON.stringify(def.xp_to_level),
+      weapon_styles: JSON.stringify(def.weapon_styles),
+      weapon_category_permissions: JSON.stringify(def.weapon_category_permissions),
+      weapon_type_permissions: JSON.stringify(def.weapon_type_permissions),
+      natural_weapons: JSON.stringify(def.natural_weapons),
+      saving_throws: JSON.stringify(def.saving_throws),
+      to_hit_bonus: JSON.stringify(def.to_hit_bonus),
+      class_features: JSON.stringify(def.class_features),
+      selectable_class_features: JSON.stringify(def.selectable_class_features),
+      class_proficiencies_at: JSON.stringify(def.class_proficiencies_at),
+      class_proficiencies: JSON.stringify(def.class_proficiencies),
+      subclasses: JSON.stringify(def.subclasses),
+    };
+    const res = await fetch("/api/createCharacterClass", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editCharacterClass(def: CharacterClassv2): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditCharacterClass = {
+      ...def,
+      // Convert all the wonky fields to the format the server wants.
+      prime_requisites: JSON.stringify(def.prime_requisites),
+      stat_requirements: JSON.stringify(def.stat_requirements),
+      xp_to_level: JSON.stringify(def.xp_to_level),
+      weapon_styles: JSON.stringify(def.weapon_styles),
+      weapon_category_permissions: JSON.stringify(def.weapon_category_permissions),
+      weapon_type_permissions: JSON.stringify(def.weapon_type_permissions),
+      natural_weapons: JSON.stringify(def.natural_weapons),
+      saving_throws: JSON.stringify(def.saving_throws),
+      to_hit_bonus: JSON.stringify(def.to_hit_bonus),
+      class_features: JSON.stringify(def.class_features),
+      selectable_class_features: JSON.stringify(def.selectable_class_features),
+      class_proficiencies_at: JSON.stringify(def.class_proficiencies_at),
+      class_proficiencies: JSON.stringify(def.class_proficiencies),
+      subclasses: JSON.stringify(def.subclasses),
+    };
+    const res = await fetch("/api/editCharacterClass", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteCharacterClass(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteCharacterClass", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

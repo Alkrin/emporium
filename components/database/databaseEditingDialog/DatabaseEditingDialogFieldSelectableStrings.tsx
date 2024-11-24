@@ -6,7 +6,7 @@ import { PassableTabIndex } from "./DatabaseEditingDialog";
 import { EditButton } from "../../EditButton";
 import { showModal } from "../../../redux/modalsSlice";
 import { SelectStringsDialog } from "../../dialogs/SelectStringsDialog";
-import { DatabaseEditingDialogFieldDef, ExtraFieldDataSelectableStrings } from "./databaseUtils";
+import { DatabaseEditingDialogFieldDef, ExtraFieldDataNamedValues } from "./databaseUtils";
 
 interface ReactProps {
   def: DatabaseEditingDialogFieldDef;
@@ -47,7 +47,7 @@ class ADatabaseEditingDialogFieldSelectableStrings extends React.Component<Props
   }
 
   private onEditClick(): void {
-    const extra = this.props.def.extra as ExtraFieldDataSelectableStrings;
+    const extra = this.props.def.extra as ExtraFieldDataNamedValues;
     this.props.dispatch?.(
       showModal({
         id: "EditSelectableStrings",

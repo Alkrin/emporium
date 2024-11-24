@@ -49,10 +49,10 @@ export const ClassElvenSpellsword: CharacterClass = {
   maxBaseArmor: 6, // Plate
   cleaveMultiplier: 1,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8],
-    [SavingThrowType.PoisonAndDeath]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8],
-    [SavingThrowType.BlastAndBreath]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10],
-    [SavingThrowType.StaffsAndWands]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10],
+    [SavingThrowType.Paralysis]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8],
+    [SavingThrowType.Death]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 8],
+    [SavingThrowType.Blast]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10],
+    [SavingThrowType.Implements]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10],
     [SavingThrowType.Spells]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 10],
   },
   toHitBonus: [0, 1, 1, 2, 3, 3, 4, 5, 5, 6],

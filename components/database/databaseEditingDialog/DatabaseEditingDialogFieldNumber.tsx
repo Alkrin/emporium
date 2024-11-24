@@ -26,9 +26,10 @@ class ADatabaseEditingDialogFieldNumber extends React.Component<Props, State> {
     super(props);
 
     const extra = props.def.extra ?? {};
+    const value = props.value ?? 0;
 
     this.state = {
-      valueString: props.value.toFixed(this.getDecimalDigits(props.def)),
+      valueString: value.toFixed(this.getDecimalDigits(props.def)),
     };
   }
 

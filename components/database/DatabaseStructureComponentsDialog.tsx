@@ -49,7 +49,7 @@ class ADatabaseStructureComponentsDialog extends React.Component<Props> {
   private async onSaveClicked(untypedData: SearchableDef): Promise<number> {
     const data = untypedData as StructureComponentDefData;
 
-    if (data.id === -1) {
+    if (data.id === 0) {
       // Brand new structureComponentDef.
       const res = await ServerAPI.createStructureComponentDef(data);
 
@@ -62,7 +62,7 @@ class ADatabaseStructureComponentsDialog extends React.Component<Props> {
 
         return res.insertId;
       } else {
-        return -1;
+        return 0;
       }
     } else {
       // Editing old structureComponentDef.

@@ -44,7 +44,7 @@ export const ClassMystic: CharacterClass = {
   name: "Mystic",
   hitDieSize: 6,
   hpStep: 2,
-  primeRequisites: [CharacterStat.Wisdom, CharacterStat.Dexterity, CharacterStat.Constitution, CharacterStat.Charisma],
+  primeRequisites: [CharacterStat.Will, CharacterStat.Dexterity, CharacterStat.Constitution, CharacterStat.Charisma],
   statRequirements: {},
   xpToLevel: [0, 2450, 4900, 9800, 19600, 39200, 80000, 160000, 280000, 400000, 520000, 640000, 760000, 880000],
   weaponStyles: [WeaponStyle.OneHandOnly, WeaponStyle.DualWield, WeaponStyle.TwoHanded],
@@ -63,10 +63,10 @@ export const ClassMystic: CharacterClass = {
   maxBaseArmor: 0, // Nothing
   cleaveMultiplier: 1,
   savingThrows: {
-    [SavingThrowType.PetrificationAndParalysis]: [15, 14, 14, 13, 12, 12, 11, 10, 10, 7, 6, 6, 5, 4],
-    [SavingThrowType.PoisonAndDeath]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 6, 5, 5, 4, 3],
-    [SavingThrowType.BlastAndBreath]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 8, 7, 7, 6, 5],
-    [SavingThrowType.StaffsAndWands]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 8, 7, 7, 6, 5],
+    [SavingThrowType.Paralysis]: [15, 14, 14, 13, 12, 12, 11, 10, 10, 7, 6, 6, 5, 4],
+    [SavingThrowType.Death]: [14, 13, 13, 12, 11, 11, 10, 9, 9, 6, 5, 5, 4, 3],
+    [SavingThrowType.Blast]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 8, 7, 7, 6, 5],
+    [SavingThrowType.Implements]: [16, 15, 15, 14, 13, 13, 12, 11, 11, 8, 7, 7, 6, 5],
     [SavingThrowType.Spells]: [17, 16, 16, 15, 14, 14, 13, 12, 12, 9, 8, 8, 7, 6],
   },
   toHitBonus: [0, 1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7, 8, 9],

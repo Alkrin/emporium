@@ -1,0 +1,113 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: wheat;
+  width: 25vmin;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.stringListRoot {
+  position: relative;
+  margin-top: 1vmin;
+  width: 20vmin;
+  height: 20vmin;
+  box-sizing: border-box;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  background-color: black;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.dialogButton {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.actionButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
+}
+
+.stringListRowContentWrapper {
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+
+  &.selected {
+    box-shadow: inset 0 0 0 1px red;
+  }
+
+  &:hover {
+    box-shadow: inset 0 0 0 1px darkred;
+  }
+}
+
+.checkbox {
+  position: relative;
+}
+
+.string {
+  position: relative;
+  margin-left: 0.5vmin;
+  color: wheat;
+  font-size: 1vmin;
+}
+
+.prompt {
+  position: relative;
+  color: white;
+  font-size: 1.2vmin;
+}

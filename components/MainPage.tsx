@@ -25,6 +25,7 @@ import {
 import { refetchCharacters } from "../dataSources/CharactersDataSource";
 import {
   refetchAbilityDefs,
+  refetchCharacterClasses,
   refetchEquipmentSetItems,
   refetchEquipmentSets,
   refetchItemDefs,
@@ -206,6 +207,8 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchActivityOutcomes(this.props.dispatch);
                 this.setState({ nowLoading: "Armies" });
                 await refetchArmies(this.props.dispatch);
+                this.setState({ nowLoading: "Character Classes" });
+                await refetchCharacterClasses(this.props.dispatch);
                 this.setState({ nowLoading: "Characters" });
                 await refetchCharacters(this.props.dispatch);
                 this.setState({ nowLoading: "Contracts" });

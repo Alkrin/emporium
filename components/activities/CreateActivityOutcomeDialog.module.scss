@@ -81,11 +81,10 @@
   @extend .column;
   align-items: center;
   position: relative;
-  margin-top: 1vmin;
+  margin: 1vmin 1vmin 0 1vmin;
   border-radius: 0.5vmin;
   background-color: black;
   padding: 1vmin;
-  width: 92%;
 }
 
 .invalidDescription {
@@ -134,7 +133,7 @@
 .participantListContainer {
   position: relative;
   height: 20vmin;
-  width: 100%;
+  width: 29.5vmin;
   padding-top: 0.5vmin;
   padding-left: 0.5vmin;
   padding-right: 0.5vmin;
