@@ -17,7 +17,6 @@ import { BasicDialog } from "../../dialogs/BasicDialog";
 import { DatabaseEditingDialogFieldBoolean } from "./DatabaseEditingDialogFieldBoolean";
 import { DatabaseEditingDialogFieldSpells } from "./DatabaseEditingDialogFieldSpells";
 import { DatabaseEditingDialogFieldLongStringArray } from "./DatabaseEditingDialogFieldLongStringArray";
-import { DatabaseEditingDialogFieldSelectableStrings } from "./DatabaseEditingDialogFieldSelectableStrings";
 import { DatabaseEditingDialogFieldAbilityComponents } from "./DatabaseEditingDialogFieldAbilityComponents";
 import {
   DatabaseEditingDialogField,

@@ -30,8 +30,6 @@ class ADatabaseEditingDialogFieldNamedValues extends React.Component<Props> {
       return null;
     }
 
-    console.log(`FieldNamedValues`, def, this.props.value);
-
     return (
       <div className={styles.root}>
         <div className={styles.row}>
