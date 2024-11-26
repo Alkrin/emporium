@@ -87,7 +87,7 @@ class ADatabaseAbilitiesDialog extends React.Component<Props> {
   private async onSaveClicked(untypedData: SearchableDef): Promise<number> {
     const data = untypedData as AbilityDefData;
 
-    if (data.id === -1) {
+    if (data.id === 0) {
       // Brand new def.
       const res = await ServerAPI.createAbilityDef(data);
 
@@ -100,7 +100,7 @@ class ADatabaseAbilitiesDialog extends React.Component<Props> {
 
         return res.insertId;
       } else {
-        return -1;
+        return 0;
       }
     } else {
       // Editing old def.

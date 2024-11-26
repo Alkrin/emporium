@@ -958,7 +958,6 @@ class AServerAPI {
     } else {
       const classes: CharacterClassv2[] = [];
       data.forEach((sCharacterClass) => {
-        console.log(sCharacterClass);
         classes.push({
           ...sCharacterClass,
           // Convert server data to local data for all of these fields.

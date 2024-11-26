@@ -94,7 +94,7 @@ class ADatabaseTroopsDialog extends React.Component<Props> {
   private async onSaveClicked(untypedData: SearchableDef): Promise<number> {
     const data = untypedData as TroopDefData;
 
-    if (data.id === -1) {
+    if (data.id === 0) {
       // Brand new def.
       const res = await ServerAPI.createTroopDef(data);
 
@@ -107,7 +107,7 @@ class ADatabaseTroopsDialog extends React.Component<Props> {
 
         return res.insertId;
       } else {
-        return -1;
+        return 0;
       }
     } else {
       // Editing old def.
