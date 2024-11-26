@@ -354,7 +354,7 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
     }
 
     // Deselects the current item by clearing the id, but retains all other fields.
-    this.applyDataChange("id", -1);
+    this.applyDataChange("id", 0);
   }
 
   private async onSaveClicked(): Promise<void> {
