@@ -266,7 +266,7 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
 
   render(): React.ReactNode {
     const tabIndex: PassableTabIndex = { value: 1 };
-    const deletableClass = this.state.data.id === -1 ? styles.disabled : "";
+    const deletableClass = this.state.data.id === 0 ? styles.disabled : "";
 
     return (
       <div className={styles.root}>
@@ -322,7 +322,7 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
   }
 
   private onDefSelected(selectedDefId: number): void {
-    if (selectedDefId === -1) {
+    if (selectedDefId === 0) {
       this.setState(buildDefaultState(this.props.fieldDefs({})));
     } else {
       const newData: AnySearchableDef = {
