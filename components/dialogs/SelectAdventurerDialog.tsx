@@ -51,6 +51,8 @@ class ASelectAdventurerDialog extends React.Component<Props, State> {
                   gender: "o",
                   portrait_url: "",
                   class_name: "",
+                  class_id: 0,
+                  subclass_id: "",
                   level: 0,
                   strength: 0,
                   intelligence: 0,
