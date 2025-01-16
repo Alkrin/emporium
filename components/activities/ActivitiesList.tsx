@@ -35,7 +35,7 @@ class AActivitiesList extends React.Component<Props, State> {
 
     this.state = {
       filters: {
-        [FilterType.Owner]: FilterValueAny,
+        [FilterType.Owner]: this.props.currentUserId.toString(),
       },
     };
   }

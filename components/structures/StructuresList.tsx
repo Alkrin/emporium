@@ -43,7 +43,7 @@ class AStructuresList extends React.Component<Props, State> {
 
     this.state = {
       filters: {
-        [FilterType.Owner]: FilterValueAny,
+        [FilterType.Owner]: this.props.currentUserId.toString(),
         [FilterType.Location]: FilterValueAny,
       },
     };
@@ -56,9 +56,9 @@ class AStructuresList extends React.Component<Props, State> {
       <div className={styles.root}>
         <div className={styles.headerContainer}>
           <div className={styles.newStructureButton} onClick={this.onCreateNewClicked.bind(this)}>
-            Add New Structure
+            {"Add New Structure"}
           </div>
-          Filters
+          {"Filters"}
           <div className={styles.filtersContainer}>
             <FilterDropdowns
               filterOrder={[[FilterType.Owner], [FilterType.Location]]}

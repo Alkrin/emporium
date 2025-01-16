@@ -31,6 +31,7 @@ class ADatabaseEditingDialogFieldSpells extends React.Component<Props> {
     if (!def) {
       return null;
     }
+    let value = this.props.value ?? [];
 
     return (
       <div className={styles.root}>
@@ -42,9 +43,9 @@ class ADatabaseEditingDialogFieldSpells extends React.Component<Props> {
             tabIndex={this.props.tabIndex.value++}
           />
         </div>
-        {this.props.value.length > 0 && (
+        {value.length > 0 && (
           <div className={styles.associatedSpells}>
-            {this.props.value
+            {value
               .map((sid) => {
                 const def = this.props.allSpellDefs[sid];
                 const level = Object.values(def.type_levels).reduce<number>(
@@ -67,7 +68,7 @@ class ADatabaseEditingDialogFieldSpells extends React.Component<Props> {
         content: () => {
           return (
             <SelectSpellsDialog
-              preselectedSpellIds={this.props.value}
+              preselectedSpellIds={this.props.value ?? []}
               onSelectionConfirmed={(spell_ids) => {
                 this.props.onValueChange(spell_ids);
               }}

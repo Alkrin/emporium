@@ -9,7 +9,7 @@ import { convertItemForServer, convertServerItem } from "./lib/itemUtils";
 import { UserRole } from "./redux/userSlice";
 import {
   RequestBody_SetXP,
-  RequestBody_CreateOrEditCharacter as RequestBody_CreateOrEditCharacter,
+  RequestBody_CreateOrEditCharacter,
   RequestBody_EncryptString,
   RequestBody_LogIn,
   RequestBody_SetHP,
@@ -311,6 +311,8 @@ export interface CharacterData extends CharacterEquipmentData {
   gender: Gender;
   portrait_url: string;
   class_name: string;
+  class_id: number;
+  subclass_id: string;
   level: number;
   strength: number;
   intelligence: number;

@@ -30,6 +30,8 @@ class ADatabaseEditingDialogFieldNamedValues extends React.Component<Props> {
       return null;
     }
 
+    const value = Array.isArray(this.props.value) ? Array.from(this.props.value) : this.props.value;
+
     return (
       <div className={styles.root}>
         <div className={styles.row}>
@@ -42,7 +44,7 @@ class ADatabaseEditingDialogFieldNamedValues extends React.Component<Props> {
         </div>
 
         {this.props.allowMultiSelect ? (
-          (this.props.value ?? []).sort().map((v: any, index: number) => {
+          (value ?? []).sort().map((v: any, index: number) => {
             return (
               <div className={styles.row} key={index}>
                 <div className={styles.selections}>{this.getNameForValue(v)}</div>
@@ -51,7 +53,7 @@ class ADatabaseEditingDialogFieldNamedValues extends React.Component<Props> {
           })
         ) : (
           <div className={styles.row}>
-            <div className={styles.selections}>{this.getNameForValue(this.props.value)}</div>
+            <div className={styles.selections}>{this.getNameForValue(value)}</div>
           </div>
         )}
       </div>

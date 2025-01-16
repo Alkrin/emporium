@@ -59,12 +59,18 @@ class ADatabaseItemsDialog extends React.Component<Props> {
         labelTexts: ["Purchase Price", "GP"],
         fieldNames: ["cost"],
         fieldSizes: ["10vmin"],
+        extra: {
+          decimalDigits: 2,
+        },
       },
       {
         type: DatabaseEditingDialogField.Number,
         labelTexts: ["Sale Price", "GP"],
         fieldNames: ["sale"],
         fieldSizes: ["10vmin"],
+        extra: {
+          decimalDigits: 2,
+        },
       },
       {
         type: DatabaseEditingDialogField.Number,

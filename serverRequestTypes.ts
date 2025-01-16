@@ -61,6 +61,8 @@ export interface RequestBody_CreateOrEditCharacter {
   gender: string;
   portrait_url: string;
   class_name: string;
+  class_id: number;
+  subclass_id: string;
   level: number;
   strength: number;
   intelligence: number;
