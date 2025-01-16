@@ -43,6 +43,8 @@ interface State {
   level: number;
   xp: number;
   class: string;
+  class_id: number;
+  subclass_id: string;
   equipmentSetId: number;
   strength: number;
   intelligence: number;
@@ -102,6 +104,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           level: props.selectedCharacter.level,
           xp: props.selectedCharacter.xp,
           class: props.selectedCharacter.class_name,
+          class_id: props.selectedCharacter.class_id,
+          subclass_id: props.selectedCharacter.subclass_id,
           equipmentSetId: 0,
           strength: props.selectedCharacter.strength,
           intelligence: props.selectedCharacter.intelligence,
@@ -123,6 +127,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         level: 1,
         xp: 0,
         class: "---",
+        class_id: 0,
+        subclass_id: "",
         equipmentSetId: 0,
         strength: 9,
         intelligence: 9,
@@ -711,6 +717,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       gender: this.state.gender,
       portrait_url: "",
       class_name: this.state.class,
+      class_id: this.state.class_id,
+      subclass_id: this.state.subclass_id,
       level: this.state.level,
       strength: this.state.strength,
       intelligence: this.state.intelligence,

@@ -87,7 +87,7 @@ class ALogin extends React.Component<Props, State> {
             onKeyDown={this.onPasswordKeyDown.bind(this)}
           />
           <div className={styles.loginButton} onClick={this.onLoginClick.bind(this)} tabIndex={3}>
-            Log In
+            {"Log In"}
           </div>
           {this.state.isAuthenticating && (
             <div className={styles.authenticatingRoot}>
@@ -100,6 +100,10 @@ class ALogin extends React.Component<Props, State> {
               </div>
             </div>
           )}
+        </div>
+        <div className={styles.orLabel}>{"Or"}</div>
+        <div className={styles.loginButton} onClick={this.onLoginAsGuestClick.bind(this)} tabIndex={4}>
+          {"Log In As Guest"}
         </div>
         {this.state.errorMessage.length > 0 && <div className={styles.errorMessage}>{this.state.errorMessage}</div>}
       </>
@@ -128,6 +132,36 @@ class ALogin extends React.Component<Props, State> {
     setTimeout(() => {
       this.setState({ isAuthenticating: false });
       authLocalStore.setLastAuthedPlayerName(this.nameField?.value ?? "");
+
+      if ("error" in result) {
+        // Show error state.
+        this.setState({
+          errorMessage: "Credentials were rejected... is Caps Lock on?",
+        });
+      } else if (result.id) {
+        // Transition to logged-in page/state.
+        this.props.dispatch?.(setCurrentUser(result));
+        this.props.dispatch?.(setActiveRole(result.role));
+      }
+    }, 5000);
+  }
+
+  private async onLoginAsGuestClick(): Promise<void> {
+    if (this.state.isAuthenticating) {
+      return;
+    }
+
+    this.setState({
+      isAuthenticating: true,
+      errorMessage: "",
+      mostRecentUserName: "Guest",
+    });
+
+    const result = await ServerAPI.logIn("Guest", "password");
+
+    setTimeout(() => {
+      this.setState({ isAuthenticating: false });
+      authLocalStore.setLastAuthedPlayerName("Guest");
 
       if ("error" in result) {
         // Show error state.

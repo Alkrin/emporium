@@ -57,7 +57,7 @@ class ASelectArmiesDialog extends React.Component<Props, State> {
       endDate,
       selectedArmyIDs: [...props.preselectedArmyIDs],
       filters: {
-        [FilterType.Owner]: FilterValueAny,
+        [FilterType.Owner]: this.props.currentUserID.toString(),
         [FilterType.Location]: FilterValueAny,
         [FilterType.BusyStatus]: FilterValueBusyStatus.Available,
       },

@@ -205,6 +205,9 @@ export function getItemNameText(item?: ItemData, def?: ItemDefData): string {
       return `${def.name}${spellText}`;
     }
   }
+  if (def) {
+    return def.name;
+  }
   return "";
 }
 

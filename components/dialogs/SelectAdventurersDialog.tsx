@@ -57,7 +57,7 @@ class ASelectAdventurersDialog extends React.Component<Props, State> {
       endDate,
       selectedAdventurerIDs: [...props.preselectedAdventurerIDs],
       filters: {
-        [FilterType.Owner]: FilterValueAny,
+        [FilterType.Owner]: this.props.currentUserID.toString(),
         [FilterType.Location]: FilterValueAny,
         [FilterType.BusyStatus]: FilterValueBusyStatus.Available,
         [FilterType.Proficiency]: FilterValueAny,

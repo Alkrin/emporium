@@ -350,7 +350,7 @@ class AFilterDropdowns extends React.Component<Props> {
     return (
       <select
         className={styles.filterDropdown}
-        value={this.props.filterValues[FilterType.Owner] ?? FilterValueAny}
+        value={this.props.filterValues[FilterType.Owner] ?? this.props.currentUserID.toString()}
         onChange={(e) => {
           const newValues: FilterValues = {
             ...this.props.filterValues,

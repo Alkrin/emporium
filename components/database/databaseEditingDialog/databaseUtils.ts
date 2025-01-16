@@ -28,7 +28,7 @@ export function Database_StringToStringArray(text: string): string[] {
 }
 
 export function Database_StringArrayToString(arr: string[]): string {
-  return arr.join(",");
+  return (arr || []).join(",");
 }
 
 export interface ExtraFieldDataNumber {

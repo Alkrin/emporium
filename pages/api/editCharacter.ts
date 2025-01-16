@@ -8,13 +8,15 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     const queries: SQLQuery[] = [];
     queries.push({
-      query: `UPDATE characters SET user_id=?,name=?,gender=?,portrait_url=?,class_name=?,level=?,strength=?,intelligence=?,wisdom=?,dexterity=?,constitution=?,charisma=?,xp=?,hp=?,hit_dice=?,location_id=? WHERE id=?`,
+      query: `UPDATE characters SET user_id=?,name=?,gender=?,portrait_url=?,class_name=?,class_id=?,subclass_id=?,level=?,strength=?,intelligence=?,wisdom=?,dexterity=?,constitution=?,charisma=?,xp=?,hp=?,hit_dice=?,location_id=? WHERE id=?`,
       values: [
         b.user_id,
         b.name,
         b.gender,
         b.portrait_url,
         b.class_name,
+        b.class_id,
+        b.subclass_id,
         b.level,
         b.strength,
         b.intelligence,
