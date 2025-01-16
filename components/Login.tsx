@@ -101,10 +101,15 @@ class ALogin extends React.Component<Props, State> {
             </div>
           )}
         </div>
-        <div className={styles.orLabel}>{"Or"}</div>
-        <div className={styles.loginButton} onClick={this.onLoginAsGuestClick.bind(this)} tabIndex={4}>
-          {"Log In As Guest"}
-        </div>
+        {!this.state.isAuthenticating && (
+          <>
+            <div className={styles.orLabel}>{"Or"}</div>
+            <div className={styles.loginButton} onClick={this.onLoginAsGuestClick.bind(this)} tabIndex={4}>
+              {"Log In As Guest"}
+            </div>
+          </>
+        )}
+
         {this.state.errorMessage.length > 0 && <div className={styles.errorMessage}>{this.state.errorMessage}</div>}
       </>
     );
