@@ -1,20 +1,20 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideModal, showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import { showToaster } from "../../redux/toastersSlice";
-import ServerAPI, { CharacterData, LocationData, StorageData } from "../../serverAPI";
+import { hideModal, showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import { showToaster } from "../../../redux/toastersSlice";
+import ServerAPI, { CharacterData, LocationData, StorageData } from "../../../serverAPI";
 import styles from "./CreateStorageDialog.module.scss";
-import { deleteStorage, setActiveStorageId, updateStorage } from "../../redux/storageSlice";
-import { Dictionary } from "../../lib/dictionary";
-import { EditButton } from "../EditButton";
-import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
-import { getPersonalPile } from "../../lib/characterUtils";
-import { deleteSpellbook } from "../../redux/spellbooksSlice";
-import { deleteItem } from "../../redux/itemsSlice";
-import { getAllStorageAssociatedItemIds } from "../../lib/storageUtils";
-import { BasicDialog } from "../dialogs/BasicDialog";
+import { deleteStorage, setActiveStorageId, updateStorage } from "../../../redux/storageSlice";
+import { Dictionary } from "../../../lib/dictionary";
+import { EditButton } from "../../EditButton";
+import { SelectLocationDialog } from "../../dialogs/SelectLocationDialog";
+import { getPersonalPile } from "../../../lib/characterUtils";
+import { deleteSpellbook } from "../../../redux/spellbooksSlice";
+import { deleteItem } from "../../../redux/itemsSlice";
+import { getAllStorageAssociatedItemIds } from "../../../lib/storageUtils";
+import { BasicDialog } from "../../dialogs/BasicDialog";
 
 interface State {
   isSaving: boolean;

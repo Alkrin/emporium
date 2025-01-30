@@ -1,27 +1,27 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { RootState } from "../../redux/store";
+import { RootState } from "../../../redux/store";
 import styles from "./HenchmanHierarchySubPanel.module.scss";
-import { SubPanelCloseButton } from "../SubPanelCloseButton";
-import { Dictionary } from "../../lib/dictionary";
-import ServerAPI, { CharacterData } from "../../serverAPI";
+import { SubPanelCloseButton } from "../../SubPanelCloseButton";
+import { Dictionary } from "../../../lib/dictionary";
+import ServerAPI, { CharacterData } from "../../../serverAPI";
 import {
   BonusCalculations,
   getMaxMinionCountForCharacter,
   getRecruitmentRollBonusForCharacter,
   randomInt,
-} from "../../lib/characterUtils";
-import DropTarget from "../DropTarget";
-import TooltipSource from "../TooltipSource";
-import { setHenchmaster } from "../../redux/charactersSlice";
-import { showToaster } from "../../redux/toastersSlice";
-import Draggable from "../Draggable";
-import { DraggableHandle } from "../DraggableHandle";
-import BonusTooltip from "../BonusTooltip";
-import { showModal } from "../../redux/modalsSlice";
-import { InputSingleNumberDialog } from "../dialogs/InputSingleNumberDialog";
-import { refetchContracts } from "../../dataSources/ContractsDataSource";
+} from "../../../lib/characterUtils";
+import DropTarget from "../../DropTarget";
+import TooltipSource from "../../TooltipSource";
+import { setHenchmaster } from "../../../redux/charactersSlice";
+import { showToaster } from "../../../redux/toastersSlice";
+import Draggable from "../../Draggable";
+import { DraggableHandle } from "../../DraggableHandle";
+import BonusTooltip from "../../BonusTooltip";
+import { showModal } from "../../../redux/modalsSlice";
+import { InputSingleNumberDialog } from "../../dialogs/InputSingleNumberDialog";
+import { refetchContracts } from "../../../dataSources/ContractsDataSource";
 
 const DropTypeMinion = "Minion";
 

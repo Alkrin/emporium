@@ -543,6 +543,9 @@ class ADatabaseCharacterClassesDialog extends React.Component<Props> {
         entries.push([abilityDef.name, { abilityDefId: abilityDef.id, rank: 1, subtypes: [] }]);
       }
     });
+    entries.sort((a, b) => {
+      return a[0].localeCompare(b[0]);
+    });
 
     return entries;
   }

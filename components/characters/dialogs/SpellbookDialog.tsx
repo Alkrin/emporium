@@ -1,18 +1,18 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { ItemData, ItemDefData, SpellDefData, SpellbookEntryData } from "../../serverAPI";
+import { hideModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { ItemData, ItemDefData, SpellDefData, SpellbookEntryData } from "../../../serverAPI";
 import styles from "./SpellbookDialog.module.scss";
-import { showToaster } from "../../redux/toastersSlice";
-import { Dictionary } from "../../lib/dictionary";
-import TooltipSource from "../TooltipSource";
-import { SpellTooltip } from "../database/tooltips/SpellTooltip";
-import Draggable from "../Draggable";
-import { DraggableHandle } from "../DraggableHandle";
-import DropTarget from "../DropTarget";
-import { addSpellbookEntry, removeSpellbookEntry } from "../../redux/spellbooksSlice";
+import { showToaster } from "../../../redux/toastersSlice";
+import { Dictionary } from "../../../lib/dictionary";
+import TooltipSource from "../../TooltipSource";
+import { SpellTooltip } from "../../database/tooltips/SpellTooltip";
+import Draggable from "../../Draggable";
+import { DraggableHandle } from "../../DraggableHandle";
+import DropTarget from "../../DropTarget";
+import { addSpellbookEntry, removeSpellbookEntry } from "../../../redux/spellbooksSlice";
 
 interface State {
   spellsByTypeAndLevel: Dictionary<SpellDefData[]>;

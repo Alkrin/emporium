@@ -1,0 +1,112 @@
+.root {
+  @extend .column;
+  width: 17vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.centeredRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.combatTitle {
+  @extend .normalText;
+}
+
+.combatTypeContainer {
+  margin-bottom: 0.5vmin;
+  border-radius: 0.5vmin;
+  background-color: black;
+}
+
+.combatTypeName {
+  color: white;
+  font-size: 0.7rem;
+}
+
+.combatDamageRoll {
+  color: #ff5511;
+  font-size: 0.9rem;
+}
+
+.combatHitRoll {
+  margin-left: 1vmin;
+  color: green;
+  font-size: 0.9rem;
+}
+
+.combatTooltipRoot {
+  max-width: 45vmin;
+}
+
+.horizontalLine {
+  background-color: yellow;
+  height: 1px;
+  margin-bottom: 0.5vmin;
+}
+
+.tooltipTitle {
+  font-size: 1rem;
+  color: wheat;
+  min-width: 10vmin;
+  flex-grow: 1;
+}
+
+.tooltipValue {
+  margin-left: 1vmin;
+  font-size: 1rem;
+  color: yellow;
+}
+
+.tooltipDivider {
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
+
+.tooltipSourceRow {
+  @extend .row;
+  margin-top: 0.5vmin;
+}
+
+.tooltipSource {
+  flex-grow: 1;
+  font-size: 0.8rem;
+  color: gray;
+  text-align: justify;
+}
+
+.tooltipSourceValue {
+  margin-left: 0.5vmin;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 0, 0.5);
+}
+
+.tooltipConditionalHeader {
+  margin-top: 1vmin;
+  font-size: 0.8rem;
+  color: wheat;
+}

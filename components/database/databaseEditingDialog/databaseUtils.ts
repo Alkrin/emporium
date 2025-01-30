@@ -1,10 +1,12 @@
 import { Dictionary } from "../../../lib/dictionary";
+import { GameDefsReduxState } from "../../../redux/gameDefsSlice";
 
 export enum DatabaseEditingDialogField {
   AbilityComponents,
   AbilityFilter,
   AbilityInstance,
   Boolean,
+  DatabaseDef,
   Dictionary,
   LongString,
   LongStringArray,
@@ -55,6 +57,13 @@ export interface ExtraFieldDataDictionary {
   fields: DatabaseEditingDialogFieldDef[];
 }
 
+export interface ExtraFieldDataDatabaseDef {
+  /** The name of the matching dictionary in `redux.gameDefs` from which the selection list will be generated.  */
+  gameDefsName: keyof GameDefsReduxState;
+  /** If provided, this will render a tooltip for the associated gameDefs. */
+  renderTooltip?: (defId: number) => React.ReactNode;
+}
+
 export interface DatabaseEditingDialogFieldDef {
   type: DatabaseEditingDialogField;
   labelTexts: string[];
@@ -62,6 +71,7 @@ export interface DatabaseEditingDialogFieldDef {
   defaults?: any[];
   fieldSizes?: string[];
   extra?:
+    | ExtraFieldDataDatabaseDef
     | ExtraFieldDataDictionary
     | ExtraFieldDataNumber
     | ExtraFieldDataNumberArray
@@ -98,6 +108,11 @@ export function setDefaultValuesForFieldDef(target: Dictionary<any>, def: Databa
     }
     case DatabaseEditingDialogField.Boolean: {
       target[def.fieldNames[0]] = def.defaults?.[0] ?? false;
+      break;
+    }
+    case DatabaseEditingDialogField.DatabaseDef: {
+      // DB defs use numeric IDs, so default is 0 (no def selected).
+      target[def.fieldNames[0]] = def.defaults?.[0] ?? 0;
       break;
     }
     case DatabaseEditingDialogField.Dictionary: {

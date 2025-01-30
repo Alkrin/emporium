@@ -9,17 +9,17 @@ import Draggable from "../Draggable";
 import { DraggableHandle } from "../DraggableHandle";
 import TooltipSource from "../TooltipSource";
 import { ItemTooltip } from "../database/tooltips/ItemTooltip";
-import { DropTypeItem } from "./EditEquipmentSubPanel";
+import { DropTypeItem } from "./dialogs/EditEquipmentSubPanel";
 import DropTarget from "../DropTarget";
 import { getItemNameText } from "../../lib/itemUtils";
 import { showModal } from "../../redux/modalsSlice";
-import { SplitBundleDialog } from "./SplitBundleDialog";
+import { SplitBundleDialog } from "./dialogs/SplitBundleDialog";
 import { Tag } from "../../lib/tags";
-import { SpellbookDialog } from "./SpellbookDialog";
+import { SpellbookDialog } from "./dialogs/SpellbookDialog";
 import { SplitButton } from "../SplitButton";
 import { EditButton } from "../EditButton";
 import { SpellbookButton } from "../SpellbookButton";
-import { EditItemDialog } from "./EditItemDialog";
+import { EditItemDialog } from "./dialogs/EditItemDialog";
 import { SpellTooltip } from "../database/tooltips/SpellTooltip";
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {

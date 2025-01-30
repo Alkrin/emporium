@@ -1,18 +1,18 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { setCharacterHP, setCharacterRemainingCXPDeductible } from "../../redux/charactersSlice";
-import { hideModal, showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData } from "../../serverAPI";
+import { setCharacterHP, setCharacterRemainingCXPDeductible } from "../../../redux/charactersSlice";
+import { hideModal, showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { CharacterData } from "../../../serverAPI";
 import styles from "./EditCXPDeductibleDialog.module.scss";
 import {
   addCommasToNumber,
   getCXPDeductibleRemainingForCharacter,
   getCampaignXPDeductibleCapForLevel,
   getCharacterMaxHP,
-} from "../../lib/characterUtils";
-import { BasicDialog } from "../dialogs/BasicDialog";
+} from "../../../lib/characterUtils";
+import { BasicDialog } from "../../dialogs/BasicDialog";
 
 interface State {
   deductiblePaidString: string;

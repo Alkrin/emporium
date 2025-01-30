@@ -1,17 +1,17 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideModal, showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData, ContractData } from "../../serverAPI";
+import { hideModal, showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { CharacterData, ContractData } from "../../../serverAPI";
 import styles from "./EditContractDialog.module.scss";
-import { SavingVeil } from "../SavingVeil";
-import { ContractDefData, ContractId, ContractTerm, getContractTermKey } from "../../redux/gameDefsSlice";
+import { SavingVeil } from "../../SavingVeil";
+import { ContractDefData, ContractId, ContractTerm, getContractTermKey } from "../../../redux/gameDefsSlice";
 import dateFormat from "dateformat";
-import { ContractEditor } from "../ContractEditor";
-import { deleteContract, updateContract } from "../../redux/contractsSlice";
-import { Dictionary } from "../../lib/dictionary";
-import { BasicDialog } from "../dialogs/BasicDialog";
+import { ContractEditor } from "../../ContractEditor";
+import { deleteContract, updateContract } from "../../../redux/contractsSlice";
+import { Dictionary } from "../../../lib/dictionary";
+import { BasicDialog } from "../../dialogs/BasicDialog";
 
 interface State {
   isEditing: boolean;

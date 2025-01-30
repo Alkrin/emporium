@@ -105,8 +105,15 @@ class ADatabaseEquipmentSetsDialog extends React.Component<Props, State> {
           {"Save"}
         </div>
         <SavingVeil show={this.state.isSaving} />
+        <div className={styles.closeButton} onClick={this.onCloseClick.bind(this)}>
+          <div className={styles.bigX}>{"X"}</div>
+        </div>
       </div>
     );
+  }
+
+  private onCloseClick(): void {
+    this.props.dispatch?.(hideModal());
   }
 
   private renderIdSection(): React.ReactNode {

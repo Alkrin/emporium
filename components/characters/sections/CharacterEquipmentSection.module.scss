@@ -1,0 +1,94 @@
+.root {
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.centeredRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.horizontalLine {
+  background-color: yellow;
+  height: 1px;
+  margin-bottom: 0.5vmin;
+}
+
+.equipmentTitle {
+  @extend .normalText;
+  flex-grow: 1;
+}
+
+.equipmentEditButton {
+  margin-left: 0.5vmin;
+  margin-top: 0vmin;
+  margin-bottom: 0.4vmin;
+  width: 2vmin;
+  height: 2vmin;
+}
+
+.acTitle {
+  @extend .normalText;
+  width: 6vmin;
+}
+
+.infoAsterisk {
+  font-size: 0.8rem;
+  color: lime;
+}
+
+.tooltipRoot {
+  max-width: 45vmin;
+}
+
+.tooltipHeader {
+  @extend .row;
+  justify-content: space-between;
+}
+
+.tooltipConditionalHeader {
+  margin-top: 1vmin;
+  font-size: 0.8rem;
+  color: wheat;
+}
+
+.tooltipText {
+  font-size: 0.8rem;
+  color: white;
+  margin-top: 0.5vmin;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.tooltipSubtext {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: gray;
+  margin-top: 0.5vmin;
+  text-align: justify;
+  white-space: pre-wrap;
+}

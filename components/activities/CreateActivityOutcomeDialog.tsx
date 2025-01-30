@@ -37,13 +37,13 @@ import { SelectAdventurerInjuryDialog } from "../dialogs/SelectAdventurerInjuryD
 import { SelectArmyDialog } from "../dialogs/SelectArmyDialog";
 import { getStorageDisplayName } from "../../lib/storageUtils";
 import { SelectStorageDialog } from "../dialogs/SelectStorageDialog";
-import { CreateItemDialog } from "../characters/CreateItemDialog";
+import { CreateItemDialog } from "../characters/dialogs/CreateItemDialog";
 import { ScrollArea } from "../ScrollArea";
 import TooltipSource from "../TooltipSource";
 import { ItemTooltip } from "../database/tooltips/ItemTooltip";
 import { getItemNameText } from "../../lib/itemUtils";
 import { SpellTooltip } from "../database/tooltips/SpellTooltip";
-import { EditItemDialog } from "../characters/EditItemDialog";
+import { EditItemDialog } from "../characters/dialogs/EditItemDialog";
 import { DeleteButton } from "../DeleteButton";
 import { BasicDialog } from "../dialogs/BasicDialog";
 

@@ -79,6 +79,8 @@ import {
   RequestBody_EditAbilityDef,
   RequestBody_EditCharacterClass,
   RequestBody_CreateCharacterClass,
+  RequestBody_CreateProficiencyRoll,
+  RequestBody_EditProficiencyRoll,
 } from "./serverRequestTypes";
 import {
   AbilityFilterv2,
@@ -789,6 +791,12 @@ export interface ContractData {
   exercise_date: string;
 }
 
+export interface ProficiencyRollData {
+  id: number;
+  name: string;
+  description: string;
+}
+
 export function StringToNumbers(s: string): number[] {
   return s.split(",").map((s2) => {
     return +s2;
@@ -841,6 +849,7 @@ export type SpellbooksResult = ServerError | SpellbookEntryData[];
 export type RepertoiresResult = ServerError | RepertoireEntryData[];
 export type MapsResult = ServerError | MapData[];
 export type MapHexesResult = ServerError | ServerMapHexData[];
+export type ProficiencyRollsResult = ServerError | ProficiencyRollData[];
 export type LocationsResult = ServerError | ServerLocationData[];
 export type LocationCitiesResult = ServerError | LocationCityData[];
 export type LocationLairsResult = ServerError | LocationLairData[];
@@ -976,7 +985,7 @@ class AServerAPI {
           selectable_class_features: JSON.parse(sCharacterClass.selectable_class_features),
           subclasses: JSON.parse(sCharacterClass.subclasses),
           class_proficiencies_at: JSON.parse(sCharacterClass.class_proficiencies_at),
-          class_proficiencies: JSON.parse(sCharacterClass.class_proficiencies_at),
+          class_proficiencies: JSON.parse(sCharacterClass.class_proficiencies),
         });
       });
 
@@ -1108,6 +1117,18 @@ class AServerAPI {
       const itemData: ItemData[] = data.map(convertServerItem);
       return itemData;
     }
+  }
+
+  async fetchProficiencyRolls(): Promise<ProficiencyRollsResult> {
+    const res = await fetch("/api/fetchProficiencyRolls", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ProficiencyRollData[] = await res.json();
+    return data;
   }
 
   async fetchSpellbooks(): Promise<SpellbooksResult> {
@@ -1512,6 +1533,48 @@ class AServerAPI {
       id,
     };
     const res = await fetch("/api/deleteSpellDef", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createProficiencyRoll(def: ProficiencyRollData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateProficiencyRoll = {
+      ...def,
+    };
+    const res = await fetch("/api/createProficiencyRoll", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editProficiencyRoll(def: ProficiencyRollData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditProficiencyRoll = {
+      ...def,
+    };
+    const res = await fetch("/api/editProficiencyRoll", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteProficiencyRoll(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteProficiencyRoll", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

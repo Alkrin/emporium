@@ -1,9 +1,9 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { Dictionary } from "../../lib/dictionary";
-import { showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
+import { Dictionary } from "../../../lib/dictionary";
+import { showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
 import ServerAPI, {
   CharacterData,
   CharacterEquipmentData,
@@ -12,20 +12,20 @@ import ServerAPI, {
   ItemDefData,
   SpellDefData,
   StorageData,
-} from "../../serverAPI";
-import { AllClasses } from "../../staticData/characterClasses/AllClasses";
-import { ItemTooltip } from "../database/tooltips/ItemTooltip";
-import Draggable from "../Draggable";
-import { DraggableHandle } from "../DraggableHandle";
-import TooltipSource from "../TooltipSource";
+} from "../../../serverAPI";
+import { AllClasses } from "../../../staticData/characterClasses/AllClasses";
+import { ItemTooltip } from "../../database/tooltips/ItemTooltip";
+import Draggable from "../../Draggable";
+import { DraggableHandle } from "../../DraggableHandle";
+import TooltipSource from "../../TooltipSource";
 import { CreateItemDialog } from "./CreateItemDialog";
 import styles from "./EditEquipmentSubPanel.module.scss";
-import DropTarget from "../DropTarget";
-import { showToaster } from "../../redux/toastersSlice";
-import { ItemMoveParams } from "../../serverRequestTypes";
-import { deleteItem, updateItem } from "../../redux/itemsSlice";
-import { WeaponStyle } from "../../staticData/types/characterClasses";
-import { InventoriesList } from "./InventoriesList";
+import DropTarget from "../../DropTarget";
+import { showToaster } from "../../../redux/toastersSlice";
+import { ItemMoveParams } from "../../../serverRequestTypes";
+import { deleteItem, updateItem } from "../../../redux/itemsSlice";
+import { WeaponStyle } from "../../../staticData/types/characterClasses";
+import { InventoriesList } from "../InventoriesList";
 import {
   StonesToSixths,
   canItemsBeStacked,
@@ -35,10 +35,10 @@ import {
   getItemTotalWeight,
   getMaxBundleItemsForRoom,
   isContainerAInContainerB,
-} from "../../lib/itemUtils";
-import { setEquipment, updateCharacter } from "../../redux/charactersSlice";
+} from "../../../lib/itemUtils";
+import { setEquipment, updateCharacter } from "../../../redux/charactersSlice";
 import { SplitBundleDialog } from "./SplitBundleDialog";
-import { EquipmentSlotTag, Tag } from "../../lib/tags";
+import { EquipmentSlotTag, Tag } from "../../../lib/tags";
 import { SpellbookDialog } from "./SpellbookDialog";
 import {
   canCharacterDualWield,
@@ -49,17 +49,17 @@ import {
   isCharacterDualWielding,
   isCharacterWielding2hWeapon,
   whereIsItemEquipped,
-} from "../../lib/characterUtils";
-import { SubPanelCloseButton } from "../SubPanelCloseButton";
-import { EditButton } from "../EditButton";
-import { SplitButton } from "../SplitButton";
-import { SpellbookButton } from "../SpellbookButton";
+} from "../../../lib/characterUtils";
+import { SubPanelCloseButton } from "../../SubPanelCloseButton";
+import { EditButton } from "../../EditButton";
+import { SplitButton } from "../../SplitButton";
+import { SpellbookButton } from "../../SpellbookButton";
 import { EditItemDialog } from "./EditItemDialog";
-import { SellButton } from "../SellButton";
+import { SellButton } from "../../SellButton";
 import { SellItemDialog } from "./SellItemDialog";
-import { setActiveStorageId } from "../../redux/storageSlice";
-import { SpellTooltip } from "../database/tooltips/SpellTooltip";
-import { ScrollArea } from "../ScrollArea";
+import { setActiveStorageId } from "../../../redux/storageSlice";
+import { SpellTooltip } from "../../database/tooltips/SpellTooltip";
+import { ScrollArea } from "../../ScrollArea";
 
 export const DropTypeItem = "DropTypeItem";
 

@@ -10,7 +10,7 @@ import { CharactersList } from "./CharactersList";
 import styles from "./CharactersPanel.module.scss";
 import TooltipSource from "../TooltipSource";
 import { showSubPanel } from "../../redux/subPanelsSlice";
-import { HenchmanHierarchySubPanel } from "./HenchmanHierarchySubPanel";
+import { HenchmanHierarchySubPanel } from "./dialogs/HenchmanHierarchySubPanel";
 
 interface State {
   currentCharacterId: number;

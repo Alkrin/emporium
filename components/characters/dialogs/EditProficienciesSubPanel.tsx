@@ -1,27 +1,27 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { refetchProficiencies } from "../../dataSources/ProficienciesDataSource";
-import { Dictionary } from "../../lib/dictionary";
-import { RootState } from "../../redux/store";
-import { hideSubPanel } from "../../redux/subPanelsSlice";
-import ServerAPI, { CharacterData, ProficiencyData } from "../../serverAPI";
-import { AllClasses } from "../../staticData/characterClasses/AllClasses";
-import { AllProficiencies } from "../../staticData/proficiencies/AllProficiencies";
-import { GeneralProficiencies } from "../../staticData/proficiencies/GeneralProficiencies";
+import { refetchProficiencies } from "../../../dataSources/ProficienciesDataSource";
+import { Dictionary } from "../../../lib/dictionary";
+import { RootState } from "../../../redux/store";
+import { hideSubPanel } from "../../../redux/subPanelsSlice";
+import ServerAPI, { CharacterData, ProficiencyData } from "../../../serverAPI";
+import { AllClasses } from "../../../staticData/characterClasses/AllClasses";
+import { AllProficiencies } from "../../../staticData/proficiencies/AllProficiencies";
+import { GeneralProficiencies } from "../../../staticData/proficiencies/GeneralProficiencies";
 import {
   AbilityOrProficiency,
   GeneralProficienciesAt,
   ProficiencySource,
-} from "../../staticData/types/abilitiesAndProficiencies";
-import Draggable from "../Draggable";
-import { DraggableHandle } from "../DraggableHandle";
-import DropTarget from "../DropTarget";
-import TooltipSource from "../TooltipSource";
+} from "../../../staticData/types/abilitiesAndProficiencies";
+import Draggable from "../../Draggable";
+import { DraggableHandle } from "../../DraggableHandle";
+import DropTarget from "../../DropTarget";
+import TooltipSource from "../../TooltipSource";
 import styles from "./EditProficienciesSubPanel.module.scss";
-import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
-import { SubPanelCloseButton } from "../SubPanelCloseButton";
-import { AllInjuries } from "../../staticData/injuries/AllInjuries";
+import { AllClassFeatures } from "../../../staticData/classFeatures/AllClassFeatures";
+import { SubPanelCloseButton } from "../../SubPanelCloseButton";
+import { AllInjuries } from "../../../staticData/injuries/AllInjuries";
 
 const DropTypeClassProficiency = "ClassProficiency";
 const DropTypeGeneralProficiency = "GeneralProficiency";
