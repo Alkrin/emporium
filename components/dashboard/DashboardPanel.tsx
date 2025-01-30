@@ -25,10 +25,10 @@ import { refetchStructures } from "../../dataSources/StructuresDataSource";
 import { SavingVeil } from "../SavingVeil";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
 import { InfoButton } from "../InfoButton";
-import { EditMoneyDialog } from "../characters/EditMoneyDialog";
+import { EditMoneyDialog } from "../characters/dialogs/EditMoneyDialog";
 import { showSubPanel } from "../../redux/subPanelsSlice";
 import { SubPanelPane } from "../SubPanelPane";
-import { EditStoragesSubPanel } from "../characters/EditStoragesSubPanel";
+import { EditStoragesSubPanel } from "../characters/dialogs/EditStoragesSubPanel";
 import { setActiveStorageId } from "../../redux/storageSlice";
 import { BasicDialog } from "../dialogs/BasicDialog";
 

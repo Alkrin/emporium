@@ -1,15 +1,15 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideModal, showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import { ArmyData, CharacterData, ContractData, StorageData, StructureData } from "../../serverAPI";
+import { hideModal, showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import { ArmyData, CharacterData, ContractData, StorageData, StructureData } from "../../../serverAPI";
 import styles from "./CharacterContractsDialog.module.scss";
-import { Dictionary } from "../../lib/dictionary";
-import { ContractDefData, ContractId, ContractTerm, ContractTermType } from "../../redux/gameDefsSlice";
-import { EditButton } from "../EditButton";
+import { Dictionary } from "../../../lib/dictionary";
+import { ContractDefData, ContractId, ContractTerm, ContractTermType } from "../../../redux/gameDefsSlice";
+import { EditButton } from "../../EditButton";
 import { EditContractDialog } from "./EditContractDialog";
-import { getPersonalPile } from "../../lib/characterUtils";
+import { getPersonalPile } from "../../../lib/characterUtils";
 
 interface ReactProps {}
 

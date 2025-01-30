@@ -1,20 +1,20 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData, RepertoireEntryData, SpellDefData } from "../../serverAPI";
+import { hideModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { CharacterData, RepertoireEntryData, SpellDefData } from "../../../serverAPI";
 import styles from "./RepertoireDialog.module.scss";
-import { showToaster } from "../../redux/toastersSlice";
-import { Dictionary } from "../../lib/dictionary";
-import TooltipSource from "../TooltipSource";
-import { SpellTooltip } from "../database/tooltips/SpellTooltip";
-import Draggable from "../Draggable";
-import { DraggableHandle } from "../DraggableHandle";
-import DropTarget from "../DropTarget";
-import { SpellType } from "../../staticData/types/characterClasses";
-import { getCharacterPreparableSpells } from "../../lib/characterUtils";
-import { addRepertoireEntry, removeRepertoireEntry } from "../../redux/repertoiresSlice";
+import { showToaster } from "../../../redux/toastersSlice";
+import { Dictionary } from "../../../lib/dictionary";
+import TooltipSource from "../../TooltipSource";
+import { SpellTooltip } from "../../database/tooltips/SpellTooltip";
+import Draggable from "../../Draggable";
+import { DraggableHandle } from "../../DraggableHandle";
+import DropTarget from "../../DropTarget";
+import { SpellType } from "../../../staticData/types/characterClasses";
+import { getCharacterPreparableSpells } from "../../../lib/characterUtils";
+import { addRepertoireEntry, removeRepertoireEntry } from "../../../redux/repertoiresSlice";
 
 interface State {
   validSpells: SpellDefData[];

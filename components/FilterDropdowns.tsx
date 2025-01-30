@@ -12,7 +12,7 @@ import styles from "./FilterDropdowns.module.scss";
 import { CharacterData, LocationData, UserData } from "../serverAPI";
 import { Dictionary } from "../lib/dictionary";
 import { UserRole } from "../redux/userSlice";
-import { AbilityDisplayData } from "./characters/EditProficienciesSubPanel";
+import { AbilityDisplayData } from "./characters/dialogs/EditProficienciesSubPanel";
 import { AllProficiencies } from "../staticData/proficiencies/AllProficiencies";
 import { AbilityOrProficiency } from "../staticData/types/abilitiesAndProficiencies";
 import { getProficiencyRankForCharacter } from "../lib/characterUtils";

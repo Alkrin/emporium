@@ -87,10 +87,13 @@ class ADatabaseEditingDialogFieldNumberArray extends React.Component<Props, Stat
           (0).toFixed(this.getDecimalDigits(this.props.def));
       }
       this.setState({ valueStrings });
-    } else if (this.props.value !== undefined && this.props.value !== prevProps.value) {
-      // If the value changes, update the state array to match.
-      this.setState({ valueStrings: this.props.value.map((v) => v.toFixed(this.getDecimalDigits(this.props.def))) });
     }
+    requestAnimationFrame(() => {
+      if (this.props.value !== undefined && this.props.value !== prevProps.value) {
+        // If the value changes, update the state array to match.
+        this.setState({ valueStrings: this.props.value.map((v) => v.toFixed(this.getDecimalDigits(this.props.def))) });
+      }
+    });
   }
 
   private getDecimalDigits(def: DatabaseEditingDialogFieldDef): number {

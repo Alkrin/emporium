@@ -1,18 +1,18 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData, ProficiencyData } from "../../serverAPI";
+import { hideModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { CharacterData, ProficiencyData } from "../../../serverAPI";
 import styles from "./EditInjuriesDialog.module.scss";
-import { showToaster } from "../../redux/toastersSlice";
-import TooltipSource from "../TooltipSource";
-import Draggable from "../Draggable";
-import { DraggableHandle } from "../DraggableHandle";
-import DropTarget from "../DropTarget";
-import { AbilityOrProficiency, ProficiencySource } from "../../staticData/types/abilitiesAndProficiencies";
-import { AllInjuries, AllInjuriesArray } from "../../staticData/injuries/AllInjuries";
-import { addInjury, removeInjury } from "../../redux/proficienciesSlice";
+import { showToaster } from "../../../redux/toastersSlice";
+import TooltipSource from "../../TooltipSource";
+import Draggable from "../../Draggable";
+import { DraggableHandle } from "../../DraggableHandle";
+import DropTarget from "../../DropTarget";
+import { AbilityOrProficiency, ProficiencySource } from "../../../staticData/types/abilitiesAndProficiencies";
+import { AllInjuries, AllInjuriesArray } from "../../../staticData/injuries/AllInjuries";
+import { addInjury, removeInjury } from "../../../redux/proficienciesSlice";
 
 interface State {
   isSaving: boolean;

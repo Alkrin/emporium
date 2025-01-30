@@ -13,7 +13,7 @@ import styles from "./BonusTooltip.module.scss";
 
 interface ReactProps {
   header: string;
-  calc: BonusCalculations;
+  calc?: BonusCalculations;
   isFlatValue?: boolean;
   hideZeroBonus?: boolean;
 }
@@ -32,11 +32,13 @@ class BonusTooltip extends React.Component<Props> {
         <div className={styles.row}>
           <div className={styles.title}>{header}</div>
           {!hideZeroBonus && (
-            <div className={styles.value}>{`${!isFlatValue && calc.totalBonus > 0 ? "+" : ""}${calc.totalBonus}`}</div>
+            <div className={styles.value}>{`${!isFlatValue && (calc?.totalBonus ?? 0) > 0 ? "+" : ""}${
+              calc?.totalBonus ?? 0
+            }`}</div>
           )}
         </div>
         <div className={styles.divider} />
-        {calc.sources.map(([text, value]) => {
+        {calc?.sources.map(([text, value]) => {
           return (
             <div className={styles.sourceRow} key={text}>
               <div className={styles.source}>{text}</div>
@@ -44,11 +46,11 @@ class BonusTooltip extends React.Component<Props> {
             </div>
           );
         })}
-        {calc.conditionalSources.length > 0 ? (
+        {(calc?.conditionalSources.length ?? 0) > 0 ? (
           <>
             <div className={styles.conditionalHeader}>Conditional Bonuses</div>
             <div className={styles.divider} />
-            {calc.conditionalSources.map(([text, value]) => {
+            {calc?.conditionalSources.map(([text, value]) => {
               return (
                 <div className={styles.sourceRow} key={text}>
                   <div className={styles.source}>{text}</div>

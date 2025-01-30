@@ -1,13 +1,13 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideModal, showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { StorageData } from "../../serverAPI";
+import { hideModal, showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { StorageData } from "../../../serverAPI";
 import styles from "./EditMoneyDialog.module.scss";
-import { updateStorage } from "../../redux/storageSlice";
-import { getStorageDisplayName } from "../../lib/storageUtils";
-import { BasicDialog } from "../dialogs/BasicDialog";
+import { updateStorage } from "../../../redux/storageSlice";
+import { getStorageDisplayName } from "../../../lib/storageUtils";
+import { BasicDialog } from "../../dialogs/BasicDialog";
 
 interface State {
   gpTotalString: string;

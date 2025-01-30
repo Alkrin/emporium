@@ -30,6 +30,7 @@ import { DatabaseEditingDialogFieldAbilityInstance } from "./DatabaseEditingDial
 import { AbilityFilterv2, AbilityInstancev2 } from "../../../staticData/types/abilitiesAndProficiencies";
 import { DatabaseEditingDialogFieldAbilityFilter } from "./DatabaseEditingDialogFieldAbilityFilter";
 import { DatabaseEditingDialogFieldNamedValues } from "./DatabaseEditingDialogFieldNamedValues";
+import { DatabaseEditingDialogFieldDatabaseDef } from "./DatabaseEditingDialogFieldDatabaseDef";
 
 type AnySearchableDef = SearchableDef & {
   [key: string]: any;
@@ -95,6 +96,17 @@ export function renderDatabaseEditingDialogField(
           def={def}
           value={data[def.fieldNames[0] ?? ""]}
           onValueChange={(value: boolean) => applyDataChange(def.fieldNames[0], value)}
+        />
+      );
+    }
+    case DatabaseEditingDialogField.DatabaseDef: {
+      return (
+        <DatabaseEditingDialogFieldDatabaseDef
+          key={def.fieldNames[0]}
+          tabIndex={tabIndex}
+          def={def}
+          value={data[def.fieldNames[0] ?? 0]}
+          onValueChange={(value: number) => applyDataChange(def.fieldNames[0], value)}
         />
       );
     }
@@ -305,8 +317,15 @@ class ADatabaseEditingDialog extends React.Component<Props, State> {
           </div>
         </div>
         <SavingVeil show={this.state.isSaving} />
+        <div className={styles.closeButton} onClick={this.onCloseClick.bind(this)}>
+          <div className={styles.bigX}>{"X"}</div>
+        </div>
       </div>
     );
+  }
+
+  private onCloseClick(): void {
+    this.props.dispatch?.(hideModal());
   }
 
   private renderField(tabIndex: PassableTabIndex, def: DatabaseEditingDialogFieldDef, index: number): React.ReactNode {

@@ -7,6 +7,7 @@ import {
   updateEquipmentSetItems,
   updateEquipmentSets,
   updateItemDefs,
+  updateProficiencyRolls,
   updateSpellDefs,
   updateStructureComponentDefs,
   updateTroopDefs,
@@ -14,62 +15,6 @@ import {
 import { showModal } from "../redux/modalsSlice";
 import ServerAPI from "../serverAPI";
 import { BasicDialog } from "../components/dialogs/BasicDialog";
-
-export async function refetchCharacterClasses(dispatch: Dispatch): Promise<void> {
-  const result = await ServerAPI.fetchCharacterClasses();
-
-  if ("error" in result) {
-    dispatch(
-      showModal({
-        id: "CharacterClass Fetch Error",
-        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch CharacterClass data"} />,
-        escapable: true,
-      })
-    );
-  } else {
-    // Send the whole batch at once so we can axe defs that no longer exist.
-    dispatch(updateCharacterClasses(result));
-  }
-}
-
-export async function refetchItemDefs(dispatch: Dispatch): Promise<void> {
-  const result = await ServerAPI.fetchItemDefs();
-
-  if ("error" in result) {
-    dispatch(
-      showModal({
-        id: "ItemDef Fetch Error",
-        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ItemDef data"} />,
-        escapable: true,
-      })
-    );
-  } else {
-    // Send the whole batch at once so we can axe defs that no longer exist.
-    result.forEach((idd) => {
-      // Force "booleans" to be true booleans.
-      idd.has_charges = !!idd.has_charges;
-      idd.fixed_weight = !!idd.fixed_weight;
-    });
-    dispatch(updateItemDefs(result));
-  }
-}
-
-export async function refetchSpellDefs(dispatch: Dispatch): Promise<void> {
-  const result = await ServerAPI.fetchSpellDefs();
-
-  if ("error" in result) {
-    dispatch(
-      showModal({
-        id: "SpellDef Fetch Error",
-        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch SpellDef data"} />,
-        escapable: true,
-      })
-    );
-  } else {
-    // Send the whole batch at once so we can axe defs that no longer exist.
-    dispatch(updateSpellDefs(result));
-  }
-}
 
 export async function refetchAbilityDefs(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchAbilityDefs();
@@ -85,6 +30,23 @@ export async function refetchAbilityDefs(dispatch: Dispatch): Promise<void> {
   } else {
     // Send the whole batch at once so we can axe defs that no longer exist.
     dispatch(updateAbilityDefs(result));
+  }
+}
+
+export async function refetchCharacterClasses(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchCharacterClasses();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "CharacterClass Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch CharacterClass data"} />,
+        escapable: true,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe defs that no longer exist.
+    dispatch(updateCharacterClasses(result));
   }
 }
 
@@ -119,6 +81,62 @@ export async function refetchEquipmentSetItems(dispatch: Dispatch): Promise<void
   } else {
     // Send the whole batch at once so we can axe defs that no longer exist.
     dispatch(updateEquipmentSetItems(result));
+  }
+}
+
+export async function refetchItemDefs(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchItemDefs();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "ItemDef Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ItemDef data"} />,
+        escapable: true,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe defs that no longer exist.
+    result.forEach((idd) => {
+      // Force "booleans" to be true booleans.
+      idd.has_charges = !!idd.has_charges;
+      idd.fixed_weight = !!idd.fixed_weight;
+    });
+    dispatch(updateItemDefs(result));
+  }
+}
+
+export async function refetchProficiencyRolls(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchProficiencyRolls();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "ProficiencyRolls Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ProficiencyRolls data"} />,
+        escapable: true,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe defs that no longer exist.
+    dispatch(updateProficiencyRolls(result));
+  }
+}
+
+export async function refetchSpellDefs(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchSpellDefs();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "SpellDef Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch SpellDef data"} />,
+        escapable: true,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe defs that no longer exist.
+    dispatch(updateSpellDefs(result));
   }
 }
 
@@ -164,6 +182,7 @@ export class GameDefsDataSource extends ExternalDataSource {
       await refetchEquipmentSets(this.dispatch);
       await refetchEquipmentSetItems(this.dispatch);
       await refetchItemDefs(this.dispatch);
+      await refetchProficiencyRolls(this.dispatch);
       await refetchSpellDefs(this.dispatch);
       await refetchStructureComponentDefs(this.dispatch);
       await refetchTroopDefs(this.dispatch);

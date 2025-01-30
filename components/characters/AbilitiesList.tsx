@@ -12,7 +12,7 @@ import TooltipSource from "../TooltipSource";
 import styles from "./AbilitiesList.module.scss";
 import { getProficiencyRankForCharacter } from "../../lib/characterUtils";
 import { AllClassFeatures } from "../../staticData/classFeatures/AllClassFeatures";
-import { AbilityDisplayData } from "./EditProficienciesSubPanel";
+import { AbilityDisplayData } from "./dialogs/EditProficienciesSubPanel";
 import { AllInjuries } from "../../staticData/injuries/AllInjuries";
 import { getRomanNumerals } from "../../lib/stringUtils";
 

@@ -1,13 +1,13 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { setCharacterHP } from "../../redux/charactersSlice";
-import { hideModal, showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData } from "../../serverAPI";
+import { setCharacterHP } from "../../../redux/charactersSlice";
+import { hideModal, showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { CharacterData } from "../../../serverAPI";
 import styles from "./EditHPDialog.module.scss";
-import { getCharacterMaxHP } from "../../lib/characterUtils";
-import { BasicDialog } from "../dialogs/BasicDialog";
+import { getCharacterMaxHP } from "../../../lib/characterUtils";
+import { BasicDialog } from "../../dialogs/BasicDialog";
 
 interface State {
   hpTotal: number;

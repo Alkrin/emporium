@@ -1,13 +1,13 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { setCharacterXP } from "../../redux/charactersSlice";
-import { hideModal, showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData } from "../../serverAPI";
-import { AllClasses } from "../../staticData/characterClasses/AllClasses";
+import { setCharacterXP } from "../../../redux/charactersSlice";
+import { hideModal, showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { CharacterData } from "../../../serverAPI";
+import { AllClasses } from "../../../staticData/characterClasses/AllClasses";
 import styles from "./EditXPDialog.module.scss";
-import { BasicDialog } from "../dialogs/BasicDialog";
+import { BasicDialog } from "../../dialogs/BasicDialog";
 
 interface State {
   xpTotalString: string;

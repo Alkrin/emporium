@@ -23,7 +23,11 @@ import { ProficiencyFightingStyle } from "../staticData/proficiencies/Proficienc
 import { ProficiencyMartialTraining } from "../staticData/proficiencies/ProficiencyMartialTraining";
 import { ProficiencySwashbuckling } from "../staticData/proficiencies/ProficiencySwashbuckling";
 import { ProficiencyWeaponFinesse } from "../staticData/proficiencies/ProficiencyWeaponFinesse";
-import { GeneralProficienciesAt, ProficiencySource } from "../staticData/types/abilitiesAndProficiencies";
+import {
+  AbilityInstancev2,
+  GeneralProficienciesAt,
+  ProficiencySource,
+} from "../staticData/types/abilitiesAndProficiencies";
 import {
   WeaponStyle,
   CharacterStat,
@@ -770,8 +774,8 @@ function generateMeleeAttack(characterId: number, weapons: ItemData[], naturalWe
 
   const weapon1 = weapons.length > 0 ? weapons[0] : null;
   const weapon2 = weapons.length > 1 ? weapons[1] : null;
-  const def1 = redux.gameDefs.items[weapon1?.def_id ?? ""];
-  const def2 = redux.gameDefs.items[weapon2?.def_id ?? ""];
+  const def1 = redux.gameDefs.items[weapon1?.def_id ?? 0];
+  const def2 = redux.gameDefs.items[weapon2?.def_id ?? 0];
 
   const data: AttackData = {
     name: naturalWeapon?.name ?? "Unarmed Strike",
@@ -1488,4 +1492,91 @@ export function getEncumbranceLevelForCharacter(characterId: number): Encumbranc
   }
 
   return encumbranceLevel;
+}
+
+export interface AbilityComponentInstance {
+  abilityId: number;
+  abilityComponentId: string;
+  subtype: string;
+  data: Record<string, any>;
+  // Active component power is based on either a rank or a character level.
+  // Proficiency Rolls grant an ability based on how many ranks of the proficiency are active,
+  // and a Fireball spell-like ability might explicitly cast at a given caster level.
+  rank: number;
+  characterLevel: number;
+}
+
+// First key is abilityDefIds.  Second key is subtype or empty string if no subtype.  Final value is rank.
+export function getActiveAbilityRanksForCharacter(character: CharacterData): Record<number, Record<string, number>> {
+  const redux = store.getState();
+
+  const abilityRanks: Record<number, Record<string, number>> = {};
+
+  // Abilities from class and subclass.
+  const characterClass = redux.gameDefs.characterClasses[character.class_id];
+  const characterSubclass = characterClass?.subclasses?.find((sc) => sc.name === character.subclass_id);
+
+  function adjustRanksForAbilityInstance(instance: AbilityInstancev2): void {
+    const abilityDef = redux.gameDefs.abilities[instance.abilityDefId];
+    // Make sure there is somewhere to track ranks.
+    if (!abilityRanks[instance.abilityDefId]) {
+      abilityRanks[instance.abilityDefId] = {};
+    }
+    const subtype = instance.subtype ?? "";
+    const earnedRank = character.level >= instance.minLevel ? instance.rank : 0;
+    const totalRank = (abilityRanks[instance.abilityDefId][subtype] ?? 0) + earnedRank;
+    // Cap at max rank for the ability.
+    abilityRanks[instance.abilityDefId][subtype] = Math.min(totalRank, abilityDef.max_ranks);
+  }
+
+  characterClass.class_features.forEach(adjustRanksForAbilityInstance);
+  characterSubclass?.class_features.forEach(adjustRanksForAbilityInstance);
+
+  // TODO: Abilities from assigned proficiencies.  Note that at least in v1, "selectable class features" fall in this category.
+  // TODO: I think that I need to rewrite how assigned proficiencies are tracked.  Not sure they deserve their own table in the DB.
+  // TODO: Might be better to have them as a Record field on the character instance, stored as JSON.
+
+  return abilityRanks;
+}
+
+// Result maps AbilityComponentIds to arrays of all component instances with that id.
+export function getActiveAbilityComponentsForCharacter(
+  character: CharacterData
+): Record<string, AbilityComponentInstance[]> {
+  const redux = store.getState();
+
+  const allComponents: Record<string, AbilityComponentInstance[]> = {};
+
+  // Maps the id of the ability to the total number of active ranks (capped by max rank).
+  const abilityRanks = getActiveAbilityRanksForCharacter(character);
+  Object.entries(abilityRanks).forEach(([abilityDefIdString, subtypes]) => {
+    const abilityDef = redux.gameDefs.abilities[+abilityDefIdString];
+
+    Object.entries(subtypes).forEach(([subtype, rank]) => {
+      Object.entries(abilityDef.components).forEach(([abilityComponentId, data]) => {
+        const instance: AbilityComponentInstance = {
+          abilityId: abilityDef.id,
+          abilityComponentId,
+          subtype,
+          data,
+          rank,
+          characterLevel: character.level,
+        };
+        if (!allComponents[abilityComponentId]) {
+          allComponents[abilityComponentId] = [];
+        }
+        allComponents[abilityComponentId].push(instance);
+      });
+    });
+  });
+
+  // TODO: Components from equipped / carried gear.
+
+  // TODO: Here's where we should filter the list of allComponents.
+  // TODO: For instance, some component types might not stack, or we might need to combine some?  I'm thinking of the weird
+  //       ranger proficiency that combines with Friend of Birds and Beasts.  Both proficiencies can only be had at one rank,
+  //       but they need to combine to have two component ranks...  They're extra weird for sure.
+  // TODO: In the meantime, though, I'm not sure if that would happen here or at point of use.
+
+  return allComponents;
 }

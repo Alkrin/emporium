@@ -1,12 +1,12 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { ItemData, ItemDefData } from "../../serverAPI";
+import { hideModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { ItemData, ItemDefData } from "../../../serverAPI";
 import styles from "./SplitBundleDialog.module.scss";
-import { showToaster } from "../../redux/toastersSlice";
-import { updateItem } from "../../redux/itemsSlice";
+import { showToaster } from "../../../redux/toastersSlice";
+import { updateItem } from "../../../redux/itemsSlice";
 
 interface State {
   bundleCount: number;

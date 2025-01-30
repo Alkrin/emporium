@@ -1,26 +1,26 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { hideModal, showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import ServerAPI, { CharacterData, StorageData } from "../../serverAPI";
+import { hideModal, showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import ServerAPI, { CharacterData, StorageData } from "../../../serverAPI";
 import styles from "./EditCostOfLivingDialog.module.scss";
 import dateFormat from "dateformat";
 import {
   getApparentLevelForCharacter,
   getCostOfLivingForCharacterLevel,
   getMaintenanceStatusForCharacter,
-} from "../../lib/characterUtils";
-import { InfoButton } from "../InfoButton";
-import { EditButton } from "../EditButton";
-import { SelectStorageDialog } from "../dialogs/SelectStorageDialog";
-import { getStorageDisplayName } from "../../lib/storageUtils";
-import { Dictionary } from "../../lib/dictionary";
-import { SavingVeil } from "../SavingVeil";
-import { refetchCharacters } from "../../dataSources/CharactersDataSource";
-import { refetchStorages } from "../../dataSources/StoragesDataSource";
-import { showToaster } from "../../redux/toastersSlice";
-import { BasicDialog } from "../dialogs/BasicDialog";
+} from "../../../lib/characterUtils";
+import { InfoButton } from "../../InfoButton";
+import { EditButton } from "../../EditButton";
+import { SelectStorageDialog } from "../../dialogs/SelectStorageDialog";
+import { getStorageDisplayName } from "../../../lib/storageUtils";
+import { Dictionary } from "../../../lib/dictionary";
+import { SavingVeil } from "../../SavingVeil";
+import { refetchCharacters } from "../../../dataSources/CharactersDataSource";
+import { refetchStorages } from "../../../dataSources/StoragesDataSource";
+import { showToaster } from "../../../redux/toastersSlice";
+import { BasicDialog } from "../../dialogs/BasicDialog";
 
 interface State {
   sourceStorageId: number;

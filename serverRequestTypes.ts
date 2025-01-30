@@ -13,6 +13,7 @@ import {
   LocationLairData,
   MapData,
   ProficiencyData,
+  ProficiencyRollData,
   ServerAbilityDefData,
   ServerActivityData,
   ServerActivityOutcomeData,
@@ -288,6 +289,9 @@ export type RequestBody_EditMap = MapData;
 // MapHex
 export type RequestBody_CreateMapHex = Omit<ServerMapHexData, "id">;
 export type RequestBody_EditMapHex = ServerMapHexData;
+// ProficiencyRoll
+export type RequestBody_CreateProficiencyRoll = Omit<ProficiencyRollData, "id">;
+export type RequestBody_EditProficiencyRoll = ProficiencyRollData;
 // SpellDef
 export type RequestBody_CreateSpellDef = Omit<ServerSpellDefData, "id">;
 export type RequestBody_EditSpellDef = ServerSpellDefData;

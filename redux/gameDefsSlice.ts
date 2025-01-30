@@ -8,6 +8,7 @@ import {
   EquipmentSetData,
   EquipmentSetItemData,
   ItemDefData,
+  ProficiencyRollData,
   SpellDefData,
   StructureComponentDefData,
   TroopDefData,
@@ -25,17 +26,18 @@ export interface UpdateItemsForEquipmentSetParams {
   items: EquipmentSetItemData[];
 }
 
-interface GameDefsReduxState {
-  abilities: Dictionary<AbilityDefData>;
-  characterClasses: Dictionary<CharacterClassv2>;
-  contracts: Dictionary<ContractDefData>;
-  equipmentSets: Dictionary<EquipmentSetData>;
-  equipmentSetsByClass: Dictionary<EquipmentSetData[]>;
-  equipmentSetItemsBySet: Dictionary<EquipmentSetItemData[]>;
-  items: Dictionary<ItemDefData>;
-  spells: Dictionary<SpellDefData>;
-  structureComponents: Dictionary<StructureComponentDefData>;
-  troops: Dictionary<TroopDefData>;
+export interface GameDefsReduxState {
+  abilities: Record<number, AbilityDefData>;
+  characterClasses: Record<number, CharacterClassv2>;
+  contracts: Record<number, ContractDefData>;
+  equipmentSets: Record<number, EquipmentSetData>;
+  equipmentSetsByClass: Record<string, EquipmentSetData[]>;
+  equipmentSetItemsBySet: Record<number, EquipmentSetItemData[]>;
+  items: Record<number, ItemDefData>;
+  proficiencyRolls: Record<number, ProficiencyRollData>;
+  spells: Record<number, SpellDefData>;
+  structureComponents: Record<number, StructureComponentDefData>;
+  troops: Record<number, TroopDefData>;
 }
 
 function buildDefaultGameDefsReduxState(): GameDefsReduxState {
@@ -47,6 +49,7 @@ function buildDefaultGameDefsReduxState(): GameDefsReduxState {
     equipmentSetsByClass: {},
     equipmentSetItemsBySet: {},
     items: {},
+    proficiencyRolls: {},
     spells: {},
     structureComponents: {},
     troops: {},
@@ -221,6 +224,18 @@ export const gameDefsSlice = createSlice({
     deleteAbilityDef: (state: GameDefsReduxState, action: PayloadAction<number>) => {
       delete state.abilities[action.payload];
     },
+    updateProficiencyRolls: (state: GameDefsReduxState, action: PayloadAction<ProficiencyRollData[]>) => {
+      state.proficiencyRolls = {};
+      action.payload.forEach((prd) => {
+        state.proficiencyRolls[prd.id] = prd;
+      });
+    },
+    updateProficiencyRoll: (state: GameDefsReduxState, action: PayloadAction<ProficiencyRollData>) => {
+      state.proficiencyRolls[action.payload.id] = action.payload;
+    },
+    deleteProficiencyRoll: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.proficiencyRolls[action.payload];
+    },
     updateEquipmentSets: (state: GameDefsReduxState, action: PayloadAction<EquipmentSetData[]>) => {
       // Start empty.
       const p: Dictionary<EquipmentSetData[]> = {};
@@ -332,6 +347,9 @@ export const {
   updateEquipmentSet,
   updateItemsForEquipmentSet,
   deleteEquipmentSet,
+  updateProficiencyRolls,
+  updateProficiencyRoll,
+  deleteProficiencyRoll,
   updateStructureComponentDefs,
   updateStructureComponentDef,
   deleteStructureComponentDef,

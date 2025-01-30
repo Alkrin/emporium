@@ -5,6 +5,14 @@ export function getRomanNumerals(num: number): string {
   return numerals[num] ?? "";
 }
 
+export function buildAbilityName(baseName: string, subtype: string, rank: number): string {
+  if ((subtype?.length ?? 0) > 0) {
+    return `${baseName} (${subtype}) ${getRomanNumerals(rank)}`;
+  } else {
+    return `${baseName} ${getRomanNumerals(rank)}`;
+  }
+}
+
 let last = 0;
 export function genID(prefix: string = "") {
   const now = Date.now();

@@ -1,17 +1,17 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { Dictionary } from "../../lib/dictionary";
-import { hideModal, showModal } from "../../redux/modalsSlice";
-import { RootState } from "../../redux/store";
-import { showToaster } from "../../redux/toastersSlice";
-import ServerAPI, { CharacterData, ItemData, ItemDefData, SpellDefData, StorageData } from "../../serverAPI";
+import { Dictionary } from "../../../lib/dictionary";
+import { hideModal, showModal } from "../../../redux/modalsSlice";
+import { RootState } from "../../../redux/store";
+import { showToaster } from "../../../redux/toastersSlice";
+import ServerAPI, { CharacterData, ItemData, ItemDefData, SpellDefData, StorageData } from "../../../serverAPI";
 import styles from "./EditItemDialog.module.scss";
-import { EditButton } from "../EditButton";
-import { SavingVeil } from "../SavingVeil";
-import { SelectAdventurersDialog } from "../dialogs/SelectAdventurersDialog";
-import { updateItem } from "../../redux/itemsSlice";
-import { SelectSpellsDialog } from "../dialogs/SelectSpellsDialog";
+import { EditButton } from "../../EditButton";
+import { SavingVeil } from "../../SavingVeil";
+import { SelectAdventurersDialog } from "../../dialogs/SelectAdventurersDialog";
+import { updateItem } from "../../../redux/itemsSlice";
+import { SelectSpellsDialog } from "../../dialogs/SelectSpellsDialog";
 
 interface State {
   isSaving: boolean;

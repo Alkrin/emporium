@@ -29,6 +29,7 @@ import {
   refetchEquipmentSetItems,
   refetchEquipmentSets,
   refetchItemDefs,
+  refetchProficiencyRolls,
   refetchSpellDefs,
   refetchStructureComponentDefs,
   refetchTroopDefs,
@@ -235,6 +236,8 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchMapHexes(this.props.dispatch);
                 this.setState({ nowLoading: "Proficiencies" });
                 await refetchProficiencies(this.props.dispatch);
+                this.setState({ nowLoading: "Proficiency Rolls" });
+                await refetchProficiencyRolls(this.props.dispatch);
                 this.setState({ nowLoading: "Repertoires" });
                 await refetchRepertoires(this.props.dispatch);
                 this.setState({ nowLoading: "Spell Defs" });

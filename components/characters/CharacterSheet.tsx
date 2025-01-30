@@ -6,10 +6,13 @@ import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { showSubPanel } from "../../redux/subPanelsSlice";
 import ServerAPI, {
+  AbilityDefData,
+  CharacterClassv2,
   CharacterData,
   ItemData,
   ItemDefData,
   LocationData,
+  ProficiencyRollData,
   RepertoireEntryData,
   SpellDefData,
   StorageData,
@@ -19,16 +22,17 @@ import { SavingThrowType, SpellType } from "../../staticData/types/characterClas
 import TooltipSource from "../TooltipSource";
 import { AbilitiesList } from "./AbilitiesList";
 import styles from "./CharacterSheet.module.scss";
-import { EditEquipmentSubPanel } from "./EditEquipmentSubPanel";
-import { EditHPDialog } from "./EditHPDialog";
-import { EditProficienciesSubPanel } from "./EditProficienciesSubPanel";
-import { EditXPDialog } from "./EditXPDialog";
-import { Dictionary } from "../../lib/dictionary";
+import { EditEquipmentSubPanel } from "./dialogs/EditEquipmentSubPanel";
+import { EditHPDialog } from "./dialogs/EditHPDialog";
+import { EditProficienciesSubPanel } from "./dialogs/EditProficienciesSubPanel";
+import { EditXPDialog } from "./dialogs/EditXPDialog";
 import { Stones, getTotalEquippedWeight } from "../../lib/itemUtils";
 import {
+  AbilityComponentInstance,
   AttackData,
   EncumbranceLevel,
   addCommasToNumber,
+  getActiveAbilityComponentsForCharacter,
   getArmorBonusForCharacter,
   getBonusForStat,
   getCXPDeductibleRemainingForCharacter,
@@ -47,24 +51,28 @@ import {
   getRangedAttackDataForCharacter,
   getSavingThrowBonusForCharacter,
 } from "../../lib/characterUtils";
-import { RepertoireDialog } from "./RepertoireDialog";
+import { RepertoireDialog } from "./dialogs/RepertoireDialog";
 import { SpellTooltip } from "../database/tooltips/SpellTooltip";
 import BonusTooltip from "../BonusTooltip";
-import { EditMoneyDialog } from "./EditMoneyDialog";
+import { EditMoneyDialog } from "./dialogs/EditMoneyDialog";
 import { FittingView } from "../FittingView";
-import { EditInjuriesDialog } from "./EditInjuriesDialog";
+import { EditInjuriesDialog } from "./dialogs/EditInjuriesDialog";
 import { EditButton } from "../EditButton";
 import { SelectLocationDialog } from "../dialogs/SelectLocationDialog";
 import { setCharacterLocation, setCharacterXPReserve } from "../../redux/charactersSlice";
 import { SheetRoot } from "../SheetRoot";
-import { EditCXPDeductibleDialog } from "./EditCXPDeductibleDialog";
-import { EditStoragesSubPanel } from "./EditStoragesSubPanel";
-import { EditCostOfLivingDialog } from "./EditCostOfLivingDialog";
-import { CharacterContractsDialog } from "./CharacterContractsDialog";
+import { EditCXPDeductibleDialog } from "./dialogs/EditCXPDeductibleDialog";
+import { EditStoragesSubPanel } from "./dialogs/EditStoragesSubPanel";
+import { EditCostOfLivingDialog } from "./dialogs/EditCostOfLivingDialog";
+import { CharacterContractsDialog } from "./dialogs/CharacterContractsDialog";
 import { SharedLoadbearing } from "../../staticData/classFeatures/SharedLoadbearing";
 import { InputSingleNumberOfTwoDialog } from "../dialogs/InputSingleNumberOfTwoDialog";
 import { setActiveStorageId } from "../../redux/storageSlice";
 import { BasicDialog } from "../dialogs/BasicDialog";
+import { AbilityComponentProficiencyRoll } from "../../staticData/abilityComponents/AbilityComponentProficiencyRoll";
+import { buildAbilityName } from "../../lib/stringUtils";
+import { CharacterEquipmentSection } from "./sections/CharacterEquipmentSection";
+import { CharacterCombatSection } from "./sections/CharacterCombatSection";
 
 interface ReactProps {
   characterId: number;
@@ -72,12 +80,15 @@ interface ReactProps {
 }
 
 interface InjectedProps {
-  allItems: Dictionary<ItemData>;
-  allItemDefs: Dictionary<ItemDefData>;
-  allSpells: Dictionary<SpellDefData>;
+  allAbilities: Record<number, AbilityDefData>;
+  allItems: Record<number, ItemData>;
+  allItemDefs: Record<number, ItemDefData>;
+  allProficiencyRolls: Record<number, ProficiencyRollData>;
+  allSpells: Record<number, SpellDefData>;
   character: CharacterData;
+  characterClass: CharacterClassv2;
   repertoire: RepertoireEntryData[];
-  allLocations: Dictionary<LocationData>;
+  allLocations: Record<number, LocationData>;
   storages: StorageData[];
   dispatch?: Dispatch;
 }
@@ -90,72 +101,157 @@ class ACharacterSheet extends React.Component<Props> {
 
     const characterExists = this.props.characterId > 0 && !!this.props.character;
 
+    // Getting this once up front and passing it along because the calculation is expensive.
+    const activeComponents = this.props.characterClass
+      ? getActiveAbilityComponentsForCharacter(this.props.character)
+      : {};
+
     return (
       <SheetRoot className={`${styles.root} ${animationClass}`}>
         {characterExists ? (
           <>
-            <div className={styles.topPanel}>
-              <FittingView className={styles.nameContainer}>
-                <div
-                  className={styles.nameLabel}
-                >{`${this.props.character.name}, L${this.props.character.level} ${this.props.character.class_name}`}</div>
-              </FittingView>
-              <div className={styles.topPanelGrid}>
-                <div className={styles.column}>
-                  <div className={styles.row}>
-                    {this.renderStatsPanel()}
-                    <div className={styles.horizontalSpacer} />
-                    {this.renderSavingThrowsPanel()}
-                  </div>
-                  <div className={styles.verticalSpacer} />
-                  {this.renderXPPanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderDeductiblePanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderXPReservePanel()}
-                </div>
-                <div className={styles.horizontalSpacer} />
-                <div className={styles.column}>
-                  {this.renderCostOfLivingPanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderSpeedPanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderInitiativePanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderCombatPanel()}
-                </div>
-                <div className={styles.horizontalSpacer} />
-                <div className={styles.column}>
-                  {this.renderMoneyPanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderHPPanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderEquipmentPanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderStoragePanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderLocationPanel()}
-                  <div className={styles.verticalSpacer} />
-                  {this.renderContractsPanel()}
-                </div>
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.leftPanel}>
-                {this.renderAbilitiesPanel()}
-                {this.renderLevelBasedSkillsPanel()}
-                {this.renderInjuriesPanel()}
-              </div>
-              <div className={styles.rightPanel}>
-                {this.renderSpellSlotsPanel()}
-                {this.renderSpellRepertoirePanel()}
-              </div>
-            </div>
+            {this.props.characterClass ? this.renderV2TopPanel(activeComponents) : this.renderV1TopPanel()}
+            {this.props.characterClass ? this.renderV2BottomPanel(activeComponents) : this.renderV1BottomPanel()}
           </>
         ) : (
           <div className={styles.placeholder} />
         )}
       </SheetRoot>
+    );
+  }
+
+  private renderV1BottomPanel(): React.ReactNode {
+    return (
+      <div className={styles.row}>
+        <div className={styles.leftPanel}>
+          {this.renderAbilitiesPanel()}
+          {this.renderLevelBasedSkillsPanel()}
+          {this.renderInjuriesPanel()}
+        </div>
+        <div className={styles.rightPanel}>
+          {this.renderSpellSlotsPanel()}
+          {this.renderSpellRepertoirePanel()}
+        </div>
+      </div>
+    );
+  }
+
+  private renderV2BottomPanel(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    return (
+      <div className={styles.row}>
+        <div className={styles.leftPanel}>
+          {this.renderAbilitiesPanel()}
+          {this.renderProficiencyRollsPanel(activeComponents)}
+          {this.renderLevelBasedSkillsPanel()}
+          {this.renderInjuriesPanel()}
+        </div>
+        <div className={styles.rightPanel}>
+          {this.renderSpellSlotsPanel()}
+          {this.renderSpellRepertoirePanel()}
+        </div>
+      </div>
+    );
+  }
+
+  private renderV1TopPanel(): React.ReactNode {
+    return (
+      <div className={styles.topPanel}>
+        <FittingView className={styles.nameContainer}>
+          <div
+            className={styles.nameLabel}
+          >{`${this.props.character.name}, L${this.props.character.level} ${this.props.character.class_name}`}</div>
+        </FittingView>
+        <div className={styles.topPanelGrid}>
+          <div className={styles.column}>
+            <div className={styles.row}>
+              {this.renderStatsPanel()}
+              <div className={styles.horizontalSpacer} />
+              {this.renderSavingThrowsPanel()}
+            </div>
+            <div className={styles.verticalSpacer} />
+            {this.renderXPPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderDeductiblePanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderXPReservePanel()}
+          </div>
+          <div className={styles.horizontalSpacer} />
+          <div className={styles.column}>
+            {this.renderCostOfLivingPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderSpeedPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderInitiativePanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderCombatPanel()}
+          </div>
+          <div className={styles.horizontalSpacer} />
+          <div className={styles.column}>
+            {this.renderMoneyPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderHPPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderEquipmentPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderStoragePanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderLocationPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderContractsPanel()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderV2TopPanel(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    return (
+      <div className={styles.topPanel}>
+        <FittingView className={styles.nameContainer}>
+          <div className={styles.nameLabel}>{`${this.props.character.name}, L${this.props.character.level} ${
+            this.props.characterClass.name + "(v2)"
+          }`}</div>
+        </FittingView>
+        <div className={styles.topPanelGrid}>
+          <div className={styles.column}>
+            <div className={styles.row}>
+              {this.renderStatsPanelv2(activeComponents)}
+              <div className={styles.horizontalSpacer} />
+              {this.renderSavingThrowsPanel()}
+            </div>
+            <div className={styles.verticalSpacer} />
+            {this.renderXPPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderDeductiblePanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderXPReservePanel()}
+          </div>
+          <div className={styles.horizontalSpacer} />
+          <div className={styles.column}>
+            {this.renderCostOfLivingPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderSpeedPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderInitiativePanel()}
+            <div className={styles.verticalSpacer} />
+            <CharacterCombatSection characterId={this.props.characterId} activeComponents={activeComponents} />
+          </div>
+          <div className={styles.horizontalSpacer} />
+          <div className={styles.column}>
+            {this.renderMoneyPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderHPPanel()}
+            <div className={styles.verticalSpacer} />
+            <CharacterEquipmentSection characterId={this.props.characterId} activeComponents={activeComponents} />
+            <div className={styles.verticalSpacer} />
+            {this.renderStoragePanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderLocationPanel()}
+            <div className={styles.verticalSpacer} />
+            {this.renderContractsPanel()}
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -385,6 +481,87 @@ class ACharacterSheet extends React.Component<Props> {
         },
         escapable: true,
       })
+    );
+  }
+
+  private renderProficiencyRollsPanel(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    if ((activeComponents[AbilityComponentProficiencyRoll.id]?.length ?? 0) > 0) {
+      // Combine any instances that map to the same proficiencyRoll.  This allows us to combine rolls coming from different
+      // sources (e.g. one rank from an item and one rank from a learned proficiency).
+      const combinedRolls: Record<number, AbilityComponentInstance[]> = {};
+      activeComponents[AbilityComponentProficiencyRoll.id].forEach((instance) => {
+        const rollId = instance.data.proficiency_roll_id;
+        if (!combinedRolls[rollId]) {
+          combinedRolls[rollId] = [];
+        }
+        combinedRolls[rollId].push(instance);
+      });
+
+      // Sort the rolls by display name.
+      const orderedRollIds = Object.keys(combinedRolls).sort((rollIdAString, rollIdBString) => {
+        const aName = this.props.allProficiencyRolls[combinedRolls[+rollIdAString][0].data.proficiency_roll_id].name;
+        const bName = this.props.allProficiencyRolls[combinedRolls[+rollIdBString][0].data.proficiency_roll_id].name;
+        return aName.localeCompare(bName);
+      });
+
+      return (
+        <div className={styles.sectionPanel}>
+          <div className={styles.centeredRow}>
+            <div className={styles.abilitiesTitle}>{"Proficiency Rolls"}</div>
+          </div>
+          <div className={styles.horizontalLine} />
+          {orderedRollIds.map((rollId) => combinedRolls[+rollId]).map(this.renderProficiencyRollRow.bind(this))}
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  private renderProficiencyRollRow(instances: AbilityComponentInstance[], index: number): React.ReactNode {
+    const rollDef = this.props.allProficiencyRolls[instances[0].data.proficiency_roll_id];
+    const totalRank = instances.reduce<number>((rankSoFar: number, instance: AbilityComponentInstance) => {
+      return rankSoFar + instance.rank;
+    }, 0);
+    // Proficiency Rolls start at 11+, then reduce to 7+ at two ranks, and 3+ at three rank.
+    let targetRoll: number = Math.max(3, 15 - 4 * totalRank);
+    // TODO: Bonuses, penalties, and conditionals, once those Components exist.
+
+    return (
+      <TooltipSource
+        className={styles.listRow}
+        key={`proficiencyRollRow${index}`}
+        tooltipParams={{
+          id: rollDef.name,
+          content: () => {
+            return (
+              <div className={styles.tooltipRoot}>
+                <div className={styles.tooltipHeader}>
+                  <div className={styles.tooltipTitle}>{rollDef.name}</div>
+                  <div className={styles.tooltipValue}>{`${targetRoll}+`}</div>
+                </div>
+                <div className={styles.tooltipText}>{rollDef.description}</div>
+                {instances.map((instance, index2) => {
+                  const ability = this.props.allAbilities[instance.abilityId];
+                  if (ability) {
+                    return (
+                      <div className={styles.tooltipSubtext} key={`source${index2}`}>
+                        {buildAbilityName(ability.name, instance.subtype, instance.rank)}
+                      </div>
+                    );
+                  } else {
+                    // TODO: Components from items instead of abilities?
+                    return null;
+                  }
+                })}
+              </div>
+            );
+          },
+        }}
+      >
+        <div className={styles.listName}>{rollDef.name}</div>
+        <div className={styles.tooltipValue}>{`${targetRoll}+`}</div>
+      </TooltipSource>
     );
   }
 
@@ -1157,6 +1334,162 @@ class ACharacterSheet extends React.Component<Props> {
     }
   }
 
+  private renderStatsPanelv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    return (
+      this.props.character && (
+        <div className={styles.statsPanel}>
+          <div className={styles.statsContainer}>
+            {this.renderStatPanev2(
+              "STR",
+              this.props.character.strength,
+              this.renderStrengthTooltipv2.bind(this, activeComponents)
+            )}
+            {this.renderStatPanev2(
+              "INT",
+              this.props.character.intelligence,
+              this.renderIntelligenceTooltipv2.bind(this, activeComponents)
+            )}
+            {this.renderStatPanev2(
+              "WIL",
+              this.props.character.wisdom,
+              this.renderWillTooltip.bind(this, activeComponents)
+            )}
+            {this.renderStatPanev2(
+              "DEX",
+              this.props.character.dexterity,
+              this.renderDexterityTooltipv2.bind(this, activeComponents)
+            )}
+            {this.renderStatPanev2(
+              "CON",
+              this.props.character.constitution,
+              this.renderConstitutionTooltipv2.bind(this, activeComponents)
+            )}
+            {this.renderStatPanev2(
+              "CHA",
+              this.props.character.charisma,
+              this.renderCharismaTooltipv2.bind(this, activeComponents)
+            )}
+          </div>
+        </div>
+      )
+    );
+  }
+
+  private renderStatPanev2(name: string, value: number, renderTooltip: () => React.ReactNode): React.ReactNode {
+    const bonus = getBonusForStat(value);
+    const bonusText = `${bonus > 0 ? "+" : ""}${bonus}`;
+
+    return (
+      <TooltipSource className={styles.statPanel} tooltipParams={{ id: `${name}Tooltip`, content: renderTooltip }}>
+        <div className={styles.statName}>{name}</div>
+        <div className={styles.statValue}>{value}</div>
+        <div className={styles.statBonus}>{bonusText}</div>
+      </TooltipSource>
+    );
+  }
+
+  private renderStrengthTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    let finalStat = this.props.character.strength;
+
+    // TODO: Any stat altering components need to be applied here.
+    // TODO: Calculate based on those components.
+    let hasModifiers = false;
+
+    return (
+      <div className={styles.statTooltip}>
+        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
+          <div className={styles.normalText}>{"Strength"}</div>
+          <div className={styles.valueText}>{finalStat}</div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderIntelligenceTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    let finalStat = this.props.character.intelligence;
+
+    // TODO: Any stat altering components need to be applied here.
+    // TODO: Calculate based on those components.
+    let hasModifiers = false;
+
+    return (
+      <div className={styles.statTooltip}>
+        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
+          <div className={styles.normalText}>{"Intelligence"}</div>
+          <div className={styles.valueText}>{finalStat}</div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderWillTooltip(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    let finalStat = this.props.character.wisdom;
+
+    // TODO: Any stat altering components need to be applied here.
+    // TODO: Calculate based on those components.
+    let hasModifiers = false;
+
+    return (
+      <div className={styles.statTooltip}>
+        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
+          <div className={styles.normalText}>{"Will"}</div>
+          <div className={styles.valueText}>{finalStat}</div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderDexterityTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    let finalStat = this.props.character.dexterity;
+
+    // TODO: Any stat altering components need to be applied here.
+    // TODO: Calculate based on those components.
+    let hasModifiers = false;
+
+    return (
+      <div className={styles.statTooltip}>
+        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
+          <div className={styles.normalText}>{"Dexterity"}</div>
+          <div className={styles.valueText}>{finalStat}</div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderConstitutionTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    let finalStat = this.props.character.constitution;
+
+    // TODO: Any stat altering components need to be applied here.
+    // TODO: Calculate based on those components.
+    let hasModifiers = false;
+
+    return (
+      <div className={styles.statTooltip}>
+        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
+          <div className={styles.normalText}>{"Constitution"}</div>
+          <div className={styles.valueText}>{finalStat}</div>
+        </div>
+      </div>
+    );
+  }
+
+  private renderCharismaTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    let finalStat = this.props.character.charisma;
+
+    // TODO: Any stat altering components need to be applied here.
+    // TODO: Calculate based on those components.
+    let hasModifiers = false;
+
+    return (
+      <div className={styles.statTooltip}>
+        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
+          <div className={styles.normalText}>{"Charisma"}</div>
+          <div className={styles.valueText}>{finalStat}</div>
+        </div>
+      </div>
+    );
+  }
+
   private renderStatsPanel(): React.ReactNode {
     return (
       this.props.character && (
@@ -1294,16 +1627,27 @@ class ACharacterSheet extends React.Component<Props> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allItems } = state.items;
-  const { spells: allSpells, items: allItemDefs } = state.gameDefs;
+  const {
+    spells: allSpells,
+    items: allItemDefs,
+    characterClasses: allCharacterClasses,
+    proficiencyRolls: allProficiencyRolls,
+    abilities: allAbilities,
+  } = state.gameDefs;
   const repertoire = state.repertoires.repertoiresByCharacter[props.characterId] ?? [];
   const storages = state.storages.storagesByCharacterId[props.characterId] ?? [];
   const allLocations = state.locations.locations;
+  const character = state.characters.characters[props.characterId ?? 1] ?? null;
+  const characterClass = state.gameDefs.characterClasses[character?.class_id] ?? null;
   return {
     ...props,
+    allAbilities,
     allItems,
     allItemDefs,
+    allProficiencyRolls,
     allSpells,
-    character: state.characters.characters[props.characterId ?? 1] ?? null,
+    character,
+    characterClass,
     repertoire,
     allLocations,
     storages,

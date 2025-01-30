@@ -18,9 +18,9 @@ import { EditButton } from "../EditButton";
 import { getPersonalPile } from "../../lib/characterUtils";
 import { setActiveStorageId } from "../../redux/storageSlice";
 import { showModal } from "../../redux/modalsSlice";
-import { CreateStorageDialog } from "./CreateStorageDialog";
+import { CreateStorageDialog } from "./dialogs/CreateStorageDialog";
 import DropTarget from "../DropTarget";
-import { DropTypeItem } from "./EditStoragesSubPanel";
+import { DropTypeItem } from "./dialogs/EditStoragesSubPanel";
 import { getStorageDisplayName } from "../../lib/storageUtils";
 
 interface State {

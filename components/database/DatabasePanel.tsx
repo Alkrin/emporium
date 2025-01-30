@@ -12,6 +12,7 @@ import { DatabaseStructureComponentsDialog } from "./DatabaseStructureComponents
 import { showModal } from "../../redux/modalsSlice";
 import { DatabaseAbilitiesDialog } from "./DatabaseAbilitiesDialog";
 import { DatabaseCharacterClassesDialog } from "./DatabaseCharacterClassesDialog";
+import { DatabaseProficiencyRollsDialog } from "./DatabaseProficiencyRollsDialog";
 
 interface ReactProps {}
 
@@ -36,6 +37,9 @@ class ADatabasePanel extends React.Component<Props> {
         </div>
         <div className={styles.dataButton} onClick={this.onItemsClicked.bind(this)}>
           {"Items"}
+        </div>
+        <div className={styles.dataButton} onClick={this.onProficiencyRollsClicked.bind(this)}>
+          {"Proficiency Rolls"}
         </div>
         <div className={styles.dataButton} onClick={this.onSpellsClicked.bind(this)}>
           {"Spells"}
@@ -93,6 +97,18 @@ class ADatabasePanel extends React.Component<Props> {
         id: "DatabaseItems",
         content: () => {
           return <DatabaseItemsDialog />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onProficiencyRollsClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseProficiencyRolls",
+        content: () => {
+          return <DatabaseProficiencyRollsDialog />;
         },
         escapable: true,
       })
