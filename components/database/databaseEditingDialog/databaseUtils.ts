@@ -1,5 +1,6 @@
 import { Dictionary } from "../../../lib/dictionary";
 import { GameDefsReduxState } from "../../../redux/gameDefsSlice";
+import { SearchableDef } from "../SearchableDefList";
 
 export enum DatabaseEditingDialogField {
   AbilityComponents,
@@ -61,7 +62,7 @@ export interface ExtraFieldDataDatabaseDef {
   /** The name of the matching dictionary in `redux.gameDefs` from which the selection list will be generated.  */
   gameDefsName: keyof GameDefsReduxState;
   /** If provided, this will render a tooltip for the associated gameDefs. */
-  renderTooltip?: (defId: number) => React.ReactNode;
+  renderTooltip?: (def: SearchableDef) => React.ReactNode;
 }
 
 export interface DatabaseEditingDialogFieldDef {
@@ -86,7 +87,7 @@ export interface DatabaseEditingDialogFieldDef {
 export function setDefaultValuesForFieldDef(target: Dictionary<any>, def: DatabaseEditingDialogFieldDef): any {
   switch (def.type) {
     case DatabaseEditingDialogField.AbilityComponents: {
-      target[def.fieldNames[0]] = def.defaults?.[0] ?? {};
+      target[def.fieldNames[0]] = def.defaults?.[0] ?? [];
       break;
     }
     case DatabaseEditingDialogField.AbilityFilter: {

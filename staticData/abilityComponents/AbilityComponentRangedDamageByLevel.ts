@@ -19,3 +19,8 @@ export const AbilityComponentRangedDamageByLevel: AbilityComponent = {
     },
   ],
 };
+
+export interface AbilityComponentRangedDamageByLevelData {
+  /** Bonus to damage granted at each level.  Zero-th index is level one. */
+  damage_by_level: number[];
+}

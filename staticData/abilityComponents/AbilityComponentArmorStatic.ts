@@ -13,3 +13,8 @@ export const AbilityComponentArmorStatic: AbilityComponent = {
     },
   ],
 };
+
+export interface AbilityComponentArmorStaticData {
+  /** The flat bonus granted to the character's AC. */
+  bonus: number;
+}

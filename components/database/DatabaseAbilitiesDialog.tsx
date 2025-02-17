@@ -5,7 +5,7 @@ import { Dictionary } from "../../lib/dictionary";
 import { deleteAbilityDef, updateAbilityDef } from "../../redux/gameDefsSlice";
 import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
-import ServerAPI, { AbilityDefData } from "../../serverAPI";
+import ServerAPI, { AbilityDefData, AbilityType } from "../../serverAPI";
 import { SearchableDef } from "./SearchableDefList";
 import { BasicDialog } from "../dialogs/BasicDialog";
 import { DatabaseEditingDialog } from "./databaseEditingDialog/DatabaseEditingDialog";
@@ -48,14 +48,14 @@ class ADatabaseAbilitiesDialog extends React.Component<Props> {
     // ID and Name are handled automatically, so we don't have to include them here.
     return [
       {
-        type: DatabaseEditingDialogField.Boolean,
-        labelTexts: ["Is Proficiency?"],
-        fieldNames: ["is_proficiency"],
-      },
-      {
-        type: DatabaseEditingDialogField.Boolean,
-        labelTexts: ["Is General Proficiency?"],
-        fieldNames: ["is_general_proficiency"],
+        type: DatabaseEditingDialogField.NamedValue,
+        labelTexts: ["Type?"],
+        fieldNames: ["type"],
+        defaults: [AbilityType.Other],
+        extra: {
+          prompt: "Select Ability Type",
+          availableValues: Object.values(AbilityType).map((cs) => [cs, cs]),
+        },
       },
       {
         type: DatabaseEditingDialogField.Number,

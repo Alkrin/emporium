@@ -10,7 +10,10 @@ import TooltipSource from "../../TooltipSource";
 import { showSubPanel } from "../../../redux/subPanelsSlice";
 import { EditEquipmentSubPanel } from "../dialogs/EditEquipmentSubPanel";
 import BonusTooltip from "../../BonusTooltip";
-import { AbilityComponentArmorStatic } from "../../../staticData/abilityComponents/AbilityComponentArmorStatic";
+import {
+  AbilityComponentArmorStatic,
+  AbilityComponentArmorStaticData,
+} from "../../../staticData/abilityComponents/AbilityComponentArmorStatic";
 
 interface ReactProps {
   characterId: number;
@@ -98,13 +101,14 @@ class ACharacterEquipmentSection extends React.Component<Props> {
       // Ability components that grant armor.
       if ((activeComponents[AbilityComponentArmorStatic.id]?.length ?? 0) > 0) {
         activeComponents[AbilityComponentArmorStatic.id].forEach((instance) => {
-          calc.totalBonus += instance.data.bonus;
+          const instanceData = instance.data as AbilityComponentArmorStaticData;
+          calc.totalBonus += instanceData.bonus;
           let sourceName = "Unknown";
           if (abilityDefs[instance.abilityId]) {
             sourceName = abilityDefs[instance.abilityId].name;
           }
           // TODO: sourceName from items?
-          calc.sources.push([sourceName, instance.data.bonus]);
+          calc.sources.push([sourceName, instanceData.bonus]);
         });
       }
 

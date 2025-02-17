@@ -9,6 +9,8 @@ import {
   EquipmentSetItemData,
   ItemDefData,
   ProficiencyRollData,
+  ResearchCategoryData,
+  ResearchSubcategoryData,
   SpellDefData,
   StructureComponentDefData,
   TroopDefData,
@@ -35,6 +37,8 @@ export interface GameDefsReduxState {
   equipmentSetItemsBySet: Record<number, EquipmentSetItemData[]>;
   items: Record<number, ItemDefData>;
   proficiencyRolls: Record<number, ProficiencyRollData>;
+  researchCategories: Record<number, ResearchCategoryData>;
+  researchSubcategories: Record<number, ResearchSubcategoryData>;
   spells: Record<number, SpellDefData>;
   structureComponents: Record<number, StructureComponentDefData>;
   troops: Record<number, TroopDefData>;
@@ -50,6 +54,8 @@ function buildDefaultGameDefsReduxState(): GameDefsReduxState {
     equipmentSetItemsBySet: {},
     items: {},
     proficiencyRolls: {},
+    researchCategories: {},
+    researchSubcategories: {},
     spells: {},
     structureComponents: {},
     troops: {},
@@ -236,6 +242,30 @@ export const gameDefsSlice = createSlice({
     deleteProficiencyRoll: (state: GameDefsReduxState, action: PayloadAction<number>) => {
       delete state.proficiencyRolls[action.payload];
     },
+    updateResearchCategories: (state: GameDefsReduxState, action: PayloadAction<ResearchCategoryData[]>) => {
+      state.researchCategories = {};
+      action.payload.forEach((rcd) => {
+        state.researchCategories[rcd.id] = rcd;
+      });
+    },
+    updateResearchCategory: (state: GameDefsReduxState, action: PayloadAction<ResearchCategoryData>) => {
+      state.researchCategories[action.payload.id] = action.payload;
+    },
+    deleteResearchCategory: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.researchCategories[action.payload];
+    },
+    updateResearchSubcategories: (state: GameDefsReduxState, action: PayloadAction<ResearchSubcategoryData[]>) => {
+      state.researchSubcategories = {};
+      action.payload.forEach((rscd) => {
+        state.researchSubcategories[rscd.id] = rscd;
+      });
+    },
+    updateResearchSubcategory: (state: GameDefsReduxState, action: PayloadAction<ResearchSubcategoryData>) => {
+      state.researchSubcategories[action.payload.id] = action.payload;
+    },
+    deleteResearchSubcategory: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.researchSubcategories[action.payload];
+    },
     updateEquipmentSets: (state: GameDefsReduxState, action: PayloadAction<EquipmentSetData[]>) => {
       // Start empty.
       const p: Dictionary<EquipmentSetData[]> = {};
@@ -350,6 +380,12 @@ export const {
   updateProficiencyRolls,
   updateProficiencyRoll,
   deleteProficiencyRoll,
+  updateResearchCategories,
+  updateResearchCategory,
+  deleteResearchCategory,
+  updateResearchSubcategories,
+  updateResearchSubcategory,
+  deleteResearchSubcategory,
   updateStructureComponentDefs,
   updateStructureComponentDef,
   deleteStructureComponentDef,

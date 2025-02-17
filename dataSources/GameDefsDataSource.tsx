@@ -8,6 +8,8 @@ import {
   updateEquipmentSets,
   updateItemDefs,
   updateProficiencyRolls,
+  updateResearchCategories,
+  updateResearchSubcategories,
   updateSpellDefs,
   updateStructureComponentDefs,
   updateTroopDefs,
@@ -123,6 +125,40 @@ export async function refetchProficiencyRolls(dispatch: Dispatch): Promise<void>
   }
 }
 
+export async function refetchResearchCategories(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchResearchCategories();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "ResearchCategories Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ResearchCategories data"} />,
+        escapable: true,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe defs that no longer exist.
+    dispatch(updateResearchCategories(result));
+  }
+}
+
+export async function refetchResearchSubcategories(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchResearchSubcategories();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "ResearchSubcategories Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ResearchSubcategories data"} />,
+        escapable: true,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe defs that no longer exist.
+    dispatch(updateResearchSubcategories(result));
+  }
+}
+
 export async function refetchSpellDefs(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchSpellDefs();
 
@@ -183,6 +219,8 @@ export class GameDefsDataSource extends ExternalDataSource {
       await refetchEquipmentSetItems(this.dispatch);
       await refetchItemDefs(this.dispatch);
       await refetchProficiencyRolls(this.dispatch);
+      await refetchResearchCategories(this.dispatch);
+      await refetchResearchSubcategories(this.dispatch);
       await refetchSpellDefs(this.dispatch);
       await refetchStructureComponentDefs(this.dispatch);
       await refetchTroopDefs(this.dispatch);

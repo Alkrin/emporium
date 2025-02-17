@@ -12,7 +12,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     // Create the new character.
     queries.push({
-      query: `INSERT INTO characters (user_id,name,gender,portrait_url,class_name,class_id,subclass_id,level,strength,intelligence,wisdom,dexterity,constitution,charisma,xp,hp,hit_dice,location_id,maintenance_date,maintenance_paid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      query: `INSERT INTO characters (user_id,name,gender,portrait_url,class_name,class_id,subclass_id,level,strength,intelligence,wisdom,dexterity,constitution,charisma,xp,hp,hit_dice,location_id,maintenance_date,maintenance_paid,proficiencies) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       values: [
         b.user_id,
         b.name,
@@ -35,6 +35,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         // A fresh character starts out marked as "maintenance fully paid for this month", since you should have paid that amount to hire them.
         getFirstOfThisMonthDateString(),
         getCostOfLivingForCharacterLevel(b.level),
+        b.proficiencies,
       ],
     });
     queries.push({

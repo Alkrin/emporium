@@ -51,7 +51,7 @@ class ADatabaseEditingDialogFieldDatabaseDef extends React.Component<Props> {
             tooltipParams={{
               id: `DBDef${extra?.gameDefsName}${value}`,
               content: () => {
-                return extra.renderTooltip?.(value) ?? null;
+                return extra.renderTooltip?.(selectedDef) ?? null;
               },
             }}
           >
@@ -76,9 +76,9 @@ class ADatabaseEditingDialogFieldDatabaseDef extends React.Component<Props> {
               prompt={"Select One"}
               availableValues={this.getSortedDatabaseDefEntries()}
               preselectedValues={[this.props.value]}
-              onSelectionConfirmed={(defIds: number[]) => {
-                if (defIds[0] !== this.props.value) {
-                  this.props.onValueChange(defIds[0]);
+              onSelectionConfirmed={(defs: SearchableDef[]) => {
+                if (defs[0].id !== this.props.value) {
+                  this.props.onValueChange(defs[0].id);
                 }
               }}
               renderTooltip={extra.renderTooltip}
@@ -89,14 +89,13 @@ class ADatabaseEditingDialogFieldDatabaseDef extends React.Component<Props> {
     );
   }
 
-  private getSortedDatabaseDefEntries(): [string, number][] {
+  private getSortedDatabaseDefEntries(): [string, SearchableDef][] {
     const extra = this.props.def.extra as ExtraFieldDataDatabaseDef;
     const allDefs = this.props.gameDefs[extra?.gameDefsName] ?? {};
     // Sort db defs alphabetically.
     const sortedAbilities = Object.values(allDefs).sort((a, b) => a.name.localeCompare(b.name));
 
-    // Tuple is [defName, defId].
-    return sortedAbilities.map((def) => [def.name, def.id]);
+    return sortedAbilities.map((def) => [def.name, def]);
   }
 }
 

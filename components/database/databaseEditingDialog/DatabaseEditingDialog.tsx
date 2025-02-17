@@ -31,6 +31,7 @@ import { AbilityFilterv2, AbilityInstancev2 } from "../../../staticData/types/ab
 import { DatabaseEditingDialogFieldAbilityFilter } from "./DatabaseEditingDialogFieldAbilityFilter";
 import { DatabaseEditingDialogFieldNamedValues } from "./DatabaseEditingDialogFieldNamedValues";
 import { DatabaseEditingDialogFieldDatabaseDef } from "./DatabaseEditingDialogFieldDatabaseDef";
+import { AbilityComponentData } from "../../../serverAPI";
 
 type AnySearchableDef = SearchableDef & {
   [key: string]: any;
@@ -62,7 +63,7 @@ export function renderDatabaseEditingDialogField(
           tabIndex={tabIndex}
           def={def}
           value={data[def.fieldNames[0] ?? ""]}
-          onValueChange={(value: Dictionary<Dictionary<any>>) => applyDataChange(def.fieldNames[0], value)}
+          onValueChange={(value: AbilityComponentData[]) => applyDataChange(def.fieldNames[0], value)}
         />
       );
     }

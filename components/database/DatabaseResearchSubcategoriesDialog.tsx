@@ -1,11 +1,10 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
-import { Dictionary } from "../../lib/dictionary";
-import { deleteProficiencyRoll, updateProficiencyRoll } from "../../redux/gameDefsSlice";
+import { deleteResearchSubcategory, updateResearchSubcategory } from "../../redux/gameDefsSlice";
 import { showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
-import ServerAPI, { ProficiencyRollData } from "../../serverAPI";
+import ServerAPI, { ResearchSubcategoryData } from "../../serverAPI";
 import { SearchableDef } from "./SearchableDefList";
 import { BasicDialog } from "../dialogs/BasicDialog";
 import { DatabaseEditingDialog } from "./databaseEditingDialog/DatabaseEditingDialog";
@@ -15,18 +14,18 @@ import { CharacterStat } from "../../staticData/types/characterClasses";
 interface ReactProps {}
 
 interface InjectedProps {
-  allProficiencyRolls: Dictionary<ProficiencyRollData>;
+  allResearchSubcategories: Record<number, ResearchSubcategoryData>;
   dispatch?: Dispatch;
 }
 
 type Props = ReactProps & InjectedProps;
 
-class ADatabaseProficiencyRollsDialog extends React.Component<Props> {
+class ADatabaseResearchSubcategoriesDialog extends React.Component<Props> {
   render(): React.ReactNode {
     return (
       <DatabaseEditingDialog
-        title={"Proficiency Rolls Database"}
-        allDefs={this.props.allProficiencyRolls}
+        title={"Research Categories Database"}
+        allDefs={this.props.allResearchSubcategories}
         fieldDefs={this.getFieldDefs.bind(this)}
         onSaveClicked={this.onSaveClicked.bind(this)}
         onDeleteConfirmed={this.onDeleteConfirmed.bind(this)}
@@ -47,45 +46,22 @@ class ADatabaseProficiencyRollsDialog extends React.Component<Props> {
         })
     );
 
-    return [
-      { type: DatabaseEditingDialogField.LongString, labelTexts: ["Description"], fieldNames: ["description"] },
-      {
-        type: DatabaseEditingDialogField.NamedValue,
-        labelTexts: ["Optional Stat Modifier"],
-        fieldNames: ["stat"],
-        defaults: [""],
-        extra: {
-          prompt:
-            "If a stat is selected, this proficiency roll will gain a bonus equal to the stat's bonus times the bonus multiplier.",
-          availableValues: statOptions,
-        },
-      },
-      {
-        type: DatabaseEditingDialogField.Number,
-        labelTexts: ["Stat Bonus Multiplier"],
-        fieldNames: ["bonus_multiplier"],
-        fieldSizes: ["2vmin"],
-        defaults: [1],
-        extra: {
-          decimalDigits: 0,
-        },
-      },
-    ];
+    return [{ type: DatabaseEditingDialogField.LongString, labelTexts: ["Description"], fieldNames: ["description"] }];
   }
 
   private async onSaveClicked(untypedData: SearchableDef): Promise<number> {
-    const data = untypedData as ProficiencyRollData;
+    const data = untypedData as ResearchSubcategoryData;
 
     if (data.id === 0) {
       // Brand new def.
-      const res = await ServerAPI.createProficiencyRoll(data);
+      const res = await ServerAPI.createResearchSubcategory(data);
 
       if ("insertId" in res) {
         // Put the real id into our data.
         data.id = res.insertId;
 
         // Push the data into Redux.
-        this.props.dispatch?.(updateProficiencyRoll(data));
+        this.props.dispatch?.(updateResearchSubcategory(data));
 
         return res.insertId;
       } else {
@@ -93,7 +69,7 @@ class ADatabaseProficiencyRollsDialog extends React.Component<Props> {
       }
     } else {
       // Editing old def.
-      const res = await ServerAPI.editProficiencyRoll(data);
+      const res = await ServerAPI.editResearchSubcategory(data);
 
       if ("error" in res) {
         this.props.dispatch?.(
@@ -105,18 +81,18 @@ class ADatabaseProficiencyRollsDialog extends React.Component<Props> {
         return data.id;
       } else {
         // Push the modified data into Redux.
-        this.props.dispatch?.(updateProficiencyRoll(data));
+        this.props.dispatch?.(updateResearchSubcategory(data));
         return data.id;
       }
     }
   }
 
   private async onDeleteConfirmed(defId: number): Promise<boolean> {
-    const res = await ServerAPI.deleteProficiencyRoll(defId);
+    const res = await ServerAPI.deleteResearchSubcategory(defId);
 
     if ("affectedRows" in res) {
       // Delete successful, so deselect and delete locally.
-      this.props.dispatch?.(deleteProficiencyRoll(defId));
+      this.props.dispatch?.(deleteResearchSubcategory(defId));
       return true;
     } else {
       return false;
@@ -125,11 +101,11 @@ class ADatabaseProficiencyRollsDialog extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const allProficiencyRolls = state.gameDefs.proficiencyRolls;
+  const allResearchSubcategories = state.gameDefs.researchSubcategories;
   return {
     ...props,
-    allProficiencyRolls,
+    allResearchSubcategories,
   };
 }
 
-export const DatabaseProficiencyRollsDialog = connect(mapStateToProps)(ADatabaseProficiencyRollsDialog);
+export const DatabaseResearchSubcategoriesDialog = connect(mapStateToProps)(ADatabaseResearchSubcategoriesDialog);
