@@ -7,8 +7,14 @@ import TooltipSource from "../../TooltipSource";
 import styles from "./CharacterCombatSection.module.scss";
 import { AbilityComponentInstance, AttackData, getBonusForStat } from "../../../lib/characterUtils";
 import { NaturalWeapon } from "../../../staticData/types/characterClasses";
-import { AbilityComponentMeleeDamageByLevel } from "../../../staticData/abilityComponents/AbilityComponentMeleeDamageByLevel";
-import { AbilityComponentRangedDamageByLevel } from "../../../staticData/abilityComponents/AbilityComponentRangedDamageByLevel";
+import {
+  AbilityComponentMeleeDamageByLevel,
+  AbilityComponentMeleeDamageByLevelData,
+} from "../../../staticData/abilityComponents/AbilityComponentMeleeDamageByLevel";
+import {
+  AbilityComponentRangedDamageByLevel,
+  AbilityComponentRangedDamageByLevelData,
+} from "../../../staticData/abilityComponents/AbilityComponentRangedDamageByLevel";
 
 interface ReactProps {
   characterId: number;
@@ -328,12 +334,13 @@ class ACharacterCombatSection extends React.Component<Props> {
     // Ability Component bonuses.
     if ((activeComponents[AbilityComponentMeleeDamageByLevel.id]?.length ?? 0) > 0) {
       activeComponents[AbilityComponentMeleeDamageByLevel.id].forEach((instance) => {
+        const instanceData = instance.data as AbilityComponentMeleeDamageByLevelData;
         let sourceName = "Unknown";
         if (allAbilities[instance.abilityId]) {
           sourceName = allAbilities[instance.abilityId].name;
         }
         // TODO: sourceName from items?
-        data.damageBonuses.push([sourceName, instance.data.damage_by_level[instance.characterLevel] ?? 0]);
+        data.damageBonuses.push([sourceName, instanceData.damage_by_level[instance.characterLevel] ?? 0]);
       });
     }
 
@@ -470,12 +477,13 @@ class ACharacterCombatSection extends React.Component<Props> {
     // Ability Component bonuses.
     if ((activeComponents[AbilityComponentRangedDamageByLevel.id]?.length ?? 0) > 0) {
       activeComponents[AbilityComponentRangedDamageByLevel.id].forEach((instance) => {
+        const instanceData = instance.data as AbilityComponentRangedDamageByLevelData;
         let sourceName = "Unknown";
         if (allAbilities[instance.abilityId]) {
           sourceName = allAbilities[instance.abilityId].name;
         }
         // TODO: sourceName from items?
-        data.damageBonuses.push([sourceName, instance.data.damage_by_level[instance.characterLevel] ?? 0]);
+        data.damageBonuses.push([sourceName, instanceData.damage_by_level[instance.characterLevel] ?? 0]);
       });
     }
 

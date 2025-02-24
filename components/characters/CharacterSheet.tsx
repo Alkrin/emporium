@@ -12,7 +12,6 @@ import ServerAPI, {
   ItemData,
   ItemDefData,
   LocationData,
-  ProficiencyRollData,
   RepertoireEntryData,
   SpellDefData,
   StorageData,
@@ -69,10 +68,11 @@ import { SharedLoadbearing } from "../../staticData/classFeatures/SharedLoadbear
 import { InputSingleNumberOfTwoDialog } from "../dialogs/InputSingleNumberOfTwoDialog";
 import { setActiveStorageId } from "../../redux/storageSlice";
 import { BasicDialog } from "../dialogs/BasicDialog";
-import { AbilityComponentProficiencyRoll } from "../../staticData/abilityComponents/AbilityComponentProficiencyRoll";
-import { buildAbilityName } from "../../lib/stringUtils";
 import { CharacterEquipmentSection } from "./sections/CharacterEquipmentSection";
 import { CharacterCombatSection } from "./sections/CharacterCombatSection";
+import { CharacterProficiencyRollsSection } from "./sections/CharacterProficiencyRollsSection";
+import { CharacterResearchSection } from "./sections/CharacterResearchSection";
+import { CharacterMonsterHarvestingSection } from "./sections/CharacterMonsterHarvestingSection";
 
 interface ReactProps {
   characterId: number;
@@ -83,7 +83,6 @@ interface InjectedProps {
   allAbilities: Record<number, AbilityDefData>;
   allItems: Record<number, ItemData>;
   allItemDefs: Record<number, ItemDefData>;
-  allProficiencyRolls: Record<number, ProficiencyRollData>;
   allSpells: Record<number, SpellDefData>;
   character: CharacterData;
   characterClass: CharacterClassv2;
@@ -141,11 +140,13 @@ class ACharacterSheet extends React.Component<Props> {
       <div className={styles.row}>
         <div className={styles.leftPanel}>
           {this.renderAbilitiesPanel()}
-          {this.renderProficiencyRollsPanel(activeComponents)}
+          <CharacterProficiencyRollsSection characterId={this.props.characterId} activeComponents={activeComponents} />
           {this.renderLevelBasedSkillsPanel()}
           {this.renderInjuriesPanel()}
         </div>
         <div className={styles.rightPanel}>
+          <CharacterResearchSection characterId={this.props.characterId} activeComponents={activeComponents} />
+          <CharacterMonsterHarvestingSection characterId={this.props.characterId} activeComponents={activeComponents} />
           {this.renderSpellSlotsPanel()}
           {this.renderSpellRepertoirePanel()}
         </div>
@@ -481,87 +482,6 @@ class ACharacterSheet extends React.Component<Props> {
         },
         escapable: true,
       })
-    );
-  }
-
-  private renderProficiencyRollsPanel(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
-    if ((activeComponents[AbilityComponentProficiencyRoll.id]?.length ?? 0) > 0) {
-      // Combine any instances that map to the same proficiencyRoll.  This allows us to combine rolls coming from different
-      // sources (e.g. one rank from an item and one rank from a learned proficiency).
-      const combinedRolls: Record<number, AbilityComponentInstance[]> = {};
-      activeComponents[AbilityComponentProficiencyRoll.id].forEach((instance) => {
-        const rollId = instance.data.proficiency_roll_id;
-        if (!combinedRolls[rollId]) {
-          combinedRolls[rollId] = [];
-        }
-        combinedRolls[rollId].push(instance);
-      });
-
-      // Sort the rolls by display name.
-      const orderedRollIds = Object.keys(combinedRolls).sort((rollIdAString, rollIdBString) => {
-        const aName = this.props.allProficiencyRolls[combinedRolls[+rollIdAString][0].data.proficiency_roll_id].name;
-        const bName = this.props.allProficiencyRolls[combinedRolls[+rollIdBString][0].data.proficiency_roll_id].name;
-        return aName.localeCompare(bName);
-      });
-
-      return (
-        <div className={styles.sectionPanel}>
-          <div className={styles.centeredRow}>
-            <div className={styles.abilitiesTitle}>{"Proficiency Rolls"}</div>
-          </div>
-          <div className={styles.horizontalLine} />
-          {orderedRollIds.map((rollId) => combinedRolls[+rollId]).map(this.renderProficiencyRollRow.bind(this))}
-        </div>
-      );
-    } else {
-      return null;
-    }
-  }
-
-  private renderProficiencyRollRow(instances: AbilityComponentInstance[], index: number): React.ReactNode {
-    const rollDef = this.props.allProficiencyRolls[instances[0].data.proficiency_roll_id];
-    const totalRank = instances.reduce<number>((rankSoFar: number, instance: AbilityComponentInstance) => {
-      return rankSoFar + instance.rank;
-    }, 0);
-    // Proficiency Rolls start at 11+, then reduce to 7+ at two ranks, and 3+ at three rank.
-    let targetRoll: number = Math.max(3, 15 - 4 * totalRank);
-    // TODO: Bonuses, penalties, and conditionals, once those Components exist.
-
-    return (
-      <TooltipSource
-        className={styles.listRow}
-        key={`proficiencyRollRow${index}`}
-        tooltipParams={{
-          id: rollDef.name,
-          content: () => {
-            return (
-              <div className={styles.tooltipRoot}>
-                <div className={styles.tooltipHeader}>
-                  <div className={styles.tooltipTitle}>{rollDef.name}</div>
-                  <div className={styles.tooltipValue}>{`${targetRoll}+`}</div>
-                </div>
-                <div className={styles.tooltipText}>{rollDef.description}</div>
-                {instances.map((instance, index2) => {
-                  const ability = this.props.allAbilities[instance.abilityId];
-                  if (ability) {
-                    return (
-                      <div className={styles.tooltipSubtext} key={`source${index2}`}>
-                        {buildAbilityName(ability.name, instance.subtype, instance.rank)}
-                      </div>
-                    );
-                  } else {
-                    // TODO: Components from items instead of abilities?
-                    return null;
-                  }
-                })}
-              </div>
-            );
-          },
-        }}
-      >
-        <div className={styles.listName}>{rollDef.name}</div>
-        <div className={styles.tooltipValue}>{`${targetRoll}+`}</div>
-      </TooltipSource>
     );
   }
 
@@ -1627,13 +1547,7 @@ class ACharacterSheet extends React.Component<Props> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allItems } = state.items;
-  const {
-    spells: allSpells,
-    items: allItemDefs,
-    characterClasses: allCharacterClasses,
-    proficiencyRolls: allProficiencyRolls,
-    abilities: allAbilities,
-  } = state.gameDefs;
+  const { spells: allSpells, items: allItemDefs, abilities: allAbilities } = state.gameDefs;
   const repertoire = state.repertoires.repertoiresByCharacter[props.characterId] ?? [];
   const storages = state.storages.storagesByCharacterId[props.characterId] ?? [];
   const allLocations = state.locations.locations;
@@ -1644,7 +1558,6 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     allAbilities,
     allItems,
     allItemDefs,
-    allProficiencyRolls,
     allSpells,
     character,
     characterClass,

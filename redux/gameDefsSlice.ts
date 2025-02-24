@@ -7,8 +7,11 @@ import {
   ContractData,
   EquipmentSetData,
   EquipmentSetItemData,
+  HarvestingCategoryData,
   ItemDefData,
   ProficiencyRollData,
+  ResearchCategoryData,
+  ResearchSubcategoryData,
   SpellDefData,
   StructureComponentDefData,
   TroopDefData,
@@ -33,8 +36,11 @@ export interface GameDefsReduxState {
   equipmentSets: Record<number, EquipmentSetData>;
   equipmentSetsByClass: Record<string, EquipmentSetData[]>;
   equipmentSetItemsBySet: Record<number, EquipmentSetItemData[]>;
+  harvestingCategories: Record<number, HarvestingCategoryData>;
   items: Record<number, ItemDefData>;
   proficiencyRolls: Record<number, ProficiencyRollData>;
+  researchCategories: Record<number, ResearchCategoryData>;
+  researchSubcategories: Record<number, ResearchSubcategoryData>;
   spells: Record<number, SpellDefData>;
   structureComponents: Record<number, StructureComponentDefData>;
   troops: Record<number, TroopDefData>;
@@ -48,8 +54,11 @@ function buildDefaultGameDefsReduxState(): GameDefsReduxState {
     equipmentSets: {},
     equipmentSetsByClass: {},
     equipmentSetItemsBySet: {},
+    harvestingCategories: {},
     items: {},
     proficiencyRolls: {},
+    researchCategories: {},
+    researchSubcategories: {},
     spells: {},
     structureComponents: {},
     troops: {},
@@ -224,6 +233,18 @@ export const gameDefsSlice = createSlice({
     deleteAbilityDef: (state: GameDefsReduxState, action: PayloadAction<number>) => {
       delete state.abilities[action.payload];
     },
+    updateHarvestingCategories: (state: GameDefsReduxState, action: PayloadAction<HarvestingCategoryData[]>) => {
+      state.harvestingCategories = {};
+      action.payload.forEach((hcd) => {
+        state.harvestingCategories[hcd.id] = hcd;
+      });
+    },
+    updateHarvestingCategory: (state: GameDefsReduxState, action: PayloadAction<HarvestingCategoryData>) => {
+      state.harvestingCategories[action.payload.id] = action.payload;
+    },
+    deleteHarvestingCategory: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.harvestingCategories[action.payload];
+    },
     updateProficiencyRolls: (state: GameDefsReduxState, action: PayloadAction<ProficiencyRollData[]>) => {
       state.proficiencyRolls = {};
       action.payload.forEach((prd) => {
@@ -235,6 +256,30 @@ export const gameDefsSlice = createSlice({
     },
     deleteProficiencyRoll: (state: GameDefsReduxState, action: PayloadAction<number>) => {
       delete state.proficiencyRolls[action.payload];
+    },
+    updateResearchCategories: (state: GameDefsReduxState, action: PayloadAction<ResearchCategoryData[]>) => {
+      state.researchCategories = {};
+      action.payload.forEach((rcd) => {
+        state.researchCategories[rcd.id] = rcd;
+      });
+    },
+    updateResearchCategory: (state: GameDefsReduxState, action: PayloadAction<ResearchCategoryData>) => {
+      state.researchCategories[action.payload.id] = action.payload;
+    },
+    deleteResearchCategory: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.researchCategories[action.payload];
+    },
+    updateResearchSubcategories: (state: GameDefsReduxState, action: PayloadAction<ResearchSubcategoryData[]>) => {
+      state.researchSubcategories = {};
+      action.payload.forEach((rscd) => {
+        state.researchSubcategories[rscd.id] = rscd;
+      });
+    },
+    updateResearchSubcategory: (state: GameDefsReduxState, action: PayloadAction<ResearchSubcategoryData>) => {
+      state.researchSubcategories[action.payload.id] = action.payload;
+    },
+    deleteResearchSubcategory: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.researchSubcategories[action.payload];
     },
     updateEquipmentSets: (state: GameDefsReduxState, action: PayloadAction<EquipmentSetData[]>) => {
       // Start empty.
@@ -330,26 +375,35 @@ export const gameDefsSlice = createSlice({
 });
 
 export const {
-  updateCharacterClasses,
-  updateCharacterClass,
-  deleteCharacterClass,
-  updateItemDefs,
-  updateItemDef,
-  deleteItemDef,
-  updateSpellDefs,
-  updateSpellDef,
-  deleteSpellDef,
   updateAbilityDefs,
   updateAbilityDef,
   deleteAbilityDef,
+  updateCharacterClasses,
+  updateCharacterClass,
+  deleteCharacterClass,
   updateEquipmentSets,
   updateEquipmentSetItems,
   updateEquipmentSet,
   updateItemsForEquipmentSet,
   deleteEquipmentSet,
+  updateHarvestingCategories,
+  updateHarvestingCategory,
+  deleteHarvestingCategory,
+  updateItemDefs,
+  updateItemDef,
+  deleteItemDef,
   updateProficiencyRolls,
   updateProficiencyRoll,
   deleteProficiencyRoll,
+  updateResearchCategories,
+  updateResearchCategory,
+  deleteResearchCategory,
+  updateResearchSubcategories,
+  updateResearchSubcategory,
+  deleteResearchSubcategory,
+  updateSpellDefs,
+  updateSpellDef,
+  deleteSpellDef,
   updateStructureComponentDefs,
   updateStructureComponentDef,
   deleteStructureComponentDef,

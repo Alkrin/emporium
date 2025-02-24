@@ -10,11 +10,12 @@ import { AllAbilityComponents } from "../../../staticData/abilityComponents/abil
 import { DeleteButton } from "../../DeleteButton";
 import { SelectAbilityComponentDialog } from "../../dialogs/SelectAbilityComponentDialog";
 import { DatabaseEditingDialogFieldDef, setDefaultValuesForFieldDef } from "./databaseUtils";
+import { AbilityComponentData } from "../../../serverAPI";
 
 interface ReactProps {
   def: DatabaseEditingDialogFieldDef;
-  value: Dictionary<Dictionary<any>>;
-  onValueChange(value: Dictionary<Dictionary<any>>): void;
+  value: AbilityComponentData[];
+  onValueChange(value: AbilityComponentData[]): void;
   tabIndex: PassableTabIndex;
   isDisabled?: boolean;
 }
@@ -45,49 +46,47 @@ class ADatabaseEditingDialogFieldAbilityComponents extends React.Component<Props
         </div>
         {Object.keys(this.props.value).length > 0 && (
           <div className={styles.components}>
-            {Object.entries(this.props.value).map(this.renderComponent.bind(this))}
+            {Object.values(this.props.value).map(this.renderComponent.bind(this))}
           </div>
         )}
       </div>
     );
   }
 
-  private renderComponent(entry: [string, Dictionary<any>]): React.ReactNode {
-    const [componentDefId, data] = entry;
+  private renderComponent(entry: AbilityComponentData, index: number): React.ReactNode {
+    const { componentId: componentDefId, data } = entry;
     const def = AllAbilityComponents[componentDefId];
     if (!def) {
       return null;
     }
 
     return (
-      <div className={styles.componentWrapper} key={componentDefId}>
-        <div className={styles.row}>
-          <div className={styles.label}>{def.name}</div>
-          <DeleteButton className={styles.button} onClick={this.onDeleteClick.bind(this, componentDefId)} />
+      <React.Fragment key={index}>
+        {index !== 0 && <div className={styles.componentSeparator} />}
+        <div className={styles.componentWrapper}>
+          <div className={styles.row}>
+            <div className={styles.label}>{def.name}</div>
+            <DeleteButton className={styles.button} onClick={this.onDeleteClick.bind(this, index)} />
+          </div>
+          <div className={styles.column}>
+            {def.fields.map((field: DatabaseEditingDialogFieldDef, fieldIndex: number) => {
+              return renderDatabaseEditingDialogField(
+                field,
+                fieldIndex,
+                this.props.tabIndex,
+                data,
+                this.applyDataChange.bind(this, index)
+              );
+            })}
+          </div>
         </div>
-        <div className={styles.column}>
-          {def.fields.map((field: DatabaseEditingDialogFieldDef, index: number) => {
-            return renderDatabaseEditingDialogField(
-              field,
-              index,
-              this.props.tabIndex,
-              data,
-              this.applyDataChange.bind(this, componentDefId)
-            );
-          })}
-        </div>
-      </div>
+      </React.Fragment>
     );
   }
 
-  private applyDataChange(componentDefId: string, fieldName: string, value: any): void {
-    const newValue: Dictionary<Dictionary<any>> = {
-      ...this.props.value,
-      [componentDefId]: {
-        ...this.props.value[componentDefId],
-        [fieldName]: value,
-      },
-    };
+  private applyDataChange(index: number, fieldName: string, value: any): void {
+    const newValue = [...this.props.value];
+    newValue[index] = { ...newValue[index], data: { ...newValue[index].data, [fieldName]: value } };
 
     this.props.onValueChange(newValue);
   }
@@ -101,14 +100,12 @@ class ADatabaseEditingDialogFieldAbilityComponents extends React.Component<Props
             <SelectAbilityComponentDialog
               onSelectionConfirmed={async (abilityComponentId: string) => {
                 const def = AllAbilityComponents[abilityComponentId];
-                const newValue: Dictionary<Dictionary<any>> = {
-                  ...this.props.value,
-                };
-                const defaults: Dictionary<any> = {};
+                const newValue = [...this.props.value];
+                const data: Dictionary<any> = {};
                 def.fields.forEach((field) => {
-                  setDefaultValuesForFieldDef(defaults, field);
+                  setDefaultValuesForFieldDef(data, field);
                 });
-                newValue[abilityComponentId] = defaults;
+                newValue.push({ componentId: abilityComponentId, data });
 
                 this.props.onValueChange(newValue);
               }}
@@ -119,11 +116,8 @@ class ADatabaseEditingDialogFieldAbilityComponents extends React.Component<Props
     );
   }
 
-  private onDeleteClick(componentDefId: string): void {
-    const newValue: Dictionary<Dictionary<any>> = {
-      ...this.props.value,
-    };
-    delete newValue[componentDefId];
+  private onDeleteClick(index: number): void {
+    const newValue = this.props.value.filter((v, vindex) => index !== vindex);
     this.props.onValueChange(newValue);
   }
 }

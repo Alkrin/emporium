@@ -13,6 +13,9 @@ import { showModal } from "../../redux/modalsSlice";
 import { DatabaseAbilitiesDialog } from "./DatabaseAbilitiesDialog";
 import { DatabaseCharacterClassesDialog } from "./DatabaseCharacterClassesDialog";
 import { DatabaseProficiencyRollsDialog } from "./DatabaseProficiencyRollsDialog";
+import { DatabaseResearchCategoriesDialog } from "./DatabaseResearchCategoriesDialog";
+import { DatabaseResearchSubcategoriesDialog } from "./DatabaseResearchSubcategoriesDialog";
+import { DatabaseHarvestingCategoriesDialog } from "./DatabaseHarvestingCategoriesDialog";
 
 interface ReactProps {}
 
@@ -35,11 +38,20 @@ class ADatabasePanel extends React.Component<Props> {
         <div className={styles.dataButton} onClick={this.onEquipmentSetsClicked.bind(this)}>
           {"Equipment Sets"}
         </div>
+        <div className={styles.dataButton} onClick={this.onHarvestingCategoriesClicked.bind(this)}>
+          {"Harvesting Categories"}
+        </div>
         <div className={styles.dataButton} onClick={this.onItemsClicked.bind(this)}>
           {"Items"}
         </div>
         <div className={styles.dataButton} onClick={this.onProficiencyRollsClicked.bind(this)}>
           {"Proficiency Rolls"}
+        </div>
+        <div className={styles.dataButton} onClick={this.onResearchCategoriesClicked.bind(this)}>
+          {"Research Categories"}
+        </div>
+        <div className={styles.dataButton} onClick={this.onResearchSubcategoriesClicked.bind(this)}>
+          {"Research Subcategories"}
         </div>
         <div className={styles.dataButton} onClick={this.onSpellsClicked.bind(this)}>
           {"Spells"}
@@ -91,6 +103,18 @@ class ADatabasePanel extends React.Component<Props> {
     );
   }
 
+  private onHarvestingCategoriesClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseHarvestingCategories",
+        content: () => {
+          return <DatabaseHarvestingCategoriesDialog />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
   private onItemsClicked(): void {
     this.props.dispatch?.(
       showModal({
@@ -109,6 +133,30 @@ class ADatabasePanel extends React.Component<Props> {
         id: "DatabaseProficiencyRolls",
         content: () => {
           return <DatabaseProficiencyRollsDialog />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onResearchCategoriesClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseResearchCategories",
+        content: () => {
+          return <DatabaseResearchCategoriesDialog />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onResearchSubcategoriesClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseResearchSubcategories",
+        content: () => {
+          return <DatabaseResearchSubcategoriesDialog />;
         },
         escapable: true,
       })

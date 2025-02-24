@@ -28,8 +28,11 @@ import {
   refetchCharacterClasses,
   refetchEquipmentSetItems,
   refetchEquipmentSets,
+  refetchHarvestingCategories,
   refetchItemDefs,
   refetchProficiencyRolls,
+  refetchResearchCategories,
+  refetchResearchSubcategories,
   refetchSpellDefs,
   refetchStructureComponentDefs,
   refetchTroopDefs,
@@ -220,6 +223,8 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchEquipmentSets(this.props.dispatch);
                 this.setState({ nowLoading: "Expected Outcomes" });
                 await refetchExpectedOutcomes(this.props.dispatch);
+                this.setState({ nowLoading: "Harvesting Categories" });
+                await refetchHarvestingCategories(this.props.dispatch);
                 this.setState({ nowLoading: "Item Defs" });
                 await refetchItemDefs(this.props.dispatch);
                 this.setState({ nowLoading: "Items" });
@@ -240,6 +245,10 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchProficiencyRolls(this.props.dispatch);
                 this.setState({ nowLoading: "Repertoires" });
                 await refetchRepertoires(this.props.dispatch);
+                this.setState({ nowLoading: "Research Categories" });
+                await refetchResearchCategories(this.props.dispatch);
+                this.setState({ nowLoading: "Research Subcategories" });
+                await refetchResearchSubcategories(this.props.dispatch);
                 this.setState({ nowLoading: "Spell Defs" });
                 await refetchSpellDefs(this.props.dispatch);
                 this.setState({ nowLoading: "Spellbooks" });

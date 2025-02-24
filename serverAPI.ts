@@ -81,18 +81,18 @@ import {
   RequestBody_CreateCharacterClass,
   RequestBody_CreateProficiencyRoll,
   RequestBody_EditProficiencyRoll,
+  RequestBody_CreateResearchCategory,
+  RequestBody_EditResearchCategory,
+  RequestBody_CreateResearchSubcategory,
+  RequestBody_EditResearchSubcategory,
+  RequestBody_EditHarvestingCategory,
+  RequestBody_CreateHarvestingCategory,
 } from "./serverRequestTypes";
-import {
-  AbilityFilterv2,
-  AbilityInstance,
-  AbilityInstancev2,
-  ProficiencySource,
-} from "./staticData/types/abilitiesAndProficiencies";
+import { AbilityFilterv2, AbilityInstancev2, ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import {
   CharacterStat,
   NaturalWeapon,
   SavingThrowType,
-  SelectableClassFeature,
   SelectableClassFeaturev2,
   SpellType,
   WeaponStyle,
@@ -333,6 +333,19 @@ export interface CharacterData extends CharacterEquipmentData {
   location_id: number;
   maintenance_date: string;
   maintenance_paid: number;
+  proficiencies: ProficiencyDatav2[];
+}
+
+export type ServerCharacterData = Omit<CharacterData, "hit_dice" | "proficiencies"> & {
+  hit_dice: string;
+  proficiencies: string;
+};
+
+export interface ProficiencyDatav2 {
+  ability_id: number;
+  subtype: string;
+  rank: number;
+  source: ProficiencySource;
 }
 
 export interface ProficiencyData {
@@ -359,17 +372,24 @@ export interface SpellDefData {
   table_image: string;
 }
 
-export interface AbilityComponentData {}
+export enum AbilityType {
+  Ailment = "Ailment",
+  ClassProficiency = "ClassProficiency",
+  GeneralProficiency = "GeneralProficiency",
+  Other = "Other",
+}
+export interface AbilityComponentData {
+  componentId: string;
+  data: Dictionary<any>;
+}
 export interface AbilityDefData {
   id: number;
   name: string;
-  is_proficiency: boolean;
-  is_general_proficiency: boolean;
+  type: AbilityType;
   max_ranks: number;
   descriptions: string[];
   subtypes: string[];
-  // First key is componentId, second key is field name, value is assigned value.
-  components: Dictionary<Dictionary<any>>;
+  components: AbilityComponentData[];
 }
 export type ServerAbilityDefData = Omit<AbilityDefData, "descriptions" | "subtypes" | "components"> & {
   descriptions: string;
@@ -418,8 +438,6 @@ export type ServerSpellDefData = Omit<SpellDefData, "tags" | "type_levels"> & {
   tags: string;
   type_levels: string;
 };
-
-export type ServerCharacterData = Omit<CharacterData, "hit_dice"> & { hit_dice: string };
 
 export interface ActivityData {
   id: number;
@@ -795,6 +813,33 @@ export interface ProficiencyRollData {
   id: number;
   name: string;
   description: string;
+  stat: CharacterStat | "---";
+  bonus_multiplier: number;
+}
+
+export interface ResearchCategoryData {
+  id: number;
+  name: string;
+  description: string;
+  rates_by_level: number[];
+  rolls_by_level: number[];
+}
+export type ServerResearchCategoryData = Omit<ResearchCategoryData, "rates_by_level" | "rolls_by_level"> & {
+  rates_by_level: string;
+  rolls_by_level: string;
+};
+
+export interface ResearchSubcategoryData {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface HarvestingCategoryData {
+  id: number;
+  name: string;
+  description: string;
+  required_ranks: number;
 }
 
 export function StringToNumbers(s: string): number[] {
@@ -836,6 +881,7 @@ export type ActivityOutcomesResult = ServerError | ActivityOutcomeData[];
 export type CharactersResult = ServerError | CharacterData[];
 export type EquipmentSetsResult = ServerError | EquipmentSetData[];
 export type EquipmentSetItemsResult = ServerError | EquipmentSetItemData[];
+export type HarvestingCategoriesResult = ServerError | HarvestingCategoryData[];
 export type ItemDefsResult = ServerError | ItemDefData[];
 export type ItemsResult = ServerError | ItemData[];
 export type UsersResult = ServerError | UserData[];
@@ -850,6 +896,8 @@ export type RepertoiresResult = ServerError | RepertoireEntryData[];
 export type MapsResult = ServerError | MapData[];
 export type MapHexesResult = ServerError | ServerMapHexData[];
 export type ProficiencyRollsResult = ServerError | ProficiencyRollData[];
+export type ResearchCategoriesResult = ServerError | ResearchCategoryData[];
+export type ResearchSubcategoriesResult = ServerError | ResearchSubcategoryData[];
 export type LocationsResult = ServerError | ServerLocationData[];
 export type LocationCitiesResult = ServerError | LocationCityData[];
 export type LocationLairsResult = ServerError | LocationLairData[];
@@ -918,11 +966,9 @@ class AServerAPI {
       data.forEach((sAbilityData) => {
         abilityData.push({
           ...sAbilityData,
-          is_proficiency: !!sAbilityData.is_proficiency,
-          is_general_proficiency: !!sAbilityData.is_general_proficiency,
           descriptions: JSON.parse(sAbilityData.descriptions),
           subtypes: Database_StringToStringArray(sAbilityData.subtypes),
-          components: sAbilityData.components.length > 0 ? JSON.parse(sAbilityData.components) : {},
+          components: sAbilityData.components.length > 0 ? JSON.parse(sAbilityData.components) : [],
         });
       });
 
@@ -1066,11 +1112,24 @@ class AServerAPI {
           hit_dice: sCharData.hit_dice.split(",").map((stringHP) => {
             return +stringHP;
           }),
+          proficiencies: JSON.parse(sCharData.proficiencies),
         });
       });
 
       return charData;
     }
+  }
+
+  async fetchHarvestingCategories(): Promise<HarvestingCategoriesResult> {
+    const res = await fetch("/api/fetchHarvestingCategories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | HarvestingCategoryData[] = await res.json();
+    return data;
   }
 
   async fetchItemDefs(): Promise<ItemDefsResult> {
@@ -1128,6 +1187,43 @@ class AServerAPI {
     });
 
     const data: ServerError | ProficiencyRollData[] = await res.json();
+    return data;
+  }
+
+  async fetchResearchCategories(): Promise<ResearchCategoriesResult> {
+    const res = await fetch("/api/fetchResearchCategories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerResearchCategoryData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      const researchCategoryData: ResearchCategoryData[] = [];
+      data.forEach((sResearchCategoryData) => {
+        researchCategoryData.push({
+          ...sResearchCategoryData,
+          rates_by_level: JSON.parse(sResearchCategoryData.rates_by_level) ?? [],
+          rolls_by_level: JSON.parse(sResearchCategoryData.rolls_by_level) ?? [],
+        });
+      });
+
+      return researchCategoryData;
+    }
+  }
+
+  async fetchResearchSubcategories(): Promise<ResearchSubcategoriesResult> {
+    const res = await fetch("/api/fetchResearchSubcategories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ResearchSubcategoryData[] = await res.json();
     return data;
   }
 
@@ -1263,6 +1359,7 @@ class AServerAPI {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
+      proficiencies: JSON.stringify(character.proficiencies),
       selected_class_features,
       equipment,
     };
@@ -1284,6 +1381,7 @@ class AServerAPI {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
+      proficiencies: JSON.stringify(character.proficiencies),
       selected_class_features,
     };
     const res = await fetch("/api/editCharacter", {
@@ -1462,6 +1560,48 @@ class AServerAPI {
     return await res.json();
   }
 
+  async createHarvestingCategory(def: HarvestingCategoryData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateHarvestingCategory = {
+      ...def,
+    };
+    const res = await fetch("/api/createHarvestingCategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editHarvestingCategory(def: HarvestingCategoryData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditHarvestingCategory = {
+      ...def,
+    };
+    const res = await fetch("/api/editHarvestingCategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteHarvestingCategory(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteHarvestingCategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
   async editItemDef(def: ItemDefData): Promise<EditRowResult> {
     const requestBody: RequestBody_EditItemDef = {
       ...def,
@@ -1575,6 +1715,94 @@ class AServerAPI {
       id,
     };
     const res = await fetch("/api/deleteProficiencyRoll", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createResearchCategory(def: ResearchCategoryData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateResearchCategory = {
+      ...def,
+      rates_by_level: JSON.stringify(def.rates_by_level),
+      rolls_by_level: JSON.stringify(def.rolls_by_level),
+    };
+    const res = await fetch("/api/createResearchCategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editResearchCategory(def: ResearchCategoryData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditResearchCategory = {
+      ...def,
+      rates_by_level: JSON.stringify(def.rates_by_level),
+      rolls_by_level: JSON.stringify(def.rolls_by_level),
+    };
+    const res = await fetch("/api/editResearchCategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteResearchCategory(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteResearchCategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createResearchSubcategory(def: ResearchSubcategoryData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateResearchSubcategory = {
+      ...def,
+    };
+    const res = await fetch("/api/createResearchSubcategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editResearchSubcategory(def: ResearchSubcategoryData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditResearchSubcategory = {
+      ...def,
+    };
+    const res = await fetch("/api/editResearchSubcategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteResearchSubcategory(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteResearchSubcategory", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

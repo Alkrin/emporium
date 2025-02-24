@@ -4,6 +4,9 @@ import { AbilityComponentArmorStatic } from "./AbilityComponentArmorStatic";
 import { AbilityComponentMeleeDamageByLevel } from "./AbilityComponentMeleeDamageByLevel";
 import { AbilityComponentProficiencyRoll } from "./AbilityComponentProficiencyRoll";
 import { AbilityComponentRangedDamageByLevel } from "./AbilityComponentRangedDamageByLevel";
+import { AbilityComponentResearchCapability } from "./AbilityComponentResearchCapability";
+import { AbilityComponentResearchBonusesOrEffectiveLevel } from "./AbilityComponentResearchBonusesOrEffectiveLevel";
+import { AbilityComponentHarvestingCapability } from "./AbilityComponentHarvestingCapability";
 
 export interface AbilityComponent {
   id: string;
@@ -14,9 +17,12 @@ export interface AbilityComponent {
 
 export const AllAbilityComponents: Dictionary<AbilityComponent> = {
   [AbilityComponentArmorStatic.id]: AbilityComponentArmorStatic,
+  [AbilityComponentHarvestingCapability.id]: AbilityComponentHarvestingCapability,
   [AbilityComponentMeleeDamageByLevel.id]: AbilityComponentMeleeDamageByLevel,
   [AbilityComponentProficiencyRoll.id]: AbilityComponentProficiencyRoll,
   [AbilityComponentRangedDamageByLevel.id]: AbilityComponentRangedDamageByLevel,
+  [AbilityComponentResearchCapability.id]: AbilityComponentResearchCapability,
+  [AbilityComponentResearchBonusesOrEffectiveLevel.id]: AbilityComponentResearchBonusesOrEffectiveLevel,
 };
 
 export const AllAbilityComponentsArray = Object.values(AllAbilityComponents).sort((a, b) => {

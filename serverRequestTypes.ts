@@ -7,6 +7,7 @@ import {
   ContractData,
   EquipmentSetData,
   EquipmentSetItemData,
+  HarvestingCategoryData,
   ItemData,
   LocationCityData,
   LocationData,
@@ -14,6 +15,7 @@ import {
   MapData,
   ProficiencyData,
   ProficiencyRollData,
+  ResearchSubcategoryData,
   ServerAbilityDefData,
   ServerActivityData,
   ServerActivityOutcomeData,
@@ -21,6 +23,7 @@ import {
   ServerItemData,
   ServerItemDefData,
   ServerMapHexData,
+  ServerResearchCategoryData,
   ServerSpellDefData,
   StorageData,
   StructureComponentData,
@@ -75,6 +78,7 @@ export interface RequestBody_CreateOrEditCharacter {
   hp: number;
   hit_dice: string;
   location_id: number;
+  proficiencies: string;
   /** Feature id, subtype, rank. */
   selected_class_features: [string, string, number][];
   equipment?: RequestField_StartingEquipmentData[];
@@ -273,6 +277,9 @@ export type RequestBody_EditCharacterClass = ServerCharacterClass;
 // Contract
 export type RequestBody_CreateContract = Omit<ContractData, "id">;
 export type RequestBody_EditContract = ContractData;
+// Harvesting Category
+export type RequestBody_CreateHarvestingCategory = Omit<HarvestingCategoryData, "id">;
+export type RequestBody_EditHarvestingCategory = HarvestingCategoryData;
 // ItemDef
 export type RequestBody_CreateItemDef = Omit<ServerItemDefData, "id">;
 export type RequestBody_EditItemDef = ServerItemDefData;
@@ -292,6 +299,12 @@ export type RequestBody_EditMapHex = ServerMapHexData;
 // ProficiencyRoll
 export type RequestBody_CreateProficiencyRoll = Omit<ProficiencyRollData, "id">;
 export type RequestBody_EditProficiencyRoll = ProficiencyRollData;
+// ResearchCategory
+export type RequestBody_CreateResearchCategory = Omit<ServerResearchCategoryData, "id">;
+export type RequestBody_EditResearchCategory = ServerResearchCategoryData;
+// ResearchSubcategory
+export type RequestBody_CreateResearchSubcategory = Omit<ResearchSubcategoryData, "id">;
+export type RequestBody_EditResearchSubcategory = ResearchSubcategoryData;
 // SpellDef
 export type RequestBody_CreateSpellDef = Omit<ServerSpellDefData, "id">;
 export type RequestBody_EditSpellDef = ServerSpellDefData;

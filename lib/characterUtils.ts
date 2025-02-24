@@ -417,6 +417,13 @@ export function getProficiencyRankForCharacter(
           [ProficiencySource.Selectable3]: 1,
           [ProficiencySource.Selectable4]: 1,
           [ProficiencySource.Extra]: 1,
+          [ProficiencySource.Extra1]: 1,
+          [ProficiencySource.Extra2]: 1,
+          [ProficiencySource.Extra3]: 1,
+          [ProficiencySource.Extra4]: 1,
+          [ProficiencySource.IntBonus1]: 1,
+          [ProficiencySource.IntBonus2]: 1,
+          [ProficiencySource.IntBonus3]: 1,
           [ProficiencySource.General1]: GeneralProficienciesAt[0] ?? 99,
           [ProficiencySource.General2]: GeneralProficienciesAt[1] ?? 99,
           [ProficiencySource.General3]: GeneralProficienciesAt[2] ?? 99,
@@ -1553,24 +1560,25 @@ export function getActiveAbilityComponentsForCharacter(
     const abilityDef = redux.gameDefs.abilities[+abilityDefIdString];
 
     Object.entries(subtypes).forEach(([subtype, rank]) => {
-      Object.entries(abilityDef.components).forEach(([abilityComponentId, data]) => {
+      Object.values(abilityDef.components).forEach((component) => {
         const instance: AbilityComponentInstance = {
           abilityId: abilityDef.id,
-          abilityComponentId,
+          abilityComponentId: component.componentId,
           subtype,
-          data,
+          data: component.data,
           rank,
           characterLevel: character.level,
         };
-        if (!allComponents[abilityComponentId]) {
-          allComponents[abilityComponentId] = [];
+        if (!allComponents[component.componentId]) {
+          allComponents[component.componentId] = [];
         }
-        allComponents[abilityComponentId].push(instance);
+        allComponents[component.componentId].push(instance);
       });
     });
   });
 
   // TODO: Components from equipped / carried gear.
+  // TODO: Note that those won't necessarily use character.level.  They might have an explicit level.
 
   // TODO: Here's where we should filter the list of allComponents.
   // TODO: For instance, some component types might not stack, or we might need to combine some?  I'm thinking of the weird
