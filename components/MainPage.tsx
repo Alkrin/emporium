@@ -28,6 +28,7 @@ import {
   refetchCharacterClasses,
   refetchEquipmentSetItems,
   refetchEquipmentSets,
+  refetchHarvestingCategories,
   refetchItemDefs,
   refetchProficiencyRolls,
   refetchResearchCategories,
@@ -222,6 +223,8 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchEquipmentSets(this.props.dispatch);
                 this.setState({ nowLoading: "Expected Outcomes" });
                 await refetchExpectedOutcomes(this.props.dispatch);
+                this.setState({ nowLoading: "Harvesting Categories" });
+                await refetchHarvestingCategories(this.props.dispatch);
                 this.setState({ nowLoading: "Item Defs" });
                 await refetchItemDefs(this.props.dispatch);
                 this.setState({ nowLoading: "Items" });

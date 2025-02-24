@@ -6,6 +6,7 @@ import {
   updateCharacterClasses,
   updateEquipmentSetItems,
   updateEquipmentSets,
+  updateHarvestingCategories,
   updateItemDefs,
   updateProficiencyRolls,
   updateResearchCategories,
@@ -83,6 +84,23 @@ export async function refetchEquipmentSetItems(dispatch: Dispatch): Promise<void
   } else {
     // Send the whole batch at once so we can axe defs that no longer exist.
     dispatch(updateEquipmentSetItems(result));
+  }
+}
+
+export async function refetchHarvestingCategories(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPI.fetchHarvestingCategories();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "HarvestingCategories Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch HarvestingCategories data"} />,
+        escapable: true,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe defs that no longer exist.
+    dispatch(updateHarvestingCategories(result));
   }
 }
 
@@ -213,17 +231,20 @@ export async function refetchTroopDefs(dispatch: Dispatch): Promise<void> {
 export class GameDefsDataSource extends ExternalDataSource {
   async componentDidMount(): Promise<void> {
     if (this.dispatch) {
-      await refetchAbilityDefs(this.dispatch);
-      await refetchCharacterClasses(this.dispatch);
-      await refetchEquipmentSets(this.dispatch);
-      await refetchEquipmentSetItems(this.dispatch);
-      await refetchItemDefs(this.dispatch);
-      await refetchProficiencyRolls(this.dispatch);
-      await refetchResearchCategories(this.dispatch);
-      await refetchResearchSubcategories(this.dispatch);
-      await refetchSpellDefs(this.dispatch);
-      await refetchStructureComponentDefs(this.dispatch);
-      await refetchTroopDefs(this.dispatch);
+      await Promise.all([
+        refetchAbilityDefs(this.dispatch),
+        refetchCharacterClasses(this.dispatch),
+        refetchEquipmentSets(this.dispatch),
+        refetchEquipmentSetItems(this.dispatch),
+        refetchHarvestingCategories(this.dispatch),
+        refetchItemDefs(this.dispatch),
+        refetchProficiencyRolls(this.dispatch),
+        refetchResearchCategories(this.dispatch),
+        refetchResearchSubcategories(this.dispatch),
+        refetchSpellDefs(this.dispatch),
+        refetchStructureComponentDefs(this.dispatch),
+        refetchTroopDefs(this.dispatch),
+      ]);
     }
   }
 }

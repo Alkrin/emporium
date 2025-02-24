@@ -119,7 +119,7 @@ class AEditStructureComponentSubPanel extends React.Component<Props, State> {
     this.setState({ isSaving: true });
 
     // Valid count?
-    if (+this.state.countString < 1) {
+    if (+this.state.countString <= 0) {
       this.props.dispatch?.(
         showModal({
           id: "NoCountError",

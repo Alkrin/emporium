@@ -5,7 +5,6 @@
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
-  margin-bottom: 1vmin;
 }
 
 .normalText {
@@ -62,6 +61,10 @@
   &:hover {
     box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
   }
+
+  &.locked {
+    background-color: rgba(255, 0, 0, 0.1);
+  }
 }
 
 .listName {
@@ -70,6 +73,11 @@
   text-align: left;
   text-overflow: ellipsis;
   flex-grow: 1;
+
+  &.locked {
+    color: rgba(255, 0, 0, 0.5);
+    text-decoration: line-through;
+  }
 }
 
 .tooltipRoot {

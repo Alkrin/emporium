@@ -15,6 +15,7 @@ import { DatabaseCharacterClassesDialog } from "./DatabaseCharacterClassesDialog
 import { DatabaseProficiencyRollsDialog } from "./DatabaseProficiencyRollsDialog";
 import { DatabaseResearchCategoriesDialog } from "./DatabaseResearchCategoriesDialog";
 import { DatabaseResearchSubcategoriesDialog } from "./DatabaseResearchSubcategoriesDialog";
+import { DatabaseHarvestingCategoriesDialog } from "./DatabaseHarvestingCategoriesDialog";
 
 interface ReactProps {}
 
@@ -36,6 +37,9 @@ class ADatabasePanel extends React.Component<Props> {
         </div>
         <div className={styles.dataButton} onClick={this.onEquipmentSetsClicked.bind(this)}>
           {"Equipment Sets"}
+        </div>
+        <div className={styles.dataButton} onClick={this.onHarvestingCategoriesClicked.bind(this)}>
+          {"Harvesting Categories"}
         </div>
         <div className={styles.dataButton} onClick={this.onItemsClicked.bind(this)}>
           {"Items"}
@@ -93,6 +97,18 @@ class ADatabasePanel extends React.Component<Props> {
         id: "DatabaseEquipmentSets",
         content: () => {
           return <DatabaseEquipmentSetsDialog />;
+        },
+        escapable: true,
+      })
+    );
+  }
+
+  private onHarvestingCategoriesClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseHarvestingCategories",
+        content: () => {
+          return <DatabaseHarvestingCategoriesDialog />;
         },
         escapable: true,
       })

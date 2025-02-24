@@ -140,7 +140,7 @@ class ACreateStructureComponentSubPanel extends React.Component<Props, State> {
     }
 
     // Valid count?
-    if (+this.state.countString < 1) {
+    if (+this.state.countString <= 0) {
       this.props.dispatch?.(
         showModal({
           id: "NoCountError",

@@ -85,6 +85,8 @@ import {
   RequestBody_EditResearchCategory,
   RequestBody_CreateResearchSubcategory,
   RequestBody_EditResearchSubcategory,
+  RequestBody_EditHarvestingCategory,
+  RequestBody_CreateHarvestingCategory,
 } from "./serverRequestTypes";
 import { AbilityFilterv2, AbilityInstancev2, ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import {
@@ -833,6 +835,13 @@ export interface ResearchSubcategoryData {
   description: string;
 }
 
+export interface HarvestingCategoryData {
+  id: number;
+  name: string;
+  description: string;
+  required_ranks: number;
+}
+
 export function StringToNumbers(s: string): number[] {
   return s.split(",").map((s2) => {
     return +s2;
@@ -872,6 +881,7 @@ export type ActivityOutcomesResult = ServerError | ActivityOutcomeData[];
 export type CharactersResult = ServerError | CharacterData[];
 export type EquipmentSetsResult = ServerError | EquipmentSetData[];
 export type EquipmentSetItemsResult = ServerError | EquipmentSetItemData[];
+export type HarvestingCategoriesResult = ServerError | HarvestingCategoryData[];
 export type ItemDefsResult = ServerError | ItemDefData[];
 export type ItemsResult = ServerError | ItemData[];
 export type UsersResult = ServerError | UserData[];
@@ -1108,6 +1118,18 @@ class AServerAPI {
 
       return charData;
     }
+  }
+
+  async fetchHarvestingCategories(): Promise<HarvestingCategoriesResult> {
+    const res = await fetch("/api/fetchHarvestingCategories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | HarvestingCategoryData[] = await res.json();
+    return data;
   }
 
   async fetchItemDefs(): Promise<ItemDefsResult> {
@@ -1529,6 +1551,48 @@ class AServerAPI {
       item_ids: itemIds,
     };
     const res = await fetch("/api/deleteStorage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async createHarvestingCategory(def: HarvestingCategoryData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateHarvestingCategory = {
+      ...def,
+    };
+    const res = await fetch("/api/createHarvestingCategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editHarvestingCategory(def: HarvestingCategoryData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditHarvestingCategory = {
+      ...def,
+    };
+    const res = await fetch("/api/editHarvestingCategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteHarvestingCategory(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteHarvestingCategory", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

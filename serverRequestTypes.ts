@@ -7,6 +7,7 @@ import {
   ContractData,
   EquipmentSetData,
   EquipmentSetItemData,
+  HarvestingCategoryData,
   ItemData,
   LocationCityData,
   LocationData,
@@ -276,6 +277,9 @@ export type RequestBody_EditCharacterClass = ServerCharacterClass;
 // Contract
 export type RequestBody_CreateContract = Omit<ContractData, "id">;
 export type RequestBody_EditContract = ContractData;
+// Harvesting Category
+export type RequestBody_CreateHarvestingCategory = Omit<HarvestingCategoryData, "id">;
+export type RequestBody_EditHarvestingCategory = HarvestingCategoryData;
 // ItemDef
 export type RequestBody_CreateItemDef = Omit<ServerItemDefData, "id">;
 export type RequestBody_EditItemDef = ServerItemDefData;

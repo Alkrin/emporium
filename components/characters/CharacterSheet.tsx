@@ -72,6 +72,7 @@ import { CharacterEquipmentSection } from "./sections/CharacterEquipmentSection"
 import { CharacterCombatSection } from "./sections/CharacterCombatSection";
 import { CharacterProficiencyRollsSection } from "./sections/CharacterProficiencyRollsSection";
 import { CharacterResearchSection } from "./sections/CharacterResearchSection";
+import { CharacterMonsterHarvestingSection } from "./sections/CharacterMonsterHarvestingSection";
 
 interface ReactProps {
   characterId: number;
@@ -145,6 +146,7 @@ class ACharacterSheet extends React.Component<Props> {
         </div>
         <div className={styles.rightPanel}>
           <CharacterResearchSection characterId={this.props.characterId} activeComponents={activeComponents} />
+          <CharacterMonsterHarvestingSection characterId={this.props.characterId} activeComponents={activeComponents} />
           {this.renderSpellSlotsPanel()}
           {this.renderSpellRepertoirePanel()}
         </div>
