@@ -2,21 +2,19 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
-import { AbilityDefData, CharacterData, HarvestingCategoryData } from "../../../serverAPI";
+import { CharacterData, HarvestingCategoryData } from "../../../serverAPI";
 import TooltipSource from "../../TooltipSource";
 import styles from "./CharacterMonsterHarvestingSection.module.scss";
-import { AbilityComponentInstance } from "../../../lib/characterUtils";
-import { buildAbilityName } from "../../../lib/stringUtils";
+import {
+  AbilityComponentInstance,
+  getAbilityComponentInstanceSourceName,
+  ValueSource,
+} from "../../../lib/characterUtils";
 import {
   AbilityComponentHarvestingCapability,
   AbilityComponentHarvestingCapabilityData,
 } from "../../../staticData/abilityComponents/AbilityComponentHarvestingCapability";
 import { InfoButton } from "../../InfoButton";
-
-interface ValueSource {
-  name: string;
-  value: number;
-}
 
 interface HarvestingCategoryDisplayData {
   categoryDef: HarvestingCategoryData;
@@ -30,7 +28,6 @@ interface ReactProps {
 }
 
 interface InjectedProps {
-  allAbilities: Record<number, AbilityDefData>;
   allHarvestingCategories: Record<number, HarvestingCategoryData>;
   character: CharacterData;
   dispatch?: Dispatch;
@@ -88,11 +85,6 @@ class ACharacterMonsterHarvestingSection extends React.Component<Props> {
       }
       return categoryDisplayData[categoryId];
     };
-    const buildSourceName = (instance: AbilityComponentInstance) => {
-      const ability = this.props.allAbilities[instance.abilityId];
-      // TODO: How to handle non-ability sources?
-      return buildAbilityName(ability.name, instance.subtype, instance.rank);
-    };
 
     activeComponents[AbilityComponentHarvestingCapability.id]?.forEach((instance) => {
       const instanceData = instance.data as AbilityComponentHarvestingCapabilityData;
@@ -100,7 +92,7 @@ class ACharacterMonsterHarvestingSection extends React.Component<Props> {
 
       // Basic harvesting capability grants ranks towards the requirement.
       data.ranks += instance.rank;
-      data.rankSources.push({ name: buildSourceName(instance), value: instance.rank });
+      data.rankSources.push({ name: getAbilityComponentInstanceSourceName(instance), value: instance.rank });
     });
 
     const sortedCategories = Object.values(categoryDisplayData).sort((a, b) => {
@@ -154,11 +146,10 @@ class ACharacterMonsterHarvestingSection extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const { harvestingCategories: allHarvestingCategories, abilities: allAbilities } = state.gameDefs;
+  const { harvestingCategories: allHarvestingCategories } = state.gameDefs;
   const character = state.characters.characters[props.characterId ?? 1] ?? null;
   return {
     ...props,
-    allAbilities,
     allHarvestingCategories,
     character,
   };

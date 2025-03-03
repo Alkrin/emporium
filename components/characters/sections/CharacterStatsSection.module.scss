@@ -1,0 +1,134 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.centeredRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.title {
+  @extend .normalText;
+  flex-grow: 1;
+}
+
+.valueDisplay {
+  @extend .valueText;
+  flex-shrink: 0;
+}
+
+.infoAsterisk {
+  font-size: 0.8rem;
+  color: lime;
+  flex-shrink: 0;
+}
+
+.tooltipRoot {
+  max-width: 45vmin;
+}
+
+.horizontalLine {
+  background-color: yellow;
+  height: 1px;
+  margin-bottom: 0.5vmin;
+}
+
+.tooltipTitle {
+  font-size: 1rem;
+  color: wheat;
+  min-width: 10vmin;
+  flex-grow: 1;
+}
+
+.tooltipValue {
+  margin-left: 1vmin;
+  font-size: 1rem;
+  color: yellow;
+}
+
+.tooltipBonus {
+  margin-left: 1vmin;
+  font-size: 1rem;
+  color: wheat;
+}
+
+.tooltipDivider {
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
+
+.tooltipSourceRow {
+  @extend .row;
+  margin-top: 0.5vmin;
+}
+
+.tooltipSource {
+  flex-grow: 1;
+  font-size: 0.8rem;
+  color: gray;
+}
+
+.tooltipCondition {
+  font-size: 0.8rem;
+  color: #448888;
+}
+
+.tooltipSourceValue {
+  margin-left: 0.5vmin;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 0, 0.5);
+}
+
+.tooltipConditionalHeader {
+  margin-top: 1vmin;
+  font-size: 0.8rem;
+  color: wheat;
+}
+
+.statPanel {
+  @extend .row;
+  margin-bottom: 0.5vmin;
+}
+
+.statName {
+  @extend .normalText;
+  width: 2.5rem;
+}
+
+.statValue {
+  @extend .valueText;
+  width: 1.3rem;
+  text-align: center;
+}
+
+.statBonus {
+  @extend .normalText;
+  width: 2rem;
+  text-align: center;
+}

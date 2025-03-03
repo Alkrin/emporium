@@ -32,7 +32,7 @@ import {
   SpellDefData,
 } from "../../serverAPI";
 import { InputSingleNumberDialog } from "../dialogs/InputSingleNumberDialog";
-import { getBonusForStat, getBonusString } from "../../lib/characterUtils";
+import { getStatBonusForValue, getBonusString } from "../../lib/characterUtils";
 import { SelectAdventurerInjuryDialog } from "../dialogs/SelectAdventurerInjuryDialog";
 import { SelectArmyDialog } from "../dialogs/SelectArmyDialog";
 import { getStorageDisplayName } from "../../lib/storageUtils";
@@ -575,7 +575,7 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
     const adventurer = this.props.allCharacters[p.characterId];
     const isInjured = (this.state.characterInjuries[p.characterId]?.length ?? 0) > 0;
     const isDead = this.state.deadCharacterIds.includes(p.characterId);
-    const conBonus = getBonusForStat(adventurer.constitution);
+    const conBonus = getStatBonusForValue(adventurer.constitution);
     return (
       <div className={styles.listRow} key={`adventurer${index}`}>
         <div className={styles.listIndex}>{index + 1}</div>

@@ -1,5 +1,4 @@
 import store from "../redux/store";
-import dateFormat from "dateformat";
 import {
   CharacterData,
   CharacterEquipmentData,
@@ -55,16 +54,45 @@ import { ProficiencySeduction } from "../staticData/proficiencies/ProficiencySed
 import { ProficiencyLayOnHands } from "../staticData/proficiencies/ProficiencyLayOnHands";
 import { ProficiencyFamiliar } from "../staticData/proficiencies/ProficiencyFamiliar";
 import { InjuryBlind } from "../staticData/injuries/InjuryBlind";
-import { getFirstOfThisMonthDateString } from "./stringUtils";
+import { buildAbilityName, getFirstOfThisMonthDateString } from "./stringUtils";
 import { getAllStorageAssociatedItemIds } from "./storageUtils";
 import { SharedNaturalAttackPower } from "../staticData/classFeatures/SharedNaturalAttackPower";
 import { SharedChitinousCarapace } from "../staticData/classFeatures/SharedChitinousCarapace";
 import { ProficiencyRunning } from "../staticData/proficiencies/ProficiencyRunning";
 import { TrueTurtleRunicScutes } from "../staticData/classFeatures/TrueTurtleRunicScutes";
 import { SharedLoadbearing } from "../staticData/classFeatures/SharedLoadbearing";
+import {
+  AbilityComponentCharacterStatOverride,
+  AbilityComponentCharacterStatOverrideData,
+} from "../staticData/abilityComponents/AbilityComponentCharacterStatOverride";
+import {
+  AbilityComponentCharacterStatBonus,
+  AbilityComponentCharacterStatBonusData,
+} from "../staticData/abilityComponents/AbilityComponentCharacterStatBonus";
+
+export interface ValueSource {
+  name: string;
+  value: number;
+}
+
+export interface ConditionalValueSource extends ValueSource {
+  condition: string;
+}
+
+export function getAbilityComponentInstanceSourceName(instance: AbilityComponentInstance): string {
+  const redux = store.getState();
+  const ability = redux.gameDefs.abilities[instance.abilityId];
+
+  if (ability) {
+    return buildAbilityName(ability.name, instance.subtype, instance.rank);
+  } else {
+    // TODO: How to handle non-ability sources?
+    return `Unknown`;
+  }
+}
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
-export function getBonusForStat(value: number): StatBonus {
+export function getStatBonusForValue(value: number): StatBonus {
   if (value <= 3) return -3;
   if (value <= 5) return -2;
   if (value <= 8) return -1;
@@ -87,7 +115,7 @@ export function getCharacterXPMultiplier(character: CharacterData): number {
     const prValue = getCharacterStat(character, pr);
     smallestPrimaryStat = Math.min(smallestPrimaryStat, prValue);
   });
-  const bonus = getBonusForStat(smallestPrimaryStat);
+  const bonus = getStatBonusForValue(smallestPrimaryStat);
   switch (bonus) {
     case 1:
       return 1.05;
@@ -109,7 +137,7 @@ export function getCharacterMaxHP(character: CharacterData): number {
   }
 
   // Add Con bonus for all levels up to 9.
-  const conBonus = getBonusForStat(character.constitution);
+  const conBonus = getStatBonusForValue(character.constitution);
   maxHP += Math.min(character.level, 9) * conBonus;
 
   // Add hp step bonus for all levels 10+.
@@ -137,10 +165,106 @@ export function getCharacterStat(character: CharacterData, stat: CharacterStat):
   }
 }
 
+export interface CharacterStatData {
+  baseValue: number;
+  baseValueSources: ValueSource[];
+  bonusValue: number;
+  bonusValueSources: ValueSource[];
+}
+
+export function getCharacterStatv2(
+  character: CharacterData,
+  stat: CharacterStat,
+  activeComponents: Record<string, AbilityComponentInstance[]>,
+  outCharacterStatData?: CharacterStatData
+): number {
+  let statValue = 0;
+  switch (stat) {
+    case CharacterStat.Strength: {
+      statValue = character.strength;
+      break;
+    }
+    case CharacterStat.Intelligence: {
+      statValue = character.intelligence;
+      break;
+    }
+    case CharacterStat.Will: {
+      statValue = character.wisdom;
+      break;
+    }
+    case CharacterStat.Dexterity: {
+      statValue = character.dexterity;
+      break;
+    }
+    case CharacterStat.Constitution: {
+      statValue = character.constitution;
+      break;
+    }
+    case CharacterStat.Charisma: {
+      statValue = character.charisma;
+      break;
+    }
+  }
+  if (outCharacterStatData) {
+    outCharacterStatData.baseValue = statValue;
+    outCharacterStatData.baseValueSources.push({ name: `Base ${stat}`, value: statValue });
+  }
+
+  // Apply stat value overrides (e.g. Ogre/Giant Strength)
+  const overrides = (activeComponents[AbilityComponentCharacterStatOverride.id] ?? []).filter((instance) => {
+    const instanceData = instance.data as AbilityComponentCharacterStatOverrideData;
+    return instanceData.stat === stat;
+  });
+  if (overrides.length > 0) {
+    // Only the highest override applies.  So if you have e.g. Ogre AND Giant strength, you get to be a Giant.
+    const bestOverride = overrides.reduce(
+      (bestSoFar: AbilityComponentInstance | null, instance: AbilityComponentInstance) => {
+        const instanceData = instance.data as AbilityComponentCharacterStatOverrideData;
+        if (bestSoFar) {
+          const bestSoFarData = bestSoFar.data as AbilityComponentCharacterStatOverrideData;
+          return bestSoFarData.value > instanceData.value ? bestSoFar : instance;
+        } else {
+          return instance;
+        }
+      },
+      null
+    );
+    if (outCharacterStatData && bestOverride) {
+      const overrideData = bestOverride.data as AbilityComponentCharacterStatOverrideData;
+      statValue = overrideData.value;
+      outCharacterStatData.baseValue = statValue;
+      outCharacterStatData.baseValueSources.push({
+        name: getAbilityComponentInstanceSourceName(bestOverride),
+        value: statValue,
+      });
+    }
+  }
+
+  // Apply stat value bonuses/penalties (e.g. injuries, curses, etc.)
+  const bonuses = (activeComponents[AbilityComponentCharacterStatBonus.id] ?? []).filter((instance) => {
+    const instanceData = instance.data as AbilityComponentCharacterStatBonusData;
+    return instanceData.stat === stat;
+  });
+  bonuses.forEach((instance: AbilityComponentInstance) => {
+    const instanceData = instance.data as AbilityComponentCharacterStatBonusData;
+    statValue += instanceData.bonus;
+
+    if (outCharacterStatData) {
+      outCharacterStatData.bonusValue += instanceData.bonus;
+      outCharacterStatData.bonusValueSources.push({
+        name: getAbilityComponentInstanceSourceName(instance),
+        value: instanceData.bonus,
+      });
+    }
+  });
+
+  return statValue;
+}
+
 export function getCharacterMaxEncumbrance(character: CharacterData): Stones {
   // LoadBearing alters the weight for each encumbrance level.
   const encumbranceReduction = 2 * getProficiencyRankForCharacter(character.id, SharedLoadbearing.id);
-  return [20 + getBonusForStat(character.strength) + encumbranceReduction, 0];
+  return [20 + getStatBonusForValue(character.strength) + encumbranceReduction, 0];
 }
 
 export function getAllCharacterAssociatedItemIds(characterId: number, excludeStorages?: boolean): number[] {
@@ -459,7 +583,7 @@ export function getInitiativeBonusForCharacter(characterId: number): BonusCalcul
   if (!character) {
     return calc;
   } else {
-    calc.totalBonus = getBonusForStat(character.dexterity);
+    calc.totalBonus = getStatBonusForValue(character.dexterity);
     calc.sources.push(["Dex Bonus", calc.totalBonus]);
 
     // Is the character wielding a weapon with an initiative penalty tag?  (e.g. Great Axe)
@@ -510,7 +634,7 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
   if (!character) {
     return calc;
   } else {
-    calc.totalBonus = getBonusForStat(character.dexterity);
+    calc.totalBonus = getStatBonusForValue(character.dexterity);
     calc.sources.push(["Dex Bonus", calc.totalBonus]);
 
     const equippedArmor = redux.gameDefs.items[redux.items.allItems[character?.slot_armor]?.def_id];
@@ -820,8 +944,8 @@ function generateMeleeAttack(characterId: number, weapons: ItemData[], naturalWe
   }
 
   // Stat bonuses.
-  const strBonus = getBonusForStat(character.strength);
-  const dexBonus = getBonusForStat(character.dexterity);
+  const strBonus = getStatBonusForValue(character.strength);
+  const dexBonus = getStatBonusForValue(character.dexterity);
 
   // Str damage bonus always applies to melee attacks.
   if (strBonus) {
@@ -999,7 +1123,7 @@ function generateRangedAttack(characterId: number, weapon?: ItemData | NaturalWe
   }
 
   // By default, you get the Dexterity bonus to hit.
-  const dexBonus = getBonusForStat(character.dexterity);
+  const dexBonus = getStatBonusForValue(character.dexterity);
   data.hitBonuses.push(["Dex Bonus", dexBonus]);
 
   // Level-based hit bonus.
@@ -1046,7 +1170,7 @@ export function getMaxMinionCountForCharacter(characterId: number): BonusCalcula
     calc.totalBonus = 4;
     calc.sources.push(["Base Value", 4]);
 
-    const chaBonus = getBonusForStat(character.charisma);
+    const chaBonus = getStatBonusForValue(character.charisma);
     calc.totalBonus += chaBonus;
     calc.sources.push(["Charisma Bonus", chaBonus]);
 
@@ -1070,7 +1194,7 @@ export function getRecruitmentRollBonusForCharacter(characterId: number): BonusC
   if (!character) {
     return calc;
   } else {
-    const chaBonus = getBonusForStat(character.charisma);
+    const chaBonus = getStatBonusForValue(character.charisma);
     calc.totalBonus = chaBonus;
     calc.sources.push(["Charisma Bonus", chaBonus]);
 

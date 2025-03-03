@@ -2,11 +2,15 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
-import { AbilityDefData, CharacterData, ProficiencyRollData } from "../../../serverAPI";
+import { CharacterData, ProficiencyRollData } from "../../../serverAPI";
 import TooltipSource from "../../TooltipSource";
 import styles from "./CharacterProficiencyRollsSection.module.scss";
-import { AbilityComponentInstance, getBonusForStat, getCharacterStat } from "../../../lib/characterUtils";
-import { buildAbilityName } from "../../../lib/stringUtils";
+import {
+  AbilityComponentInstance,
+  getStatBonusForValue,
+  getCharacterStatv2,
+  getAbilityComponentInstanceSourceName,
+} from "../../../lib/characterUtils";
 import {
   AbilityComponentProficiencyRoll,
   AbilityComponentProficiencyRollData,
@@ -18,7 +22,6 @@ interface ReactProps {
 }
 
 interface InjectedProps {
-  allAbilities: Record<number, AbilityDefData>;
   allProficiencyRolls: Record<number, ProficiencyRollData>;
   character: CharacterData;
   dispatch?: Dispatch;
@@ -92,17 +95,24 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
     const baseTargetRoll = Math.min(rankRoll, levelRoll);
     let finalTargetRoll = baseTargetRoll;
 
+    // If the target is still 99, then they don't actually have that proficiency roll.  This allows us to
+    // set up rolls that are only available at certain proficiency ranks, e.g. Healing only lets you roll
+    // to Neutralize Poison at Rank 2+.
+    if (finalTargetRoll >= 99) {
+      return null;
+    }
+
     // Stat-based bonuses.
     let statBonus = 0;
     let hasStatBonus = false;
     if (!!rollDef.stat && rollDef.stat != "---") {
       hasStatBonus = true;
-      const statValue = getCharacterStat(this.props.character, rollDef.stat);
-      statBonus = getBonusForStat(statValue) * rollDef.bonus_multiplier;
+      const statValue = getCharacterStatv2(this.props.character, rollDef.stat, this.props.activeComponents);
+      statBonus = getStatBonusForValue(statValue) * rollDef.bonus_multiplier;
     }
     finalTargetRoll -= statBonus;
 
-    // TODO: Bonuses, penalties, and conditionals, once those Components exist.
+    // TODO: Other bonuses, penalties, and conditionals, once those Components exist.
 
     return (
       <TooltipSource
@@ -127,17 +137,11 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
                 ) : null}
                 <div className={styles.tooltipSubtext}>{"Sources"}</div>
                 {instances.map((instance, index2) => {
-                  const ability = this.props.allAbilities[instance.abilityId];
-                  if (ability) {
-                    return (
-                      <div className={styles.tooltipSubtext} key={`source${index2}`}>
-                        {`\xa0\xa0\xa0\xa0${buildAbilityName(ability.name, instance.subtype, instance.rank)}`}
-                      </div>
-                    );
-                  } else {
-                    // TODO: Components from items instead of abilities?
-                    return null;
-                  }
+                  return (
+                    <div className={styles.tooltipSubtext} key={`source${index2}`}>
+                      {`\xa0\xa0\xa0\xa0${getAbilityComponentInstanceSourceName(instance)}`}
+                    </div>
+                  );
                 })}
               </div>
             );
@@ -152,11 +156,10 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const { proficiencyRolls: allProficiencyRolls, abilities: allAbilities } = state.gameDefs;
+  const { proficiencyRolls: allProficiencyRolls } = state.gameDefs;
   const character = state.characters.characters[props.characterId ?? 1] ?? null;
   return {
     ...props,
-    allAbilities,
     allProficiencyRolls,
     character,
   };
