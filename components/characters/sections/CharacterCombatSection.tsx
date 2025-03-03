@@ -2,11 +2,18 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
-import { AbilityDefData, CharacterClassv2, CharacterData, ItemData, ItemDefData } from "../../../serverAPI";
+import { CharacterClassv2, CharacterData, ItemData, ItemDefData } from "../../../serverAPI";
 import TooltipSource from "../../TooltipSource";
 import styles from "./CharacterCombatSection.module.scss";
-import { AbilityComponentInstance, AttackData, getBonusForStat } from "../../../lib/characterUtils";
-import { NaturalWeapon } from "../../../staticData/types/characterClasses";
+import {
+  AbilityComponentInstance,
+  AttackData,
+  getAbilityComponentInstanceSourceName,
+  getBonusString,
+  getCharacterStatv2,
+  getStatBonusForValue,
+} from "../../../lib/characterUtils";
+import { CharacterStat, NaturalWeapon } from "../../../staticData/types/characterClasses";
 import {
   AbilityComponentMeleeDamageByLevel,
   AbilityComponentMeleeDamageByLevelData,
@@ -22,7 +29,6 @@ interface ReactProps {
 }
 
 interface InjectedProps {
-  allAbilities: Record<number, AbilityDefData>;
   allItems: Record<number, ItemData>;
   allItemDefs: Record<number, ItemDefData>;
   character: CharacterData;
@@ -78,14 +84,14 @@ class ACharacterCombatSection extends React.Component<Props> {
       <div className={styles.combatTooltipRoot}>
         <div className={styles.row}>
           <div className={styles.tooltipTitle}>{"Damage"}</div>
-          <div className={styles.tooltipValue}>{`${data.damage.bonus > 0 ? "+" : ""}${data.damage.bonus}`}</div>
+          <div className={styles.tooltipValue}>{getBonusString(data.damage.bonus)}</div>
         </div>
         <div className={styles.tooltipDivider} />
         {data.damageBonuses.map(([text, value]) => {
           return (
             <div className={styles.tooltipSourceRow} key={text}>
               <div className={styles.tooltipSource}>{text}</div>
-              <div className={styles.tooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
+              <div className={styles.tooltipSourceValue}>{getBonusString(value)}</div>
             </div>
           );
         })}
@@ -97,7 +103,7 @@ class ACharacterCombatSection extends React.Component<Props> {
               return (
                 <div className={styles.tooltipSourceRow} key={text}>
                   <div className={styles.tooltipSource}>{text}</div>
-                  <div className={styles.tooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
+                  <div className={styles.tooltipSourceValue}>{getBonusString(value)}</div>
                 </div>
               );
             })}
@@ -106,14 +112,14 @@ class ACharacterCombatSection extends React.Component<Props> {
         <div style={{ height: "1vmin" }} />
         <div className={styles.row}>
           <div className={styles.tooltipTitle}>{"To Hit"}</div>
-          <div className={styles.tooltipValue}>{`${data.toHit > 0 ? "+" : ""}${data.toHit}`}</div>
+          <div className={styles.tooltipValue}>{getBonusString(data.toHit)}</div>
         </div>
         <div className={styles.tooltipDivider} />
         {data.hitBonuses.map(([text, value]) => {
           return (
             <div className={styles.tooltipSourceRow} key={text}>
               <div className={styles.tooltipSource}>{text}</div>
-              <div className={styles.tooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
+              <div className={styles.tooltipSourceValue}>{getBonusString(value)}</div>
             </div>
           );
         })}
@@ -125,7 +131,7 @@ class ACharacterCombatSection extends React.Component<Props> {
               return (
                 <div className={styles.tooltipSourceRow} key={text}>
                   <div className={styles.tooltipSource}>{text}</div>
-                  <div className={styles.tooltipSourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
+                  <div className={styles.tooltipSourceValue}>{getBonusString(value)}</div>
                 </div>
               );
             })}
@@ -235,7 +241,7 @@ class ACharacterCombatSection extends React.Component<Props> {
   }
 
   private generateMeleeAttack(weapons: ItemData[], naturalWeapon?: NaturalWeapon): AttackData {
-    const { character, characterClass, allItemDefs, activeComponents, allAbilities } = this.props;
+    const { character, characterClass, allItemDefs, activeComponents } = this.props;
 
     const weapon1 = weapons.length > 0 ? weapons[0] : null;
     const weapon2 = weapons.length > 1 ? weapons[1] : null;
@@ -276,12 +282,10 @@ class ACharacterCombatSection extends React.Component<Props> {
     }
 
     // Stat bonuses.
-    const totalStr = character.strength;
-    // TODO: Component stat boosts / penalties.
-    const strBonus = getBonusForStat(totalStr);
-    const totalDex = character.dexterity;
-    // TODO: Component stat boosts / penalties.
-    const dexBonus = getBonusForStat(totalDex);
+    const totalStr = getCharacterStatv2(character, CharacterStat.Strength, activeComponents);
+    const strBonus = getStatBonusForValue(totalStr);
+    const totalDex = getCharacterStatv2(character, CharacterStat.Dexterity, activeComponents);
+    const dexBonus = getStatBonusForValue(totalDex);
 
     // Str damage bonus always applies to melee attacks.
     if (strBonus) {
@@ -335,12 +339,10 @@ class ACharacterCombatSection extends React.Component<Props> {
     if ((activeComponents[AbilityComponentMeleeDamageByLevel.id]?.length ?? 0) > 0) {
       activeComponents[AbilityComponentMeleeDamageByLevel.id].forEach((instance) => {
         const instanceData = instance.data as AbilityComponentMeleeDamageByLevelData;
-        let sourceName = "Unknown";
-        if (allAbilities[instance.abilityId]) {
-          sourceName = allAbilities[instance.abilityId].name;
-        }
-        // TODO: sourceName from items?
-        data.damageBonuses.push([sourceName, instanceData.damage_by_level[instance.characterLevel] ?? 0]);
+        data.damageBonuses.push([
+          getAbilityComponentInstanceSourceName(instance),
+          instanceData.damage_by_level[instance.characterLevel] ?? 0,
+        ]);
       });
     }
 
@@ -397,7 +399,7 @@ class ACharacterCombatSection extends React.Component<Props> {
   }
 
   private generateRangedAttack(weapon?: ItemData | NaturalWeapon): AttackData {
-    const { character, characterClass, allItemDefs, activeComponents, allAbilities } = this.props;
+    const { character, characterClass, allItemDefs, activeComponents } = this.props;
 
     function isItem(weapon: ItemData | NaturalWeapon): weapon is ItemData {
       return "def_id" in weapon;
@@ -463,9 +465,8 @@ class ACharacterCombatSection extends React.Component<Props> {
     }
 
     // By default, you get the Dexterity bonus to hit.
-    const totalDex = character.dexterity;
-    // TODO: Component stat boosts / penalties.
-    const dexBonus = getBonusForStat(totalDex);
+    const totalDex = getCharacterStatv2(character, CharacterStat.Dexterity, activeComponents);
+    const dexBonus = getStatBonusForValue(totalDex);
     data.hitBonuses.push(["Dex Bonus", dexBonus]);
 
     // Level-based hit bonus.
@@ -478,12 +479,10 @@ class ACharacterCombatSection extends React.Component<Props> {
     if ((activeComponents[AbilityComponentRangedDamageByLevel.id]?.length ?? 0) > 0) {
       activeComponents[AbilityComponentRangedDamageByLevel.id].forEach((instance) => {
         const instanceData = instance.data as AbilityComponentRangedDamageByLevelData;
-        let sourceName = "Unknown";
-        if (allAbilities[instance.abilityId]) {
-          sourceName = allAbilities[instance.abilityId].name;
-        }
-        // TODO: sourceName from items?
-        data.damageBonuses.push([sourceName, instanceData.damage_by_level[instance.characterLevel] ?? 0]);
+        data.damageBonuses.push([
+          getAbilityComponentInstanceSourceName(instance),
+          instanceData.damage_by_level[instance.characterLevel] ?? 0,
+        ]);
       });
     }
 
@@ -497,12 +496,11 @@ class ACharacterCombatSection extends React.Component<Props> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allItems } = state.items;
-  const { items: allItemDefs, abilities: allAbilities } = state.gameDefs;
+  const { items: allItemDefs } = state.gameDefs;
   const character = state.characters.characters[props.characterId ?? 1] ?? null;
   const characterClass = state.gameDefs.characterClasses[character?.class_id] ?? null;
   return {
     ...props,
-    allAbilities,
     allItems,
     allItemDefs,
     character,

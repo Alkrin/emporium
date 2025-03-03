@@ -38,7 +38,7 @@ import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../../dataSources/ArmiesDataSource";
 import { refetchActivities } from "../../dataSources/ActivitiesDataSource";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
-import { getBonusForStat, getBonusString } from "../../lib/characterUtils";
+import { getStatBonusForValue, getBonusString } from "../../lib/characterUtils";
 import { refetchContracts } from "../../dataSources/ContractsDataSource";
 import { ActivityOutcomesList } from "../activities/ActivityOutcomeList";
 import { CreateActivityOutcomeDialog } from "../activities/CreateActivityOutcomeDialog";
@@ -421,7 +421,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     const adventurer = this.props.allCharacters[p.characterId];
     const isInjured = (this.state.painOutcome.characterInjuries[p.characterId] ?? []).length > 0;
     const isDead = this.state.painOutcome.deadCharacterIds.includes(p.characterId);
-    const conBonus = getBonusForStat(adventurer.constitution);
+    const conBonus = getStatBonusForValue(adventurer.constitution);
     return (
       <div className={styles.listRow} key={`adventurer${index}`}>
         <div className={styles.listIndex}>{index + 1}</div>

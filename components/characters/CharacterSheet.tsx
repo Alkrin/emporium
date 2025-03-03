@@ -33,7 +33,7 @@ import {
   addCommasToNumber,
   getActiveAbilityComponentsForCharacter,
   getArmorBonusForCharacter,
-  getBonusForStat,
+  getStatBonusForValue,
   getCXPDeductibleRemainingForCharacter,
   getCampaignXPDeductibleCapForLevel,
   getCharacterMaxEncumbrance,
@@ -73,6 +73,10 @@ import { CharacterCombatSection } from "./sections/CharacterCombatSection";
 import { CharacterProficiencyRollsSection } from "./sections/CharacterProficiencyRollsSection";
 import { CharacterResearchSection } from "./sections/CharacterResearchSection";
 import { CharacterMonsterHarvestingSection } from "./sections/CharacterMonsterHarvestingSection";
+import { CharacterAvailableJobsSection } from "./sections/CharacterAvailableJobsSection";
+import { CharacterInitiativeSection } from "./sections/CharacterInitiativeSection";
+import { CharacterStatsSection } from "./sections/CharacterStatsSection";
+import { CharacterReactionRollSection } from "./sections/CharacterReactionRollSection";
 
 interface ReactProps {
   characterId: number;
@@ -147,6 +151,7 @@ class ACharacterSheet extends React.Component<Props> {
         <div className={styles.rightPanel}>
           <CharacterResearchSection characterId={this.props.characterId} activeComponents={activeComponents} />
           <CharacterMonsterHarvestingSection characterId={this.props.characterId} activeComponents={activeComponents} />
+          <CharacterAvailableJobsSection characterId={this.props.characterId} activeComponents={activeComponents} />
           {this.renderSpellSlotsPanel()}
           {this.renderSpellRepertoirePanel()}
         </div>
@@ -216,7 +221,7 @@ class ACharacterSheet extends React.Component<Props> {
         <div className={styles.topPanelGrid}>
           <div className={styles.column}>
             <div className={styles.row}>
-              {this.renderStatsPanelv2(activeComponents)}
+              <CharacterStatsSection characterId={this.props.characterId} activeComponents={activeComponents} />
               <div className={styles.horizontalSpacer} />
               {this.renderSavingThrowsPanel()}
             </div>
@@ -233,7 +238,9 @@ class ACharacterSheet extends React.Component<Props> {
             <div className={styles.verticalSpacer} />
             {this.renderSpeedPanel()}
             <div className={styles.verticalSpacer} />
-            {this.renderInitiativePanel()}
+            <CharacterReactionRollSection characterId={this.props.characterId} activeComponents={activeComponents} />
+            <div className={styles.verticalSpacer} />
+            <CharacterInitiativeSection characterId={this.props.characterId} activeComponents={activeComponents} />
             <div className={styles.verticalSpacer} />
             <CharacterCombatSection characterId={this.props.characterId} activeComponents={activeComponents} />
           </div>
@@ -270,7 +277,10 @@ class ACharacterSheet extends React.Component<Props> {
         <div className={styles.repertoireScroller}>
           {characterClass.spellcasting.map((spellCapability, scIndex) => {
             const repertoireBonus = spellCapability.repertoireStat
-              ? Math.max(getBonusForStat(getCharacterStat(this.props.character, spellCapability.repertoireStat)), 0)
+              ? Math.max(
+                  getStatBonusForValue(getCharacterStat(this.props.character, spellCapability.repertoireStat)),
+                  0
+                )
               : 0;
             const slots = spellCapability.spellSlots[this.props.character.level - 1];
             return (
@@ -1254,162 +1264,6 @@ class ACharacterSheet extends React.Component<Props> {
     }
   }
 
-  private renderStatsPanelv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
-    return (
-      this.props.character && (
-        <div className={styles.statsPanel}>
-          <div className={styles.statsContainer}>
-            {this.renderStatPanev2(
-              "STR",
-              this.props.character.strength,
-              this.renderStrengthTooltipv2.bind(this, activeComponents)
-            )}
-            {this.renderStatPanev2(
-              "INT",
-              this.props.character.intelligence,
-              this.renderIntelligenceTooltipv2.bind(this, activeComponents)
-            )}
-            {this.renderStatPanev2(
-              "WIL",
-              this.props.character.wisdom,
-              this.renderWillTooltip.bind(this, activeComponents)
-            )}
-            {this.renderStatPanev2(
-              "DEX",
-              this.props.character.dexterity,
-              this.renderDexterityTooltipv2.bind(this, activeComponents)
-            )}
-            {this.renderStatPanev2(
-              "CON",
-              this.props.character.constitution,
-              this.renderConstitutionTooltipv2.bind(this, activeComponents)
-            )}
-            {this.renderStatPanev2(
-              "CHA",
-              this.props.character.charisma,
-              this.renderCharismaTooltipv2.bind(this, activeComponents)
-            )}
-          </div>
-        </div>
-      )
-    );
-  }
-
-  private renderStatPanev2(name: string, value: number, renderTooltip: () => React.ReactNode): React.ReactNode {
-    const bonus = getBonusForStat(value);
-    const bonusText = `${bonus > 0 ? "+" : ""}${bonus}`;
-
-    return (
-      <TooltipSource className={styles.statPanel} tooltipParams={{ id: `${name}Tooltip`, content: renderTooltip }}>
-        <div className={styles.statName}>{name}</div>
-        <div className={styles.statValue}>{value}</div>
-        <div className={styles.statBonus}>{bonusText}</div>
-      </TooltipSource>
-    );
-  }
-
-  private renderStrengthTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
-    let finalStat = this.props.character.strength;
-
-    // TODO: Any stat altering components need to be applied here.
-    // TODO: Calculate based on those components.
-    let hasModifiers = false;
-
-    return (
-      <div className={styles.statTooltip}>
-        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
-          <div className={styles.normalText}>{"Strength"}</div>
-          <div className={styles.valueText}>{finalStat}</div>
-        </div>
-      </div>
-    );
-  }
-
-  private renderIntelligenceTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
-    let finalStat = this.props.character.intelligence;
-
-    // TODO: Any stat altering components need to be applied here.
-    // TODO: Calculate based on those components.
-    let hasModifiers = false;
-
-    return (
-      <div className={styles.statTooltip}>
-        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
-          <div className={styles.normalText}>{"Intelligence"}</div>
-          <div className={styles.valueText}>{finalStat}</div>
-        </div>
-      </div>
-    );
-  }
-
-  private renderWillTooltip(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
-    let finalStat = this.props.character.wisdom;
-
-    // TODO: Any stat altering components need to be applied here.
-    // TODO: Calculate based on those components.
-    let hasModifiers = false;
-
-    return (
-      <div className={styles.statTooltip}>
-        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
-          <div className={styles.normalText}>{"Will"}</div>
-          <div className={styles.valueText}>{finalStat}</div>
-        </div>
-      </div>
-    );
-  }
-
-  private renderDexterityTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
-    let finalStat = this.props.character.dexterity;
-
-    // TODO: Any stat altering components need to be applied here.
-    // TODO: Calculate based on those components.
-    let hasModifiers = false;
-
-    return (
-      <div className={styles.statTooltip}>
-        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
-          <div className={styles.normalText}>{"Dexterity"}</div>
-          <div className={styles.valueText}>{finalStat}</div>
-        </div>
-      </div>
-    );
-  }
-
-  private renderConstitutionTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
-    let finalStat = this.props.character.constitution;
-
-    // TODO: Any stat altering components need to be applied here.
-    // TODO: Calculate based on those components.
-    let hasModifiers = false;
-
-    return (
-      <div className={styles.statTooltip}>
-        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
-          <div className={styles.normalText}>{"Constitution"}</div>
-          <div className={styles.valueText}>{finalStat}</div>
-        </div>
-      </div>
-    );
-  }
-
-  private renderCharismaTooltipv2(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
-    let finalStat = this.props.character.charisma;
-
-    // TODO: Any stat altering components need to be applied here.
-    // TODO: Calculate based on those components.
-    let hasModifiers = false;
-
-    return (
-      <div className={styles.statTooltip}>
-        <div className={`${styles.statRow} ${hasModifiers ? styles.hasMods : ""}`}>
-          <div className={styles.normalText}>{"Charisma"}</div>
-          <div className={styles.valueText}>{finalStat}</div>
-        </div>
-      </div>
-    );
-  }
-
   private renderStatsPanel(): React.ReactNode {
     return (
       this.props.character && (
@@ -1428,7 +1282,7 @@ class ACharacterSheet extends React.Component<Props> {
   }
 
   private renderStatPane(name: string, value: number, renderTooltip: () => React.ReactNode): React.ReactNode {
-    const bonus = getBonusForStat(value);
+    const bonus = getStatBonusForValue(value);
     const bonusText = `${bonus > 0 ? "+" : ""}${bonus}`;
 
     return (

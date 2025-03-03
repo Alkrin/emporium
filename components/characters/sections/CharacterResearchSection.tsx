@@ -5,7 +5,7 @@ import { RootState } from "../../../redux/store";
 import { AbilityDefData, CharacterData, ResearchCategoryData, ResearchSubcategoryData } from "../../../serverAPI";
 import TooltipSource from "../../TooltipSource";
 import styles from "./CharacterResearchSection.module.scss";
-import { AbilityComponentInstance } from "../../../lib/characterUtils";
+import { AbilityComponentInstance, ValueSource } from "../../../lib/characterUtils";
 import { buildAbilityName } from "../../../lib/stringUtils";
 import {
   AbilityComponentResearchCapability,
@@ -15,11 +15,6 @@ import {
   AbilityComponentResearchBonusesOrEffectiveLevel,
   AbilityComponentResearchBonusesOrEffectiveLevelData,
 } from "../../../staticData/abilityComponents/AbilityComponentResearchBonusesOrEffectiveLevel";
-
-interface ValueSource {
-  name: string;
-  value: number;
-}
 
 interface ResearchCategoryDisplayData {
   categoryDef: ResearchCategoryData;

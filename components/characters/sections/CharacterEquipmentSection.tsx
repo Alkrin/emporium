@@ -4,7 +4,13 @@ import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
 import styles from "./CharacterEquipmentSection.module.scss";
 import { AbilityDefData, CharacterClassv2, CharacterData, ItemData, ItemDefData } from "../../../serverAPI";
-import { AbilityComponentInstance, BonusCalculations, getBonusForStat } from "../../../lib/characterUtils";
+import {
+  AbilityComponentInstance,
+  BonusCalculations,
+  getAbilityComponentInstanceSourceName,
+  getCharacterStatv2,
+  getStatBonusForValue,
+} from "../../../lib/characterUtils";
 import { EditButton } from "../../EditButton";
 import TooltipSource from "../../TooltipSource";
 import { showSubPanel } from "../../../redux/subPanelsSlice";
@@ -14,6 +20,7 @@ import {
   AbilityComponentArmorStatic,
   AbilityComponentArmorStaticData,
 } from "../../../staticData/abilityComponents/AbilityComponentArmorStatic";
+import { CharacterStat } from "../../../staticData/types/characterClasses";
 
 interface ReactProps {
   characterId: number;
@@ -74,14 +81,13 @@ class ACharacterEquipmentSection extends React.Component<Props> {
   }
 
   private getArmorBonusCalculations(): BonusCalculations {
-    const { character, itemDefs, abilityDefs, allItems, activeComponents } = this.props;
+    const { character, itemDefs, allItems, activeComponents } = this.props;
     const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
     if (!character) {
       return calc;
     } else {
-      const totalDexterity = character.dexterity;
-      // TODO: Dex bonuses from components?
-      calc.totalBonus = getBonusForStat(totalDexterity);
+      const totalDexterity = getCharacterStatv2(character, CharacterStat.Dexterity, activeComponents);
+      calc.totalBonus = getStatBonusForValue(totalDexterity);
       calc.sources.push(["Dex Bonus", calc.totalBonus]);
 
       const equippedArmor = itemDefs[allItems[character?.slot_armor]?.def_id];
@@ -103,12 +109,7 @@ class ACharacterEquipmentSection extends React.Component<Props> {
         activeComponents[AbilityComponentArmorStatic.id].forEach((instance) => {
           const instanceData = instance.data as AbilityComponentArmorStaticData;
           calc.totalBonus += instanceData.bonus;
-          let sourceName = "Unknown";
-          if (abilityDefs[instance.abilityId]) {
-            sourceName = abilityDefs[instance.abilityId].name;
-          }
-          // TODO: sourceName from items?
-          calc.sources.push([sourceName, instanceData.bonus]);
+          calc.sources.push([getAbilityComponentInstanceSourceName(instance), instanceData.bonus]);
         });
       }
 
