@@ -14,6 +14,7 @@ import {
 
 interface JobDisplayData extends AvailableJobEntry {
   source: string;
+  subtype: string;
 }
 
 interface ReactProps {
@@ -61,15 +62,27 @@ class ACharacterAvailableJobsSection extends React.Component<Props> {
       // as an Alchemist once you have three ranks of Alchemy by setting a zero wage for ranks
       // one and two.
       if (job && job.wage > 0) {
-        displayData.push({ ...job, source });
+        displayData.push({ ...job, source, subtype: instance.subtype });
       }
     });
 
     const sortedDisplayData = Object.values(displayData).sort((a, b) => {
+      // Sort by subtype.
+      if (a.title === b.title) {
+        return a.subtype.localeCompare(b.subtype);
+      }
       // Sort by name.
       return a.title.localeCompare(b.title);
     });
     return sortedDisplayData;
+  }
+
+  private buildJobTitle(title: string, subtype: string): string {
+    if (subtype.length > 0) {
+      return `${title} (${subtype})`;
+    } else {
+      return title;
+    }
   }
 
   private renderAvailableJobRow(datum: JobDisplayData, index: number): React.ReactNode {
@@ -82,7 +95,7 @@ class ACharacterAvailableJobsSection extends React.Component<Props> {
           content: this.renderJobTooltip.bind(this, datum),
         }}
       >
-        <div className={styles.listName}>{datum.title}</div>
+        <div className={styles.listName}>{this.buildJobTitle(datum.title, datum.subtype)}</div>
         <div className={styles.valueText}>{`${+datum.wage.toFixed(2)}gp`}</div>
       </TooltipSource>
     );
@@ -92,7 +105,7 @@ class ACharacterAvailableJobsSection extends React.Component<Props> {
     return (
       <div className={styles.tooltipRoot}>
         <div className={styles.tooltipHeader}>
-          <div className={styles.tooltipTitle}>{datum.title}</div>
+          <div className={styles.tooltipTitle}>{this.buildJobTitle(datum.title, datum.subtype)}</div>
         </div>
         <div className={styles.tooltipSubtext}>{`Source: ${datum.source}`}</div>
       </div>

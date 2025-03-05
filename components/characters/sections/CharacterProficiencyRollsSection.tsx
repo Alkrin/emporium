@@ -36,22 +36,16 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
     if ((activeComponents[AbilityComponentProficiencyRoll.id]?.length ?? 0) > 0) {
       // Combine any instances that map to the same proficiencyRoll.  This allows us to combine rolls coming from different
       // sources (e.g. one rank from an item and one rank from a learned proficiency).
-      const combinedRolls: Record<number, AbilityComponentInstance[]> = {};
+      const combinedRolls: Record<string, AbilityComponentInstance[]> = {};
       activeComponents[AbilityComponentProficiencyRoll.id].forEach((instance) => {
-        const instanceData = instance.data as AbilityComponentProficiencyRollData;
-        const rollId = instanceData.proficiency_roll_id;
-        if (!combinedRolls[rollId]) {
-          combinedRolls[rollId] = [];
+        const rollName = this.makeRollName(instance);
+        if (!combinedRolls[rollName]) {
+          combinedRolls[rollName] = [];
         }
-        combinedRolls[rollId].push(instance);
+        combinedRolls[rollName].push(instance);
       });
 
-      // Sort the rolls by display name.
-      const orderedRollIds = Object.keys(combinedRolls).sort((rollIdAString, rollIdBString) => {
-        const aData = combinedRolls[+rollIdAString][0].data as AbilityComponentProficiencyRollData;
-        const bData = combinedRolls[+rollIdBString][0].data as AbilityComponentProficiencyRollData;
-        const aName = this.props.allProficiencyRolls[aData.proficiency_roll_id].name;
-        const bName = this.props.allProficiencyRolls[bData.proficiency_roll_id].name;
+      const orderedRollNames = Object.keys(combinedRolls).sort((aName, bName) => {
         return aName.localeCompare(bName);
       });
 
@@ -61,7 +55,7 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
             <div className={styles.title}>{"Proficiency Rolls"}</div>
           </div>
           <div className={styles.horizontalLine} />
-          {orderedRollIds.map((rollId) => combinedRolls[+rollId]).map(this.renderProficiencyRollRow.bind(this))}
+          {orderedRollNames.map((rollName) => combinedRolls[rollName]).map(this.renderProficiencyRollRow.bind(this))}
         </div>
       );
     } else {
@@ -69,6 +63,13 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
       // handful of proficiency rolls.
       return null;
     }
+  }
+
+  private makeRollName(instance: AbilityComponentInstance): string {
+    const instanceData = instance.data as AbilityComponentProficiencyRollData;
+    const baseName = this.props.allProficiencyRolls[instanceData.proficiency_roll_id].name;
+
+    return instance.subtype.length > 0 ? `${baseName} (${instance.subtype})` : baseName;
   }
 
   private renderProficiencyRollRow(instances: AbilityComponentInstance[], index: number): React.ReactNode {
@@ -124,7 +125,7 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
             return (
               <div className={styles.tooltipRoot}>
                 <div className={styles.tooltipHeader}>
-                  <div className={styles.tooltipTitle}>{rollDef.name}</div>
+                  <div className={styles.tooltipTitle}>{this.makeRollName(instances[0])}</div>
                   <div className={styles.tooltipValue}>{`${finalTargetRoll}+`}</div>
                 </div>
                 <div className={styles.tooltipText}>{rollDef.description}</div>
@@ -148,7 +149,7 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
           },
         }}
       >
-        <div className={styles.listName}>{rollDef.name}</div>
+        <div className={styles.listName}>{this.makeRollName(instances[0])}</div>
         <div className={styles.tooltipValue}>{`${finalTargetRoll}+`}</div>
       </TooltipSource>
     );
