@@ -88,20 +88,20 @@ class ACharacterEquipmentSection extends React.Component<Props> {
     } else {
       const totalDexterity = getCharacterStatv2(character, CharacterStat.Dexterity, activeComponents);
       calc.bonus = getStatBonusForValue(totalDexterity);
-      calc.sources.push(["Dex Bonus", calc.bonus]);
+      calc.sources.push({ name: "Dex Bonus", value: calc.bonus });
 
       const equippedArmor = itemDefs[allItems[character?.slot_armor]?.def_id];
       if (equippedArmor) {
         const equippedArmorAC = (equippedArmor?.ac ?? 0) + (equippedArmor?.magic_bonus ?? 0);
         calc.bonus += equippedArmorAC;
-        calc.sources.push([equippedArmor.name, equippedArmorAC]);
+        calc.sources.push({ name: equippedArmor.name, value: equippedArmorAC });
       }
 
       const equippedShield = itemDefs[allItems[character?.slot_shield]?.def_id];
       if (equippedShield) {
         const equippedShieldAC = (equippedShield?.ac ?? 0) + (equippedShield?.magic_bonus ?? 0);
         calc.bonus += equippedShieldAC;
-        calc.sources.push([equippedShield.name, equippedShieldAC]);
+        calc.sources.push({ name: equippedShield.name, value: equippedShieldAC });
       }
 
       // Ability components that grant armor.
@@ -109,7 +109,7 @@ class ACharacterEquipmentSection extends React.Component<Props> {
         activeComponents[AbilityComponentArmorStatic.id].forEach((instance) => {
           const instanceData = instance.data as AbilityComponentArmorStaticData;
           calc.bonus += instanceData.bonus;
-          calc.sources.push([getAbilityComponentInstanceSourceName(instance), instanceData.bonus]);
+          calc.sources.push({ name: getAbilityComponentInstanceSourceName(instance), value: instanceData.bonus });
         });
       }
 
