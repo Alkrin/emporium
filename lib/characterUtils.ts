@@ -69,6 +69,14 @@ import {
   AbilityComponentCharacterStatBonus,
   AbilityComponentCharacterStatBonusData,
 } from "../staticData/abilityComponents/AbilityComponentCharacterStatBonus";
+import {
+  AbilityComponentLanguageCapability,
+  AbilityComponentLanguageCapabilityData,
+} from "../staticData/abilityComponents/AbilityComponentLanguageCapability";
+import {
+  AbilityComponentLanguageCapacityBonus,
+  AbilityComponentLanguageCapacityBonusData,
+} from "../staticData/abilityComponents/AbilityComponentLanguageCapacityBonus";
 
 export interface ValueSource {
   name: string;
@@ -84,7 +92,7 @@ export function getAbilityComponentInstanceSourceName(instance: AbilityComponent
   const ability = redux.gameDefs.abilities[instance.abilityId];
 
   if (ability) {
-    return buildAbilityName(ability.name, instance.subtype, instance.rank);
+    return buildAbilityName(ability.name, instance.subtype, instance.rank, ability.max_ranks);
   } else {
     // TODO: How to handle non-ability sources?
     return `Unknown`;
@@ -570,26 +578,26 @@ export function getProficiencyRankForCharacter(
 }
 
 export interface BonusCalculations {
-  totalBonus: number;
+  bonus: number;
   // We use arrays to preserve ordering.
-  sources: [string, number][];
-  conditionalSources: [string, number][];
+  sources: ValueSource[];
+  conditionalSources: ConditionalValueSource[];
 }
 
 export function getInitiativeBonusForCharacter(characterId: number): BonusCalculations {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
-  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  const calc: BonusCalculations = { bonus: 0, sources: [], conditionalSources: [] };
   if (!character) {
     return calc;
   } else {
-    calc.totalBonus = getStatBonusForValue(character.dexterity);
-    calc.sources.push(["Dex Bonus", calc.totalBonus]);
+    calc.bonus = getStatBonusForValue(character.dexterity);
+    calc.sources.push({ name: "Dex Bonus", value: calc.bonus });
 
     // Is the character wielding a weapon with an initiative penalty tag?  (e.g. Great Axe)
     if (getWeaponTagsForCharacter(characterId).includes(Tag.InitiativeMinusOne)) {
-      calc.sources.push(["Slow Weapon", -1]);
-      calc.totalBonus -= 1;
+      calc.sources.push({ name: "Slow Weapon", value: -1 });
+      calc.bonus -= 1;
     }
 
     // Is the character wielding a spear/polearm with the matching proficiency?
@@ -599,28 +607,32 @@ export function getInitiativeBonusForCharacter(characterId: number): BonusCalcul
       const def1 = redux.gameDefs.items[weapon1?.def_id];
       const def2 = redux.gameDefs.items[weapon2?.def_id];
       if (def1?.tags.includes(WeaponCategory.SpearPoleArm) || def2?.tags.includes(WeaponCategory.SpearPoleArm)) {
-        calc.sources.push(["Fighting Style: Pole Weapon", 1]);
-        calc.totalBonus += 1;
+        calc.sources.push({ name: "Fighting Style: Pole Weapon", value: 1 });
+        calc.bonus += 1;
       }
     }
 
     if (getProficiencyRankForCharacter(characterId, BladeDancerMobility.id)) {
-      calc.sources.push(["Blade Dancer Mobility", 1]);
-      calc.totalBonus += 1;
+      calc.sources.push({ name: "Blade Dancer Mobility", value: 1 });
+      calc.bonus += 1;
     }
 
     if (getProficiencyRankForCharacter(characterId, SharedAnimalReflexes.id)) {
-      calc.sources.push(["Animal Reflexes", 1]);
-      calc.totalBonus += 1;
+      calc.sources.push({ name: "Animal Reflexes", value: 1 });
+      calc.bonus += 1;
     }
 
     if (getProficiencyRankForCharacter(characterId, MysticSpeedOfThought.id)) {
-      calc.sources.push(["Speed Of Thought", 1]);
-      calc.totalBonus += 1;
+      calc.sources.push({ name: "Speed Of Thought", value: 1 });
+      calc.bonus += 1;
     }
 
     if (getProficiencyRankForCharacter(characterId, MysticMeditativeFocus.id)) {
-      calc.conditionalSources.push(["Is Mediative Focus active?", 1]);
+      calc.conditionalSources.push({
+        name: "Is Meditative Focus active?",
+        value: 1,
+        condition: "Is Meditative Focus active?",
+      });
     }
 
     return calc;
@@ -630,25 +642,25 @@ export function getInitiativeBonusForCharacter(characterId: number): BonusCalcul
 export function getArmorBonusForCharacter(characterId: number): BonusCalculations {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
-  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  const calc: BonusCalculations = { bonus: 0, sources: [], conditionalSources: [] };
   if (!character) {
     return calc;
   } else {
-    calc.totalBonus = getStatBonusForValue(character.dexterity);
-    calc.sources.push(["Dex Bonus", calc.totalBonus]);
+    calc.bonus = getStatBonusForValue(character.dexterity);
+    calc.sources.push({ name: "Dex Bonus", value: calc.bonus });
 
     const equippedArmor = redux.gameDefs.items[redux.items.allItems[character?.slot_armor]?.def_id];
     if (equippedArmor) {
       const equippedArmorAC = (equippedArmor?.ac ?? 0) + (equippedArmor?.magic_bonus ?? 0);
-      calc.totalBonus += equippedArmorAC;
-      calc.sources.push([equippedArmor.name, equippedArmorAC]);
+      calc.bonus += equippedArmorAC;
+      calc.sources.push({ name: equippedArmor.name, value: equippedArmorAC });
     }
 
     const equippedShield = redux.gameDefs.items[redux.items.allItems[character?.slot_shield]?.def_id];
     if (equippedShield) {
       const equippedShieldAC = (equippedShield?.ac ?? 0) + (equippedShield?.magic_bonus ?? 0);
-      calc.totalBonus += equippedShieldAC;
-      calc.sources.push([equippedShield.name, equippedShieldAC]);
+      calc.bonus += equippedShieldAC;
+      calc.sources.push({ name: equippedShield.name, value: equippedShieldAC });
     }
 
     // Proficiencies and abilities that grant armor.
@@ -656,8 +668,8 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
       equippedShield &&
       getProficiencyRankForCharacter(characterId, ProficiencyFightingStyle.id, "Weapon and Shield")
     ) {
-      calc.sources.push(["Fighting Style (Weapon and Shield)", 1]);
-      calc.totalBonus += 1;
+      calc.sources.push({ name: "Fighting Style (Weapon and Shield)", value: 1 });
+      calc.bonus += 1;
     }
 
     if (getProficiencyRankForCharacter(characterId, BladeDancerMobility.id)) {
@@ -665,8 +677,8 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
       if (character.level >= 7) ++mBonus;
       if (character.level >= 13) ++mBonus;
 
-      calc.sources.push(["Blade Dancer, Mobility", mBonus]);
-      calc.totalBonus += mBonus;
+      calc.sources.push({ name: "Blade Dancer, Mobility", value: mBonus });
+      calc.bonus += mBonus;
     }
 
     if (getProficiencyRankForCharacter(characterId, WildHarvesterNaturalTactics.id)) {
@@ -674,8 +686,8 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
       if (character.level >= 7) ++mBonus;
       if (character.level >= 13) ++mBonus;
 
-      calc.sources.push(["Wild Harvester, Natural Tactics", mBonus]);
-      calc.totalBonus += mBonus;
+      calc.sources.push({ name: "Wild Harvester, Natural Tactics", value: mBonus });
+      calc.bonus += mBonus;
     }
 
     if (getProficiencyRankForCharacter(characterId, MysticGracefulFightingStyle.id)) {
@@ -683,8 +695,8 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
       if (character.level >= 7) ++mBonus;
       if (character.level >= 13) ++mBonus;
 
-      calc.sources.push(["Mystic, Graceful Fighting Style", mBonus]);
-      calc.totalBonus += mBonus;
+      calc.sources.push({ name: "Mystic, Graceful Fighting Style", value: mBonus });
+      calc.bonus += mBonus;
     }
 
     if (getProficiencyRankForCharacter(characterId, ProficiencySwashbuckling.id)) {
@@ -692,8 +704,8 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
       if (character.level >= 7) ++mBonus;
       if (character.level >= 13) ++mBonus;
 
-      calc.sources.push(["Swashbuckling", mBonus]);
-      calc.totalBonus += mBonus;
+      calc.sources.push({ name: "Swashbuckling", value: mBonus });
+      calc.bonus += mBonus;
     }
 
     if (getProficiencyRankForCharacter(characterId, DwarvenFuryFleshRunes.id)) {
@@ -701,8 +713,8 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
       if (character.level >= 7) mBonus += 2;
       if (character.level >= 13) mBonus += 2;
 
-      calc.sources.push(["Dwarven Fury, Flesh Runes", mBonus]);
-      calc.totalBonus += mBonus;
+      calc.sources.push({ name: "Dwarven Fury, Flesh Runes", value: mBonus });
+      calc.bonus += mBonus;
     }
 
     if (getProficiencyRankForCharacter(characterId, BattlegoatGatecrasherRuneCarvedHorns.id)) {
@@ -710,8 +722,8 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
       if (character.level >= 7) mBonus += 2;
       if (character.level >= 13) mBonus += 2;
 
-      calc.sources.push(["Battlegoat Gatecrasher, Rune-carved Horns", mBonus]);
-      calc.totalBonus += mBonus;
+      calc.sources.push({ name: "Battlegoat Gatecrasher, Rune-carved Horns", value: mBonus });
+      calc.bonus += mBonus;
     }
 
     if (getProficiencyRankForCharacter(characterId, TrueTurtleRunicScutes.id)) {
@@ -719,31 +731,35 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
       if (character.level >= 7) mBonus += 2;
       if (character.level >= 13) mBonus += 2;
 
-      calc.sources.push(["True Turtle, Runic Scutes", mBonus]);
-      calc.totalBonus += mBonus;
+      calc.sources.push({ name: "True Turtle, Runic Scutes", value: mBonus });
+      calc.bonus += mBonus;
     }
 
     if (getProficiencyRankForCharacter(characterId, BattlegoatGatecrasherSteelWool.id)) {
-      calc.sources.push(["Battlegoat Gatecrasher, Steel Wool", 1]);
-      calc.totalBonus += 1;
+      calc.sources.push({ name: "Battlegoat Gatecrasher, Steel Wool", value: 1 });
+      calc.bonus += 1;
     }
 
     const chitinRank = getProficiencyRankForCharacter(characterId, SharedChitinousCarapace.id);
     if (chitinRank > 0) {
-      calc.sources.push(["Chitinous Carapace", chitinRank]);
-      calc.totalBonus += chitinRank;
+      calc.sources.push({ name: "Chitinous Carapace", value: chitinRank });
+      calc.bonus += chitinRank;
     }
 
     if (getProficiencyRankForCharacter(characterId, AntiPaladinAuraOfProtection.id)) {
-      calc.conditionalSources.push(["Is target Good-aligned?", 1]);
+      calc.conditionalSources.push({ name: "Is target Good-aligned?", value: 1, condition: "Is target Good-aligned?" });
     }
 
     if (getProficiencyRankForCharacter(characterId, PaladinAuraOfProtection.id)) {
-      calc.conditionalSources.push(["Is source Evil-aligned?", 1]);
+      calc.conditionalSources.push({ name: "Is target Evil-aligned?", value: 1, condition: "Is target Evil-aligned?" });
     }
 
     if (getProficiencyRankForCharacter(characterId, MysticMeditativeFocus.id)) {
-      calc.conditionalSources.push(["Is Mediative Focus active?", 1]);
+      calc.conditionalSources.push({
+        name: "Is Meditative Focus active?",
+        value: 1,
+        condition: "Is Meditative Focus active?",
+      });
     }
 
     return calc;
@@ -753,29 +769,37 @@ export function getArmorBonusForCharacter(characterId: number): BonusCalculation
 export function getSavingThrowBonusForCharacter(characterId: number): BonusCalculations {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
-  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  const calc: BonusCalculations = { bonus: 0, sources: [], conditionalSources: [] };
   if (!character) {
     return calc;
   } else {
     if (getProficiencyRankForCharacter(characterId, ProficiencyDivineBlessing.id)) {
-      calc.sources.push(["Divine Blessing", 2]);
-      calc.totalBonus += 2;
+      calc.sources.push({ name: "Divine Blessing", value: 2 });
+      calc.bonus += 2;
     }
 
     if (getProficiencyRankForCharacter(characterId, AntiPaladinAuraOfProtection.id)) {
-      calc.conditionalSources.push(["Is source Good-aligned?", 1]);
+      calc.conditionalSources.push({ name: "Is target Good-aligned?", value: 1, condition: "Is target Good-aligned?" });
     }
 
     if (getProficiencyRankForCharacter(characterId, PaladinAuraOfProtection.id)) {
-      calc.conditionalSources.push(["Is source Evil-aligned?", 1]);
+      calc.conditionalSources.push({ name: "Is target Evil-aligned?", value: 1, condition: "Is target Evil-aligned?" });
     }
 
     if (getProficiencyRankForCharacter(characterId, MysticMeditativeFocus.id)) {
-      calc.conditionalSources.push(["Is Meditative Focus active?", 1]);
+      calc.conditionalSources.push({
+        name: "Is Meditative Focus active?",
+        value: 1,
+        condition: "Is Meditative Focus active?",
+      });
     }
 
     if (getProficiencyRankForCharacter(characterId, ProficiencyFamiliar.id)) {
-      calc.conditionalSources.push(["Is Familiar nearby?", 1]);
+      calc.conditionalSources.push({
+        name: "Is Familiar nearby?",
+        value: 1,
+        condition: "Is Familiar nearby?",
+      });
     }
 
     return calc;
@@ -1163,25 +1187,21 @@ function generateRangedAttack(characterId: number, weapon?: ItemData | NaturalWe
 export function getMaxMinionCountForCharacter(characterId: number): BonusCalculations {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
-  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  const calc: BonusCalculations = { bonus: 0, sources: [], conditionalSources: [] };
   if (!character) {
     return calc;
   } else {
-    calc.totalBonus = 4;
-    calc.sources.push(["Base Value", 4]);
+    calc.bonus = 4;
+    calc.sources.push({ name: "Base Value", value: 4 });
 
     const chaBonus = getStatBonusForValue(character.charisma);
-    calc.totalBonus += chaBonus;
-    calc.sources.push(["Charisma Bonus", chaBonus]);
+    calc.bonus += chaBonus;
+    calc.sources.push({ name: "Charisma Bonus", value: chaBonus });
 
     if (getProficiencyRankForCharacter(characterId, ProficiencyLeadership.id)) {
-      calc.sources.push(["Proficiency: Leadership", 1]);
-      calc.totalBonus += 1;
+      calc.sources.push({ name: "Proficiency: Leadership", value: 1 });
+      calc.bonus += 1;
     }
-
-    // if (isProficiencyUnlockedForCharacter(characterId, MysticMeditativeFocus.id)) {
-    //   calc.conditionalSources.push(["Is Mediative Focus active?", 1]);
-    // }
 
     return calc;
   }
@@ -1190,26 +1210,30 @@ export function getMaxMinionCountForCharacter(characterId: number): BonusCalcula
 export function getRecruitmentRollBonusForCharacter(characterId: number): BonusCalculations {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
-  const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+  const calc: BonusCalculations = { bonus: 0, sources: [], conditionalSources: [] };
   if (!character) {
     return calc;
   } else {
     const chaBonus = getStatBonusForValue(character.charisma);
-    calc.totalBonus = chaBonus;
-    calc.sources.push(["Charisma Bonus", chaBonus]);
+    calc.bonus = chaBonus;
+    calc.sources.push({ name: "Charisma Bonus", value: chaBonus });
 
     if (getProficiencyRankForCharacter(characterId, ProficiencyMysticAura.id)) {
-      calc.sources.push(["Proficiency: Mystic Aura", 2]);
-      calc.totalBonus += 2;
+      calc.sources.push({ name: "Proficiency: Mystic Aura", value: 2 });
+      calc.bonus += 2;
     }
 
     if (getProficiencyRankForCharacter(characterId, MysticCommandOfVoice.id)) {
-      calc.sources.push(["Mystic, Command Of Voice", 2]);
-      calc.totalBonus += 2;
+      calc.sources.push({ name: "Mystic, Command Of Voice", value: 2 });
+      calc.bonus += 2;
     }
 
     if (getProficiencyRankForCharacter(characterId, ProficiencySeduction.id)) {
-      calc.conditionalSources.push(["Is henchman of opposite gender?", 2]);
+      calc.conditionalSources.push({
+        name: "Is henchman of opposite gender?",
+        value: 2,
+        condition: "Is henchman of opposite gender?",
+      });
     }
 
     return calc;
@@ -1711,4 +1735,68 @@ export function getActiveAbilityComponentsForCharacter(
   // TODO: In the meantime, though, I'm not sure if that would happen here or at point of use.
 
   return allComponents;
+}
+
+export function getCharacterSupportsV2(character: CharacterData): boolean {
+  const redux = store.getState();
+  return !!redux.gameDefs.characterClasses[character.class_id];
+}
+
+export function getCharacterGrantedLanguages(
+  character: CharacterData,
+  activeComponents: Record<string, AbilityComponentInstance[]>
+): string[] {
+  // De-dupe.
+  const uniqueLanguageCapabilities = (activeComponents[AbilityComponentLanguageCapability.id] ?? []).reduce<string[]>(
+    (soFar: string[], instance: AbilityComponentInstance) => {
+      const instanceData = instance.data as AbilityComponentLanguageCapabilityData;
+      if (!soFar.includes(instanceData.language)) {
+        soFar.push(instanceData.language);
+      }
+      return soFar;
+    },
+    []
+  );
+  return uniqueLanguageCapabilities;
+}
+
+export function getCharacterLanguageCapacity(
+  character: CharacterData,
+  activeComponents: Record<string, AbilityComponentInstance[]>
+): number {
+  let capacity = 0;
+
+  // Intelligence grants extra slots equal to the stat bonus, but never reduces slot count.
+  const intValue = getCharacterStatv2(character, CharacterStat.Intelligence, activeComponents);
+  capacity += Math.max(0, getStatBonusForValue(intValue));
+
+  // Language Capability grants the slot that it also fills.
+  const grantedLanguages = getCharacterGrantedLanguages(character, activeComponents);
+  capacity += grantedLanguages.length;
+
+  // Language Capacity grants slots by ability rank.
+  (activeComponents[AbilityComponentLanguageCapacityBonus.id] ?? []).forEach((instance) => {
+    const instanceData = instance.data as AbilityComponentLanguageCapacityBonusData;
+    capacity += instanceData.bonus_by_rank[instance.rank - 1];
+  });
+
+  return capacity;
+}
+
+export function getCharacterKnownLanguages(
+  character: CharacterData,
+  activeComponents: Record<string, AbilityComponentInstance[]>
+): string[] {
+  // Ability/Item-granted languages (may have duplicates).
+  const languages: string[] = getCharacterGrantedLanguages(character, activeComponents);
+
+  // Custom selected languages from the character data.
+  // These may duplicate granted languages, which allows the character to retain language knowledge if a granting item is removed.
+  character.languages.forEach((language) => {
+    if (language && language.length > 0 && !languages.includes(language)) {
+      languages.push(language);
+    }
+  });
+
+  return languages;
 }

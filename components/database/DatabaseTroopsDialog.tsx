@@ -39,6 +39,13 @@ class ADatabaseTroopsDialog extends React.Component<Props> {
       { type: DatabaseEditingDialogField.LongString, labelTexts: ["Description"], fieldNames: ["description"] },
       {
         type: DatabaseEditingDialogField.Number,
+        labelTexts: ["Army Level"],
+        fieldNames: ["army_level"],
+        fieldSizes: ["5vmin"],
+        defaults: [1],
+      },
+      {
+        type: DatabaseEditingDialogField.Number,
         labelTexts: ["AC"],
         fieldNames: ["ac"],
         fieldSizes: ["5vmin"],

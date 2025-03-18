@@ -81,7 +81,7 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
                   }}
                   className={styles.recruitmentRollTitle}
                 >
-                  {`Recruitment Roll Bonus : ${recruitmentRoll.totalBonus > 0 ? "+" : ""}${recruitmentRoll.totalBonus}`}
+                  {`Recruitment Roll Bonus : ${recruitmentRoll.bonus > 0 ? "+" : ""}${recruitmentRoll.bonus}`}
                   {hasConditionalBonuses ? <span className={styles.infoAsterisk}>*</span> : null}
                 </TooltipSource>
                 <div className={styles.rollDiceButton} onClick={this.onRollRecruitment.bind(this, recruitmentRoll)} />
@@ -127,7 +127,7 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
 
   private onRollRecruitment(calc: BonusCalculations): void {
     // 2d6 + bonus.
-    const total = randomInt(1, 6) + randomInt(1, 6) + calc.totalBonus;
+    const total = randomInt(1, 6) + randomInt(1, 6) + calc.bonus;
 
     if (total <= 2) {
       this.setState({ recruitmentRollResult: `${total} : Refuse & Slander` });
@@ -245,14 +245,14 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
   private renderCharacterRowContents(character: CharacterData): React.ReactNode {
     const minions = this.getMinions(character.id);
     const maxMinions = getMaxMinionCountForCharacter(character.id);
-    const countStyle = minions.length === maxMinions.totalBonus ? styles.full : "";
+    const countStyle = minions.length === maxMinions.bonus ? styles.full : "";
     return (
       <div className={styles.characterRowContentWrapper}>
         <div className={styles.allCharactersListName}>{character.name}</div>
         <div className={styles.allCharactersListLevel}>L{character.level}</div>
         <div
           className={`${styles.allCharactersListMinionCount} ${countStyle}`}
-        >{`${minions.length}/${maxMinions.totalBonus}`}</div>
+        >{`${minions.length}/${maxMinions.bonus}`}</div>
         <div className={`${styles.allCharactersListGender} ${styles[character.gender]}`}>{character.gender}</div>
       </div>
     );
@@ -262,7 +262,7 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
     const maxMinions = getMaxMinionCountForCharacter(this.state.selectedCharacterId);
     const minions = this.getMinions(this.state.selectedCharacterId);
     const slots: React.ReactNode[] = [];
-    for (let i = 0; i < maxMinions.totalBonus; ++i) {
+    for (let i = 0; i < maxMinions.bonus; ++i) {
       slots.push(this.renderMinionSlotRow(minions[i], i, minions));
     }
     return slots;

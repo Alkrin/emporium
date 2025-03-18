@@ -60,7 +60,7 @@ class ACharacterEquipmentSection extends React.Component<Props> {
         >
           <div className={styles.acTitle}>{"AC:"}</div>
           <div className={styles.valueText}>
-            {calc.totalBonus}
+            {calc.bonus}
             {calc.conditionalSources.length > 0 ? <span className={styles.infoAsterisk}>*</span> : null}
           </div>
         </TooltipSource>
@@ -82,34 +82,34 @@ class ACharacterEquipmentSection extends React.Component<Props> {
 
   private getArmorBonusCalculations(): BonusCalculations {
     const { character, itemDefs, allItems, activeComponents } = this.props;
-    const calc: BonusCalculations = { totalBonus: 0, sources: [], conditionalSources: [] };
+    const calc: BonusCalculations = { bonus: 0, sources: [], conditionalSources: [] };
     if (!character) {
       return calc;
     } else {
       const totalDexterity = getCharacterStatv2(character, CharacterStat.Dexterity, activeComponents);
-      calc.totalBonus = getStatBonusForValue(totalDexterity);
-      calc.sources.push(["Dex Bonus", calc.totalBonus]);
+      calc.bonus = getStatBonusForValue(totalDexterity);
+      calc.sources.push({ name: "Dex Bonus", value: calc.bonus });
 
       const equippedArmor = itemDefs[allItems[character?.slot_armor]?.def_id];
       if (equippedArmor) {
         const equippedArmorAC = (equippedArmor?.ac ?? 0) + (equippedArmor?.magic_bonus ?? 0);
-        calc.totalBonus += equippedArmorAC;
-        calc.sources.push([equippedArmor.name, equippedArmorAC]);
+        calc.bonus += equippedArmorAC;
+        calc.sources.push({ name: equippedArmor.name, value: equippedArmorAC });
       }
 
       const equippedShield = itemDefs[allItems[character?.slot_shield]?.def_id];
       if (equippedShield) {
         const equippedShieldAC = (equippedShield?.ac ?? 0) + (equippedShield?.magic_bonus ?? 0);
-        calc.totalBonus += equippedShieldAC;
-        calc.sources.push([equippedShield.name, equippedShieldAC]);
+        calc.bonus += equippedShieldAC;
+        calc.sources.push({ name: equippedShield.name, value: equippedShieldAC });
       }
 
       // Ability components that grant armor.
       if ((activeComponents[AbilityComponentArmorStatic.id]?.length ?? 0) > 0) {
         activeComponents[AbilityComponentArmorStatic.id].forEach((instance) => {
           const instanceData = instance.data as AbilityComponentArmorStaticData;
-          calc.totalBonus += instanceData.bonus;
-          calc.sources.push([getAbilityComponentInstanceSourceName(instance), instanceData.bonus]);
+          calc.bonus += instanceData.bonus;
+          calc.sources.push({ name: getAbilityComponentInstanceSourceName(instance), value: instanceData.bonus });
         });
       }
 

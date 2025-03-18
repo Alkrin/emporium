@@ -50,6 +50,16 @@ class ADatabaseEditingDialogFieldAbilityInstance extends React.Component<Props, 
 
     const abilityDef = this.props.abilityDefs[this.props.value?.abilityDefId];
 
+    const subtypeValue = this.props.value?.subtype ?? "";
+    let subtypeName: string = "---";
+    if (subtypeValue !== "") {
+      if (abilityDef.subtypes.includes(subtypeValue)) {
+        subtypeName = subtypeValue;
+      } else {
+        subtypeName = "Custom";
+      }
+    }
+
     return (
       <div className={styles.root}>
         <div className={styles.row}>
@@ -60,8 +70,23 @@ class ADatabaseEditingDialogFieldAbilityInstance extends React.Component<Props, 
         {(abilityDef?.subtypes?.length ?? 0) > 0 ? (
           <div className={styles.row}>
             <div className={styles.label}>{"Subtype:\xa0"}</div>
-            <div className={styles.abilityName}>{this.props.value?.subtype ?? "---"}</div>
+            <div className={styles.abilityName}>{subtypeName}</div>
             <EditButton onClick={this.onSelectSubtypeClicked.bind(this)} />
+          </div>
+        ) : null}
+        {abilityDef?.custom_subtypes ? (
+          <div className={styles.row}>
+            <div className={styles.label}>{"Custom Subtype:\xa0"}</div>
+            <input
+              className={styles.longField}
+              type={"text"}
+              value={subtypeName === "Custom" ? subtypeValue : ""}
+              readOnly={this.props.isDisabled}
+              onChange={(e) => {
+                this.applyDataChange("subtype", e.target.value);
+              }}
+              tabIndex={this.props.tabIndex.value++}
+            />
           </div>
         ) : null}
         <div className={styles.row}>

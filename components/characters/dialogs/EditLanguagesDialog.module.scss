@@ -1,0 +1,198 @@
+.root {
+  display: flex;
+  flex-direction: row;
+  padding: 2vmin;
+}
+
+.grantedLanguagesRoot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  color: wheat;
+  border-bottom: 1px solid yellow;
+  text-align: center;
+}
+
+.grantedLanguagesList {
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background-color: #333;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.grantedLanguageRow {
+  margin-bottom: 0.5vmin;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  text-overflow: clip;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.listName {
+  font-size: 1rem;
+  color: white;
+  text-align: left;
+  text-overflow: ellipsis;
+  width: 15vmin;
+}
+
+.chosenLanguagesRoot {
+  position: relative;
+  margin-left: 2vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.chosenLanguagesList {
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  background-color: #333;
+}
+
+.availableLanguagesRoot {
+  position: relative;
+  margin-left: 2vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.availableLanguagesList {
+  height: 30vmin;
+  width: 17vmin;
+  margin-top: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  background-color: #333;
+
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.availableLanguageRowDraggable {
+  position: relative;
+  margin-bottom: 0.5vmin;
+  cursor: move;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.availableLanguageRowContentWrapper {
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  cursor: move;
+}
+
+.availableLanguageRowDraggableHandle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: move;
+}
+
+.availableLanguageName {
+  color: white;
+}
+
+.languageSlotRow {
+  padding-top: 0.5vmin;
+  width: 18vmin;
+  display: flex;
+  flex-direction: row;
+  font-size: 1rem;
+  align-items: center;
+}
+
+.languageSlot {
+  width: 15vmin;
+  height: 2vmin;
+  box-sizing: border-box;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+
+  &.excess {
+    border-color: red;
+  }
+}
+
+.assignedLanguageName {
+  margin-left: 0.5vmin;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.noSlots {
+  width: 100%;
+  text-align: center;
+  font-style: italic;
+  color: red;
+}
+
+.cancelButton {
+  margin-left: 0.5vmin;
+  width: 2vmin;
+  height: 2vmin;
+  background-image: url("/images/CancelIcon.png");
+  background-size: contain;
+  cursor: pointer;
+
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}

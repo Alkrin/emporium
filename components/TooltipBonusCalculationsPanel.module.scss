@@ -1,0 +1,56 @@
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.growingColumn {
+  @extend .column;
+  flex-grow: 1;
+}
+
+.tooltipDivider {
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
+
+.tooltipSourceRow {
+  @extend .row;
+  margin-top: 0.5vmin;
+}
+
+.tooltipSource {
+  flex-grow: 1;
+  font-size: 0.8rem;
+  color: gray;
+  white-space: pre-wrap;
+}
+
+.tooltipCondition {
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: #448888;
+  white-space: pre-wrap;
+}
+
+.tooltipSourceValue {
+  margin-left: 0.5vmin;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 0, 0.5);
+}
+
+.tooltipConditionalHeader {
+  margin-top: 1vmin;
+  font-size: 0.8rem;
+  color: wheat;
+}

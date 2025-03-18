@@ -1,0 +1,21 @@
+.root {
+  width: 5vmin;
+  height: 5vmin;
+  flex-shrink: 0;
+  background-image: url("/images/ExportIcon.png");
+  background-size: contain;
+  cursor: pointer;
+  background-color: black;
+  border-radius: 1vmin;
+  border: 2px solid gray;
+
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}

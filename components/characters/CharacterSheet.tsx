@@ -77,6 +77,8 @@ import { CharacterAvailableJobsSection } from "./sections/CharacterAvailableJobs
 import { CharacterInitiativeSection } from "./sections/CharacterInitiativeSection";
 import { CharacterStatsSection } from "./sections/CharacterStatsSection";
 import { CharacterReactionRollSection } from "./sections/CharacterReactionRollSection";
+import { CharacterSavingThrowsSection } from "./sections/CharacterSavingThrowsSection";
+import { CharacterLanguagesSection } from "./sections/CharacterLanguagesSection";
 
 interface ReactProps {
   characterId: number;
@@ -143,6 +145,7 @@ class ACharacterSheet extends React.Component<Props> {
     return (
       <div className={styles.row}>
         <div className={styles.leftPanel}>
+          <CharacterLanguagesSection characterId={this.props.characterId} activeComponents={activeComponents} />
           {this.renderAbilitiesPanel()}
           <CharacterProficiencyRollsSection characterId={this.props.characterId} activeComponents={activeComponents} />
           {this.renderLevelBasedSkillsPanel()}
@@ -223,7 +226,7 @@ class ACharacterSheet extends React.Component<Props> {
             <div className={styles.row}>
               <CharacterStatsSection characterId={this.props.characterId} activeComponents={activeComponents} />
               <div className={styles.horizontalSpacer} />
-              {this.renderSavingThrowsPanel()}
+              <CharacterSavingThrowsSection characterId={this.props.characterId} activeComponents={activeComponents} />
             </div>
             <div className={styles.verticalSpacer} />
             {this.renderXPPanel()}
@@ -921,7 +924,7 @@ class ACharacterSheet extends React.Component<Props> {
             <div className={styles.row}>
               <div className={styles.initiativeTitle}>Initiative Bonus</div>
               <div className={styles.valueText}>
-                {`${calc.totalBonus > 0 ? "+" : ""} ${calc.totalBonus}`}
+                {`${calc.bonus > 0 ? "+" : ""} ${calc.bonus}`}
                 {hasConditionalBonuses ? <span className={styles.infoAsterisk}>*</span> : null}
               </div>
             </div>
@@ -995,7 +998,7 @@ class ACharacterSheet extends React.Component<Props> {
           >
             <div className={styles.acTitle}>AC:</div>
             <div className={styles.valueText}>
-              {calc.totalBonus}
+              {calc.bonus}
               {calc.conditionalSources.length > 0 ? <span className={styles.infoAsterisk}>*</span> : null}
             </div>
           </TooltipSource>
@@ -1254,7 +1257,7 @@ class ACharacterSheet extends React.Component<Props> {
           <div className={styles.savingThrowsValue}>
             {finalValue}
             {calc.conditionalSources.length > 0 || calc.sources.length > 0 ? (
-              <span className={styles.infoAsterisk}>*</span>
+              <span className={styles.infoAsterisk}>{"*"}</span>
             ) : null}
           </div>
         </TooltipSource>

@@ -15,6 +15,7 @@ import ServerAPI, {
   ActivityOutcomeData_LootAndXP,
   ActivityOutcomeType,
   ArmyData,
+  CharacterClassv2,
   CharacterData,
   StorageData,
   TroopData,
@@ -38,7 +39,16 @@ import { refetchItems } from "../../dataSources/ItemsDataSource";
 import { refetchArmies, refetchTroopInjuries, refetchTroops } from "../../dataSources/ArmiesDataSource";
 import { refetchActivities } from "../../dataSources/ActivitiesDataSource";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
-import { getStatBonusForValue, getBonusString } from "../../lib/characterUtils";
+import {
+  getStatBonusForValue,
+  getBonusString,
+  getCharacterStatv2,
+  getActiveAbilityComponentsForCharacter,
+  getCharacterSupportsV2,
+  getCharacterStat,
+  getCombatSpeedsForCharacter,
+  getEncumbranceLevelForCharacter,
+} from "../../lib/characterUtils";
 import { refetchContracts } from "../../dataSources/ContractsDataSource";
 import { ActivityOutcomesList } from "../activities/ActivityOutcomeList";
 import { CreateActivityOutcomeDialog } from "../activities/CreateActivityOutcomeDialog";
@@ -47,6 +57,9 @@ import { getStorageDisplayName } from "../../lib/storageUtils";
 import { EditButton } from "../EditButton";
 import { SelectStorageDialog } from "../dialogs/SelectStorageDialog";
 import { BasicDialog } from "../dialogs/BasicDialog";
+import { ExportButton } from "../ExportButton";
+import { ExportDialog } from "../dialogs/ExportDialog";
+import { CharacterStat } from "../../staticData/types/characterClasses";
 
 interface State {
   isSaving: boolean;
@@ -93,6 +106,7 @@ interface ReactProps {}
 interface InjectedProps {
   allArmies: Dictionary<ArmyData>;
   allCharacters: Dictionary<CharacterData>;
+  allCharacterClasses: Record<number, CharacterClassv2>;
   allStorages: Dictionary<StorageData>;
   troopsByArmy: Dictionary<TroopData[]>;
   troopDefs: Dictionary<TroopDefData>;
@@ -253,6 +267,7 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
         <div className={styles.applyButton} onClick={this.onApplyOutcomesClick.bind(this)}>
           {"Apply Outcomes and Adjust Participants"}
         </div>
+        <ExportButton className={styles.exportButton} onClick={this.onExportClick.bind(this)} />
         {this.state.isSaving ? (
           <div className={styles.savingVeil}>
             <div className={styles.savingLabel}>{"Saving..."}</div>
@@ -906,6 +921,138 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
     // And update state with the new set.
     this.setState({ activity: { ...this.state.activity, army_participants: newParticipants }, painOutcome });
   }
+
+  private onExportClick(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "Export",
+        content: () => {
+          return <ExportDialog title={"Export Hex Clearing Expedition Data"} json={this.buildExportJSON()} />;
+        },
+      })
+    );
+  }
+
+  private buildExportJSON(): string {
+    interface CharacterExport {
+      unitIndex: number;
+      id: number;
+      name: string;
+      level: number;
+      className: string;
+      conBonus: number;
+      willBonus: number;
+      isLeadFromBehind: boolean;
+    }
+
+    interface PlatoonExport {
+      unitIndex: number;
+      armyId: number;
+      troopDefId: number;
+      troopName: string;
+      unitCount: number;
+      armyLevel: number;
+      battleRating: number;
+    }
+
+    interface ExportData {
+      expeditionLevel: number;
+      participantCount: number;
+      speed: number;
+      slowestUnitName: string;
+      characters: CharacterExport[];
+      platoons: PlatoonExport[];
+    }
+
+    let unitIndex: number = 1;
+    let speed = 9999;
+    let slowestUnitName: string = "Unknown";
+    let totalCharacterLevel = 0;
+
+    const data: ExportData = {
+      characters: this.state.activity.participants.map((ap) => {
+        const character: CharacterData = this.props.allCharacters[ap.characterId];
+        if (character.id === this.state.activity.lead_from_behind_id) {
+          totalCharacterLevel += character.level / 2;
+        } else {
+          totalCharacterLevel += character.level;
+        }
+
+        let conValue = getCharacterStat(character, CharacterStat.Constitution);
+        let willValue = getCharacterStat(character, CharacterStat.Will);
+        let className = character.class_name;
+
+        const speeds = getCombatSpeedsForCharacter(character.id);
+        const speedIndex = getEncumbranceLevelForCharacter(character.id);
+        if (speeds[speedIndex] * 3 < speed) {
+          speed = speeds[speedIndex] * 3;
+          slowestUnitName = character.name;
+        }
+
+        if (getCharacterSupportsV2(character)) {
+          const activeComponents = getActiveAbilityComponentsForCharacter(character);
+          conValue = getCharacterStatv2(character, CharacterStat.Constitution, activeComponents);
+          willValue = getCharacterStatv2(character, CharacterStat.Will, activeComponents);
+          className = this.props.allCharacterClasses[character.class_id]?.name ?? "Unknown";
+          // TODO: v2 speed calculation, once it exists.
+        }
+
+        const cData: CharacterExport = {
+          unitIndex: unitIndex++,
+          id: character.id,
+          name: character.name,
+          level: character.level,
+          className,
+          conBonus: getStatBonusForValue(conValue),
+          willBonus: getStatBonusForValue(willValue),
+          isLeadFromBehind: this.state.activity.lead_from_behind_id === character.id,
+        };
+        return cData;
+      }),
+      platoons: this.state.activity.army_participants.reduce<PlatoonExport[]>((plats, ap) => {
+        const sortedTroops = Object.entries(ap.troopCounts).sort((a, b) => {
+          const defA = this.props.troopDefs[+a[0]];
+          const defB = this.props.troopDefs[+b[0]];
+          return defA.name.localeCompare(defB.name);
+        });
+        sortedTroops.forEach(([troopDefIdString, unitCount]) => {
+          const troopDef = this.props.troopDefs[+troopDefIdString];
+          if (troopDef.move < speed) {
+            speed = troopDef.move;
+            slowestUnitName = troopDef.name;
+          }
+
+          let remainingUnitCount = unitCount;
+          while (remainingUnitCount > 0) {
+            const platoonUnitCount = Math.min(remainingUnitCount, troopDef.platoon_size);
+            remainingUnitCount -= platoonUnitCount;
+
+            const plat: PlatoonExport = {
+              unitIndex: unitIndex++,
+              armyId: ap.armyId,
+              troopDefId: +troopDefIdString,
+              troopName: troopDef.name,
+              unitCount: platoonUnitCount,
+              armyLevel: troopDef.army_level,
+              battleRating:
+                platoonUnitCount === troopDef.platoon_size
+                  ? troopDef.platoon_br
+                  : troopDef.individual_br * platoonUnitCount,
+            };
+
+            plats.push(plat);
+          }
+        });
+        return plats;
+      }, []),
+      participantCount: unitIndex - 1,
+      speed,
+      slowestUnitName,
+      expeditionLevel: Math.floor(totalCharacterLevel / 6),
+    };
+
+    return JSON.stringify(data);
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
@@ -913,11 +1060,13 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allStorages = state.storages.allStorages;
   const { troopsByArmy, armies: allArmies } = state.armies;
   const troopDefs = state.gameDefs.troops;
+  const allCharacterClasses = state.gameDefs.characterClasses;
 
   return {
     ...props,
     allArmies,
     allCharacters,
+    allCharacterClasses,
     allStorages,
     troopsByArmy,
     troopDefs,

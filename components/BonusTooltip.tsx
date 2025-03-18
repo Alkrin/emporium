@@ -32,28 +32,28 @@ class BonusTooltip extends React.Component<Props> {
         <div className={styles.row}>
           <div className={styles.title}>{header}</div>
           {!hideZeroBonus && (
-            <div className={styles.value}>{`${!isFlatValue && (calc?.totalBonus ?? 0) > 0 ? "+" : ""}${
-              calc?.totalBonus ?? 0
+            <div className={styles.value}>{`${!isFlatValue && (calc?.bonus ?? 0) > 0 ? "+" : ""}${
+              calc?.bonus ?? 0
             }`}</div>
           )}
         </div>
         <div className={styles.divider} />
-        {calc?.sources.map(([text, value]) => {
+        {calc?.sources.map(({ name, value }) => {
           return (
-            <div className={styles.sourceRow} key={text}>
-              <div className={styles.source}>{text}</div>
+            <div className={styles.sourceRow} key={name}>
+              <div className={styles.source}>{name}</div>
               <div className={styles.sourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
             </div>
           );
         })}
         {(calc?.conditionalSources.length ?? 0) > 0 ? (
           <>
-            <div className={styles.conditionalHeader}>Conditional Bonuses</div>
+            <div className={styles.conditionalHeader}>{"Conditional Bonuses"}</div>
             <div className={styles.divider} />
-            {calc?.conditionalSources.map(([text, value]) => {
+            {calc?.conditionalSources.map(({ name, value }) => {
               return (
-                <div className={styles.sourceRow} key={text}>
-                  <div className={styles.source}>{text}</div>
+                <div className={styles.sourceRow} key={name}>
+                  <div className={styles.source}>{name}</div>
                   <div className={styles.sourceValue}>{`${value > 0 ? "+" : ""}${value}`}</div>
                 </div>
               );

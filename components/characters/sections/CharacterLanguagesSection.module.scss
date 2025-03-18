@@ -1,0 +1,82 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 1vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.subText {
+  font-size: 1rem;
+  color: white;
+}
+
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.centeredRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.title {
+  @extend .normalText;
+  flex-grow: 1;
+}
+
+.capacity {
+  @extend .valueText;
+  flex-shrink: 0;
+}
+
+.horizontalLine {
+  background-color: yellow;
+  height: 1px;
+  margin-bottom: 0.5vmin;
+}
+
+.listRow {
+  margin-bottom: 0.5vmin;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.listName {
+  flex-grow: 1;
+  font-size: 1rem;
+  color: white;
+  text-align: left;
+  text-overflow: ellipsis;
+  width: 15vmin;
+}
+
+.editButton {
+  margin-left: 1vmin;
+}

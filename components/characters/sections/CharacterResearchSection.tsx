@@ -5,7 +5,11 @@ import { RootState } from "../../../redux/store";
 import { AbilityDefData, CharacterData, ResearchCategoryData, ResearchSubcategoryData } from "../../../serverAPI";
 import TooltipSource from "../../TooltipSource";
 import styles from "./CharacterResearchSection.module.scss";
-import { AbilityComponentInstance, ValueSource } from "../../../lib/characterUtils";
+import {
+  AbilityComponentInstance,
+  getAbilityComponentInstanceSourceName,
+  ValueSource,
+} from "../../../lib/characterUtils";
 import { buildAbilityName } from "../../../lib/stringUtils";
 import {
   AbilityComponentResearchCapability,
@@ -87,11 +91,6 @@ class ACharacterResearchSection extends React.Component<Props> {
       }
       return categoryDisplayData[categoryId];
     };
-    const buildSourceName = (instance: AbilityComponentInstance) => {
-      const ability = this.props.allAbilities[instance.abilityId];
-      // TODO: How to handle non-ability sources?
-      return buildAbilityName(ability.name, instance.subtype, instance.rank);
-    };
 
     activeComponents[AbilityComponentResearchCapability.id]?.forEach((instance) => {
       const instanceData = instance.data as AbilityComponentResearchCapabilityData;
@@ -99,7 +98,10 @@ class ACharacterResearchSection extends React.Component<Props> {
 
       // Basic research capability grants you an effective level equal to a specific character level.
       data.effectiveLevel = Math.max(data.effectiveLevel, instance.characterLevel);
-      data.effectiveLevelSources.push({ name: buildSourceName(instance), value: instance.characterLevel });
+      data.effectiveLevelSources.push({
+        name: getAbilityComponentInstanceSourceName(instance),
+        value: instance.characterLevel,
+      });
     });
 
     // Group the RollBonusOrEffectiveLevel components by the category they are attached to.
@@ -125,7 +127,7 @@ class ACharacterResearchSection extends React.Component<Props> {
           if (!rbd[key]) {
             // We use the name of the first source for an identical dataset, under the assumption that it comes from an identical source.
             // This is not necessarily true, unfortunately.
-            rbd[key] = { name: buildSourceName(instance), value: 0 };
+            rbd[key] = { name: getAbilityComponentInstanceSourceName(instance), value: 0 };
           }
           rbd[key].value += instance.rank;
           return rbd;

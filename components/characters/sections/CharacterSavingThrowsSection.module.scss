@@ -1,21 +1,16 @@
 .root {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  margin-top: 1vmin;
+  width: 9vmin;
   padding: 0.5vmin 0.5vmin 0;
   background-color: #222;
   border-radius: 0.5vmin;
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
 }
 
 .normalText {
   font-size: 1rem;
   color: wheat;
-}
-
-.subText {
-  font-size: 1rem;
-  color: white;
 }
 
 .valueText {
@@ -33,11 +28,6 @@
   flex-direction: column;
 }
 
-.growingColumn {
-  @extend .column;
-  flex-grow: 1;
-}
-
 .centeredRow {
   display: flex;
   flex-direction: row;
@@ -49,10 +39,19 @@
   flex-grow: 1;
 }
 
+.valueDisplay {
+  @extend .valueText;
+  flex-shrink: 0;
+}
+
 .infoAsterisk {
   font-size: 0.8rem;
   color: lime;
   flex-shrink: 0;
+}
+
+.tooltipRoot {
+  max-width: 45vmin;
 }
 
 .horizontalLine {
@@ -61,62 +60,23 @@
   margin-bottom: 0.5vmin;
 }
 
-.listRow {
-  margin-bottom: 0.5vmin;
-  padding: 0vmin 0.5vmin;
-  background-color: rgba(255, 255, 255, 0.1);
-  font-size: 1rem;
-  display: flex;
-  flex-direction: row;
-
-  &:hover {
-    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
-  }
-}
-
-.listName {
-  flex-grow: 1;
-  font-size: 1rem;
-  color: white;
-  text-align: left;
-  text-overflow: ellipsis;
-  width: 15vmin;
-}
-
-.tooltipRoot {
-  max-width: 45vmin;
-}
-
-.tooltipHeader {
-  @extend .row;
-  justify-content: space-between;
-}
-
 .tooltipTitle {
   font-size: 1rem;
   color: wheat;
+  min-width: 10vmin;
+  flex-grow: 1;
 }
 
 .tooltipValue {
+  margin-left: 1vmin;
   font-size: 1rem;
   color: yellow;
 }
 
-.tooltipText {
-  font-size: 0.8rem;
-  color: white;
-  margin-top: 0.5vmin;
-  text-align: justify;
-  white-space: pre-wrap;
-}
-
-.tooltipSubtext {
-  font-size: 0.8rem;
-  font-style: italic;
-  color: gray;
-  margin-top: 0.5vmin;
-  text-align: justify;
-  white-space: pre-wrap;
+.tooltipBonus {
+  margin-left: 1vmin;
+  font-size: 1rem;
+  color: wheat;
 }
 
 .tooltipDivider {
@@ -134,14 +94,11 @@
   flex-grow: 1;
   font-size: 0.8rem;
   color: gray;
-  white-space: pre-wrap;
 }
 
 .tooltipCondition {
-  margin-left: 1vmin;
   font-size: 0.8rem;
   color: #448888;
-  white-space: pre-wrap;
 }
 
 .tooltipSourceValue {
@@ -154,4 +111,27 @@
   margin-top: 1vmin;
   font-size: 0.8rem;
   color: wheat;
+}
+
+.savingThrowsText {
+  @extend .normalText;
+  text-align: center;
+}
+
+.savingThrowsName {
+  font-size: 0.7rem;
+  line-height: 1rem;
+  flex-grow: 1;
+  text-align: right;
+}
+
+.savingThrowsValue {
+  @extend .savingThrowsText;
+  width: 3vmin;
+}
+
+.horizontalLine {
+  background-color: yellow;
+  height: 1px;
+  margin-bottom: 0.5vmin;
 }

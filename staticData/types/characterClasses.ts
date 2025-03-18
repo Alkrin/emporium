@@ -24,6 +24,13 @@ export enum SavingThrowType {
   Implements = "Implements",
   Spells = "Spells",
 }
+export const sortedSavingThrowTypes: SavingThrowType[] = [
+  SavingThrowType.Paralysis,
+  SavingThrowType.Death,
+  SavingThrowType.Blast,
+  SavingThrowType.Implements,
+  SavingThrowType.Spells,
+];
 
 export type CleaveMultiplier = 0 | 0.5 | 1;
 

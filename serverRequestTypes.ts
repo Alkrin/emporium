@@ -79,6 +79,7 @@ export interface RequestBody_CreateOrEditCharacter {
   hit_dice: string;
   location_id: number;
   proficiencies: string;
+  languages: string;
   /** Feature id, subtype, rank. */
   selected_class_features: [string, string, number][];
   equipment?: RequestField_StartingEquipmentData[];
@@ -149,6 +150,11 @@ export interface RequestBody_SetHP {
 export interface RequestBody_SetMoney {
   storageId: number;
   gp: number;
+}
+
+export interface RequestBody_SetCharacterLanguages {
+  characterId: number;
+  languages: string[];
 }
 
 export interface RequestBody_SetCharacterLocation {

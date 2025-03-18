@@ -53,7 +53,7 @@ class ACharacterMonsterHarvestingSection extends React.Component<Props> {
                       {`The character can harvest Special Components from monsters in unlocked categories.  ` +
                         `Special Components are used primarily in the creation of scrolls, potions, and other ` +
                         `more permanent magic items and equipment.\n\nBefore harvest is possible, the components ` +
-                        `must be identified through a Component Identification proficiency roll.\n\n` +
+                        `must be identified through a Component Identification proficiency roll (granted by the Alchemy proficiency).\n\n` +
                         `After harvest, Special Components must be stored in a Metamphora or else lose their magical properties.`}
                     </div>
                   </div>

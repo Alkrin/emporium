@@ -5,11 +5,12 @@ export function getRomanNumerals(num: number): string {
   return numerals[num] ?? "";
 }
 
-export function buildAbilityName(baseName: string, subtype: string, rank: number): string {
+export function buildAbilityName(baseName: string, subtype: string, rank: number, max_ranks: number): string {
+  const rankText = max_ranks > 1 ? ` ${getRomanNumerals(rank)}` : "";
   if ((subtype?.length ?? 0) > 0) {
-    return `${baseName} (${subtype}) ${getRomanNumerals(rank)}`;
+    return `${baseName} (${subtype})${rankText}`;
   } else {
-    return `${baseName} ${getRomanNumerals(rank)}`;
+    return `${baseName}${rankText}`;
   }
 }
 
