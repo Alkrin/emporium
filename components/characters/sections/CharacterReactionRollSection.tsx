@@ -10,9 +10,8 @@ import {
   getStatBonusForValue,
   getBonusString,
   getCharacterStatv2,
-  ValueSource,
   getAbilityComponentInstanceSourceName,
-  ConditionalValueSource,
+  BonusCalculations,
 } from "../../../lib/characterUtils";
 import { CharacterStat } from "../../../staticData/types/characterClasses";
 import {
@@ -23,12 +22,7 @@ import {
   AbilityComponentReactionRollBonusConditional,
   AbilityComponentReactionRollBonusConditionalData,
 } from "../../../staticData/abilityComponents/AbilityComponentReactionRollBonusConditional";
-
-interface ReactionRollData {
-  bonus: number;
-  sources: ValueSource[];
-  conditionalSources: ConditionalValueSource[];
-}
+import { TooltipBonusCalculationsPanel } from "../../TooltipBonusCalculationsPanel";
 
 interface ReactProps {
   characterId: number;
@@ -44,64 +38,39 @@ type Props = ReactProps & InjectedProps;
 
 class ACharacterReactionRollSection extends React.Component<Props> {
   render(): React.ReactNode {
-    const data = this.getReactionRollData();
+    const calc = this.getReactionRollCalculations();
 
     return (
       <TooltipSource
         className={styles.root}
         tooltipParams={{
           id: "ReactionRollExplanation",
-          content: this.renderTooltip.bind(this, data),
+          content: this.renderTooltip.bind(this, calc),
         }}
       >
         <div className={styles.title}>{"Reaction Roll"}</div>
-        <div className={styles.valueDisplay}>{getBonusString(data.bonus)}</div>
-        {data.conditionalSources.length > 0 ? <div className={styles.infoAsterisk}>{"*"}</div> : null}
+        <div className={styles.valueDisplay}>{getBonusString(calc.bonus)}</div>
+        {calc.conditionalSources.length > 0 ? <div className={styles.infoAsterisk}>{"*"}</div> : null}
       </TooltipSource>
     );
   }
 
-  private renderTooltip(data: ReactionRollData): React.ReactNode {
+  private renderTooltip(data: BonusCalculations): React.ReactNode {
     return (
       <div className={styles.combatTooltipRoot}>
         <div className={styles.row}>
           <div className={styles.tooltipTitle}>{"Reaction Roll"}</div>
           <div className={styles.tooltipValue}>{getBonusString(data.bonus)}</div>
         </div>
-        <div className={styles.tooltipDivider} />
-        {data.sources.map(({ name, value }) => {
-          return (
-            <div className={styles.tooltipSourceRow} key={name}>
-              <div className={styles.tooltipSource}>{name}</div>
-              <div className={styles.tooltipSourceValue}>{getBonusString(value)}</div>
-            </div>
-          );
-        })}
-        {data.conditionalSources.length > 0 ? (
-          <>
-            <div className={styles.tooltipConditionalHeader}>{"Conditional Bonuses"}</div>
-            <div className={styles.tooltipDivider} />
-            {data.conditionalSources.map(({ name, value, condition }) => {
-              return (
-                <div className={styles.tooltipSourceRow} key={name}>
-                  <div className={styles.column}>
-                    <div className={styles.tooltipSource}>{name}</div>
-                    <div className={styles.tooltipCondition}>{`\xa0\xa0\xa0\xa0${condition}`}</div>
-                  </div>
-                  <div className={styles.tooltipSourceValue}>{getBonusString(value)}</div>
-                </div>
-              );
-            })}
-          </>
-        ) : null}
+        <TooltipBonusCalculationsPanel calc={data} />
       </div>
     );
   }
 
-  private getReactionRollData(): ReactionRollData {
+  private getReactionRollCalculations(): BonusCalculations {
     const { character, activeComponents } = this.props;
 
-    const data: ReactionRollData = {
+    const calc: BonusCalculations = {
       bonus: 0,
       sources: [],
       conditionalSources: [],
@@ -110,16 +79,16 @@ class ACharacterReactionRollSection extends React.Component<Props> {
     // Charisma bonus is always displayed, even if it's a zero.
     const cha = getCharacterStatv2(character, CharacterStat.Charisma, activeComponents);
     const chaBonus = getStatBonusForValue(cha);
-    data.bonus += chaBonus;
-    data.sources.push({ name: CharacterStat.Charisma, value: chaBonus });
+    calc.bonus += chaBonus;
+    calc.sources.push({ name: CharacterStat.Charisma, value: chaBonus });
 
     // Reaction Roll Bonuses
     (activeComponents[AbilityComponentReactionRollBonusStatic.id] ?? []).forEach(
       (instance: AbilityComponentInstance) => {
         const instanceData = instance.data as AbilityComponentReactionRollBonusStaticData;
         const name = getAbilityComponentInstanceSourceName(instance);
-        data.sources.push({ name, value: instanceData.bonus });
-        data.bonus += instanceData.bonus;
+        calc.sources.push({ name, value: instanceData.bonus });
+        calc.bonus += instanceData.bonus;
       }
     );
 
@@ -128,11 +97,15 @@ class ACharacterReactionRollSection extends React.Component<Props> {
       (instance: AbilityComponentInstance) => {
         const instanceData = instance.data as AbilityComponentReactionRollBonusConditionalData;
         const name = getAbilityComponentInstanceSourceName(instance);
-        data.conditionalSources.push({ name, value: instanceData.bonus, condition: instanceData.condition });
+        calc.conditionalSources.push({
+          name,
+          value: instanceData.bonus_by_rank[instance.rank - 1],
+          condition: instanceData.condition,
+        });
       }
     );
 
-    return data;
+    return calc;
   }
 }
 

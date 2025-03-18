@@ -1,3 +1,4 @@
+import { AllLanguagesArray } from "../../lib/languages";
 import { AbilityOrProficiency } from "../types/abilitiesAndProficiencies";
 
 export const ProficiencyLanguage: AbilityOrProficiency = {
@@ -10,18 +11,5 @@ export const ProficiencyLanguage: AbilityOrProficiency = {
       "by a character with a low Intelligence (8 or less) in order to become literate in a language the " +
       "character already speaks.",
   ],
-  subTypes: [
-    "Common",
-    "Draconic",
-    "Dwarven",
-    "Elven",
-    "Gnoll",
-    "Gnome",
-    "Goat",
-    "Goblin",
-    "Hobgoblin",
-    "Kobold",
-    "Orc",
-    "Turtle",
-  ],
+  subTypes: AllLanguagesArray,
 };

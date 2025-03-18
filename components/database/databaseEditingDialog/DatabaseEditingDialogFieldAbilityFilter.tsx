@@ -30,14 +30,22 @@ type Props = ReactProps & InjectedProps;
 
 interface State {
   rankString: string;
+  customSubtypesString: string;
 }
 
 class ADatabaseEditingDialogFieldAbilityFilter extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    const abilityDef = this.props.abilityDefs[this.props.value?.abilityDefId];
+
+    const customSubtypes: string[] = (props.value?.subtypes || []).filter(
+      (subtype) => abilityDef && !abilityDef.subtypes.includes(subtype)
+    );
+
     this.state = {
       rankString: (props.value?.rank ?? 1).toFixed(0),
+      customSubtypesString: customSubtypes.join(","),
     };
   }
 
@@ -49,6 +57,26 @@ class ADatabaseEditingDialogFieldAbilityFilter extends React.Component<Props, St
 
     const abilityDef = this.props.abilityDefs[this.props.value?.abilityDefId];
 
+    const standardSubtypes: string[] = (this.props.value?.subtypes || []).filter((subtype) =>
+      abilityDef.subtypes.includes(subtype)
+    );
+    const customSubtypes: string[] = (this.props.value?.subtypes || []).filter(
+      (subtype) => !abilityDef.subtypes.includes(subtype)
+    );
+
+    // If only custom, then "Custom".
+    // If neither, "All".
+    // If standard or both, "list of standard subtypes"
+    let standardSubtypesText = "All";
+    if (
+      (customSubtypes.length > 0 || this.state.customSubtypesString.trim().length > 0) &&
+      standardSubtypes.length === 0
+    ) {
+      standardSubtypesText = "Custom";
+    } else if (standardSubtypes.length > 0) {
+      standardSubtypesText = standardSubtypes.join(", ");
+    }
+
     return (
       <div className={styles.root}>
         <div className={styles.row}>
@@ -59,8 +87,26 @@ class ADatabaseEditingDialogFieldAbilityFilter extends React.Component<Props, St
         {(abilityDef?.subtypes?.length ?? 0) > 0 ? (
           <div className={styles.row}>
             <div className={styles.label}>{"Subtypes:\xa0"}</div>
-            <div className={styles.abilityName}>{this.props.value?.subtypes?.join(", ") ?? "All"}</div>
+            <div className={styles.abilityName}>{standardSubtypesText}</div>
             <EditButton onClick={this.onSelectSubtypesClicked.bind(this)} />
+          </div>
+        ) : null}
+        {abilityDef?.custom_subtypes ? (
+          <div className={styles.row}>
+            <div className={styles.label}>{"Custom Subtypes:\xa0"}</div>
+            <input
+              className={styles.longField}
+              type={"text"}
+              value={this.state.customSubtypesString}
+              readOnly={this.props.isDisabled}
+              onChange={(e) => {
+                this.setState({ customSubtypesString: e.target.value });
+              }}
+              onBlur={(e) => {
+                this.applyDataChange("subtypes", [...standardSubtypes, ...this.generateCustomSubtypes()]);
+              }}
+              tabIndex={this.props.tabIndex.value++}
+            />
           </div>
         ) : null}
         <div className={styles.row}>
@@ -105,6 +151,7 @@ class ADatabaseEditingDialogFieldAbilityFilter extends React.Component<Props, St
                   // When the ability changes, clear the subtype, as the new ability probably won't have
                   // the same list of subtypes.
                   this.props.onValueChange({ ...this.props.value, abilityDefId: abilityDefIds[0], subtypes: [] });
+                  this.setState({ customSubtypesString: "" });
                 }
               }}
               renderTooltip={(abilityDefId: number) => {
@@ -137,12 +184,22 @@ class ADatabaseEditingDialogFieldAbilityFilter extends React.Component<Props, St
             <SelectStringsDialog
               availableStrings={abilityDef.subtypes.slice().sort()}
               preselectedStrings={this.props.value.subtypes}
-              onSelectionConfirmed={this.applyDataChange.bind(this, "subtypes")}
+              onSelectionConfirmed={(standardSubtypes: string[]) => {
+                this.applyDataChange("subtypes", [...standardSubtypes, ...this.generateCustomSubtypes()]);
+              }}
             />
           );
         },
       })
     );
+  }
+
+  private generateCustomSubtypes(): string[] {
+    const customSubtypes = this.state.customSubtypesString
+      .trim()
+      .split(",")
+      .map((subtype) => subtype.trim());
+    return customSubtypes;
   }
 
   private applyDataChange(fieldName: string, value: any): void {

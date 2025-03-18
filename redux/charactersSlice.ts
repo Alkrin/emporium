@@ -29,6 +29,11 @@ export interface SetLocationParams {
   locationId: number;
 }
 
+export interface SetLanguagesParams {
+  characterId: number;
+  languages: string[];
+}
+
 export interface SetEquipmentParams {
   characterId: number;
   itemId: number;
@@ -88,6 +93,11 @@ export const charactersSlice = createSlice({
         state.characters[action.payload.characterId].location_id = action.payload.locationId;
       }
     },
+    setCharacterLanguages: (state: CharactersReduxState, action: PayloadAction<SetLanguagesParams>) => {
+      if (state.characters[action.payload.characterId]) {
+        state.characters[action.payload.characterId].languages = action.payload.languages;
+      }
+    },
     setCharacterXP: (state: CharactersReduxState, action: PayloadAction<SetXPParams>) => {
       if (state.characters[action.payload.characterId]) {
         state.characters[action.payload.characterId].xp = action.payload.xp;
@@ -133,6 +143,7 @@ export const {
   setActiveCharacterId,
   setDashboardCharacterId,
   setCharacterHP,
+  setCharacterLanguages,
   setCharacterLocation,
   setCharacterXP,
   setCharacterXPReserve,

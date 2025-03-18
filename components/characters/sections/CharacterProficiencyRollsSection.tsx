@@ -10,11 +10,28 @@ import {
   getStatBonusForValue,
   getCharacterStatv2,
   getAbilityComponentInstanceSourceName,
+  ValueSource,
+  ConditionalValueSource,
 } from "../../../lib/characterUtils";
 import {
   AbilityComponentProficiencyRoll,
   AbilityComponentProficiencyRollData,
 } from "../../../staticData/abilityComponents/AbilityComponentProficiencyRoll";
+import {
+  AbilityComponentProficiencyRollBonusStatic,
+  AbilityComponentProficiencyRollBonusStaticData,
+} from "../../../staticData/abilityComponents/AbilityComponentProficiencyRollBonusStatic";
+import {
+  AbilityComponentProficiencyRollBonusConditional,
+  AbilityComponentProficiencyRollBonusConditionalData,
+} from "../../../staticData/abilityComponents/AbilityComponentProficiencyRollBonusConditional";
+import { TooltipBonusCalculationsPanel } from "../../TooltipBonusCalculationsPanel";
+
+interface ProficiencyRollCalculations {
+  bonus: number;
+  sources: ValueSource[];
+  conditionalSources: ConditionalValueSource[];
+}
 
 interface ReactProps {
   characterId: number;
@@ -103,17 +120,9 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
       return null;
     }
 
-    // Stat-based bonuses.
-    let statBonus = 0;
-    let hasStatBonus = false;
-    if (!!rollDef.stat && rollDef.stat != "---") {
-      hasStatBonus = true;
-      const statValue = getCharacterStatv2(this.props.character, rollDef.stat, this.props.activeComponents);
-      statBonus = getStatBonusForValue(statValue) * rollDef.bonus_multiplier;
-    }
-    finalTargetRoll -= statBonus;
+    const calc = this.getProficiencyRollCalculations(rollDef);
 
-    // TODO: Other bonuses, penalties, and conditionals, once those Components exist.
+    finalTargetRoll -= calc.bonus;
 
     return (
       <TooltipSource
@@ -129,21 +138,17 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
                   <div className={styles.tooltipValue}>{`${finalTargetRoll}+`}</div>
                 </div>
                 <div className={styles.tooltipText}>{rollDef.description}</div>
-                <div className={styles.tooltipSubtext}>{"Calculations"}</div>
-                <div className={styles.tooltipSubtext}>{`\xa0\xa0\xa0\xa0Base Target: ${baseTargetRoll}+`}</div>
-                {hasStatBonus ? (
-                  <div
-                    className={`${styles.tooltipBonusText} ${statBonus < 0 ? styles.penalty : ""}`}
-                  >{`\xa0\xa0\xa0\xa0Bonus from ${rollDef.stat}: ${statBonus > 0 ? "+" : ""}${statBonus}`}</div>
-                ) : null}
-                <div className={styles.tooltipSubtext}>{"Sources"}</div>
-                {instances.map((instance, index2) => {
+                <div className={styles.tooltipConditionalHeader}>{"Base Target"}</div>
+                <div className={styles.tooltipDivider} />
+                {instances.map((instance, index) => {
                   return (
-                    <div className={styles.tooltipSubtext} key={`source${index2}`}>
-                      {`\xa0\xa0\xa0\xa0${getAbilityComponentInstanceSourceName(instance)}`}
+                    <div className={styles.tooltipSourceRow} key={index}>
+                      <div className={styles.tooltipSource}>{getAbilityComponentInstanceSourceName(instance)}</div>
+                      <div className={styles.tooltipSourceValue}>{`${baseTargetRoll}+`}</div>
                     </div>
                   );
                 })}
+                <TooltipBonusCalculationsPanel calc={calc} />
               </div>
             );
           },
@@ -151,8 +156,57 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
       >
         <div className={styles.listName}>{this.makeRollName(instances[0])}</div>
         <div className={styles.tooltipValue}>{`${finalTargetRoll}+`}</div>
+        {calc.conditionalSources.length > 0 ? <div className={styles.infoAsterisk}>{"*"}</div> : null}
       </TooltipSource>
     );
+  }
+
+  private getProficiencyRollCalculations(rollDef: ProficiencyRollData): ProficiencyRollCalculations {
+    const { character, activeComponents } = this.props;
+
+    const calc: ProficiencyRollCalculations = {
+      bonus: 0,
+      sources: [],
+      conditionalSources: [],
+    };
+
+    // Stat-based bonuses.
+    if (!!rollDef.stat && rollDef.stat != "---") {
+      // The stat bonus is always displayed, even if it's a zero.
+      const statValue = getCharacterStatv2(character, rollDef.stat, activeComponents);
+      const statBonus = getStatBonusForValue(statValue) * rollDef.bonus_multiplier;
+      calc.bonus += statBonus;
+      calc.sources.push({ name: rollDef.stat, value: statBonus });
+    }
+
+    // Proficiency Roll Bonuses
+    (activeComponents[AbilityComponentProficiencyRollBonusStatic.id] ?? []).forEach(
+      (instance: AbilityComponentInstance) => {
+        const instanceData = instance.data as AbilityComponentProficiencyRollBonusStaticData;
+        if (instanceData.proficiency_roll_id === rollDef.id) {
+          const name = getAbilityComponentInstanceSourceName(instance);
+          calc.sources.push({ name, value: instanceData.bonus });
+          calc.bonus += instanceData.bonus;
+        }
+      }
+    );
+
+    // Conditional Proficiency Roll Bonuses
+    (activeComponents[AbilityComponentProficiencyRollBonusConditional.id] ?? []).forEach(
+      (instance: AbilityComponentInstance) => {
+        const instanceData = instance.data as AbilityComponentProficiencyRollBonusConditionalData;
+        if (instanceData.proficiency_roll_id === rollDef.id) {
+          const name = getAbilityComponentInstanceSourceName(instance);
+          calc.conditionalSources.push({
+            name,
+            value: instanceData.bonus_by_rank[instance.rank - 1],
+            condition: instanceData.condition,
+          });
+        }
+      }
+    );
+
+    return calc;
   }
 }
 

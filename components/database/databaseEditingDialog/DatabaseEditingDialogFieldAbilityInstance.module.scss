@@ -31,6 +31,12 @@
   resize: none;
 }
 
+.longField {
+  position: relative;
+  width: 13.5vmin;
+  resize: none;
+}
+
 .abilityName {
   @extend .label;
   color: yellow;

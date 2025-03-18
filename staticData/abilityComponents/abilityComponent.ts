@@ -14,6 +14,13 @@ import { AbilityComponentInitiativeBonusConditional } from "./AbilityComponentIn
 import { AbilityComponentInitiativeBonusStatic } from "./AbilityComponentInitiativeBonusStatic";
 import { AbilityComponentCharacterStatBonus } from "./AbilityComponentCharacterStatBonus";
 import { AbilityComponentCharacterStatOverride } from "./AbilityComponentCharacterStatOverride";
+import { AbilityComponentProficiencyRollBonusStatic } from "./AbilityComponentProficiencyRollBonusStatic";
+import { AbilityComponentProficiencyRollBonusConditional } from "./AbilityComponentProficiencyRollBonusConditional";
+import { AbilityComponentSavingThrowBonusConditional } from "./AbilityComponentSavingThrowBonusConditional";
+import { AbilityComponentSavingThrowBonusStatic } from "./AbilityComponentSavingThrowBonusStatic";
+import { AbilityComponentLanguageCapacityBonus } from "./AbilityComponentLanguageCapacityBonus";
+import { AbilityComponentLanguageReadWriteOverride } from "./AbilityComponentLanguageReadWriteOverride";
+import { AbilityComponentLanguageCapability } from "./AbilityComponentLanguageCapability";
 
 export interface AbilityComponent {
   id: string;
@@ -30,13 +37,20 @@ export const AllAbilityComponents: Dictionary<AbilityComponent> = {
   [AbilityComponentHarvestingCapability.id]: AbilityComponentHarvestingCapability,
   [AbilityComponentInitiativeBonusConditional.id]: AbilityComponentInitiativeBonusConditional,
   [AbilityComponentInitiativeBonusStatic.id]: AbilityComponentInitiativeBonusStatic,
+  [AbilityComponentLanguageCapability.id]: AbilityComponentLanguageCapability,
+  [AbilityComponentLanguageCapacityBonus.id]: AbilityComponentLanguageCapacityBonus,
+  [AbilityComponentLanguageReadWriteOverride.id]: AbilityComponentLanguageReadWriteOverride,
   [AbilityComponentMeleeDamageByLevel.id]: AbilityComponentMeleeDamageByLevel,
   [AbilityComponentProficiencyRoll.id]: AbilityComponentProficiencyRoll,
+  [AbilityComponentProficiencyRollBonusConditional.id]: AbilityComponentProficiencyRollBonusConditional,
+  [AbilityComponentProficiencyRollBonusStatic.id]: AbilityComponentProficiencyRollBonusStatic,
   [AbilityComponentRangedDamageByLevel.id]: AbilityComponentRangedDamageByLevel,
   [AbilityComponentReactionRollBonusConditional.id]: AbilityComponentReactionRollBonusConditional,
   [AbilityComponentReactionRollBonusStatic.id]: AbilityComponentReactionRollBonusStatic,
   [AbilityComponentResearchBonusesOrEffectiveLevel.id]: AbilityComponentResearchBonusesOrEffectiveLevel,
   [AbilityComponentResearchCapability.id]: AbilityComponentResearchCapability,
+  [AbilityComponentSavingThrowBonusConditional.id]: AbilityComponentSavingThrowBonusConditional,
+  [AbilityComponentSavingThrowBonusStatic.id]: AbilityComponentSavingThrowBonusStatic,
 };
 
 export const AllAbilityComponentsArray = Object.values(AllAbilityComponents).sort((a, b) => {

@@ -77,6 +77,12 @@ class ADatabaseAbilitiesDialog extends React.Component<Props> {
         convertLocalDataToEditableString: Database_StringArrayToString,
       },
       {
+        type: DatabaseEditingDialogField.Boolean,
+        labelTexts: ["Allows Custom Subtypes?"],
+        fieldNames: ["custom_subtypes"],
+        defaults: [false],
+      },
+      {
         type: DatabaseEditingDialogField.AbilityComponents,
         labelTexts: ["Components"],
         fieldNames: ["components"],

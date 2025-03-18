@@ -86,11 +86,14 @@
   flex-grow: 1;
   font-size: 0.8rem;
   color: gray;
+  white-space: pre-wrap;
 }
 
 .tooltipCondition {
+  margin-left: 1vmin;
   font-size: 0.8rem;
   color: #448888;
+  white-space: pre-wrap;
 }
 
 .tooltipSourceValue {

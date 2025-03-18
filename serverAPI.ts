@@ -87,6 +87,7 @@ import {
   RequestBody_EditResearchSubcategory,
   RequestBody_EditHarvestingCategory,
   RequestBody_CreateHarvestingCategory,
+  RequestBody_SetCharacterLanguages,
 } from "./serverRequestTypes";
 import { AbilityFilterv2, AbilityInstancev2, ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import {
@@ -334,11 +335,13 @@ export interface CharacterData extends CharacterEquipmentData {
   maintenance_date: string;
   maintenance_paid: number;
   proficiencies: ProficiencyDatav2[];
+  languages: string[];
 }
 
-export type ServerCharacterData = Omit<CharacterData, "hit_dice" | "proficiencies"> & {
+export type ServerCharacterData = Omit<CharacterData, "hit_dice" | "proficiencies" | "languages"> & {
   hit_dice: string;
   proficiencies: string;
+  languages: string;
 };
 
 export interface ProficiencyDatav2 {
@@ -389,11 +392,16 @@ export interface AbilityDefData {
   max_ranks: number;
   descriptions: string[];
   subtypes: string[];
+  custom_subtypes: boolean;
   components: AbilityComponentData[];
 }
-export type ServerAbilityDefData = Omit<AbilityDefData, "descriptions" | "subtypes" | "components"> & {
+export type ServerAbilityDefData = Omit<
+  AbilityDefData,
+  "descriptions" | "subtypes" | "custom_subtypes" | "components"
+> & {
   descriptions: string;
   subtypes: string;
+  custom_subtypes: number;
   components: string;
 };
 
@@ -746,6 +754,7 @@ export interface TroopDefData {
   platoon_br: number;
   platoon_size: number;
   wage: number;
+  army_level: number;
 }
 
 export interface ArmyData {
@@ -968,6 +977,7 @@ class AServerAPI {
           ...sAbilityData,
           descriptions: JSON.parse(sAbilityData.descriptions),
           subtypes: Database_StringToStringArray(sAbilityData.subtypes),
+          custom_subtypes: !!sAbilityData.custom_subtypes,
           components: sAbilityData.components.length > 0 ? JSON.parse(sAbilityData.components) : [],
         });
       });
@@ -1113,6 +1123,7 @@ class AServerAPI {
             return +stringHP;
           }),
           proficiencies: JSON.parse(sCharData.proficiencies),
+          languages: JSON.parse(sCharData.languages),
         });
       });
 
@@ -1360,6 +1371,7 @@ class AServerAPI {
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
       proficiencies: JSON.stringify(character.proficiencies),
+      languages: JSON.stringify(character.languages),
       selected_class_features,
       equipment,
     };
@@ -1382,6 +1394,7 @@ class AServerAPI {
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
       proficiencies: JSON.stringify(character.proficiencies),
+      languages: JSON.stringify(character.languages),
       selected_class_features,
     };
     const res = await fetch("/api/editCharacter", {
@@ -1817,6 +1830,7 @@ class AServerAPI {
       ...def,
       descriptions: JSON.stringify(def.descriptions),
       subtypes: Database_StringArrayToString(def.subtypes),
+      custom_subtypes: def.custom_subtypes ? 1 : 0,
       components: JSON.stringify(def.components),
     };
     const res = await fetch("/api/createAbilityDef", {
@@ -1834,6 +1848,7 @@ class AServerAPI {
       ...def,
       descriptions: JSON.stringify(def.descriptions),
       subtypes: Database_StringArrayToString(def.subtypes),
+      custom_subtypes: def.custom_subtypes ? 1 : 0,
       components: JSON.stringify(def.components),
     };
     const res = await fetch("/api/editAbilityDef", {
@@ -2073,6 +2088,21 @@ class AServerAPI {
       gp,
     };
     const res = await fetch("/api/setMoney", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async setCharacterLanguages(characterId: number, languages: string[]): Promise<EditRowResult> {
+    const requestBody: RequestBody_SetCharacterLanguages = {
+      characterId,
+      languages,
+    };
+    const res = await fetch("/api/setCharacterLanguages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
