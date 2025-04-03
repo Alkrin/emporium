@@ -14,7 +14,6 @@ export async function refetchSpellbooks(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Spellbook Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Spellbook data"} />,
-        escapable: true,
       })
     );
   } else {

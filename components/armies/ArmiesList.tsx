@@ -110,7 +110,6 @@ class AArmiesList extends React.Component<Props, State> {
         content: () => {
           return <CreateArmySubPanel isEditMode />;
         },
-        escapable: true,
       })
     );
   }
@@ -148,7 +147,6 @@ class AArmiesList extends React.Component<Props, State> {
         content: () => {
           return <CreateArmySubPanel />;
         },
-        escapable: true,
       })
     );
   }

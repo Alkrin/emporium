@@ -6,6 +6,8 @@ import { RootState } from "../../redux/store";
 import { connect } from "react-redux";
 import { Dictionary } from "../../lib/dictionary";
 import { getRomanNumerals } from "../../lib/stringUtils";
+import { getMaxPopulationForCityValue } from "../../lib/locationUtils";
+import { addCommasToNumber } from "../../lib/characterUtils";
 
 interface ReactProps {
   data: LocationData;
@@ -13,8 +15,6 @@ interface ReactProps {
 
 interface InjectedProps {
   locations: Dictionary<LocationData>;
-  cities: Dictionary<LocationCityData>;
-  lairs: Dictionary<LocationLairData>;
   dispatch?: Dispatch;
 }
 
@@ -36,15 +36,26 @@ class ALocationTooltip extends React.Component<Props> {
   }
 
   private renderCityTooltipData(locationID: number): React.ReactNode {
-    const data = Object.values(this.props.cities).find((c) => {
-      return c.location_id === locationID;
+    const city = Object.values(this.props.locations).find((l) => {
+      return l.id === locationID && l.type === "City";
     });
-    if (data) {
+    if (city) {
+      const data = city.type_data as LocationCityData;
       return (
         <>
           <div className={styles.data}>
             <div className={styles.dataName}>{"Market Class:"}</div>
             <div className={styles.dataValue}>{getRomanNumerals(data.market_class)}</div>
+          </div>
+          <div className={styles.data}>
+            <div className={styles.dataName}>{"Population:"}</div>
+            <div className={styles.dataValue}>{`${data.population} / ${getMaxPopulationForCityValue(
+              data.city_value
+            )} families`}</div>
+          </div>
+          <div className={styles.data}>
+            <div className={styles.dataName}>{"City Value:"}</div>
+            <div className={styles.dataValue}>{`${addCommasToNumber(data.city_value)}gp`}</div>
           </div>
         </>
       );
@@ -54,22 +65,12 @@ class ALocationTooltip extends React.Component<Props> {
   }
 
   private renderLairTooltipData(locationID: number): React.ReactNode {
-    const data = Object.values(this.props.lairs).find((l) => {
-      return l.location_id === locationID;
+    const lair = Object.values(this.props.locations).find((l) => {
+      return l.id === locationID && l.type === "Lair";
     });
-    if (data) {
-      return (
-        <>
-          <div className={styles.data}>
-            <div className={styles.dataName}>{"Monster Level:"}</div>
-            <div className={styles.dataValue}>{data.monster_level}</div>
-          </div>
-          <div className={styles.data}>
-            <div className={styles.dataName}>{"Num Encounters:"}</div>
-            <div className={styles.dataValue}>{data.num_encounters}</div>
-          </div>
-        </>
-      );
+    if (lair) {
+      const data = lair.type_data as LocationLairData;
+      return null;
     } else {
       return null;
     }
@@ -77,12 +78,10 @@ class ALocationTooltip extends React.Component<Props> {
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
-  const { locations, cities, lairs } = state.locations;
+  const { locations } = state.locations;
   return {
     ...props,
     locations,
-    cities,
-    lairs,
   };
 }
 

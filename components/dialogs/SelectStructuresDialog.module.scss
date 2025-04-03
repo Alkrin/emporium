@@ -1,0 +1,146 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: wheat;
+  width: 100%;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialogButton {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
+}
+
+.listContainer {
+  position: relative;
+  padding-top: 0.5vmin;
+  padding-left: 0.5vmin;
+  padding-right: 0.5vmin;
+  border-radius: 0.5vmin;
+  box-shadow: inset 0 0 0 2px wheat;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+
+  /* width */
+  &::-webkit-scrollbar {
+    width: 1.5vmin;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0 2px wheat;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 222, 179, 0.5);
+  }
+}
+
+.title {
+  @extend .normalText;
+  font-size: 2rem;
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid yellow;
+}
+
+.contentRow {
+  @extend .row;
+  position: relative;
+  margin-top: 1vmin;
+}
+
+.locationsContainer {
+  @extend .column;
+  position: relative;
+  width: 30vmin;
+}
+
+.locationsListContainer {
+  @extend .listContainer;
+  height: 30vmin;
+}
+
+.mapWindow {
+  position: relative;
+  margin-left: 1vmin;
+  width: 30vmin;
+  height: 30vmin;
+}
+
+.listRow {
+  margin-bottom: 0.25vmin;
+  padding: 0.25vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+
+  &.selected {
+    box-shadow: inset 0 0 0 2px red;
+  }
+
+  &.owned {
+    background-color: rgba(255, 0, 255, 0.1);
+  }
+
+  &.dead {
+    background-color: black;
+  }
+}
+
+.listName {
+  font-size: 0.8rem;
+  color: wheat;
+  text-align: left;
+  width: 15vmin;
+  flex-grow: 1;
+}

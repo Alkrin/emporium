@@ -110,7 +110,6 @@ class APayArmyMaintenanceDialog extends React.Component<Props, State> {
           content: () => (
             <BasicDialog title={"Error!"} prompt={"You must select a payment source and a valid payment amount!"} />
           ),
-          escapable: true,
         })
       );
       return;
@@ -134,7 +133,6 @@ class APayArmyMaintenanceDialog extends React.Component<Props, State> {
               prompt={"Failed to make the payment.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else if (this.props.dispatch) {
@@ -168,7 +166,6 @@ class APayArmyMaintenanceDialog extends React.Component<Props, State> {
             />
           );
         },
-        escapable: true,
       })
     );
   }

@@ -77,6 +77,10 @@ import {
   AbilityComponentLanguageCapacityBonus,
   AbilityComponentLanguageCapacityBonusData,
 } from "../staticData/abilityComponents/AbilityComponentLanguageCapacityBonus";
+import {
+  AbilityComponentHenchmanCapacityBonus,
+  AbilityComponentHenchmanCapacityBonusData,
+} from "../staticData/abilityComponents/AbilityComponentHenchmanCapacityBonus";
 
 export interface ValueSource {
   name: string;
@@ -1207,6 +1211,32 @@ export function getMaxMinionCountForCharacter(characterId: number): BonusCalcula
   }
 }
 
+export function getMaxMinionCountForCharacterv2(
+  character: CharacterData,
+  activeComponents: Record<string, AbilityComponentInstance[]>
+): BonusCalculations {
+  const calc: BonusCalculations = { bonus: 0, sources: [], conditionalSources: [] };
+  if (!character) {
+    return calc;
+  } else {
+    calc.bonus = 4;
+    calc.sources.push({ name: "Base Value", value: 4 });
+
+    const chaValue = getCharacterStatv2(character, CharacterStat.Charisma, activeComponents);
+    const chaBonus = getStatBonusForValue(chaValue);
+    calc.bonus += chaBonus;
+    calc.sources.push({ name: "Charisma Bonus", value: chaBonus });
+
+    (activeComponents[AbilityComponentHenchmanCapacityBonus.id] ?? []).forEach((instance) => {
+      const instanceData = instance.data as AbilityComponentHenchmanCapacityBonusData;
+      calc.sources.push({ name: getAbilityComponentInstanceSourceName(instance), value: instanceData.bonus });
+      calc.bonus += instanceData.bonus;
+    });
+
+    return calc;
+  }
+}
+
 export function getRecruitmentRollBonusForCharacter(characterId: number): BonusCalculations {
   const redux = store.getState();
   const character = redux.characters.characters[characterId];
@@ -1799,4 +1829,22 @@ export function getCharacterKnownLanguages(
   });
 
   return languages;
+}
+
+export function rollDice(num: number, max: number): number {
+  let result: number = 0;
+  for (let i = 0; i < num; ++i) {
+    result += randomInt(1, max);
+  }
+  return result;
+}
+
+export function rollFactorialDie(max: number): number {
+  let result: number = randomInt(1, max);
+
+  if (result === max) {
+    result += rollFactorialDie(max);
+  }
+
+  return result;
 }

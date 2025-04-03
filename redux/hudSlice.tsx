@@ -7,6 +7,17 @@
 import { createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit";
 import { UserRole } from "./userSlice";
 
+export enum MainPanel {
+  Dashboard,
+  Characters,
+  Armies,
+  Structures,
+  World,
+  Activities,
+  Tools,
+  Database,
+}
+
 export enum HUDVerticalAnchor {
   Top,
   Center,
@@ -26,6 +37,7 @@ export interface EscapableParams {
 
 interface HUDState {
   activeRole: UserRole;
+  activePanel: MainPanel;
   escapables: EscapableParams[];
   hudWidth: number;
   hudHeight: number;
@@ -34,6 +46,7 @@ interface HUDState {
 function buildDefaultHUDState() {
   const DefaultHUDState: HUDState = {
     activeRole: "player",
+    activePanel: MainPanel.Dashboard,
     escapables: [],
     hudWidth: 0,
     hudHeight: 0,
@@ -46,10 +59,7 @@ export const hudSlice = createSlice({
   name: "hud",
   initialState: buildDefaultHUDState(),
   reducers: {
-    addOrUpdateEscapable: (
-      state: HUDState,
-      action: PayloadAction<EscapableParams>
-    ) => {
+    addOrUpdateEscapable: (state: HUDState, action: PayloadAction<EscapableParams>) => {
       // If the item already existed, remove it so we can put it on the top.
       state.escapables = state.escapables.filter((escapable) => {
         return escapable.id !== action.payload.id;
@@ -61,22 +71,17 @@ export const hudSlice = createSlice({
         return escapable.id !== action.payload;
       });
     },
-    updateHUDSize: (
-      state: HUDState,
-      action: PayloadAction<[number, number]>
-    ) => {
+    updateHUDSize: (state: HUDState, action: PayloadAction<[number, number]>) => {
       state.hudWidth = action.payload[0];
       state.hudHeight = action.payload[1];
     },
     setActiveRole: (state: HUDState, action: PayloadAction<UserRole>) => {
       state.activeRole = action.payload;
     },
+    setActivePanel: (state: HUDState, action: PayloadAction<MainPanel>) => {
+      state.activePanel = action.payload;
+    },
   },
 });
 
-export const {
-  addOrUpdateEscapable,
-  removeEscapable,
-  updateHUDSize,
-  setActiveRole,
-} = hudSlice.actions;
+export const { addOrUpdateEscapable, removeEscapable, updateHUDSize, setActiveRole, setActivePanel } = hudSlice.actions;

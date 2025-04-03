@@ -3,7 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
 import styles from "./DashboardPanel.module.scss";
-import ServerAPI, { CharacterData, ContractData, ItemData, StorageData } from "../../serverAPI";
+import ServerAPI, { CharacterData, ContractData, ItemData, StorageData, UserData } from "../../serverAPI";
 import { EditButton } from "../EditButton";
 import { showModal } from "../../redux/modalsSlice";
 import { SelectAdventurerDialog } from "../dialogs/SelectAdventurerDialog";
@@ -31,6 +31,7 @@ import { SubPanelPane } from "../SubPanelPane";
 import { EditStoragesSubPanel } from "../characters/dialogs/EditStoragesSubPanel";
 import { setActiveStorageId } from "../../redux/storageSlice";
 import { BasicDialog } from "../dialogs/BasicDialog";
+import { DashboardDomainSection } from "./sections/DashboardDomainSection";
 
 interface State {
   isSaving: boolean;
@@ -47,7 +48,7 @@ interface InjectedProps {
   contractsByDefByPartyAId: Dictionary<Dictionary<ContractData[]>>;
   contractsByDefByPartyBId: Dictionary<Dictionary<ContractData[]>>;
   activeRole: UserRole;
-  currentUserId: number;
+  currentUser: UserData;
   dispatch?: Dispatch;
 }
 
@@ -67,13 +68,15 @@ class ADashboardPanel extends React.Component<Props, State> {
   render(): React.ReactNode {
     return (
       <div className={styles.root}>
+        {this.renderCostOfLivingPanel()}
         <div className={styles.characterSelectorPanel}>
           <div className={styles.characterSelectorLabel}>{"Active Character:\xa0"}</div>
           <div className={styles.characterSelectorValue}>{this.props.character?.name ?? "---"}</div>
           <EditButton className={styles.editButton} onClick={this.onSelectActiveCharacterClicked.bind(this)} />
         </div>
         {this.renderFinancesPanel()}
-        {this.renderCostOfLivingPanel()}
+        <DashboardDomainSection />
+
         <SubPanelPane />
         <SavingVeil show={this.state.isSaving} textOverride={"Making Payments..."} />
       </div>
@@ -190,7 +193,6 @@ class ADashboardPanel extends React.Component<Props, State> {
         content: () => {
           return <EditStoragesSubPanel />;
         },
-        escapable: true,
       })
     );
   }
@@ -232,6 +234,9 @@ class ADashboardPanel extends React.Component<Props, State> {
     return (
       <div className={styles.costOfLivingPanel}>
         <div className={styles.panelTitle}>{`Cost Of Living, ${dateFormat(new Date(), "mmm yyyy")}`}</div>
+        <div className={styles.costOfLivingDataRow}>
+          <div className={styles.ownerLabel}>{`Characters Owned by ${this.props.currentUser.name}`}</div>
+        </div>
         <div className={styles.costOfLivingDataRow}>
           <div className={styles.costOfLivingLabel}>{"Insolvent Unpaid Characters:\xa0"}</div>
           <div className={styles.costOfLivingValue}>{destitute.length}</div>
@@ -281,7 +286,6 @@ class ADashboardPanel extends React.Component<Props, State> {
         content: () => {
           return <EditMoneyDialog storageId={storage.id} />;
         },
-        escapable: true,
       })
     );
   }
@@ -326,7 +330,7 @@ class ADashboardPanel extends React.Component<Props, State> {
       if (c.dead) return false;
 
       const isUnpaid = c.maintenance_date !== thisMonth;
-      const isOwnedByUser = c.user_id === this.props.currentUserId;
+      const isOwnedByUser = c.user_id === this.props.currentUser.id;
 
       return isUnpaid && isOwnedByUser;
     });
@@ -363,7 +367,7 @@ class ADashboardPanel extends React.Component<Props, State> {
       if (c.dead) return false;
 
       const isUnpaid = c.maintenance_date !== thisMonth;
-      const isOwnedByUser = c.user_id === this.props.currentUserId;
+      const isOwnedByUser = c.user_id === this.props.currentUser.id;
 
       return !isUnpaid && isOwnedByUser;
     });
@@ -534,7 +538,6 @@ class ADashboardPanel extends React.Component<Props, State> {
             />
           );
         },
-        escapable: true,
       })
     );
   }
@@ -548,7 +551,7 @@ class ADashboardPanel extends React.Component<Props, State> {
       return (
         this.props.activeRole !== "player" ||
         // Storages are owned by characters, not players, so we have to chain back through the owner to find the user.
-        this.props.allCharacters[storage.owner_id].user_id === this.props.currentUserId
+        this.props.allCharacters[storage.owner_id].user_id === this.props.currentUser.id
       );
     });
 
@@ -581,7 +584,6 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { dashboardCharacterId, characters: allCharacters } = state.characters;
   const allStorages = state.storages.allStorages;
   const { activeRole } = state.hud;
-  const currentUserId = state.user.currentUser.id;
   const { contractsByDefByPartyAId, contractsByDefByPartyBId } = state.contracts;
   const allItems = state.items.allItems;
   return {
@@ -594,7 +596,7 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     contractsByDefByPartyAId,
     contractsByDefByPartyBId,
     activeRole,
-    currentUserId,
+    currentUser: state.user.currentUser,
   };
 }
 

@@ -27,7 +27,6 @@ export async function refetchAbilityDefs(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "AbilityDef Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch AbilityDef data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -44,7 +43,6 @@ export async function refetchCharacterClasses(dispatch: Dispatch): Promise<void>
       showModal({
         id: "CharacterClass Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch CharacterClass data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -61,7 +59,6 @@ export async function refetchEquipmentSets(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "EquipmentSets Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch EquipmentSets data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -78,7 +75,6 @@ export async function refetchEquipmentSetItems(dispatch: Dispatch): Promise<void
       showModal({
         id: "EquipmentSetItems Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch EquipmentSetItems data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -95,7 +91,6 @@ export async function refetchHarvestingCategories(dispatch: Dispatch): Promise<v
       showModal({
         id: "HarvestingCategories Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch HarvestingCategories data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -112,7 +107,6 @@ export async function refetchItemDefs(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "ItemDef Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ItemDef data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -134,7 +128,6 @@ export async function refetchProficiencyRolls(dispatch: Dispatch): Promise<void>
       showModal({
         id: "ProficiencyRolls Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ProficiencyRolls data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -151,7 +144,6 @@ export async function refetchResearchCategories(dispatch: Dispatch): Promise<voi
       showModal({
         id: "ResearchCategories Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ResearchCategories data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -168,7 +160,6 @@ export async function refetchResearchSubcategories(dispatch: Dispatch): Promise<
       showModal({
         id: "ResearchSubcategories Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ResearchSubcategories data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -185,7 +176,6 @@ export async function refetchSpellDefs(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "SpellDef Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch SpellDef data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -202,7 +192,6 @@ export async function refetchStructureComponentDefs(dispatch: Dispatch): Promise
       showModal({
         id: "StructureComponentDef Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch StructureComponentDef data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -219,7 +208,6 @@ export async function refetchTroopDefs(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "TroopDef Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch TroopDef data"} />,
-        escapable: true,
       })
     );
   } else {

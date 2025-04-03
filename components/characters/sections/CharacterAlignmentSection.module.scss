@@ -1,0 +1,42 @@
+.root {
+  @extend .row;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  align-self: center;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.centeredRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.title {
+  @extend .normalText;
+}
+
+.valueDisplay {
+  @extend .valueText;
+  flex-shrink: 0;
+}

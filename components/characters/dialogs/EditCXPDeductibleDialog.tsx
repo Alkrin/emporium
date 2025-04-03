@@ -115,7 +115,6 @@ class AEditCXPDeductibleDialog extends React.Component<Props, State> {
               prompt={`The deductible paid amount must be between 0 and ${maxDeductible}.  Please enter a valid value.`}
             />
           ),
-          escapable: true,
         })
       );
       return;
@@ -137,7 +136,6 @@ class AEditCXPDeductibleDialog extends React.Component<Props, State> {
               prompt={"Failed to update CXP Deductible.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else {
@@ -170,7 +168,6 @@ class AEditCXPDeductibleDialog extends React.Component<Props, State> {
               prompt={`The deductible remaining amount must be between 0 and ${maxDeductible}.  Please enter a valid value.`}
             />
           ),
-          escapable: true,
         })
       );
       return;
@@ -189,7 +186,6 @@ class AEditCXPDeductibleDialog extends React.Component<Props, State> {
               prompt={"Failed to update CXP Deductible.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else {

@@ -15,7 +15,6 @@ export async function refetchMaps(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Map Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Map data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -35,7 +34,6 @@ export async function refetchMapHexes(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "MapHex Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch MapHex data"} />,
-        escapable: true,
       })
     );
   } else {

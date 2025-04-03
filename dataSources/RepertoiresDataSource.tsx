@@ -14,7 +14,6 @@ export async function refetchRepertoires(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Repertoire Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Repertoire data"} />,
-        escapable: true,
       })
     );
   } else {

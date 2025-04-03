@@ -59,7 +59,6 @@ interface InjectedProps {
   allCharacters: Dictionary<CharacterData>;
   allStorages: Dictionary<StorageData>;
   allLocations: Dictionary<LocationData>;
-  allCities: Dictionary<LocationCityData>;
   activeStorageId: number;
   dispatch?: Dispatch;
 }
@@ -180,11 +179,12 @@ class ASellItemDialog extends React.Component<Props, State> {
       // The item was in a non-located storage (probably a personal pile), so try to locate its owner.
       locationId = this.props.allCharacters[storage.owner_id].location_id;
     }
-    const city = Object.values(this.props.allCities).find((c) => {
-      return c.location_id === locationId;
+    const city = Object.values(this.props.allLocations).find((l) => {
+      return l.id === locationId && l.type === "City";
     });
     if (city) {
-      return `${this.props.allLocations[locationId].name}, Class ${getRomanNumerals(city.market_class)}`;
+      const data = city.type_data as LocationCityData;
+      return `${city.name}, Class ${getRomanNumerals(data.market_class)}`;
     } else {
       return "None";
     }
@@ -197,10 +197,11 @@ class ASellItemDialog extends React.Component<Props, State> {
       // The item was in a non-located storage (probably a personal pile), so try to locate its owner.
       locationId = this.props.allCharacters[storage.owner_id].location_id;
     }
-    const city = Object.values(this.props.allCities).find((c) => {
-      return c.location_id === locationId;
+    const city = Object.values(this.props.allLocations).find((l) => {
+      return l.id === locationId && l.type === "City";
     });
     if (city) {
+      const data = city.type_data as LocationCityData;
       return (
         <>
           <div className={styles.countRow}>
@@ -218,21 +219,21 @@ class ASellItemDialog extends React.Component<Props, State> {
             </div>
             <div className={styles.column}>
               <div className={styles.availabilityHeader}>{"Venturer"}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class - 1, 0)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class - 1, 1)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class - 1, 2)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class - 1, 3)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class - 1, 4)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class - 1, 5)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class - 1, 0)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class - 1, 1)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class - 1, 2)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class - 1, 3)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class - 1, 4)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class - 1, 5)}</div>
             </div>
             <div className={styles.column}>
               <div className={styles.availabilityHeader}>{"No Venturer"}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class, 0)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class, 1)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class, 2)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class, 3)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class, 4)}</div>
-              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(city.market_class, 5)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class, 0)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class, 1)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class, 2)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class, 3)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class, 4)}</div>
+              <div className={styles.availabilityValueEntry}>{getItemAvailabilityText(data.market_class, 5)}</div>
             </div>
           </div>
         </>
@@ -376,14 +377,12 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allCharacters = state.characters.characters;
   const { activeStorageId, allStorages } = state.storages;
   const allLocations = state.locations.locations;
-  const allCities = state.locations.cities;
 
   return {
     ...props,
     allCharacters,
     allStorages,
     allLocations,
-    allCities,
     activeStorageId,
   };
 }

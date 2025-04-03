@@ -51,7 +51,6 @@ class AAuthControl extends React.Component<Props> {
                   ]}
                 />
               ),
-              escapable: true,
             })
           );
         }}

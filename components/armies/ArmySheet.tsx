@@ -176,7 +176,6 @@ class AArmySheet extends React.Component<Props> {
         content: () => {
           return <PayArmyMaintenanceDialog />;
         },
-        escapable: true,
       })
     );
   }

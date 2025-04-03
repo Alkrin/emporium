@@ -133,7 +133,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
         content: () => {
           return <EditMoneyDialog storageId={this.props.activeStorageId} />;
         },
-        escapable: true,
       })
     );
   }
@@ -269,7 +268,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
           content: () => {
             return <SellItemDialog item={item} def={def} />;
           },
-          escapable: true,
         })
       );
     }
@@ -285,7 +283,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
         content: () => {
           return <EditItemDialog item={item} def={def} />;
         },
-        escapable: true,
       })
     );
   }
@@ -300,7 +297,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
         content: () => {
           return <SplitBundleDialog item={item} def={def} />;
         },
-        escapable: true,
       })
     );
   }
@@ -315,7 +311,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
         content: () => {
           return <SpellbookDialog item={item} def={def} />;
         },
-        escapable: true,
       })
     );
   }
@@ -718,7 +713,6 @@ class AEditStoragesSubPanel extends React.Component<Props> {
         content: () => {
           return <CreateItemDialog storageId={this.props.activeStorageId} />;
         },
-        escapable: true,
       })
     );
   }

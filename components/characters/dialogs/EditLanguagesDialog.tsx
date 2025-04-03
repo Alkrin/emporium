@@ -173,7 +173,6 @@ class AEditLanguagesDialog extends React.Component<Props> {
               prompt={"Failed to update Languages.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else {

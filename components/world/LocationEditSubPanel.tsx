@@ -6,51 +6,46 @@ import { RootState } from "../../redux/store";
 import ServerAPI, { LocationCityData, LocationData, LocationLairData } from "../../serverAPI";
 import styles from "./LocationEditSubPanel.module.scss";
 import { SubPanelCloseButton } from "../SubPanelCloseButton";
-import { deleteLocation } from "../../redux/locationsSlice";
-import { refetchLocationCities, refetchLocationLairs, refetchLocations } from "../../dataSources/LocationsDataSource";
+import { deleteLocation, updateLocation } from "../../redux/locationsSlice";
+import { refetchLocations } from "../../dataSources/LocationsDataSource";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
 import { ImagePickerDialog } from "../ImagePickerDialog";
-import { Dictionary } from "../../lib/dictionary";
 import { BasicDialog } from "../dialogs/BasicDialog";
+import { SavingVeil } from "../SavingVeil";
+import { getMarketClassForPopulation, getMaxPopulationForCityValue } from "../../lib/locationUtils";
+import { addCommasToNumber } from "../../lib/characterUtils";
 
 type LocationType = "---" | "City" | "Lair";
 
-interface CityState {
-  market_class: number;
-}
-
-const defaultCityState: CityState = {
+const defaultCityData: LocationCityData = {
   market_class: 0,
+  population: 0,
+  city_value: 0,
 };
 
-interface LairState {
-  monster_level: number;
-  num_encounters: number;
-}
-
-const defaultLairState: LairState = {
-  monster_level: 0,
-  num_encounters: 0,
-};
+const defaultLairData: LocationLairData = {};
 
 interface State {
   isSaving: boolean;
-  name: string;
-  description: string;
-  icon_url: string;
-  type: LocationType;
-  cityData: CityState;
-  lairData: LairState;
+  location: LocationData;
+  cityPopulationString: string;
+  cityCityValueString: string;
 }
 
 const defaultState: State = {
   isSaving: false,
-  name: "",
-  description: "",
-  icon_url: "",
-  type: "---",
-  cityData: defaultCityState,
-  lairData: defaultLairState,
+  location: {
+    id: 0,
+    name: "",
+    description: "",
+    map_id: 0,
+    hex_id: 0,
+    type: "---",
+    type_data: {},
+    icon_url: "",
+  },
+  cityPopulationString: "0",
+  cityCityValueString: "0",
 };
 
 interface ReactProps {
@@ -61,8 +56,6 @@ interface ReactProps {
 
 interface InjectedProps {
   location?: LocationData;
-  cities: Dictionary<LocationCityData>;
-  lairs: Dictionary<LocationLairData>;
   dispatch?: Dispatch;
 }
 
@@ -73,17 +66,23 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    const initialState = { ...defaultState };
-    if (props.location) {
-      initialState.name = props.location.name;
-      initialState.description = props.location.description;
-      initialState.icon_url = props.location.icon_url;
-      initialState.type = props.location.type as LocationType;
 
-      initialState.cityData = this.getOldCityData() ?? defaultCityState;
-      initialState.lairData = this.getOldLairData() ?? defaultLairState;
-    }
-    this.state = initialState;
+    const cityPopulationString =
+      props.location?.type === "City" ? (props.location.type_data as LocationCityData).population.toString() : "0";
+    const cityCityValueString =
+      props.location?.type === "City" ? (props.location.type_data as LocationCityData).city_value.toString() : "0";
+
+    this.state = {
+      ...defaultState,
+      location: props.location ?? {
+        ...defaultState.location,
+        map_id: props.mapId,
+        hex_id: props.hexId,
+        id: props.locationId ?? 0,
+      },
+      cityPopulationString,
+      cityCityValueString,
+    };
   }
 
   render(): React.ReactNode {
@@ -99,21 +98,17 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
           {this.renderDescriptionSection()}
           {this.renderIconSection()}
           {this.renderTypeSection()}
-          {this.renderTypeSpecificSection()}
+          {this.renderTypeDataSection()}
         </div>
         <div className={styles.footerSection}>
           <div className={`${styles.footerButton} ${deletableClass}`} onClick={this.onDeleteClicked.bind(this)}>
-            Delete
+            {"Delete"}
           </div>
           <div className={styles.footerButton} onClick={this.onSaveClicked.bind(this)}>
-            Save
+            {"Save"}
           </div>
         </div>
-        {this.state.isSaving && (
-          <div className={styles.savingVeil}>
-            <div className={styles.savingLabel}>Saving...</div>
-          </div>
-        )}
+        <SavingVeil show={this.state.isSaving} />
         <SubPanelCloseButton />
       </div>
     );
@@ -122,7 +117,7 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
   private renderIdSection(): React.ReactNode {
     return (
       <div className={styles.row}>
-        <div className={styles.firstLabel}>ID</div>
+        <div className={styles.firstLabel}>{"ID"}</div>
         <input
           className={styles.idField}
           type={"text"}
@@ -136,16 +131,16 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
   private renderNameSection(): React.ReactNode {
     return (
       <div className={styles.row}>
-        <div className={styles.firstLabel}>Name</div>
+        <div className={styles.firstLabel}>{"Name"}</div>
         <input
           className={styles.nameField}
           type={"text"}
-          value={this.state.name}
+          value={this.state.location.name}
           autoFocus
           spellCheck={false}
           tabIndex={this.nextTabIndex++}
           onChange={(e) => {
-            this.setState({ name: e.target.value });
+            this.setState({ location: { ...this.state.location, name: e.target.value } });
           }}
         />
       </div>
@@ -155,13 +150,13 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
   private renderDescriptionSection(): React.ReactNode {
     return (
       <div className={styles.column}>
-        <div className={styles.labelText}>Description</div>
+        <div className={styles.labelText}>{"Description"}</div>
         <textarea
           className={styles.descriptionField}
-          value={this.state.description}
+          value={this.state.location.description}
           tabIndex={this.nextTabIndex++}
           onChange={(e) => {
-            this.setState({ description: e.target.value });
+            this.setState({ location: { ...this.state.location, description: e.target.value } });
           }}
         />
       </div>
@@ -170,22 +165,20 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
 
   private renderIconSection(): React.ReactNode {
     return (
-      <>
-        <div className={styles.row}>
-          <div className={styles.labelText}>{"Icon"}</div>
-          {(this.state.icon_url?.length ?? 0) > 0 ? (
-            <img
-              className={styles.iconPicker}
-              src={this.state.icon_url}
-              onClick={this.onIconPickerClicked.bind(this)}
-            />
-          ) : (
-            <div className={styles.iconPicker} onClick={this.onIconPickerClicked.bind(this)}>
-              {"None"}
-            </div>
-          )}
-        </div>
-      </>
+      <div className={styles.row}>
+        <div className={styles.labelText}>{"Icon"}</div>
+        {(this.state.location.icon_url?.length ?? 0) > 0 ? (
+          <img
+            className={styles.iconPicker}
+            src={this.state.location.icon_url}
+            onClick={this.onIconPickerClicked.bind(this)}
+          />
+        ) : (
+          <div className={styles.iconPicker} onClick={this.onIconPickerClicked.bind(this)}>
+            {"None"}
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -203,8 +196,8 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
           return (
             <ImagePickerDialog
               urls={urls}
-              onImageSelected={(url) => {
-                this.setState({ icon_url: url });
+              onImageSelected={(icon_url) => {
+                this.setState({ location: { ...this.state.location, icon_url } });
               }}
             />
           );
@@ -215,35 +208,44 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
 
   private renderTypeSection(): React.ReactNode {
     return (
-      <>
-        <div className={styles.row}>
-          <div className={styles.labelText}>{"Type"}</div>
-          <select
-            className={styles.typeSelector}
-            value={this.state.type}
-            onChange={(e) => {
-              const newType = e.target.value as LocationType;
-              if (newType !== this.state.type) {
-                this.setState({
-                  type: e.target.value as LocationType,
-                  cityData: defaultCityState,
-                  lairData: defaultLairState,
-                });
-              }
-            }}
-            tabIndex={this.nextTabIndex++}
-          >
-            <option value={"---"}>---</option>
-            <option value={"City"}>City</option>
-            <option value={"Lair"}>Lair</option>
-          </select>
-        </div>
-      </>
+      <div className={styles.row}>
+        <div className={styles.labelText}>{"Type"}</div>
+        <select
+          className={styles.typeSelector}
+          value={this.state.location.type}
+          onChange={(e) => {
+            const newType = e.target.value as LocationType;
+            if (newType !== this.state.location.type) {
+              this.setState({
+                location: { ...this.state.location, type: e.target.value, type_data: this.getDefaultTypeData(newType) },
+                cityPopulationString: "0",
+                cityCityValueString: "0",
+              });
+            }
+          }}
+          tabIndex={this.nextTabIndex++}
+        >
+          <option value={"---"}>---</option>
+          <option value={"City"}>{"City"}</option>
+          <option value={"Lair"}>{"Lair"}</option>
+        </select>
+      </div>
     );
   }
 
-  private renderTypeSpecificSection(): React.ReactNode {
-    switch (this.state.type) {
+  private getDefaultTypeData(type: LocationType): {} {
+    switch (type) {
+      case "---":
+        return {};
+      case "City":
+        return defaultCityData;
+      case "Lair":
+        return defaultLairData;
+    }
+  }
+
+  private renderTypeDataSection(): React.ReactNode {
+    switch (this.state.location.type) {
       case "City": {
         return this.renderCitySection();
       }
@@ -255,92 +257,88 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
   }
 
   private renderCitySection(): React.ReactNode {
+    const data = this.state.location.type_data as LocationCityData;
     return (
       <div className={styles.typeSpecificSection}>
         <div className={styles.row}>
           <div className={styles.labelText}>{"Market Class"}</div>
           <select
-            className={styles.typeSelector}
-            value={this.state.cityData.market_class}
+            className={styles.marketClassSelector}
+            value={data.market_class}
             onChange={(e) => {
-              const newData: CityState = {
-                ...this.state.cityData,
+              const type_data: LocationCityData = {
+                ...(this.state.location.type_data as LocationCityData),
                 market_class: +e.target.value,
               };
-              this.setState({
-                cityData: newData,
-              });
+              this.setState({ location: { ...this.state.location, type_data } });
             }}
             tabIndex={this.nextTabIndex++}
           >
-            <option value={0}>---</option>
-            <option value={1}>I</option>
-            <option value={2}>II</option>
-            <option value={3}>III</option>
-            <option value={4}>IV</option>
-            <option value={5}>V</option>
-            <option value={6}>VI</option>
+            <option value={0}>{"---"}</option>
+            <option value={1}>{"I (20,000+ families)"}</option>
+            <option value={2}>{"II (5,000-19,999 families)"}</option>
+            <option value={3}>{"III (2,500-4,999 families)"}</option>
+            <option value={4}>{"IV (500-2,499 families)"}</option>
+            <option value={5}>{"V (250-499 families)"}</option>
+            <option value={6}>{"VI (75-249 families)"}</option>
           </select>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.labelText}>{"Population"}</div>
+          <input
+            className={styles.field}
+            type={"text"}
+            value={this.state.cityPopulationString}
+            onChange={(e) => {
+              this.setState({ cityPopulationString: e.target.value });
+            }}
+            onBlur={() => {
+              this.setState({
+                location: {
+                  ...this.state.location,
+                  type_data: {
+                    ...this.state.location.type_data,
+                    population: +this.state.cityPopulationString,
+                    // When the population is changed, the market class may change to match.
+                    market_class: getMarketClassForPopulation(+this.state.cityPopulationString),
+                  },
+                },
+              });
+            }}
+          />
+          <div className={styles.labelText}>{`\xa0/ ${addCommasToNumber(
+            getMaxPopulationForCityValue(+this.state.cityCityValueString)
+          )} families`}</div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.labelText}>{"City Value"}</div>
+          <input
+            className={styles.field}
+            type={"text"}
+            value={this.state.cityCityValueString}
+            onChange={(e) => {
+              this.setState({ cityCityValueString: e.target.value });
+            }}
+            onBlur={() => {
+              this.setState({
+                location: {
+                  ...this.state.location,
+                  type_data: {
+                    ...this.state.location.type_data,
+                    city_value: +this.state.cityCityValueString,
+                  },
+                },
+              });
+            }}
+          />
+          <div className={styles.labelText}>{"\xa0gp"}</div>
         </div>
       </div>
     );
   }
 
   private renderLairSection(): React.ReactNode {
-    return (
-      <div className={styles.typeSpecificSection}>
-        <div className={styles.row}>
-          <div className={styles.labelText}>{"Monster Level"}</div>
-          <select
-            className={styles.typeSelector}
-            value={this.state.lairData.monster_level}
-            onChange={(e) => {
-              const newData: LairState = {
-                ...this.state.lairData,
-                monster_level: +e.target.value,
-              };
-              this.setState({
-                lairData: newData,
-              });
-            }}
-            tabIndex={this.nextTabIndex++}
-          >
-            <option value={0}>---</option>
-            <option value={1}>1</option>
-            <option value={2}>2</option>
-            <option value={3}>3</option>
-            <option value={4}>4</option>
-            <option value={5}>5</option>
-            <option value={6}>6</option>
-          </select>
-        </div>
-        <div className={styles.row}>
-          <div className={styles.labelText}>{"Num Encounters"}</div>
-          <select
-            className={styles.typeSelector}
-            value={this.state.lairData.num_encounters}
-            onChange={(e) => {
-              const newData: LairState = {
-                ...this.state.lairData,
-                num_encounters: +e.target.value,
-              };
-              this.setState({
-                lairData: newData,
-              });
-            }}
-            tabIndex={this.nextTabIndex++}
-          >
-            <option value={0}>0</option>
-            <option value={1}>1</option>
-            <option value={2}>2</option>
-            <option value={3}>3</option>
-            <option value={4}>4</option>
-            <option value={5}>5</option>
-            <option value={6}>6</option>
-          </select>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   private async onSaveClicked(): Promise<void> {
@@ -348,7 +346,7 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
       return;
     }
 
-    if (this.state.name.trim().length === 0) {
+    if (this.state.location.name.trim().length === 0) {
       this.props.dispatch?.(
         showModal({
           id: "CreateLocationFailure",
@@ -360,71 +358,31 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
 
     this.setState({ isSaving: true });
 
-    const data: LocationData = {
-      // If this is a new location, the locationId will be overwritten by the DB with a real value.
-      id: this.props.locationId ?? 0,
-      name: this.state.name,
-      description: this.state.description,
-      map_id: this.props.mapId,
-      hex_id: this.props.hexId,
-      is_public: true, //TODO: Or should this be included in viewer_ids?  Maybe a '*' id?
-      viewer_ids: [], //TODO:
-      type: this.state.type,
-      icon_url: this.state.icon_url,
-    };
-
-    // Type-specific data.
-    const cityData: LocationCityData = {
-      id: 0,
-      location_id: this.props.locationId ?? 0,
-      ...(this.getOldCityData() ?? {}),
-      ...this.state.cityData,
-    };
-
-    const lairData: LocationLairData = {
-      id: 0,
-      location_id: this.props.locationId ?? 0,
-      ...(this.getOldLairData() ?? {}),
-      ...this.state.lairData,
-    };
-
     if (!this.props.locationId) {
       // Brand new location.
-      const res = await ServerAPI.createLocation(data, cityData, lairData);
+      const res = await ServerAPI.createLocation(this.state.location);
 
-      if (
-        "error" in res ||
-        res.length === 0 ||
-        !!res.find((entry) => {
-          return "error" in entry;
-        })
-      ) {
+      if ("insertId" in res) {
+        // Put the real id into our data.
+        const location: LocationData = { ...this.state.location, id: res.insertId };
+
+        // Push the data into Redux.
+        this.props.dispatch?.(updateLocation(location));
+
+        this.props.dispatch?.(hideSubPanel());
+      } else {
         this.props.dispatch?.(
           showModal({
             id: "CreateLocationFailure",
             content: () => <BasicDialog title={"Error!"} prompt={"Location creation failed.  Please try again."} />,
           })
         );
-      } else {
-        // Edit successful, so refetch (since we may have added new records).
-        if (this.props.dispatch) {
-          await refetchLocations(this.props.dispatch);
-          await refetchLocationCities(this.props.dispatch);
-          await refetchLocationLairs(this.props.dispatch);
-        }
-        this.props.dispatch?.(hideSubPanel());
       }
     } else {
       // Editing old location.
-      const res = await ServerAPI.editLocation(data, cityData, lairData);
+      const res = await ServerAPI.editLocation(this.state.location);
 
-      if (
-        "error" in res ||
-        res.length === 0 ||
-        !!res.find((entry) => {
-          return "error" in entry;
-        })
-      ) {
+      if ("error" in res) {
         this.props.dispatch?.(
           showModal({
             id: "EditLocationFailure",
@@ -432,33 +390,13 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
           })
         );
       } else {
-        // Edit successful, so refetch (since we may have added new records).
-        if (this.props.dispatch) {
-          await refetchLocations(this.props.dispatch);
-          await refetchLocationCities(this.props.dispatch);
-          await refetchLocationLairs(this.props.dispatch);
-        }
+        const location: LocationData = { ...this.state.location };
+        this.props.dispatch?.(updateLocation(location));
         this.props.dispatch?.(hideSubPanel());
       }
     }
 
     this.setState({ isSaving: false });
-  }
-
-  private getOldCityData(): LocationCityData | undefined {
-    const data = Object.values(this.props.cities).find((c) => {
-      return c.location_id === this.props.locationId;
-    });
-
-    return data;
-  }
-
-  private getOldLairData(): LocationLairData | undefined {
-    const data = Object.values(this.props.lairs).find((l) => {
-      return l.location_id === this.props.locationId;
-    });
-
-    return data;
   }
 
   private onDeleteClicked(): void {
@@ -477,7 +415,7 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
         content: () => (
           <BasicDialog
             title={"Please Confirm"}
-            prompt={`Are you sure you wish to delete "${this.state.name}", id ${this.props.locationId}?  This cannot be undone.`}
+            prompt={`Are you sure you wish to delete "${this.state.location.name}", id ${this.props.locationId}?  This cannot be undone.`}
             buttons={[
               {
                 text: "Delete",
@@ -489,7 +427,6 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
                   if ("affectedRows" in res) {
                     // Delete successful, so deselect and close.
                     this.props.dispatch?.(deleteLocation(this.props.locationId ?? 0));
-                    // TODO: Delete locationType data.
                     this.props.dispatch?.(hideSubPanel());
                   } else {
                     this.props.dispatch?.(
@@ -514,12 +451,9 @@ class ALocationEditSubPanel extends React.Component<Props, State> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const location = state.locations.locations[props.locationId ?? -1];
-  const { cities, lairs } = state.locations;
   return {
     ...props,
     location,
-    cities,
-    lairs,
   };
 }
 

@@ -5,7 +5,7 @@ import { hideModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import styles from "./SelectAdventurerDialog.module.scss";
 import { Dictionary } from "../../lib/dictionary";
-import { CharacterData, emptyEquipmentData } from "../../serverAPI";
+import { CharacterAlignment, CharacterData, emptyEquipmentData } from "../../serverAPI";
 import { UserRole } from "../../redux/userSlice";
 
 interface State {
@@ -49,6 +49,7 @@ class ASelectAdventurerDialog extends React.Component<Props, State> {
                   user_id: this.props.currentUserId,
                   name: "---",
                   gender: "o",
+                  alignment: CharacterAlignment.Lawful,
                   portrait_url: "",
                   class_name: "",
                   class_id: 0,
@@ -83,10 +84,10 @@ class ASelectAdventurerDialog extends React.Component<Props, State> {
         </div>
 
         <div className={styles.closeButton} onClick={this.onConfirmClicked.bind(this)}>
-          Confirm Selection
+          {"Confirm Selection"}
         </div>
         <div className={styles.closeButton} onClick={this.onCloseClicked.bind(this)}>
-          Cancel
+          {"Cancel"}
         </div>
       </div>
     );

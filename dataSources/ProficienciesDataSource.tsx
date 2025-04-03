@@ -15,7 +15,6 @@ export async function refetchProficiencies(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Proficiency Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Proficiency data"} />,
-        escapable: true,
       })
     );
   } else {

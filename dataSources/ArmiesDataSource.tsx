@@ -15,7 +15,6 @@ export async function refetchArmies(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Army Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Army data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -35,7 +34,6 @@ export async function refetchTroops(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Troop Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Troop data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -51,7 +49,6 @@ export async function refetchTroopInjuries(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "TroopInjury Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch TroopInjury data"} />,
-        escapable: true,
       })
     );
   } else {

@@ -149,7 +149,6 @@ class AEditArmyWageContractDialog extends React.Component<Props, State> {
               ]}
             />
           ),
-          escapable: true,
         })
       );
     } else {

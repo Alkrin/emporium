@@ -111,7 +111,6 @@ class AStructuresList extends React.Component<Props, State> {
         content: () => {
           return <CreateStructureSubPanel isEditMode />;
         },
-        escapable: true,
       })
     );
   }
@@ -149,7 +148,6 @@ class AStructuresList extends React.Component<Props, State> {
         content: () => {
           return <CreateStructureSubPanel />;
         },
-        escapable: true,
       })
     );
   }

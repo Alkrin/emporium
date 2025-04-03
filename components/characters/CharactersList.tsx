@@ -122,7 +122,6 @@ class ACharactersList extends React.Component<Props, State> {
         content: () => {
           return <CreateCharacterSubPanel isEditMode />;
         },
-        escapable: true,
       })
     );
   }
@@ -170,7 +169,6 @@ class ACharactersList extends React.Component<Props, State> {
         content: () => {
           return <CreateCharacterSubPanel />;
         },
-        escapable: true,
       })
     );
   }

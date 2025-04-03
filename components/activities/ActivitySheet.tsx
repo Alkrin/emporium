@@ -150,7 +150,6 @@ class AActivitySheet extends React.Component<Props> {
             content: () => {
               return <CreateActivitySubPanel isClone />;
             },
-            escapable: true,
           })
         );
       } else {

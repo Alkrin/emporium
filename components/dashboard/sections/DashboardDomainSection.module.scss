@@ -1,0 +1,211 @@
+.root {
+  margin-top: 1vmin;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5vmin;
+  background-color: #222;
+  border-radius: 0.5vmin;
+  border: 1px solid wheat;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.centeredRow {
+  @extend .row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.horizontalSpacer {
+  width: 1vmin;
+}
+
+.panelTitle {
+  color: wheat;
+  font-size: 1.2rem;
+}
+
+.domainName {
+  color: yellow;
+  font-size: 1.2rem;
+}
+
+.editButton {
+  margin-left: 0.5vmin;
+}
+
+.fieldName {
+  margin-right: 0.5vmin;
+  width: 10vmin;
+  color: gray;
+  font-size: 1rem;
+  text-align: right;
+}
+
+.fieldValue {
+  color: yellow;
+  font-size: 1rem;
+}
+
+.colorPreview {
+  width: 2vmin;
+  height: 2vmin;
+  border-radius: 0.25vmin;
+  border: 2px solid wheat;
+  cursor: pointer;
+}
+
+.domainDataContainer {
+  @extend .row;
+  padding: 0.25vmin;
+  background-color: black;
+  border-radius: 0.25vmin;
+  border: 1px solid #444;
+}
+
+.citiesTitle {
+  color: wheat;
+  font-size: 1.2rem;
+}
+
+.citiesPanel {
+  @extend .row;
+  margin-top: 0.5vmin;
+  border: 1px solid white;
+  align-self: flex-start;
+}
+
+.citiesFirstColumn {
+  @extend .column;
+  align-items: unset;
+}
+
+.citiesHeader {
+  position: relative;
+  padding: 0.5vmin;
+  background-color: #111;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid white;
+}
+
+.citiesCell {
+  position: relative;
+  padding: 0.5vmin;
+  background-color: #222;
+  display: flex;
+  flex-direction: row;
+
+  &.odd {
+    background-color: #111;
+  }
+}
+
+.citiesName {
+  position: relative;
+  font-size: 1rem;
+  color: goldenrod;
+}
+
+.citiesOtherColumn {
+  @extend .column;
+  align-items: unset;
+  border-left: 1px solid white;
+}
+
+.citiesValue {
+  position: relative;
+  font-size: 1rem;
+  text-align: right;
+  color: #0c0;
+  flex-grow: 1;
+}
+
+.populationValue {
+  position: relative;
+  font-size: 1rem;
+  text-align: right;
+  color: #cc0;
+  flex-grow: 1;
+}
+
+.infoButton {
+  margin: -0.25vmin 0 -0.25vmin 0.5vmin;
+  align-self: center;
+}
+
+.marketValue {
+  position: relative;
+  width: 100%;
+  font-size: 1rem;
+  color: #0c0;
+  text-align: center;
+}
+
+.infoTooltipRoot {
+  @extend .column;
+}
+
+.marketClassLabel {
+  width: 8vmin;
+  text-align: center;
+  color: gray;
+  font-size: 1rem;
+}
+
+.marketClassRequirement {
+  margin-right: 2vmin;
+  color: #880;
+  font-size: 1rem;
+}
+
+.cityValueLabel {
+  width: 10vmin;
+  text-align: center;
+  color: gray;
+  font-size: 1rem;
+}
+
+.updateSection {
+  @extend .row;
+  margin-top: 0.5vmin;
+  padding: 1vmin;
+  align-items: center;
+  justify-content: center;
+}
+
+.updateLabel {
+  font-size: 1rem;
+  color: green;
+}
+
+.updateButton {
+  position: relative;
+  padding: 0.4vmin 0.75vmin 0.3vmin;
+  color: white;
+  background-color: black;
+  border: 1px solid white;
+  border-radius: 0.5vmin;
+  font-size: 1rem;
+  user-select: none;
+  cursor: pointer;
+
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:active {
+    opacity: 0.85;
+  }
+}

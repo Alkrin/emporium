@@ -397,7 +397,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
           content: () => {
             return <SellItemDialog item={item} def={def} />;
           },
-          escapable: true,
         })
       );
     }
@@ -413,7 +412,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         content: () => {
           return <EditItemDialog item={item} def={def} />;
         },
-        escapable: true,
       })
     );
   }
@@ -428,7 +426,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         content: () => {
           return <SplitBundleDialog item={item} def={def} />;
         },
-        escapable: true,
       })
     );
   }
@@ -443,7 +440,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         content: () => {
           return <SpellbookDialog item={item} def={def} />;
         },
-        escapable: true,
       })
     );
   }
@@ -1194,7 +1190,6 @@ class AEditEquipmentSubPanel extends React.Component<Props> {
         content: () => {
           return <CreateItemDialog storageId={getPersonalPile(this.props.character.id).id} />;
         },
-        escapable: true,
       })
     );
   }

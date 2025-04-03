@@ -161,7 +161,6 @@ class AStructureSheet extends React.Component<Props> {
         content: () => {
           return <PayStructureMaintenanceDialog />;
         },
-        escapable: true,
       })
     );
   }

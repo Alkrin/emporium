@@ -192,7 +192,6 @@ class AEditContractDialog extends React.Component<Props, State> {
               ]}
             />
           ),
-          escapable: true,
         })
       );
     } else {
@@ -243,7 +242,6 @@ class AEditContractDialog extends React.Component<Props, State> {
             ]}
           />
         ),
-        escapable: true,
       })
     );
   }

@@ -14,7 +14,6 @@ export async function refetchStorages(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Storage Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Storage data"} />,
-        escapable: true,
       })
     );
   } else {
