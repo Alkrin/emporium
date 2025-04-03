@@ -7,8 +7,8 @@ import styles from "./HexDisplay.module.scss";
 import { hexPointCoords, roadColors } from "./MapHexConstants";
 
 export interface MapHexDataEx extends MapHexData {
-  locations: LocationData[];
-  cityName: string;
+  locations?: LocationData[];
+  cityName?: string;
   domain?: DomainData;
 }
 

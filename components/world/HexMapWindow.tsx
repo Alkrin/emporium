@@ -6,10 +6,7 @@ import { LocationData, MapData, MapHexData } from "../../serverAPI";
 import styles from "./HexMapWindow.module.scss";
 import { Dictionary } from "../../lib/dictionary";
 import { MapHexTypes } from "./MapHexConstants";
-
-interface MapHexDataEx extends MapHexData {
-  locations: LocationData[];
-}
+import { MapHexDataEx } from "./HexDisplay";
 
 interface State {
   hexLookup: Dictionary<Dictionary<MapHexDataEx>>;
@@ -90,7 +87,7 @@ class AHexMapWindow extends React.Component<Props, State> {
     const type = styles[hex?.type ?? MapHexTypes.Undefined];
 
     const shouldShowCoords = true;
-    const shouldShowIcons = hex?.locations?.length > 0 && true;
+    const shouldShowIcons = (hex?.locations?.length ?? 0) > 0 && true;
 
     const isTargetHex = hex?.id === this.props.hexId;
     const targetRef = isTargetHex
@@ -122,7 +119,7 @@ class AHexMapWindow extends React.Component<Props, State> {
   }
 
   private renderHexIcon(hex: MapHexDataEx): React.ReactNode {
-    const locationsWithIcons = hex.locations.filter((loc) => {
+    const locationsWithIcons = (hex.locations ?? []).filter((loc) => {
       return loc.icon_url.length > 0;
     });
     if (locationsWithIcons.length === 0) {
