@@ -38,6 +38,7 @@ class ACreateDomainDialog extends React.Component<Props, State> {
         hex_ids: [],
         city_ids: [],
         fortification_structure_ids: [],
+        garrison_army_ids: [],
         treasury_storage_id: 0,
         alignment: CharacterAlignment.Lawful,
         classification: DomainClassification.Civilized,
