@@ -173,7 +173,7 @@ class AHexMap extends React.Component<Props, State> {
     const selectedStyle = x === this.state.selectedX && y === this.state.selectedY ? styles.selected : "";
 
     const shouldShowCoords = this.props.settings.showCoordinates;
-    const shouldShowIcons = hex?.locations?.length > 0 && this.props.settings.showLocations;
+    const shouldShowIcons = (hex?.locations?.length ?? 0) > 0 && this.props.settings.showLocations;
 
     return (
       <HexDisplay
@@ -201,7 +201,7 @@ class AHexMap extends React.Component<Props, State> {
   }
 
   private renderHexIcon(hex: MapHexDataEx): React.ReactNode {
-    const locationsWithIcons = hex.locations.filter((loc) => {
+    const locationsWithIcons = (hex.locations ?? []).filter((loc) => {
       return loc.icon_url.length > 0;
     });
     if (locationsWithIcons.length === 0) {
