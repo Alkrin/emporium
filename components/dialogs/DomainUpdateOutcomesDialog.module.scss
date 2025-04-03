@@ -1,0 +1,114 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  color: wheat;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.button {
+  position: relative;
+  margin-top: 1vmin;
+  align-self: center;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.title {
+  position: relative;
+  margin: 0 3vmin 1vmin 3vmin;
+  font-size: 1.5rem;
+  line-height: 2.5vmin;
+  text-align: center;
+  text-wrap: nowrap;
+  color: wheat;
+}
+
+.section {
+  @extend .column;
+  margin-top: 1vmin;
+  background-color: black;
+  border: 1px solid gray;
+  border-radius: 0.5vmin;
+  padding: 1vmin;
+  align-self: center;
+}
+
+.sectionHeader {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.growthLabel {
+  width: 16.5vmin;
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: white;
+  text-align: right;
+}
+
+.growthValue {
+  width: 5vmin;
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: yellowgreen;
+  text-align: right;
+}
+
+.declineValue {
+  width: 5vmin;
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: orangered;
+  text-align: right;
+}
+
+.divider {
+  position: relative;
+  margin: 0.5vmin 0;
+  height: 1px;
+  background-color: yellow;
+}
+
+.moraleLabel {
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: white;
+  text-align: right;
+}
+
+.growthMorale {
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: yellowgreen;
+}
+
+.declineMorale {
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: orangered;
+}

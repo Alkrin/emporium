@@ -149,8 +149,6 @@ class AEditStructureMaintenanceContractDialog extends React.Component<Props, Sta
               ]}
             />
           ),
-
-          escapable: true,
         })
       );
     } else {

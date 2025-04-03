@@ -1,0 +1,97 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: wheat;
+  min-width: 32vmin;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.button {
+  position: relative;
+  margin-top: 1vmin;
+  align-self: center;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.titleContainer {
+  position: relative;
+  height: 3.5vmin;
+  width: 100%;
+}
+
+.title {
+  position: relative;
+  margin-bottom: 1vmin;
+  font-size: 1.5rem;
+  line-height: 2.5vmin;
+  text-align: center;
+  text-wrap: nowrap;
+  color: wheat;
+  border-bottom: 1px solid yellow;
+}
+
+.prompt {
+  position: relative;
+  margin-top: 1vmin;
+  font-size: 1rem;
+  color: gray;
+  width: 100%;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.mapSelectorTitle {
+  position: relative;
+  color: wheat;
+  font-size: 1rem;
+}
+
+.mapSelector {
+  position: relative;
+  margin-left: 0.5vmin;
+  resize: none;
+}
+
+.map {
+  position: relative;
+  margin: 1vmin;
+  width: 80vmin;
+  height: 50vmin;
+}
+
+.multiSelectOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 0, 255, 0.5);
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}

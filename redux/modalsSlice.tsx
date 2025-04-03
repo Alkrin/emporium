@@ -32,6 +32,8 @@ export const modalsSlice = createSlice({
   initialState: buildDefaultModalsState(),
   reducers: {
     showModal: (state: ModalsState, action: PayloadAction<ModalParams>) => {
+      // Default all modals to escapable if unspecified.
+      action.payload.escapable = action.payload.escapable ?? true;
       state.modals.push(action.payload);
     },
     hideModal: (state: ModalsState) => {

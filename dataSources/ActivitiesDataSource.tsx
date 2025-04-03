@@ -14,7 +14,6 @@ export async function refetchActivities(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Activities Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Activities data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -30,7 +29,6 @@ export async function refetchExpectedOutcomes(dispatch: Dispatch): Promise<void>
       showModal({
         id: "ExpectedOutcomes Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ExpectedOutcomes data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -46,7 +44,6 @@ export async function refetchActivityOutcomes(dispatch: Dispatch): Promise<void>
       showModal({
         id: "ActivityOutcomes Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch ActivityOutcomes data"} />,
-        escapable: true,
       })
     );
   } else {

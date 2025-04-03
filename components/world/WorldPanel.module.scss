@@ -265,3 +265,18 @@
     background-color: rgba(245, 222, 179, 0.5);
   }
 }
+
+.mapZoomSection {
+  @extend .row;
+  margin-top: 0.5vmin;
+  position: relative;
+  align-items: center;
+}
+
+.mapZoomTitle {
+  margin-right: 1vmin;
+}
+
+.mapZoomValue {
+  margin: 0 0.5vmin;
+}

@@ -5,12 +5,14 @@ import { MapData, MapHexData } from "../serverAPI";
 
 interface MapsReduxState {
   maps: Dictionary<MapData>;
+  mapHexes: Record<number, MapHexData>;
   mapHexesByMap: Dictionary<MapHexData[]>;
 }
 
 function buildDefaultMapsReduxState(): MapsReduxState {
   const defaults: MapsReduxState = {
     maps: {},
+    mapHexes: {},
     mapHexesByMap: {},
   };
   return defaults;
@@ -30,8 +32,11 @@ export const mapsSlice = createSlice({
       delete state.maps[action.payload];
     },
     updateMapHexes: (state: MapsReduxState, action: PayloadAction<MapHexData[]>) => {
+      state.mapHexes = {};
       state.mapHexesByMap = {};
       action.payload.forEach((hex) => {
+        state.mapHexes[hex.id] = hex;
+
         if (!state.mapHexesByMap[hex.map_id]) {
           state.mapHexesByMap[hex.map_id] = [];
         }
@@ -40,9 +45,13 @@ export const mapsSlice = createSlice({
     },
     updateMapHex: (state: MapsReduxState, action: PayloadAction<MapHexData>) => {
       const newHex = action.payload;
+
+      state.mapHexes[newHex.id] = newHex;
+
       if (!state.mapHexesByMap[newHex.map_id]) {
         state.mapHexesByMap[newHex.map_id] = [];
       }
+
       const index = state.mapHexesByMap[newHex.map_id].findIndex((hex) => {
         return hex.id === newHex.id;
       });

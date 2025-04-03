@@ -231,7 +231,6 @@ class ACharacterContractsDialog extends React.Component<Props> {
           // By not passing in a contract, this functions as a Create dialog.
           return <EditContractDialog character={this.props.character} />;
         },
-        escapable: true,
       })
     );
   }
@@ -243,7 +242,6 @@ class ACharacterContractsDialog extends React.Component<Props> {
         content: () => {
           return <EditContractDialog character={this.props.character} contract={contract} />;
         },
-        escapable: true,
       })
     );
   }

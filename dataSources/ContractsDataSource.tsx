@@ -15,7 +15,6 @@ export async function refetchContracts(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Contract Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Contract data"} />,
-        escapable: true,
       })
     );
   } else {

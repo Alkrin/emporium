@@ -1,0 +1,194 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  color: wheat;
+  width: 40vmin;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.button {
+  position: relative;
+  margin-top: 1vmin;
+  align-self: center;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.titleContainer {
+  position: relative;
+  height: 2.5vmin;
+  width: 100%;
+  margin-bottom: 1vmin;
+}
+
+.title {
+  position: relative;
+  font-size: 1.5rem;
+  line-height: 2.5vmin;
+  text-align: center;
+  text-wrap: nowrap;
+  color: wheat;
+}
+
+.prompt {
+  position: relative;
+  font-size: 1.2rem;
+  color: gray;
+  width: 100%;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.checkboxLabel {
+  font-size: 1rem;
+  color: white;
+}
+
+.checkbox {
+  resize: none;
+}
+
+.revenueSection {
+  @extend .column;
+  margin-top: 1vmin;
+  background-color: black;
+  border: 1px solid gray;
+  border-radius: 0.5vmin;
+  padding: 1vmin;
+}
+
+.revenueLabel {
+  font-size: 1rem;
+  width: 10vmin;
+  text-align: right;
+  color: wheat;
+}
+
+.revenueValue {
+  font-size: 1rem;
+  width: 12vmin;
+  color: gold;
+  text-align: right;
+}
+
+.expensesValue {
+  font-size: 1rem;
+  width: 12vmin;
+  color: red;
+  text-align: right;
+}
+
+.incomeValue {
+  font-size: 1rem;
+  width: 12vmin;
+  color: green;
+  text-align: right;
+}
+
+.infoLabel {
+  font-size: 0.8rem;
+  color: gray;
+  font-style: italic;
+}
+
+.infoButton {
+  margin-left: 1vmin;
+}
+
+.tooltipTitle {
+  font-size: 1rem;
+  color: wheat;
+  min-width: 10vmin;
+  flex-grow: 1;
+}
+
+.tooltipValue {
+  margin-left: 1vmin;
+  font-size: 1rem;
+  color: gold;
+}
+
+.tooltipExpenseValue {
+  margin-left: 1vmin;
+  font-size: 1rem;
+  color: red;
+}
+
+.sourceRow {
+  @extend .row;
+  margin-top: 0.5vmin;
+}
+
+.source {
+  flex-grow: 1;
+  font-size: 0.8rem;
+  color: gray;
+  text-align: justify;
+}
+
+.sourceValue {
+  margin-left: 2vmin;
+  font-size: 0.8rem;
+  color: gold;
+}
+
+.expenseSourceValue {
+  margin-left: 2vmin;
+  font-size: 0.8rem;
+  color: red;
+}
+
+.divider {
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
+
+.investmentSection {
+  @extend .column;
+  margin-top: 1vmin;
+  background-color: black;
+  border: 1px solid gray;
+  border-radius: 0.5vmin;
+  padding: 1vmin;
+}
+
+.investmentCell {
+  @extend .row;
+  height: 2vmin;
+}
+
+.investmentLabel {
+  color: wheat;
+  font-size: 1rem;
+  line-height: 2vmin;
+}
+
+.inputField {
+  width: 12vmin;
+}

@@ -341,7 +341,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
             />
           );
         },
-        escapable: true,
       })
     );
   }
@@ -483,7 +482,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
             />
           );
         },
-        escapable: true,
       })
     );
   }
@@ -502,7 +500,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
             />
           );
         },
-        escapable: true,
       })
     );
   }
@@ -783,7 +780,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
             />
           );
         },
-        escapable: true,
       })
     );
   }
@@ -802,7 +798,6 @@ class ACreateActivityOutcomeDialog extends React.Component<Props, State> {
             />
           );
         },
-        escapable: true,
       })
     );
   }

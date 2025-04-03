@@ -293,7 +293,6 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
             />
           );
         },
-        escapable: true,
       })
     );
   }
@@ -322,7 +321,6 @@ class AToolsHexClearingSubPanel extends React.Component<Props, State> {
             />
           );
         },
-        escapable: true,
       })
     );
   }

@@ -121,7 +121,6 @@ class AEditXPDialog extends React.Component<Props, State> {
               prompt={"Failed to update XP.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else {
@@ -148,7 +147,6 @@ class AEditXPDialog extends React.Component<Props, State> {
               prompt={"Failed to update XP.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else {

@@ -2,16 +2,18 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
-import { MapHexData, MapHexRiverData, MapHexRoadData, MapHexRoadType } from "../../serverAPI";
+import { DomainData, LocationData, MapHexData, MapHexRiverData, MapHexRoadData, MapHexRoadType } from "../../serverAPI";
 import styles from "./HexDisplay.module.scss";
 import { hexPointCoords, roadColors } from "./MapHexConstants";
 
-interface State {
-  //
+export interface MapHexDataEx extends MapHexData {
+  locations: LocationData[];
+  cityName: string;
+  domain?: DomainData;
 }
 
 interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {
-  data: MapHexData;
+  data: MapHexDataEx;
   height: string;
 }
 
@@ -21,11 +23,7 @@ interface InjectedProps {
 
 type Props = ReactProps & InjectedProps;
 
-class AHexDisplay extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-  }
-
+class AHexDisplay extends React.Component<Props> {
   render(): React.ReactNode {
     // We pull out our custom props so the DOM's `div` doesn't get confused by unknown props.
     const { data, height, dispatch, className, style, children, ...otherProps } = this.props;
@@ -35,6 +33,9 @@ class AHexDisplay extends React.Component<Props, State> {
     return (
       <div className={`${styles.root} ${className}`} style={finalStyle} {...otherProps}>
         <div className={`${styles.hexRoot} ${styles[this.props.data.type]}`}>
+          {!!data.domain ? (
+            <div className={styles.hexRoot} style={{ background: this.buildBackgroundStyle(data.domain.color) }} />
+          ) : null}
           {(data.rivers.length > 0 || data.roads.length > 0) && (
             <svg className={styles.riversAndRoads} viewBox={"0 0 11547 10000"}>
               {data.rivers.map(this.renderRiver.bind(this))}
@@ -45,6 +46,10 @@ class AHexDisplay extends React.Component<Props, State> {
         {this.props.children}
       </div>
     );
+  }
+
+  private buildBackgroundStyle(color: string): string {
+    return `repeating-linear-gradient(-60deg,transparent,transparent 11%,${color} 11%,${color} 22%)`;
   }
 
   private renderRiver(data: MapHexRiverData, index: number): React.ReactNode {

@@ -69,7 +69,6 @@ class ACharacterLanguagesSection extends React.Component<Props> {
             <EditLanguagesDialog characterId={this.props.characterId} activeComponents={this.props.activeComponents} />
           );
         },
-        escapable: true,
       })
     );
   }

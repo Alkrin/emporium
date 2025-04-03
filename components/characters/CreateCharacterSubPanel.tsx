@@ -6,6 +6,7 @@ import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
 import ServerAPI, {
+  CharacterAlignment,
   CharacterData,
   EquipmentSetData,
   EquipmentSetItemData,
@@ -18,7 +19,7 @@ import ServerAPI, {
 import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { CharacterStat } from "../../staticData/types/characterClasses";
 import styles from "./CreateCharacterSubPanel.module.scss";
-import { getAllCharacterAssociatedItemIds, getCharacterMaxHP, randomInt } from "../../lib/characterUtils";
+import { getAllCharacterAssociatedItemIds, getCharacterMaxHP, randomInt, rollDice } from "../../lib/characterUtils";
 import { deleteCharacter, setActiveCharacterId, unsetAllHenchmenForCharacter } from "../../redux/charactersSlice";
 import { deleteItem } from "../../redux/itemsSlice";
 import { deleteProficienciesForCharacter } from "../../redux/proficienciesSlice";
@@ -40,6 +41,7 @@ import { BasicDialog } from "../dialogs/BasicDialog";
 interface State {
   nameText: string;
   gender: Gender;
+  alignment: CharacterAlignment;
   level: number;
   xp: number;
   class: string;
@@ -101,6 +103,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         this.state = {
           nameText: props.selectedCharacter.name,
           gender: props.selectedCharacter.gender,
+          alignment: props.selectedCharacter.alignment,
           level: props.selectedCharacter.level,
           xp: props.selectedCharacter.xp,
           class: props.selectedCharacter.class_name,
@@ -124,6 +127,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       this.state = {
         nameText: "",
         gender: "m",
+        alignment: CharacterAlignment.Lawful,
         level: 1,
         xp: 0,
         class: "---",
@@ -238,7 +242,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         </div>
 
         <div className={styles.contentRow}>
-          <div className={styles.genderLabel}>Gender</div>
+          <div className={styles.genderLabel}>{"Gender"}</div>
           <div className={styles.genderRadioGroup}>
             <input
               className={styles.radioButton}
@@ -251,7 +255,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
               }}
               tabIndex={nextTabIndex++}
             />
-            <span className={styles.radioLabel}>Male</span>
+            <span className={styles.radioLabel}>{"Male"}</span>
             <input
               className={styles.radioButton}
               type="radio"
@@ -262,7 +266,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 this.setState({ gender: e.target.value as Gender });
               }}
             />
-            <span className={styles.radioLabel}>Female</span>
+            <span className={styles.radioLabel}>{"Female"}</span>
             <input
               className={styles.radioButton}
               type="radio"
@@ -273,7 +277,49 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 this.setState({ gender: e.target.value as Gender });
               }}
             />
-            <span className={styles.radioLabel}>Other</span>
+            <span className={styles.radioLabel}>{"Other"}</span>
+          </div>
+        </div>
+
+        <div className={styles.contentRow}>
+          <div className={styles.genderLabel}>{"Alignment"}</div>
+          <div className={styles.genderRadioGroup}>
+            <input
+              className={styles.radioButton}
+              type="radio"
+              value={CharacterAlignment.Lawful}
+              name="alignment"
+              checked={this.state.alignment === CharacterAlignment.Lawful}
+              onChange={(e) => {
+                this.setState({ alignment: e.target.value as CharacterAlignment });
+              }}
+              tabIndex={nextTabIndex++}
+            />
+            <span className={styles.radioLabel}>{CharacterAlignment.Lawful}</span>
+            <input
+              className={styles.radioButton}
+              type="radio"
+              value={CharacterAlignment.Neutral}
+              name="alignment"
+              checked={this.state.alignment === CharacterAlignment.Neutral}
+              onChange={(e) => {
+                this.setState({ alignment: e.target.value as CharacterAlignment });
+              }}
+              tabIndex={nextTabIndex++}
+            />
+            <span className={styles.radioLabel}>{CharacterAlignment.Neutral}</span>
+            <input
+              className={styles.radioButton}
+              type="radio"
+              value={CharacterAlignment.Chaotic}
+              name="alignment"
+              checked={this.state.alignment === CharacterAlignment.Chaotic}
+              onChange={(e) => {
+                this.setState({ alignment: e.target.value as CharacterAlignment });
+              }}
+              tabIndex={nextTabIndex++}
+            />
+            <span className={styles.radioLabel}>{CharacterAlignment.Chaotic}</span>
           </div>
         </div>
 
@@ -317,7 +363,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
               const level = +e.target.value;
               const hitDice: number[] = this.state.hitDice.slice(0, level);
               while (hitDice.length < level) {
-                hitDice.push(this.rollDice(1, hitDieSize));
+                hitDice.push(rollDice(1, hitDieSize));
               }
               this.setState({ level, hitDice });
             }}
@@ -715,6 +761,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       user_id: this.props.currentUserId,
       name: this.state.nameText,
       gender: this.state.gender,
+      alignment: this.state.alignment,
       portrait_url: "",
       class_name: this.state.class,
       class_id: this.state.class_id,
@@ -922,7 +969,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     const hitDieSize = AllClasses[this.state.class]?.hitDieSize ?? 4;
     const hitDice: number[] = [...this.state.hitDice];
     for (let i = 0; i < hitDice.length; ++i) {
-      hitDice[i] = this.rollDice(1, hitDieSize);
+      hitDice[i] = rollDice(1, hitDieSize);
     }
     this.setState({ hitDice });
   }
@@ -930,17 +977,9 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
   private rollStat(min: number): number {
     let stat: number = -1;
     while (stat < min) {
-      stat = this.rollDice(3, 6);
+      stat = rollDice(3, 6);
     }
     return stat;
-  }
-
-  private rollDice(num: number, max: number) {
-    let result: number = 0;
-    for (let i = 0; i < num; ++i) {
-      result += randomInt(1, max);
-    }
-    return result;
   }
 
   private onEditLocationClicked(): void {

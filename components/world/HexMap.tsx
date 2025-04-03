@@ -2,54 +2,53 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../redux/store";
-import { LocationCityData, LocationData, MapData, MapHexData } from "../../serverAPI";
+import { DomainData, LocationData, MapData, MapHexData } from "../../serverAPI";
 import styles from "./HexMap.module.scss";
 import { Dictionary } from "../../lib/dictionary";
 import { MapHexTypes } from "./MapHexConstants";
-import { HexDisplay } from "./HexDisplay";
+import { HexDisplay, MapHexDataEx } from "./HexDisplay";
 
 export interface HexMapSettings {
   showCoordinates: boolean;
   showLocations: boolean;
   showCityNames: boolean;
-}
-
-interface MapHexDataEx extends MapHexData {
-  locations: LocationData[];
-  cityName: string;
+  zoomLevel: number;
 }
 
 interface State {
-  zoomLevel: number;
   hexLookup: Dictionary<Dictionary<MapHexDataEx>>;
   selectedX: number;
   selectedY: number;
   isDragging: boolean;
   dragStart: [number, number];
   scrollStart: [number, number];
+  needsAutoScroll: boolean;
 }
 
 const defaultState: State = {
-  zoomLevel: 1,
   hexLookup: {},
   selectedX: Number.MIN_SAFE_INTEGER,
   selectedY: Number.MIN_SAFE_INTEGER,
   isDragging: false,
   dragStart: [0, 0],
   scrollStart: [0, 0],
+  needsAutoScroll: false,
 };
 
 interface ReactProps {
   mapID: number;
   onHexSelected: (x: number, y: number) => void;
   settings: HexMapSettings;
+  renderCustomOverlay?: (mapHexId: number) => React.ReactNode;
+  /** If supplied, we will auto-scroll to the hex at the coordinates. */
+  focusCoordinates?: [number, number];
 }
 
 interface InjectedProps {
   map?: MapData;
   hexes?: MapHexData[];
   locations: Dictionary<LocationData>;
-  cities: Dictionary<LocationCityData>;
+  allDomains: Record<number, DomainData>;
   dispatch?: Dispatch;
 }
 
@@ -61,9 +60,15 @@ class AHexMap extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = defaultState;
+    this.state = {
+      ...defaultState,
+      // If focus coordinates are set, we should scroll to them.
+      needsAutoScroll: !!props.focusCoordinates,
+    };
+
     requestAnimationFrame(() => {
       this.buildSparseHexLookup();
+      this.attemptAutoScroll();
     });
   }
 
@@ -74,7 +79,10 @@ class AHexMap extends React.Component<Props, State> {
           <div
             className={styles.mapRoot}
             // Have to manually calculate width or else the mapRoot maxWidth matches parent width.
-            style={{ width: `${20 + (this.props.map.max_x - this.props.map.min_x + 1) * 5.3}vmin` }}
+            style={{
+              width: `${20 + (this.props.map.max_x - this.props.map.min_x + 1) * 5.3}vmin`,
+              zoom: `${this.props.settings.zoomLevel}`,
+            }}
           >
             {this.renderHexes()}
             <div className={styles.mapOverlayRoot}>{this.renderHexOverlays()}</div>
@@ -138,6 +146,7 @@ class AHexMap extends React.Component<Props, State> {
     return (
       <div key={y} className={styles.overlayHexRoot}>
         {shouldShowCityNames && this.renderCityName(hex)}
+        {this.props.renderCustomOverlay?.(hex.id) ?? null}
       </div>
     );
   }
@@ -154,6 +163,7 @@ class AHexMap extends React.Component<Props, State> {
       locations: [],
       cityName: "",
     };
+
     return hex;
   }
 
@@ -243,6 +253,16 @@ class AHexMap extends React.Component<Props, State> {
         this.buildSparseHexLookup();
       });
     }
+
+    if (
+      this.props.focusCoordinates &&
+      this.props.focusCoordinates !== prevProps.focusCoordinates &&
+      (this.props.focusCoordinates?.[0] !== prevProps.focusCoordinates?.[0] ||
+        this.props.focusCoordinates?.[1] !== prevProps.focusCoordinates?.[1])
+    ) {
+      this.setState({ needsAutoScroll: true });
+      this.attemptAutoScroll();
+    }
   }
 
   private buildSparseHexLookup(): void {
@@ -263,7 +283,12 @@ class AHexMap extends React.Component<Props, State> {
           return l.type === "City";
         });
         locations.sort(this.sortLocations);
-        data[hex.x][hex.y] = { ...hex, locations, cityName: city?.name ?? "" };
+        data[hex.x][hex.y] = {
+          ...hex,
+          locations,
+          cityName: city?.name ?? "",
+          domain: Object.values(this.props.allDomains).find((d) => d.hex_ids.includes(hex.id)),
+        };
       });
     }
 
@@ -281,19 +306,41 @@ class AHexMap extends React.Component<Props, State> {
     const nameSort = a.name.localeCompare(b.name);
     return nameSort;
   }
+
+  private async attemptAutoScroll(): Promise<void> {
+    setTimeout(() => {
+      if (this.state.needsAutoScroll && this.rootRef.current && this.props.focusCoordinates && this.props.map) {
+        const scroller = this.rootRef.current;
+        const bounds = scroller.getBoundingClientRect();
+
+        // The +4 accounts for the black border around the tiles, which is about 2 tiles on each side.
+        const horizontalTileCount = this.props.map.max_x - this.props.map.min_x + 4;
+        const verticalTileCount = this.props.map.max_y - this.props.map.min_y + 4;
+
+        const relativeX = this.props.focusCoordinates[0] - this.props.map.min_x + 2;
+        const relativeY = this.props.focusCoordinates[1] - this.props.map.min_y + 2;
+
+        // Calculate the pixel position of the target within the scrollContent.
+        const hexX = (scroller.scrollWidth * relativeX) / horizontalTileCount;
+        const hexY = (scroller.scrollHeight * relativeY) / verticalTileCount;
+
+        this.rootRef.current.scrollTo({ top: hexY - bounds.height / 2, left: hexX - bounds.width / 2 });
+      }
+    }, 1);
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const map = state.maps.maps[props.mapID];
   const hexes = state.maps.mapHexesByMap[props.mapID] ?? [];
   const locations = state.locations.locations;
-  const cities = state.locations.cities;
+  const allDomains = state.domains.allDomains;
   return {
     ...props,
     map,
     hexes,
     locations,
-    cities,
+    allDomains,
   };
 }
 

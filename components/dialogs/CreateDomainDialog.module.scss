@@ -1,0 +1,104 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  color: wheat;
+  width: 100%;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialogButton {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0.35vmin 1vmin;
+  font-size: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 0.5vmin;
+  background-color: #333;
+  color: white;
+  opacity: 0.5;
+  align-self: center;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  @extend .dialogButton;
+  margin-top: 1.5vmin;
+  width: 15vmin;
+}
+
+.titleContainer {
+  position: relative;
+  height: 2.5vmin;
+  width: 100%;
+}
+
+.title {
+  @extend .normalText;
+  position: relative;
+  font-size: 1.5rem;
+  line-height: 2.5vmin;
+  text-align: center;
+  text-wrap: nowrap;
+}
+
+.prompt {
+  @extend .normalText;
+  position: relative;
+  font-size: 1.2rem;
+  color: gray;
+  width: 100%;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.contentRow {
+  @extend .row;
+  position: relative;
+  margin-top: 1vmin;
+}
+
+.fieldName {
+  position: relative;
+  margin-right: 0.5vmin;
+  color: wheat;
+  font-size: 1rem;
+  text-align: right;
+  width: 10vmin;
+}
+
+.inputField {
+  position: relative;
+  width: 23vmin;
+}
+
+.colorPreview {
+  width: 2vmin;
+  height: 2vmin;
+  border-radius: 0.25vmin;
+  border: 2px solid wheat;
+  cursor: pointer;
+}

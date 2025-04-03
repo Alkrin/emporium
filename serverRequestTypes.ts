@@ -10,8 +10,6 @@ import {
   HarvestingCategoryData,
   ItemData,
   LocationCityData,
-  LocationData,
-  LocationLairData,
   MapData,
   ProficiencyData,
   ProficiencyRollData,
@@ -20,8 +18,10 @@ import {
   ServerActivityData,
   ServerActivityOutcomeData,
   ServerCharacterClass,
+  ServerDomainData,
   ServerItemData,
   ServerItemDefData,
+  ServerLocationData,
   ServerMapHexData,
   ServerResearchCategoryData,
   ServerSpellDefData,
@@ -55,14 +55,21 @@ export interface RequestBody_RemoveFromSpellbook {
   entry_id: number;
 }
 
+export interface RequestBody_SetDomainRuler {
+  characterId: number;
+  domainId: number;
+}
+
 export interface RequestField_StartingEquipmentData extends EquipmentSetItemData {
   count: number;
 }
+
 export interface RequestBody_CreateOrEditCharacter {
   id: number;
   user_id: number;
   name: string;
   gender: string;
+  alignment: string;
   portrait_url: string;
   class_name: string;
   class_id: number;
@@ -260,6 +267,15 @@ export interface RequestBody_DeleteArmy {
   troop_ids: number[];
 }
 
+export interface RequestBody_UpdateDomain {
+  domain_id: number;
+  morale: number;
+  frontier_population: number;
+  city_updates: Record<number, LocationCityData>;
+  treasury_id: number;
+  treasury_value: number;
+}
+
 export interface RequestBody_DeleteSingleEntry {
   id: number;
 }
@@ -283,6 +299,9 @@ export type RequestBody_EditCharacterClass = ServerCharacterClass;
 // Contract
 export type RequestBody_CreateContract = Omit<ContractData, "id">;
 export type RequestBody_EditContract = ContractData;
+// Domain
+export type RequestBody_CreateDomain = Omit<ServerDomainData, "id">;
+export type RequestBody_EditDomain = ServerDomainData;
 // Harvesting Category
 export type RequestBody_CreateHarvestingCategory = Omit<HarvestingCategoryData, "id">;
 export type RequestBody_EditHarvestingCategory = HarvestingCategoryData;
@@ -290,12 +309,8 @@ export type RequestBody_EditHarvestingCategory = HarvestingCategoryData;
 export type RequestBody_CreateItemDef = Omit<ServerItemDefData, "id">;
 export type RequestBody_EditItemDef = ServerItemDefData;
 // Location
-interface LocationEx {
-  city: LocationCityData;
-  lair: LocationLairData;
-}
-export type RequestBody_CreateLocation = Omit<LocationData, "id"> & LocationEx;
-export type RequestBody_EditLocation = LocationData & LocationEx;
+export type RequestBody_CreateLocation = Omit<ServerLocationData, "id">;
+export type RequestBody_EditLocation = ServerLocationData;
 // Map
 export type RequestBody_CreateMap = Omit<MapData, "id">;
 export type RequestBody_EditMap = MapData;

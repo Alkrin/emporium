@@ -172,7 +172,6 @@ class AActivitiesList extends React.Component<Props, State> {
         content: () => {
           return <CreateActivitySubPanel isEditMode />;
         },
-        escapable: true,
       })
     );
   }
@@ -184,7 +183,6 @@ class AActivitiesList extends React.Component<Props, State> {
         content: () => {
           return <CreateActivitySubPanel />;
         },
-        escapable: true,
       })
     );
   }

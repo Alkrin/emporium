@@ -14,7 +14,6 @@ export async function refetchItems(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Item Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Item data"} />,
-        escapable: true,
       })
     );
   } else {

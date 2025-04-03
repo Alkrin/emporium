@@ -40,8 +40,16 @@
   border-bottom: 1px solid yellow;
 }
 
+.ownerLabel {
+  position: relative;
+  color: grey;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
 .characterSelectorPanel {
   @extend .dataPanel;
+  margin-top: 1vmin;
   flex-direction: row;
 }
 
@@ -178,7 +186,6 @@
 
 .costOfLivingPanel {
   @extend .dataPanel;
-  margin-top: 1vmin;
 }
 
 .costOfLivingDataRow {

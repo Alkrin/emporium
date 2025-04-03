@@ -75,7 +75,6 @@ class ACharacterEquipmentSection extends React.Component<Props> {
         content: () => {
           return <EditEquipmentSubPanel />;
         },
-        escapable: true,
       })
     );
   }

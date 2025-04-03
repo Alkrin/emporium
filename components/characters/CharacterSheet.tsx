@@ -79,6 +79,10 @@ import { CharacterStatsSection } from "./sections/CharacterStatsSection";
 import { CharacterReactionRollSection } from "./sections/CharacterReactionRollSection";
 import { CharacterSavingThrowsSection } from "./sections/CharacterSavingThrowsSection";
 import { CharacterLanguagesSection } from "./sections/CharacterLanguagesSection";
+import { CharacterAlignmentSection } from "./sections/CharacterAlignmentSection";
+import { CharacterStorageSection } from "./sections/CharacterStorageSection";
+import { CharacterContractsSection } from "./sections/CharacterContractsSection";
+import { CharacterDomainSection } from "./sections/CharacterDomainSection";
 
 interface ReactProps {
   characterId: number;
@@ -229,6 +233,8 @@ class ACharacterSheet extends React.Component<Props> {
               <CharacterSavingThrowsSection characterId={this.props.characterId} activeComponents={activeComponents} />
             </div>
             <div className={styles.verticalSpacer} />
+            <CharacterAlignmentSection characterId={this.props.characterId} activeComponents={activeComponents} />
+            <div className={styles.verticalSpacer} />
             {this.renderXPPanel()}
             <div className={styles.verticalSpacer} />
             {this.renderDeductiblePanel()}
@@ -255,11 +261,13 @@ class ACharacterSheet extends React.Component<Props> {
             <div className={styles.verticalSpacer} />
             <CharacterEquipmentSection characterId={this.props.characterId} activeComponents={activeComponents} />
             <div className={styles.verticalSpacer} />
-            {this.renderStoragePanel()}
+            <CharacterStorageSection characterId={this.props.characterId} activeComponents={activeComponents} />
             <div className={styles.verticalSpacer} />
             {this.renderLocationPanel()}
             <div className={styles.verticalSpacer} />
-            {this.renderContractsPanel()}
+            <CharacterContractsSection characterId={this.props.characterId} activeComponents={activeComponents} />
+            <div className={styles.verticalSpacer} />
+            <CharacterDomainSection characterId={this.props.characterId} activeComponents={activeComponents} />
           </div>
         </div>
       </div>
@@ -429,7 +437,6 @@ class ACharacterSheet extends React.Component<Props> {
             />
           );
         },
-        escapable: true,
       })
     );
   }
@@ -493,7 +500,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <EditProficienciesSubPanel />;
         },
-        escapable: true,
       })
     );
   }
@@ -623,7 +629,7 @@ class ACharacterSheet extends React.Component<Props> {
       return (
         <div className={styles.storageContainer}>
           <div className={styles.centeredRow}>
-            <div className={styles.storageTitle}>Storage</div>
+            <div className={styles.storageTitle}>{"Storage"}</div>
             <EditButton className={styles.storageEditButton} onClick={this.onEditStorageClicked.bind(this)} />
           </div>
         </div>
@@ -713,7 +719,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <EditStoragesSubPanel />;
         },
-        escapable: true,
       })
     );
   }
@@ -725,7 +730,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <CharacterContractsDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -737,7 +741,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <EditCXPDeductibleDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -795,7 +798,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <EditHPDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -807,7 +809,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <EditMoneyDialog storageId={getPersonalPile(this.props.characterId).id} />;
         },
-        escapable: true,
       })
     );
   }
@@ -819,7 +820,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <EditCostOfLivingDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -831,7 +831,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <EditXPDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -859,7 +858,6 @@ class ACharacterSheet extends React.Component<Props> {
                           prompt={"Failed to update XP Reserve.  Please check your network connection and try again."}
                         />
                       ),
-                      escapable: true,
                     })
                   );
                   return false;
@@ -884,7 +882,6 @@ class ACharacterSheet extends React.Component<Props> {
                           prompt={"Failed to update XP Reserve.  Please check your network connection and try again."}
                         />
                       ),
-                      escapable: true,
                     })
                   );
                   return false;
@@ -901,7 +898,6 @@ class ACharacterSheet extends React.Component<Props> {
             />
           );
         },
-        escapable: true,
       })
     );
   }
@@ -1215,7 +1211,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <EditEquipmentSubPanel />;
         },
-        escapable: true,
       })
     );
   }
@@ -1341,7 +1336,6 @@ class ACharacterSheet extends React.Component<Props> {
         content: () => {
           return <EditInjuriesDialog character={this.props.character} />;
         },
-        escapable: true,
       })
     );
   }
@@ -1386,7 +1380,6 @@ class ACharacterSheet extends React.Component<Props> {
                           prompt={"Failed to update Location.  Please check your network connection and try again."}
                         />
                       ),
-                      escapable: true,
                     })
                   );
                 } else {

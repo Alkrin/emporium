@@ -88,6 +88,10 @@ import {
   RequestBody_EditHarvestingCategory,
   RequestBody_CreateHarvestingCategory,
   RequestBody_SetCharacterLanguages,
+  RequestBody_CreateDomain,
+  RequestBody_EditDomain,
+  RequestBody_SetDomainRuler,
+  RequestBody_UpdateDomain,
 } from "./serverRequestTypes";
 import { AbilityFilterv2, AbilityInstancev2, ProficiencySource } from "./staticData/types/abilitiesAndProficiencies";
 import {
@@ -234,6 +238,43 @@ export type ServerItemData = Omit<ItemData, "owner_ids" | "spell_ids"> & {
   spell_ids: string;
 };
 
+export enum CharacterAlignment {
+  Lawful = "Lawful",
+  Neutral = "Neutral",
+  Chaotic = "Chaotic",
+}
+
+export enum DomainClassification {
+  Outlands = "Outlands",
+  Borderlands = "Borderlands",
+  Civilized = "Civilized",
+}
+export interface DomainData {
+  id: number;
+  name: string;
+  ruler_character_id: number;
+  color: string;
+  hex_ids: number[];
+  city_ids: number[];
+  fortification_structure_ids: number[];
+  garrison_army_ids: number[];
+  treasury_storage_id: number;
+  alignment: CharacterAlignment;
+  classification: DomainClassification;
+  frontier_population: number;
+  current_morale: number;
+  last_updated_date: string;
+}
+export type ServerDomainData = Omit<
+  DomainData,
+  "hex_ids" | "city_ids" | "fortification_structure_ids" | "garrison_army_ids"
+> & {
+  hex_ids: string;
+  city_ids: string;
+  fortification_structure_ids: string;
+  garrison_army_ids: string;
+};
+
 export interface StorageData {
   id: number;
   name: string;
@@ -312,6 +353,7 @@ export interface CharacterData extends CharacterEquipmentData {
   user_id: number;
   name: string;
   gender: Gender;
+  alignment: CharacterAlignment;
   portrait_url: string;
   class_name: string;
   class_id: number;
@@ -720,28 +762,22 @@ export interface LocationData {
   description: string;
   map_id: number;
   hex_id: number;
-  is_public: boolean;
-  viewer_ids: number[];
   type: string;
+  type_data: LocationCityData | LocationLairData | {};
   icon_url: string;
 }
 
-type ServerLocationData = Omit<LocationData, "viewer_ids"> & {
-  viewer_ids: string;
+export type ServerLocationData = Omit<LocationData, "type_data"> & {
+  type_data: string;
 };
 
 export interface LocationCityData {
-  id: number;
-  location_id: number;
   market_class: number;
+  population: number;
+  city_value: number;
 }
 
-export interface LocationLairData {
-  id: number;
-  location_id: number;
-  monster_level: number;
-  num_encounters: number;
-}
+export interface LocationLairData {}
 
 export interface TroopDefData {
   id: number;
@@ -888,6 +924,7 @@ export type CharacterClassesResult = ServerError | CharacterClassv2[];
 export type ExpectedOutcomesResult = ServerError | ActivityOutcomeData[];
 export type ActivityOutcomesResult = ServerError | ActivityOutcomeData[];
 export type CharactersResult = ServerError | CharacterData[];
+export type DomainsResult = ServerError | DomainData[];
 export type EquipmentSetsResult = ServerError | EquipmentSetData[];
 export type EquipmentSetItemsResult = ServerError | EquipmentSetItemData[];
 export type HarvestingCategoriesResult = ServerError | HarvestingCategoryData[];
@@ -907,7 +944,7 @@ export type MapHexesResult = ServerError | ServerMapHexData[];
 export type ProficiencyRollsResult = ServerError | ProficiencyRollData[];
 export type ResearchCategoriesResult = ServerError | ResearchCategoryData[];
 export type ResearchSubcategoriesResult = ServerError | ResearchSubcategoryData[];
-export type LocationsResult = ServerError | ServerLocationData[];
+export type LocationsResult = ServerError | LocationData[];
 export type LocationCitiesResult = ServerError | LocationCityData[];
 export type LocationLairsResult = ServerError | LocationLairData[];
 export type TroopDefsResult = ServerError | TroopDefData[];
@@ -1042,6 +1079,34 @@ class AServerAPI {
           subclasses: JSON.parse(sCharacterClass.subclasses),
           class_proficiencies_at: JSON.parse(sCharacterClass.class_proficiencies_at),
           class_proficiencies: JSON.parse(sCharacterClass.class_proficiencies),
+        });
+      });
+
+      return classes;
+    }
+  }
+
+  async fetchDomains(): Promise<DomainsResult> {
+    const res = await fetch("/api/fetchDomains", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: ServerError | ServerDomainData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      const classes: DomainData[] = [];
+      data.forEach((sDomain) => {
+        classes.push({
+          ...sDomain,
+          // Convert server data to local data for all of these fields.
+          hex_ids: JSON.parse(sDomain.hex_ids),
+          city_ids: JSON.parse(sDomain.city_ids),
+          fortification_structure_ids: JSON.parse(sDomain.fortification_structure_ids),
+          garrison_army_ids: JSON.parse(sDomain.garrison_army_ids),
         });
       });
 
@@ -1947,6 +2012,84 @@ class AServerAPI {
     return await res.json();
   }
 
+  async createDomain(def: DomainData): Promise<InsertRowResult> {
+    const requestBody: RequestBody_CreateDomain = {
+      ...def,
+      // Convert all the wonky fields to the format the server wants.
+      hex_ids: JSON.stringify(def.hex_ids),
+      city_ids: JSON.stringify(def.city_ids),
+      fortification_structure_ids: JSON.stringify(def.fortification_structure_ids),
+      garrison_army_ids: JSON.stringify(def.garrison_army_ids),
+    };
+    const res = await fetch("/api/createDomain", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async editDomain(def: DomainData): Promise<EditRowResult> {
+    const requestBody: RequestBody_EditDomain = {
+      ...def,
+      // Convert all the wonky fields to the format the server wants.
+      hex_ids: JSON.stringify(def.hex_ids),
+      city_ids: JSON.stringify(def.city_ids),
+      fortification_structure_ids: JSON.stringify(def.fortification_structure_ids),
+      garrison_army_ids: JSON.stringify(def.garrison_army_ids),
+    };
+    const res = await fetch("/api/editDomain", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async deleteDomain(id: number): Promise<DeleteRowResult> {
+    const requestBody: RequestBody_DeleteSingleEntry = {
+      id,
+    };
+    const res = await fetch("/api/deleteDomain", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async updateDomain(
+    domain_id: number,
+    morale: number,
+    frontier_population: number,
+    city_updates: Record<number, LocationCityData>,
+    treasury_id: number,
+    treasury_value: number
+  ): Promise<MultiModifyResult> {
+    const requestBody: RequestBody_UpdateDomain = {
+      domain_id,
+      morale,
+      frontier_population,
+      city_updates,
+      treasury_id,
+      treasury_value,
+    };
+    const res = await fetch("/api/updateDomain", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
   async fetchProficiencies(): Promise<ProficienciesResult> {
     const res = await fetch("/api/fetchProficiencies", {
       method: "POST",
@@ -1994,27 +2137,22 @@ class AServerAPI {
         "Content-Type": "application/json",
       },
     });
-    return await res.json();
-  }
 
-  async fetchLocationCities(): Promise<LocationCitiesResult> {
-    const res = await fetch("/api/fetchLocationCities", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return await res.json();
-  }
+    const data: ServerError | ServerLocationData[] = await res.json();
+    if ("error" in data) {
+      return data;
+    } else {
+      const locations: LocationData[] = [];
+      data.forEach((sLocation) => {
+        locations.push({
+          ...sLocation,
+          // Convert server data to local data for all of these fields.
+          type_data: JSON.parse(sLocation.type_data),
+        });
+      });
 
-  async fetchLocationLairs(): Promise<LocationLairsResult> {
-    const res = await fetch("/api/fetchLocationLairs", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return await res.json();
+      return locations;
+    }
   }
 
   async fetchTroopDefs(): Promise<TroopDefsResult> {
@@ -2612,15 +2750,10 @@ class AServerAPI {
     return await res.json();
   }
 
-  async createLocation(
-    location: LocationData,
-    city: LocationCityData,
-    lair: LocationLairData
-  ): Promise<MultiModifyResult> {
+  async createLocation(location: LocationData): Promise<InsertRowResult> {
     const requestBody: RequestBody_CreateLocation = {
       ...location,
-      city,
-      lair,
+      type_data: JSON.stringify(location.type_data),
     };
     const res = await fetch("/api/createLocation", {
       method: "POST",
@@ -2632,15 +2765,10 @@ class AServerAPI {
     return await res.json();
   }
 
-  async editLocation(
-    location: LocationData,
-    city: LocationCityData,
-    lair: LocationLairData
-  ): Promise<MultiModifyResult> {
+  async editLocation(location: LocationData): Promise<EditRowResult> {
     const requestBody: RequestBody_EditLocation = {
       ...location,
-      city,
-      lair,
+      type_data: JSON.stringify(location.type_data),
     };
     const res = await fetch("/api/editLocation", {
       method: "POST",
@@ -3056,6 +3184,21 @@ class AServerAPI {
       gp,
     };
     const res = await fetch("/api/payStructureMaintenance", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    return await res.json();
+  }
+
+  async setDomainRuler(characterId: number, domainId: number): Promise<EditRowResult> {
+    const requestBody: RequestBody_SetDomainRuler = {
+      characterId,
+      domainId,
+    };
+    const res = await fetch("/api/setDomainRuler", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

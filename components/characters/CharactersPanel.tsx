@@ -71,7 +71,6 @@ class ACharactersPanel extends React.Component<Props, State> {
         content: () => {
           return <HenchmanHierarchySubPanel />;
         },
-        escapable: true,
       })
     );
   }

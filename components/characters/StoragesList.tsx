@@ -123,7 +123,6 @@ class AStoragesList extends React.Component<Props, State> {
         content: () => {
           return <CreateStorageDialog isEditMode />;
         },
-        escapable: true,
       })
     );
   }
@@ -199,7 +198,6 @@ class AStoragesList extends React.Component<Props, State> {
         content: () => {
           return <CreateStorageDialog />;
         },
-        escapable: true,
       })
     );
   }

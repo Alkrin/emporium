@@ -238,7 +238,6 @@ class AInventoriesList extends React.Component<Props> {
         content: () => {
           return <SplitBundleDialog item={item} def={def} />;
         },
-        escapable: true,
       })
     );
   }
@@ -253,7 +252,6 @@ class AInventoriesList extends React.Component<Props> {
         content: () => {
           return <SpellbookDialog item={item} def={def} />;
         },
-        escapable: true,
       })
     );
   }
@@ -268,7 +266,6 @@ class AInventoriesList extends React.Component<Props> {
         content: () => {
           return <EditItemDialog item={item} def={def} />;
         },
-        escapable: true,
       })
     );
   }

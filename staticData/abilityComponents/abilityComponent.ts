@@ -21,6 +21,8 @@ import { AbilityComponentSavingThrowBonusStatic } from "./AbilityComponentSaving
 import { AbilityComponentLanguageCapacityBonus } from "./AbilityComponentLanguageCapacityBonus";
 import { AbilityComponentLanguageReadWriteOverride } from "./AbilityComponentLanguageReadWriteOverride";
 import { AbilityComponentLanguageCapability } from "./AbilityComponentLanguageCapability";
+import { AbilityComponentDomainMoraleBonusStatic } from "./AbilityComponentDomainMoraleBonusStatic";
+import { AbilityComponentHenchmanCapacityBonus } from "./AbilityComponentHenchmanCapacityBonus";
 
 export interface AbilityComponent {
   id: string;
@@ -34,7 +36,9 @@ export const AllAbilityComponents: Dictionary<AbilityComponent> = {
   [AbilityComponentAvailableJob.id]: AbilityComponentAvailableJob,
   [AbilityComponentCharacterStatBonus.id]: AbilityComponentCharacterStatBonus,
   [AbilityComponentCharacterStatOverride.id]: AbilityComponentCharacterStatOverride,
+  [AbilityComponentDomainMoraleBonusStatic.id]: AbilityComponentDomainMoraleBonusStatic,
   [AbilityComponentHarvestingCapability.id]: AbilityComponentHarvestingCapability,
+  [AbilityComponentHenchmanCapacityBonus.id]: AbilityComponentHenchmanCapacityBonus,
   [AbilityComponentInitiativeBonusConditional.id]: AbilityComponentInitiativeBonusConditional,
   [AbilityComponentInitiativeBonusStatic.id]: AbilityComponentInitiativeBonusStatic,
   [AbilityComponentLanguageCapability.id]: AbilityComponentLanguageCapability,

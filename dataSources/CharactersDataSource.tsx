@@ -14,7 +14,6 @@ export async function refetchCharacters(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Character Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Character data"} />,
-        escapable: true,
       })
     );
   } else {

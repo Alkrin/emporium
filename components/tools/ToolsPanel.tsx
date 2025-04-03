@@ -34,7 +34,6 @@ class AToolsPanel extends React.Component<Props> {
         content: () => {
           return <ToolsHexClearingSubPanel />;
         },
-        escapable: true,
       })
     );
   }

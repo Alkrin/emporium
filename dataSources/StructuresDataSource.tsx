@@ -15,7 +15,6 @@ export async function refetchStructures(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "Structure Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Structure data"} />,
-        escapable: true,
       })
     );
   } else {
@@ -35,7 +34,6 @@ export async function refetchStructureComponents(dispatch: Dispatch): Promise<vo
       showModal({
         id: "StructureComponent Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch StructureComponent data"} />,
-        escapable: true,
       })
     );
   } else {

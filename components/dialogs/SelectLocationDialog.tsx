@@ -53,9 +53,8 @@ class ASelectLocationDialog extends React.Component<Props, State> {
                   description: "",
                   map_id: 0,
                   hex_id: 0,
-                  is_public: true,
-                  viewer_ids: [],
                   type: "",
+                  type_data: {},
                   icon_url: "",
                 },
                 -1

@@ -99,7 +99,6 @@ class AEditHPDialog extends React.Component<Props, State> {
               prompt={"Failed to update HP.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else {
@@ -129,7 +128,6 @@ class AEditHPDialog extends React.Component<Props, State> {
               prompt={"Failed to update HP.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else {

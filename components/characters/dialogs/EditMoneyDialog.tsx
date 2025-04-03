@@ -98,7 +98,6 @@ class AEditMoneyDialog extends React.Component<Props, State> {
               prompt={"Failed to update money.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else {
@@ -134,7 +133,6 @@ class AEditMoneyDialog extends React.Component<Props, State> {
               prompt={"Failed to update money.  Please check your network connection and try again."}
             />
           ),
-          escapable: true,
         })
       );
     } else {

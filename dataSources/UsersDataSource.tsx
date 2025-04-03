@@ -14,7 +14,6 @@ export async function refetchUsers(dispatch: Dispatch): Promise<void> {
       showModal({
         id: "User Fetch Error",
         content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch User data"} />,
-        escapable: true,
       })
     );
   } else {

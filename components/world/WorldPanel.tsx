@@ -17,6 +17,8 @@ import TooltipSource from "../TooltipSource";
 import { LocationTooltip } from "../tooltips/LocationTooltip";
 import { HexEditor } from "./HexEditor";
 import { BasicDialog } from "../dialogs/BasicDialog";
+import { AddButton } from "../AddButton";
+import { DeleteButton } from "../DeleteButton";
 
 enum HexMode {
   POIs,
@@ -47,13 +49,14 @@ class AWorldPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      mapId: 0,
+      mapId: Object.values(props.maps)?.[0]?.id ?? 0,
       selectedX: Number.MIN_SAFE_INTEGER,
       selectedY: Number.MIN_SAFE_INTEGER,
       mapSettings: {
         showCoordinates: true,
         showLocations: true,
         showCityNames: true,
+        zoomLevel: 1,
       },
       hexMode: HexMode.POIs,
     };
@@ -124,6 +127,36 @@ class AWorldPanel extends React.Component<Props, State> {
               }}
             />
             <div className={styles.mapSettingsLabel}>{"Show City Names"}</div>
+          </div>
+          <div className={styles.mapSettingsRow}>
+            <div className={styles.mapZoomSection}>
+              <div className={styles.mapZoomTitle}>{"Zoom Level"}</div>
+              <DeleteButton
+                onClick={() => {
+                  if (this.state.mapSettings.zoomLevel > 0.49) {
+                    this.setState({
+                      mapSettings: {
+                        ...this.state.mapSettings,
+                        zoomLevel: Math.max(0.25, this.state.mapSettings.zoomLevel - 0.25),
+                      },
+                    });
+                  }
+                }}
+              />
+              <div className={styles.mapZoomValue}>{`${(this.state.mapSettings.zoomLevel * 100).toFixed(0)}%`}</div>
+              <AddButton
+                onClick={() => {
+                  if (this.state.mapSettings.zoomLevel < 1) {
+                    this.setState({
+                      mapSettings: {
+                        ...this.state.mapSettings,
+                        zoomLevel: Math.min(1, this.state.mapSettings.zoomLevel + 0.25),
+                      },
+                    });
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
         {this.renderHexData()}
@@ -258,7 +291,6 @@ class AWorldPanel extends React.Component<Props, State> {
         content: () => {
           return <LocationEditSubPanel mapId={this.state.mapId} hexId={data.hex_id} locationId={data.id} />;
         },
-        escapable: true,
       })
     );
   }
@@ -294,7 +326,6 @@ class AWorldPanel extends React.Component<Props, State> {
         content: () => {
           return <LocationEditSubPanel mapId={this.state.mapId} hexId={hexData.id} />;
         },
-        escapable: true,
       })
     );
   }
@@ -379,7 +410,6 @@ class AWorldPanel extends React.Component<Props, State> {
         content: () => {
           return <WorldMapsSubPanel />;
         },
-        escapable: true,
       })
     );
   }

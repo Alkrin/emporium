@@ -7,8 +7,12 @@ import { SubPanelCloseButton } from "../../SubPanelCloseButton";
 import { Dictionary } from "../../../lib/dictionary";
 import ServerAPI, { CharacterData } from "../../../serverAPI";
 import {
+  AbilityComponentInstance,
   BonusCalculations,
+  getActiveAbilityComponentsForCharacter,
+  getCharacterSupportsV2,
   getMaxMinionCountForCharacter,
+  getMaxMinionCountForCharacterv2,
   getRecruitmentRollBonusForCharacter,
   randomInt,
 } from "../../../lib/characterUtils";
@@ -53,6 +57,11 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
     const recruitmentRoll = getRecruitmentRollBonusForCharacter(this.state.selectedCharacterId);
     const hasConditionalBonuses = recruitmentRoll.conditionalSources.length > 0;
 
+    const character = this.props.allCharacters[this.state.selectedCharacterId];
+
+    const activeComponents: Record<string, AbilityComponentInstance[]> =
+      character && getCharacterSupportsV2(character) ? getActiveAbilityComponentsForCharacter(character) : {};
+
     return (
       <div className={styles.root}>
         <div className={styles.titleLabel}>{"Henchman Hierarchy"}</div>
@@ -74,7 +83,7 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
               <div className={styles.recruitmentRollContainer}>
                 <TooltipSource
                   tooltipParams={{
-                    id: "InitiativeExplanation",
+                    id: "RecruitmentExplanation",
                     content: () => {
                       return <BonusTooltip header={"Recruitment Roll Bonus"} calc={recruitmentRoll} />;
                     },
@@ -82,13 +91,13 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
                   className={styles.recruitmentRollTitle}
                 >
                   {`Recruitment Roll Bonus : ${recruitmentRoll.bonus > 0 ? "+" : ""}${recruitmentRoll.bonus}`}
-                  {hasConditionalBonuses ? <span className={styles.infoAsterisk}>*</span> : null}
+                  {hasConditionalBonuses ? <span className={styles.infoAsterisk}>{"*"}</span> : null}
                 </TooltipSource>
                 <div className={styles.rollDiceButton} onClick={this.onRollRecruitment.bind(this, recruitmentRoll)} />
                 <div className={styles.recruitmentRollResult}>{this.state.recruitmentRollResult}</div>
               </div>
               <div className={styles.titleLabel}>{"Henchmen"}</div>
-              {this.renderMinionSlots()}
+              {this.renderMinionSlots(activeComponents)}
             </div>
           ) : null}
         </div>
@@ -258,11 +267,17 @@ class AHenchmanHierarchySubPanel extends React.Component<Props, State> {
     );
   }
 
-  private renderMinionSlots(): React.ReactNode[] {
-    const maxMinions = getMaxMinionCountForCharacter(this.state.selectedCharacterId);
+  private renderMinionSlots(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode[] {
+    const character = this.props.allCharacters[this.state.selectedCharacterId];
+    let maxMinions: number = 4;
+    if (getCharacterSupportsV2(character)) {
+      maxMinions = getMaxMinionCountForCharacterv2(character, activeComponents).bonus;
+    } else {
+      maxMinions = getMaxMinionCountForCharacter(this.state.selectedCharacterId).bonus;
+    }
     const minions = this.getMinions(this.state.selectedCharacterId);
     const slots: React.ReactNode[] = [];
-    for (let i = 0; i < maxMinions.bonus; ++i) {
+    for (let i = 0; i < maxMinions; ++i) {
       slots.push(this.renderMinionSlotRow(minions[i], i, minions));
     }
     return slots;

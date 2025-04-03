@@ -74,7 +74,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseAbilitiesDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -86,7 +85,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseCharacterClassesDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -98,7 +96,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseEquipmentSetsDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -110,7 +107,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseHarvestingCategoriesDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -122,7 +118,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseItemsDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -134,7 +129,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseProficiencyRollsDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -146,7 +140,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseResearchCategoriesDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -158,7 +151,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseResearchSubcategoriesDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -170,7 +162,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseSpellsDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -182,7 +173,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseStructureComponentsDialog />;
         },
-        escapable: true,
       })
     );
   }
@@ -194,7 +184,6 @@ class ADatabasePanel extends React.Component<Props> {
         content: () => {
           return <DatabaseTroopsDialog />;
         },
-        escapable: true,
       })
     );
   }
