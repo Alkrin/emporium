@@ -30,6 +30,8 @@ import {
   refetchEquipmentSets,
   refetchHarvestingCategories,
   refetchItemDefs,
+  refetchJobCredentials,
+  refetchJobs,
   refetchProficiencyRolls,
   refetchResearchCategories,
   refetchResearchSubcategories,
@@ -243,6 +245,10 @@ class AMainPage extends React.Component<Props, State> {
                 await refetchItemDefs(this.props.dispatch);
                 this.setState({ nowLoading: "Items" });
                 await refetchItems(this.props.dispatch);
+                this.setState({ nowLoading: "Job Credentials" });
+                await refetchJobCredentials(this.props.dispatch);
+                this.setState({ nowLoading: "Jobs" });
+                await refetchJobs(this.props.dispatch);
                 this.setState({ nowLoading: "Locations" });
                 await refetchLocations(this.props.dispatch);
                 this.setState({ nowLoading: "Maps" });

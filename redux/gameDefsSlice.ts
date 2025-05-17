@@ -16,6 +16,8 @@ import {
   StructureComponentDefData,
   TroopDefData,
 } from "../serverAPI";
+import { JobCredentialData } from "../pages/api/tables/job_credentials/types";
+import { JobData } from "../pages/api/tables/jobs/types";
 
 export interface ContractDefData {
   id: number;
@@ -38,6 +40,8 @@ export interface GameDefsReduxState {
   equipmentSetItemsBySet: Record<number, EquipmentSetItemData[]>;
   harvestingCategories: Record<number, HarvestingCategoryData>;
   items: Record<number, ItemDefData>;
+  jobCredentials: Record<number, JobCredentialData>;
+  jobs: Record<number, JobData>;
   proficiencyRolls: Record<number, ProficiencyRollData>;
   researchCategories: Record<number, ResearchCategoryData>;
   researchSubcategories: Record<number, ResearchSubcategoryData>;
@@ -56,6 +60,8 @@ function buildDefaultGameDefsReduxState(): GameDefsReduxState {
     equipmentSetItemsBySet: {},
     harvestingCategories: {},
     items: {},
+    jobCredentials: {},
+    jobs: {},
     proficiencyRolls: {},
     researchCategories: {},
     researchSubcategories: {},
@@ -208,6 +214,30 @@ export const gameDefsSlice = createSlice({
     },
     deleteItemDef: (state: GameDefsReduxState, action: PayloadAction<number>) => {
       delete state.items[action.payload];
+    },
+    updateJobCredentials: (state: GameDefsReduxState, action: PayloadAction<JobCredentialData[]>) => {
+      state.jobCredentials = {};
+      action.payload.forEach((jcd) => {
+        state.jobCredentials[jcd.id] = jcd;
+      });
+    },
+    updateJobCredential: (state: GameDefsReduxState, action: PayloadAction<JobCredentialData>) => {
+      state.jobCredentials[action.payload.id] = action.payload;
+    },
+    deleteJobCredential: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.jobCredentials[action.payload];
+    },
+    updateJobs: (state: GameDefsReduxState, action: PayloadAction<JobData[]>) => {
+      state.jobs = {};
+      action.payload.forEach((jd) => {
+        state.jobs[jd.id] = jd;
+      });
+    },
+    updateJob: (state: GameDefsReduxState, action: PayloadAction<JobData>) => {
+      state.jobs[action.payload.id] = action.payload;
+    },
+    deleteJob: (state: GameDefsReduxState, action: PayloadAction<number>) => {
+      delete state.jobs[action.payload];
     },
     updateSpellDefs: (state: GameDefsReduxState, action: PayloadAction<SpellDefData[]>) => {
       state.spells = {};
@@ -392,6 +422,12 @@ export const {
   updateItemDefs,
   updateItemDef,
   deleteItemDef,
+  updateJobCredentials,
+  updateJobCredential,
+  deleteJobCredential,
+  updateJobs,
+  updateJob,
+  deleteJob,
   updateProficiencyRolls,
   updateProficiencyRoll,
   deleteProficiencyRoll,

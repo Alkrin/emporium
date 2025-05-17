@@ -23,6 +23,12 @@ import { AbilityComponentLanguageReadWriteOverride } from "./AbilityComponentLan
 import { AbilityComponentLanguageCapability } from "./AbilityComponentLanguageCapability";
 import { AbilityComponentDomainMoraleBonusStatic } from "./AbilityComponentDomainMoraleBonusStatic";
 import { AbilityComponentHenchmanCapacityBonus } from "./AbilityComponentHenchmanCapacityBonus";
+import { AbilityComponentTroopMoraleBonusStatic } from "./AbilityComponentTroopMoraleBonusStatic";
+import { AbilityComponentTroopLeadershipBonusStatic } from "./AbilityComponentTroopLeadershipBonusStatic";
+import { AbilityComponentTroopStrategyBonus } from "./AbilityComponentTroopStrategyBonus";
+import { AbilityComponentProficiencyRollMultiTarget } from "./AbilityComponentProficiencyRollMultiTarget";
+import { AbilityComponentJobCredential } from "./AbilityComponentJobCredential";
+import { AbilityComponentProficiencyRollBonusByRank } from "./AbilityComponentProficiencyRollBonusByRank";
 
 export interface AbilityComponent {
   id: string;
@@ -41,11 +47,14 @@ export const AllAbilityComponents: Dictionary<AbilityComponent> = {
   [AbilityComponentHenchmanCapacityBonus.id]: AbilityComponentHenchmanCapacityBonus,
   [AbilityComponentInitiativeBonusConditional.id]: AbilityComponentInitiativeBonusConditional,
   [AbilityComponentInitiativeBonusStatic.id]: AbilityComponentInitiativeBonusStatic,
+  [AbilityComponentJobCredential.id]: AbilityComponentJobCredential,
   [AbilityComponentLanguageCapability.id]: AbilityComponentLanguageCapability,
   [AbilityComponentLanguageCapacityBonus.id]: AbilityComponentLanguageCapacityBonus,
   [AbilityComponentLanguageReadWriteOverride.id]: AbilityComponentLanguageReadWriteOverride,
   [AbilityComponentMeleeDamageByLevel.id]: AbilityComponentMeleeDamageByLevel,
   [AbilityComponentProficiencyRoll.id]: AbilityComponentProficiencyRoll,
+  [AbilityComponentProficiencyRollMultiTarget.id]: AbilityComponentProficiencyRollMultiTarget,
+  [AbilityComponentProficiencyRollBonusByRank.id]: AbilityComponentProficiencyRollBonusByRank,
   [AbilityComponentProficiencyRollBonusConditional.id]: AbilityComponentProficiencyRollBonusConditional,
   [AbilityComponentProficiencyRollBonusStatic.id]: AbilityComponentProficiencyRollBonusStatic,
   [AbilityComponentRangedDamageByLevel.id]: AbilityComponentRangedDamageByLevel,
@@ -55,6 +64,9 @@ export const AllAbilityComponents: Dictionary<AbilityComponent> = {
   [AbilityComponentResearchCapability.id]: AbilityComponentResearchCapability,
   [AbilityComponentSavingThrowBonusConditional.id]: AbilityComponentSavingThrowBonusConditional,
   [AbilityComponentSavingThrowBonusStatic.id]: AbilityComponentSavingThrowBonusStatic,
+  [AbilityComponentTroopLeadershipBonusStatic.id]: AbilityComponentTroopLeadershipBonusStatic,
+  [AbilityComponentTroopStrategyBonus.id]: AbilityComponentTroopStrategyBonus,
+  [AbilityComponentTroopMoraleBonusStatic.id]: AbilityComponentTroopMoraleBonusStatic,
 };
 
 export const AllAbilityComponentsArray = Object.values(AllAbilityComponents).sort((a, b) => {

@@ -1702,6 +1702,11 @@ export function getActiveAbilityRanksForCharacter(character: CharacterData): Rec
   const characterSubclass = characterClass?.subclasses?.find((sc) => sc.name === character.subclass_id);
 
   function adjustRanksForAbilityInstance(instance: AbilityInstancev2): void {
+    // Abilities are activated at specific levels, so make sure we qualify.
+    if (character.level < instance.minLevel) {
+      return;
+    }
+
     const abilityDef = redux.gameDefs.abilities[instance.abilityDefId];
     // Make sure there is somewhere to track ranks.
     if (!abilityRanks[instance.abilityDefId]) {

@@ -3,18 +3,17 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { CharacterData } from "../../../serverAPI";
-import TooltipSource from "../../TooltipSource";
 import styles from "./CharacterAvailableJobsSection.module.scss";
-import { AbilityComponentInstance, getAbilityComponentInstanceSourceName } from "../../../lib/characterUtils";
+import { AbilityComponentInstance } from "../../../lib/characterUtils";
+import { JobData, JobData_CredentialRequirement } from "../../../pages/api/tables/jobs/types";
 import {
-  AbilityComponentAvailableJob,
-  AbilityComponentAvailableJobData,
-  AvailableJobEntry,
-} from "../../../staticData/abilityComponents/AbilityComponentAvailableJob";
+  AbilityComponentJobCredential,
+  AbilityComponentJobCredentialData,
+} from "../../../staticData/abilityComponents/AbilityComponentJobCredential";
 
-interface JobDisplayData extends AvailableJobEntry {
-  source: string;
-  subtype: string;
+interface JobDisplayData {
+  title: string;
+  wage: number;
 }
 
 interface ReactProps {
@@ -24,6 +23,7 @@ interface ReactProps {
 
 interface InjectedProps {
   character: CharacterData;
+  allJobs: Record<number, JobData>;
   dispatch?: Dispatch;
 }
 
@@ -49,65 +49,103 @@ class ACharacterAvailableJobsSection extends React.Component<Props> {
     }
   }
 
+  private isCredentialRequirementSatisfied(
+    req: JobData_CredentialRequirement,
+    credentials: Record<number, Record<string, number>>,
+    outSubtypes: string[]
+  ): boolean {
+    let isSatisfied: boolean = false;
+
+    // We check all the credentials in case multiple of them work, since we need
+    // to collect all the relevant subtypes.
+    Object.entries(credentials[req.credential_id] ?? []).forEach((entry) => {
+      const subtype: string = entry[0];
+      const rank: number = entry[1];
+      if ((req.subtype === "" || req.subtype === subtype) && rank >= req.ranks) {
+        if (!outSubtypes.includes(subtype)) {
+          outSubtypes.push(subtype);
+          isSatisfied = true;
+        }
+      }
+    });
+
+    return isSatisfied;
+  }
+
   private buildDisplayData(): JobDisplayData[] {
-    const { activeComponents } = this.props;
+    const { activeComponents, allJobs } = this.props;
+
+    // Combine all credential ranks by subtype (or lack thereof)
+    // Maps credential_id and subtype to rank.
+    let credentials: Record<number, Record<string, number>> = {};
+    activeComponents[AbilityComponentJobCredential.id]?.forEach((instance: AbilityComponentInstance) => {
+      const { credential_id } = instance.data as AbilityComponentJobCredentialData;
+
+      if (!credentials[credential_id]) {
+        credentials[credential_id] = {};
+      }
+
+      credentials[credential_id][instance.subtype] =
+        (credentials[credential_id][instance.subtype] ?? 0) + instance.rank;
+    });
 
     const displayData: JobDisplayData[] = [];
 
-    activeComponents[AbilityComponentAvailableJob.id]?.forEach((instance) => {
-      const source = getAbilityComponentInstanceSourceName(instance);
-      const { jobs } = instance.data as AbilityComponentAvailableJobData;
-      const job = jobs[Math.min(instance.rank - 1, jobs.length - 1)];
-      // Only include jobs that pay a wage.  This allows us to do things like only let you work
-      // as an Alchemist once you have three ranks of Alchemy by setting a zero wage for ranks
-      // one and two.
-      if (job && job.wage > 0) {
-        displayData.push({ ...job, source, subtype: instance.subtype });
+    Object.values(allJobs).forEach((job: JobData) => {
+      // Check for all subtypes that sufficiently support this job.
+
+      const matchingSubtypes: string[] = [];
+      let allCredentialsMet = true;
+      job.credentials.forEach((requiredCredential) => {
+        allCredentialsMet =
+          allCredentialsMet && this.isCredentialRequirementSatisfied(requiredCredential, credentials, matchingSubtypes);
+      });
+
+      job.alternate_credentials.forEach((credentialSet) => {
+        if (allCredentialsMet) {
+          let setMet = true;
+          credentialSet.forEach((requiredCredential) => {
+            setMet = setMet && this.isCredentialRequirementSatisfied(requiredCredential, credentials, matchingSubtypes);
+          });
+
+          allCredentialsMet = allCredentialsMet && setMet;
+        }
+      });
+
+      // If every credential met the required rank, add display data for at least one job, or more if the job has subtypes.
+      if (allCredentialsMet) {
+        if (job.has_subtypes) {
+          // One job per subtype.
+          matchingSubtypes.forEach((s) => {
+            const datum: JobDisplayData = {
+              title: `${job.name} (${s})`,
+              wage: job.wage,
+            };
+            displayData.push(datum);
+          });
+        } else {
+          // One job, with no subtype.
+          const datum: JobDisplayData = {
+            title: job.name,
+            wage: job.wage,
+          };
+          displayData.push(datum);
+        }
       }
     });
 
     const sortedDisplayData = Object.values(displayData).sort((a, b) => {
-      // Sort by subtype.
-      if (a.title === b.title) {
-        return a.subtype.localeCompare(b.subtype);
-      }
       // Sort by name.
       return a.title.localeCompare(b.title);
     });
     return sortedDisplayData;
   }
 
-  private buildJobTitle(title: string, subtype: string): string {
-    if (subtype.length > 0) {
-      return `${title} (${subtype})`;
-    } else {
-      return title;
-    }
-  }
-
   private renderAvailableJobRow(datum: JobDisplayData, index: number): React.ReactNode {
     return (
-      <TooltipSource
-        className={styles.listRow}
-        key={`jobRow${index}`}
-        tooltipParams={{
-          id: datum.title,
-          content: this.renderJobTooltip.bind(this, datum),
-        }}
-      >
-        <div className={styles.listName}>{this.buildJobTitle(datum.title, datum.subtype)}</div>
+      <div className={styles.listRow} key={`jobRow${index}`}>
+        <div className={styles.listName}>{datum.title}</div>
         <div className={styles.valueText}>{`${+datum.wage.toFixed(2)}gp`}</div>
-      </TooltipSource>
-    );
-  }
-
-  private renderJobTooltip(datum: JobDisplayData): React.ReactNode {
-    return (
-      <div className={styles.tooltipRoot}>
-        <div className={styles.tooltipHeader}>
-          <div className={styles.tooltipTitle}>{this.buildJobTitle(datum.title, datum.subtype)}</div>
-        </div>
-        <div className={styles.tooltipSubtext}>{`Source: ${datum.source}`}</div>
       </div>
     );
   }
@@ -115,9 +153,11 @@ class ACharacterAvailableJobsSection extends React.Component<Props> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const character = state.characters.characters[props.characterId ?? 1] ?? null;
+  const allJobs = state.gameDefs.jobs;
   return {
     ...props,
     character,
+    allJobs,
   };
 }
 

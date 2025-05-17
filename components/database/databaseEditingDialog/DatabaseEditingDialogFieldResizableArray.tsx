@@ -109,6 +109,17 @@ class ADatabaseEditingDialogFieldResizableArray extends React.Component<Props> {
             this.applyNumberDataChange.bind(this, valueIndex)
           );
         }
+        case DatabaseEditingDialogField.ResizableArray: {
+          return (
+            <DatabaseEditingDialogFieldResizableArray
+              key={valueIndex}
+              tabIndex={this.props.tabIndex}
+              def={this.props.def.extra.entryDef}
+              value={value}
+              onValueChange={(value: any[]) => this.applyResizableArrayDataChange(valueIndex, "", value)}
+            />
+          );
+        }
         default: {
           console.error(`Attempted to renderEntryContents() for unsupported type: ${this.props.def.type}`);
           return null;
@@ -141,6 +152,12 @@ class ADatabaseEditingDialogFieldResizableArray extends React.Component<Props> {
     const newEntry: any = { ...newArray[index] };
     newEntry[fieldName] = value;
     newArray[index] = newEntry;
+    this.props.onValueChange(newArray);
+  }
+
+  private applyResizableArrayDataChange(index: number, fieldName: string, value: any[]): void {
+    const newArray: any[] = [...this.props.value];
+    newArray[index] = value;
     this.props.onValueChange(newArray);
   }
 
@@ -179,6 +196,10 @@ class ADatabaseEditingDialogFieldResizableArray extends React.Component<Props> {
         }
         case DatabaseEditingDialogField.Number: {
           this.props.onValueChange([...value, 0]);
+          break;
+        }
+        case DatabaseEditingDialogField.ResizableArray: {
+          this.props.onValueChange([...value, []]);
           break;
         }
         default: {
