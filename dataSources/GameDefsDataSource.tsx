@@ -8,6 +8,8 @@ import {
   updateEquipmentSets,
   updateHarvestingCategories,
   updateItemDefs,
+  updateJobCredentials,
+  updateJobs,
   updateProficiencyRolls,
   updateResearchCategories,
   updateResearchSubcategories,
@@ -18,6 +20,8 @@ import {
 import { showModal } from "../redux/modalsSlice";
 import ServerAPI from "../serverAPI";
 import { BasicDialog } from "../components/dialogs/BasicDialog";
+import { ServerAPIJobCredentials } from "../pages/api/tables/job_credentials/functions";
+import { ServerAPIJob } from "../pages/api/tables/jobs/functions";
 
 export async function refetchAbilityDefs(dispatch: Dispatch): Promise<void> {
   const result = await ServerAPI.fetchAbilityDefs();
@@ -117,6 +121,38 @@ export async function refetchItemDefs(dispatch: Dispatch): Promise<void> {
       idd.fixed_weight = !!idd.fixed_weight;
     });
     dispatch(updateItemDefs(result));
+  }
+}
+
+export async function refetchJobCredentials(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPIJobCredentials.fetch();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "JobCredential Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch JobCredential data"} />,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe entries that no longer exist.
+    dispatch(updateJobCredentials(result));
+  }
+}
+
+export async function refetchJobs(dispatch: Dispatch): Promise<void> {
+  const result = await ServerAPIJob.fetch();
+
+  if ("error" in result) {
+    dispatch(
+      showModal({
+        id: "Job Fetch Error",
+        content: () => <BasicDialog title={"Error!"} prompt={"Failed to fetch Job data"} />,
+      })
+    );
+  } else {
+    // Send the whole batch at once so we can axe entries that no longer exist.
+    dispatch(updateJobs(result));
   }
 }
 
@@ -226,6 +262,8 @@ export class GameDefsDataSource extends ExternalDataSource {
         refetchEquipmentSetItems(this.dispatch),
         refetchHarvestingCategories(this.dispatch),
         refetchItemDefs(this.dispatch),
+        refetchJobCredentials(this.dispatch),
+        refetchJobs(this.dispatch),
         refetchProficiencyRolls(this.dispatch),
         refetchResearchCategories(this.dispatch),
         refetchResearchSubcategories(this.dispatch),

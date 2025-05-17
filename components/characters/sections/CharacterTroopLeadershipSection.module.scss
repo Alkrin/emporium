@@ -1,0 +1,82 @@
+.root {
+  @extend .column;
+  width: 17vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.centeredRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.title {
+  @extend .normalText;
+}
+
+.horizontalLine {
+  background-color: yellow;
+  height: 1px;
+  margin-bottom: 0.5vmin;
+}
+
+.categoryTitle {
+  font-size: 0.8rem;
+  color: #ccc;
+  flex-grow: 1;
+}
+
+.categoryValue {
+  font-size: 0.8rem;
+  color: yellow;
+  flex-shrink: 0;
+}
+
+.tooltipRoot {
+  max-width: 45vmin;
+}
+
+.tooltipHeader {
+  @extend .row;
+  justify-content: space-between;
+}
+
+.tooltipTitle {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.tooltipValue {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.tooltipText {
+  font-size: 0.8rem;
+  color: gray;
+  font-style: italic;
+  text-align: justify;
+  white-space: pre-wrap;
+}

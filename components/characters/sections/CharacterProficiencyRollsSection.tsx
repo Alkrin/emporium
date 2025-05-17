@@ -26,6 +26,15 @@ import {
   AbilityComponentProficiencyRollBonusConditionalData,
 } from "../../../staticData/abilityComponents/AbilityComponentProficiencyRollBonusConditional";
 import { TooltipBonusCalculationsPanel } from "../../TooltipBonusCalculationsPanel";
+import {
+  AbilityComponentProficiencyRollMultiTarget,
+  AbilityComponentProficiencyRollMultiTargetData,
+} from "../../../staticData/abilityComponents/AbilityComponentProficiencyRollMultiTarget";
+import { ExpandableSection } from "../../ExpandableSection";
+import {
+  AbilityComponentProficiencyRollBonusByRank,
+  AbilityComponentProficiencyRollBonusByRankData,
+} from "../../../staticData/abilityComponents/AbilityComponentProficiencyRollBonusByRank";
 
 interface ProficiencyRollCalculations {
   bonus: number;
@@ -50,18 +59,8 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
   render(): React.ReactNode {
     const { activeComponents } = this.props;
 
-    if ((activeComponents[AbilityComponentProficiencyRoll.id]?.length ?? 0) > 0) {
-      // Combine any instances that map to the same proficiencyRoll.  This allows us to combine rolls coming from different
-      // sources (e.g. one rank from an item and one rank from a learned proficiency).
-      const combinedRolls: Record<string, AbilityComponentInstance[]> = {};
-      activeComponents[AbilityComponentProficiencyRoll.id].forEach((instance) => {
-        const rollName = this.makeRollName(instance);
-        if (!combinedRolls[rollName]) {
-          combinedRolls[rollName] = [];
-        }
-        combinedRolls[rollName].push(instance);
-      });
-
+    const combinedRolls = this.getCombinedRolls();
+    if (Object.keys(combinedRolls).length > 0) {
       const orderedRollNames = Object.keys(combinedRolls).sort((aName, bName) => {
         return aName.localeCompare(bName);
       });
@@ -72,7 +71,7 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
             <div className={styles.title}>{"Proficiency Rolls"}</div>
           </div>
           <div className={styles.horizontalLine} />
-          {orderedRollNames.map((rollName) => combinedRolls[rollName]).map(this.renderProficiencyRollRow.bind(this))}
+          {orderedRollNames.map((rollName) => combinedRolls[rollName]).map(this.renderProficiencyRoll.bind(this))}
         </div>
       );
     } else {
@@ -82,6 +81,36 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
     }
   }
 
+  private getCombinedRolls(): Record<string, AbilityComponentInstance[]> {
+    const { activeComponents } = this.props;
+    const combinedRolls: Record<string, AbilityComponentInstance[]> = {};
+
+    // Combine any instances that map to the same proficiencyRoll.  This allows us to combine rolls coming from different
+    // sources (e.g. one rank from an item and one rank from a learned proficiency).
+
+    // Single Target Rolls
+    activeComponents[AbilityComponentProficiencyRoll.id].forEach((instance) => {
+      const rollName = this.makeRollName(instance);
+      if (!combinedRolls[rollName]) {
+        combinedRolls[rollName] = [];
+      }
+      combinedRolls[rollName].push(instance);
+    });
+
+    // Multi Target Rolls
+    activeComponents[AbilityComponentProficiencyRollMultiTarget.id].forEach((instance) => {
+      const rollName = this.makeRollName(instance);
+      if (!combinedRolls[rollName]) {
+        combinedRolls[rollName] = [];
+      }
+      combinedRolls[rollName].push(instance);
+    });
+
+    // Note that it is a data error to have a Proficiency Roll be both single target and multi target.
+
+    return combinedRolls;
+  }
+
   private makeRollName(instance: AbilityComponentInstance): string {
     const instanceData = instance.data as AbilityComponentProficiencyRollData;
     const baseName = this.props.allProficiencyRolls[instanceData.proficiency_roll_id].name;
@@ -89,25 +118,96 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
     return instance.subtype.length > 0 ? `${baseName} (${instance.subtype})` : baseName;
   }
 
-  private renderProficiencyRollRow(instances: AbilityComponentInstance[], index: number): React.ReactNode {
+  private renderProficiencyRoll(instances: AbilityComponentInstance[], index: number): React.ReactNode {
+    if (instances[0].abilityComponentId === AbilityComponentProficiencyRoll.id) {
+      // Single target
+      return this.renderProficiencyRollRow(instances, index);
+    } else if (instances[0].abilityComponentId === AbilityComponentProficiencyRollMultiTarget.id) {
+      // Multi target
+      const instanceData = instances[0].data as AbilityComponentProficiencyRollMultiTargetData;
+      const rollDef = this.props.allProficiencyRolls[instances[0].data.proficiency_roll_id];
+      const rollName = this.makeRollName(instances[0]);
+      return (
+        <ExpandableSection
+          key={`RollMulti${index}`}
+          renderHeader={() => {
+            return (
+              <TooltipSource
+                className={styles.listRow}
+                key={`proficiencyRollMulti${index}`}
+                tooltipParams={{
+                  id: rollDef.name,
+                  content: () => {
+                    return (
+                      <div className={styles.tooltipRoot}>
+                        <div className={styles.tooltipHeader}>
+                          <div className={styles.tooltipTitle}>{rollName}</div>
+                        </div>
+                        <div className={styles.tooltipText}>{rollDef.description}</div>
+                      </div>
+                    );
+                  },
+                }}
+              >
+                <div className={styles.listName}>{rollName}</div>
+              </TooltipSource>
+            );
+          }}
+        >
+          {instanceData.targets.map((target, rollIndex) => {
+            return this.renderProficiencyRollRow(instances, index, rollIndex);
+          })}
+        </ExpandableSection>
+      );
+    }
+  }
+
+  private renderProficiencyRollRow(
+    instances: AbilityComponentInstance[],
+    index: number,
+    rollIndex: number = -1
+  ): React.ReactNode {
+    const isMultiTarget = rollIndex !== -1;
     const rollDef = this.props.allProficiencyRolls[instances[0].data.proficiency_roll_id];
     const totalRank = instances.reduce<number>((rankSoFar: number, instance: AbilityComponentInstance) => {
-      const instanceData = instance.data as AbilityComponentProficiencyRollData;
-      // Only component instances that use target_by_rank count towards our rank total.
-      if ((instanceData.target_by_rank?.[0] ?? 0) > 0) {
-        return rankSoFar + instance.rank;
+      if (isMultiTarget) {
+        const instanceData = instance.data as AbilityComponentProficiencyRollMultiTargetData;
+        // Only component instances that use target_by_rank count towards our rank total.
+        if ((instanceData.targets[rollIndex].target_by_rank?.[0] ?? 0) > 0) {
+          return rankSoFar + instance.rank;
+        }
+        return rankSoFar;
+      } else {
+        const instanceData = instance.data as AbilityComponentProficiencyRollData;
+        // Only component instances that use target_by_rank count towards our rank total.
+        if ((instanceData.target_by_rank?.[0] ?? 0) > 0) {
+          return rankSoFar + instance.rank;
+        }
+        return rankSoFar;
       }
-      return rankSoFar;
     }, 0);
 
     // A proficiency roll is either based on Rank or Level.
     const rankRoll = instances.reduce<number>((lowestSoFar, instance) => {
-      const instanceData = instance.data as AbilityComponentProficiencyRollData;
-      return Math.min(lowestSoFar, instanceData.target_by_rank[totalRank - 1] ?? 99);
+      if (isMultiTarget) {
+        const instanceData = instance.data as AbilityComponentProficiencyRollMultiTargetData;
+        return Math.min(lowestSoFar, instanceData.targets[rollIndex].target_by_rank[totalRank - 1] ?? 99);
+      } else {
+        const instanceData = instance.data as AbilityComponentProficiencyRollData;
+        return Math.min(lowestSoFar, instanceData.target_by_rank[totalRank - 1] ?? 99);
+      }
     }, 99);
     const levelRoll = instances.reduce<number>((lowestSoFar, instance) => {
-      const instanceData = instance.data as AbilityComponentProficiencyRollData;
-      return Math.min(lowestSoFar, instanceData.target_by_level[this.props.character.level - 1] ?? 99);
+      if (isMultiTarget) {
+        const instanceData = instance.data as AbilityComponentProficiencyRollMultiTargetData;
+        return Math.min(
+          lowestSoFar,
+          instanceData.targets[rollIndex].target_by_level[this.props.character.level - 1] ?? 99
+        );
+      } else {
+        const instanceData = instance.data as AbilityComponentProficiencyRollData;
+        return Math.min(lowestSoFar, instanceData.target_by_level[this.props.character.level - 1] ?? 99);
+      }
     }, 99);
     // The character gets whichever is best.
     const baseTargetRoll = Math.min(rankRoll, levelRoll);
@@ -124,17 +224,25 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
 
     finalTargetRoll -= calc.bonus;
 
+    let rollName = "";
+    if (isMultiTarget) {
+      const instanceData = instances[0].data as AbilityComponentProficiencyRollMultiTargetData;
+      rollName = instanceData.targets[rollIndex].name;
+    } else {
+      rollName = this.makeRollName(instances[0]);
+    }
+
     return (
       <TooltipSource
-        className={styles.listRow}
-        key={`proficiencyRollRow${index}`}
+        className={isMultiTarget ? styles.listRowMulti : styles.listRow}
+        key={`proficiencyRollRow${index}:${rollIndex}`}
         tooltipParams={{
           id: rollDef.name,
           content: () => {
             return (
               <div className={styles.tooltipRoot}>
                 <div className={styles.tooltipHeader}>
-                  <div className={styles.tooltipTitle}>{this.makeRollName(instances[0])}</div>
+                  <div className={styles.tooltipTitle}>{rollName}</div>
                   <div className={styles.tooltipValue}>{`${finalTargetRoll}+`}</div>
                 </div>
                 <div className={styles.tooltipText}>{rollDef.description}</div>
@@ -154,7 +262,7 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
           },
         }}
       >
-        <div className={styles.listName}>{this.makeRollName(instances[0])}</div>
+        <div className={styles.listName}>{rollName}</div>
         <div className={styles.tooltipValue}>{`${finalTargetRoll}+`}</div>
         {calc.conditionalSources.length > 0 ? <div className={styles.infoAsterisk}>{"*"}</div> : null}
       </TooltipSource>
@@ -187,6 +295,18 @@ class ACharacterProficiencyRollsSection extends React.Component<Props> {
           const name = getAbilityComponentInstanceSourceName(instance);
           calc.sources.push({ name, value: instanceData.bonus });
           calc.bonus += instanceData.bonus;
+        }
+      }
+    );
+
+    (activeComponents[AbilityComponentProficiencyRollBonusByRank.id] ?? []).forEach(
+      (instance: AbilityComponentInstance) => {
+        const instanceData = instance.data as AbilityComponentProficiencyRollBonusByRankData;
+        if (instanceData.proficiency_roll_id === rollDef.id) {
+          const name = getAbilityComponentInstanceSourceName(instance);
+          const bonus: number = instanceData.bonus_by_rank[instance.rank - 1] ?? 0;
+          calc.sources.push({ name, value: bonus });
+          calc.bonus += bonus;
         }
       }
     );

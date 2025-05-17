@@ -16,6 +16,8 @@ import { DatabaseProficiencyRollsDialog } from "./DatabaseProficiencyRollsDialog
 import { DatabaseResearchCategoriesDialog } from "./DatabaseResearchCategoriesDialog";
 import { DatabaseResearchSubcategoriesDialog } from "./DatabaseResearchSubcategoriesDialog";
 import { DatabaseHarvestingCategoriesDialog } from "./DatabaseHarvestingCategoriesDialog";
+import { DatabaseJobCredentialsDialog } from "./DatabaseJobCredentialsDialog";
+import { DatabaseJobsDialog } from "./DatabaseJobsDialog";
 
 interface ReactProps {}
 
@@ -43,6 +45,12 @@ class ADatabasePanel extends React.Component<Props> {
         </div>
         <div className={styles.dataButton} onClick={this.onItemsClicked.bind(this)}>
           {"Items"}
+        </div>
+        <div className={styles.dataButton} onClick={this.onJobCredentialsClicked.bind(this)}>
+          {"Job Credentials"}
+        </div>
+        <div className={styles.dataButton} onClick={this.onJobsClicked.bind(this)}>
+          {"Jobs"}
         </div>
         <div className={styles.dataButton} onClick={this.onProficiencyRollsClicked.bind(this)}>
           {"Proficiency Rolls"}
@@ -117,6 +125,28 @@ class ADatabasePanel extends React.Component<Props> {
         id: "DatabaseItems",
         content: () => {
           return <DatabaseItemsDialog />;
+        },
+      })
+    );
+  }
+
+  private onJobCredentialsClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseJobCredentials",
+        content: () => {
+          return <DatabaseJobCredentialsDialog />;
+        },
+      })
+    );
+  }
+
+  private onJobsClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseJobs",
+        content: () => {
+          return <DatabaseJobsDialog />;
         },
       })
     );

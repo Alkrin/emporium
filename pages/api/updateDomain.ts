@@ -11,7 +11,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     // Update the domain itself.
     queries.push({
-      query: `UPDATE domains SET frontier_population=?,current_morale=?,last_updated_date WHERE id=?`,
+      query: `UPDATE domains SET frontier_population=?,current_morale=?,last_updated_date=? WHERE id=?`,
       values: [b.frontier_population, b.morale, getFirstOfThisMonthDateString(), b.domain_id],
     });
 

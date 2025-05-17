@@ -74,6 +74,12 @@
   }
 }
 
+.listRowMulti {
+  @extend .listRow;
+  margin-left: 1vmin;
+  background-color: rgba(150, 150, 255, 0.1);
+}
+
 .listName {
   flex-grow: 1;
   font-size: 1rem;

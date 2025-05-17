@@ -83,6 +83,7 @@ import { CharacterAlignmentSection } from "./sections/CharacterAlignmentSection"
 import { CharacterStorageSection } from "./sections/CharacterStorageSection";
 import { CharacterContractsSection } from "./sections/CharacterContractsSection";
 import { CharacterDomainSection } from "./sections/CharacterDomainSection";
+import { CharacterTroopLeadershipSection } from "./sections/CharacterTroopLeadershipSection";
 
 interface ReactProps {
   characterId: number;
@@ -252,6 +253,8 @@ class ACharacterSheet extends React.Component<Props> {
             <CharacterInitiativeSection characterId={this.props.characterId} activeComponents={activeComponents} />
             <div className={styles.verticalSpacer} />
             <CharacterCombatSection characterId={this.props.characterId} activeComponents={activeComponents} />
+            <div className={styles.verticalSpacer} />
+            <CharacterTroopLeadershipSection characterId={this.props.characterId} activeComponents={activeComponents} />
           </div>
           <div className={styles.horizontalSpacer} />
           <div className={styles.column}>
