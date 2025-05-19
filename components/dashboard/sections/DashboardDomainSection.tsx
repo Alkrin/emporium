@@ -54,6 +54,10 @@ type Props = ReactProps & InjectedProps;
 
 class ADashboardDomainSection extends React.Component<Props> {
   render(): React.ReactNode {
+    if (!this.props.character) {
+      return null;
+    }
+
     const domain = Object.values(this.props.allDomains).find(
       (d) => d.ruler_character_id === this.props.dashboardCharacterId
     );
