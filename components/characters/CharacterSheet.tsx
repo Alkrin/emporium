@@ -84,6 +84,7 @@ import { CharacterStorageSection } from "./sections/CharacterStorageSection";
 import { CharacterContractsSection } from "./sections/CharacterContractsSection";
 import { CharacterDomainSection } from "./sections/CharacterDomainSection";
 import { CharacterTroopLeadershipSection } from "./sections/CharacterTroopLeadershipSection";
+import { CharacterHPSection } from "./sections/CharacterHPSection";
 
 interface ReactProps {
   characterId: number;
@@ -260,7 +261,7 @@ class ACharacterSheet extends React.Component<Props> {
           <div className={styles.column}>
             {this.renderMoneyPanel()}
             <div className={styles.verticalSpacer} />
-            {this.renderHPPanel()}
+            <CharacterHPSection characterId={this.props.characterId} activeComponents={activeComponents} />
             <div className={styles.verticalSpacer} />
             <CharacterEquipmentSection characterId={this.props.characterId} activeComponents={activeComponents} />
             <div className={styles.verticalSpacer} />
@@ -1272,7 +1273,7 @@ class ACharacterSheet extends React.Component<Props> {
           <div className={styles.statsContainer}>
             {this.renderStatPane("STR", this.props.character.strength, this.renderStrengthTooltip.bind(this))}
             {this.renderStatPane("INT", this.props.character.intelligence, this.renderIntelligenceTooltip.bind(this))}
-            {this.renderStatPane("WIS", this.props.character.wisdom, this.renderWisdomTooltip.bind(this))}
+            {this.renderStatPane("WIS", this.props.character.will, this.renderWisdomTooltip.bind(this))}
             {this.renderStatPane("DEX", this.props.character.dexterity, this.renderDexterityTooltip.bind(this))}
             {this.renderStatPane("CON", this.props.character.constitution, this.renderConstitutionTooltip.bind(this))}
             {this.renderStatPane("CHA", this.props.character.charisma, this.renderCharismaTooltip.bind(this))}

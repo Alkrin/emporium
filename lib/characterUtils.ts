@@ -160,6 +160,33 @@ export function getCharacterMaxHP(character: CharacterData): number {
   return maxHP;
 }
 
+export function getCharacterMaxHPv2(
+  character: CharacterData,
+  activeComponents: Record<string, AbilityComponentInstance[]>
+): number {
+  const redux = store.getState();
+  const characterClass = redux.gameDefs.characterClasses[character.class_id];
+  const constitution = getCharacterStatv2(character, CharacterStat.Constitution, activeComponents);
+  const conBonus = getStatBonusForValue(constitution);
+
+  let maxHP = 0;
+  // Only count hit dice up to the character's current level.  That way we can still have records
+  // of previous values if the player gets de-leveled by a vampire or something.
+
+  for (let i = 0; i < character.level; ++i) {
+    if (i <= 9) {
+      // Add at least one hp per level, but modified by con (which may be negative).
+      const hp = Math.max(1, conBonus + (character.hit_dice[i] ?? 0));
+      maxHP += hp;
+    } else {
+      // Add hp step bonus for all levels 10+.
+      maxHP += characterClass.hp_step;
+    }
+  }
+
+  return maxHP;
+}
+
 export function getCharacterStat(character: CharacterData, stat: CharacterStat): number {
   switch (stat) {
     case CharacterStat.Strength:
@@ -167,7 +194,7 @@ export function getCharacterStat(character: CharacterData, stat: CharacterStat):
     case CharacterStat.Intelligence:
       return character.intelligence;
     case CharacterStat.Will:
-      return character.wisdom;
+      return character.will;
     case CharacterStat.Dexterity:
       return character.dexterity;
     case CharacterStat.Constitution:
@@ -201,7 +228,7 @@ export function getCharacterStatv2(
       break;
     }
     case CharacterStat.Will: {
-      statValue = character.wisdom;
+      statValue = character.will;
       break;
     }
     case CharacterStat.Dexterity: {

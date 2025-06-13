@@ -57,7 +57,7 @@ class ASelectAdventurerDialog extends React.Component<Props, State> {
                   level: 0,
                   strength: 0,
                   intelligence: 0,
-                  wisdom: 0,
+                  will: 0,
                   dexterity: 0,
                   constitution: 0,
                   charisma: 0,

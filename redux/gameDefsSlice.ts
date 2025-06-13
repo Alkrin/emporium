@@ -37,6 +37,7 @@ export interface GameDefsReduxState {
   contracts: Record<number, ContractDefData>;
   equipmentSets: Record<number, EquipmentSetData>;
   equipmentSetsByClass: Record<string, EquipmentSetData[]>;
+  equipmentSetsByClassv2: Record<number, EquipmentSetData[]>;
   equipmentSetItemsBySet: Record<number, EquipmentSetItemData[]>;
   harvestingCategories: Record<number, HarvestingCategoryData>;
   items: Record<number, ItemDefData>;
@@ -57,6 +58,7 @@ function buildDefaultGameDefsReduxState(): GameDefsReduxState {
     contracts: buildContractDefs(),
     equipmentSets: {},
     equipmentSetsByClass: {},
+    equipmentSetsByClassv2: {},
     equipmentSetItemsBySet: {},
     harvestingCategories: {},
     items: {},
@@ -315,12 +317,17 @@ export const gameDefsSlice = createSlice({
       // Start empty.
       const p: Dictionary<EquipmentSetData[]> = {};
       const q: Dictionary<EquipmentSetData> = {};
+      const r: Record<number, EquipmentSetData[]> = {};
       action.payload.forEach((equipmentSet) => {
         q[equipmentSet.id] = equipmentSet;
         if (!p[equipmentSet.class_name]) {
           p[equipmentSet.class_name] = [];
         }
         p[equipmentSet.class_name].push(equipmentSet);
+        if (!r[equipmentSet.class_id]) {
+          r[equipmentSet.class_id] = [];
+        }
+        r[equipmentSet.class_id].push(equipmentSet);
       });
       // Sort equipment sets by name.
       Object.values(p).forEach((classSets) => {
@@ -331,6 +338,7 @@ export const gameDefsSlice = createSlice({
       // Then replace the whole data set in Redux.
       state.equipmentSets = q;
       state.equipmentSetsByClass = p;
+      state.equipmentSetsByClassv2 = r;
     },
     updateEquipmentSetItems: (state: GameDefsReduxState, action: PayloadAction<EquipmentSetItemData[]>) => {
       // Start empty.
@@ -353,11 +361,20 @@ export const gameDefsSlice = createSlice({
           return setData.id !== action.payload.id;
         });
       });
+      Object.entries(state.equipmentSetsByClassv2).forEach(([class_id, equipmentSets]) => {
+        state.equipmentSetsByClassv2[+class_id] = equipmentSets.filter((setData) => {
+          return setData.id !== action.payload.id;
+        });
+      });
       // Push the set into its appropriate class location.
       if (!state.equipmentSetsByClass[action.payload.class_name]) {
         state.equipmentSetsByClass[action.payload.class_name] = [];
       }
       state.equipmentSetsByClass[action.payload.class_name].push(action.payload);
+      if (!state.equipmentSetsByClassv2[action.payload.class_id]) {
+        state.equipmentSetsByClassv2[action.payload.class_id] = [];
+      }
+      state.equipmentSetsByClassv2[action.payload.class_id].push(action.payload);
     },
     updateItemsForEquipmentSet: (
       state: GameDefsReduxState,
@@ -373,6 +390,11 @@ export const gameDefsSlice = createSlice({
       delete state.equipmentSetItemsBySet[setId];
       Object.entries(state.equipmentSetsByClass).forEach(([class_name, equipmentSets]) => {
         state.equipmentSetsByClass[class_name] = equipmentSets.filter((setData) => {
+          return setData.id !== setId;
+        });
+      });
+      Object.entries(state.equipmentSetsByClassv2).forEach(([class_id, equipmentSets]) => {
+        state.equipmentSetsByClassv2[+class_id] = equipmentSets.filter((setData) => {
           return setData.id !== setId;
         });
       });

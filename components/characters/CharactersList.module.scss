@@ -9,6 +9,16 @@
   flex-grow: 1;
 }
 
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
 .headerContainer {
   position: relative;
   display: flex;
@@ -16,12 +26,29 @@
   font-size: 1rem;
 }
 
+.newCharacterRow {
+  @extend .row;
+  justify-content: flex-end;
+}
+
 .newCharacterButton {
   box-shadow: inset 0 0 0 2px orange;
   font-size: 1.5rem;
   padding: 1vmin 0.5vmin;
   color: wheat;
-  align-self: flex-end;
+  cursor: pointer;
+
+  &:hover {
+    color: red;
+  }
+}
+
+.newCharacterButtonv2 {
+  margin-left: 1vmin;
+  box-shadow: inset 0 0 0 2px orange;
+  font-size: 1.5rem;
+  padding: 1vmin 0.5vmin;
+  color: wheat;
   cursor: pointer;
 
   &:hover {

@@ -5,6 +5,7 @@ import { Dictionary } from "../../lib/dictionary";
 import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import ServerAPI, {
+  CharacterClassv2,
   CharacterEquipmentSlots,
   EquipmentSetData,
   EquipmentSetItemData,
@@ -12,7 +13,6 @@ import ServerAPI, {
 } from "../../serverAPI";
 import styles from "./DatabaseEquipmentSetsDialog.module.scss";
 import { SearchableDefList } from "./SearchableDefList";
-import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { deleteEquipmentSet, updateEquipmentSet, updateItemsForEquipmentSet } from "../../redux/gameDefsSlice";
 import { AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { getEquippableItemsForSlot } from "../../lib/characterUtils";
@@ -25,6 +25,7 @@ interface State {
   isSaving: boolean;
   name: string;
   class_name: string;
+  class_id: number;
   items: EquipmentSetItemData[];
 }
 
@@ -33,6 +34,7 @@ const defaultState: State = {
   isSaving: false,
   name: "",
   class_name: "---",
+  class_id: 0,
   items: [],
 };
 
@@ -42,6 +44,7 @@ interface InjectedProps {
   allEquipmentSets: Dictionary<EquipmentSetData>;
   allEquipmentSetItems: Dictionary<EquipmentSetItemData[]>;
   allItemDefs: Dictionary<ItemDefData>;
+  allCharacterClasses: Record<number, CharacterClassv2>;
 
   dispatch?: Dispatch;
 }
@@ -133,7 +136,7 @@ class ADatabaseEquipmentSetsDialog extends React.Component<Props, State> {
   private renderNameSection(): React.ReactNode {
     return (
       <div className={styles.row}>
-        <div className={styles.firstLabel}>Name</div>
+        <div className={styles.firstLabel}>{"Name"}</div>
         <input
           className={styles.nameField}
           type={"text"}
@@ -150,28 +153,52 @@ class ADatabaseEquipmentSetsDialog extends React.Component<Props, State> {
 
   private renderClassSection(): React.ReactNode {
     return (
-      <div className={styles.row}>
-        <div className={styles.firstLabel}>Class</div>
-        <select
-          className={styles.classSelector}
-          value={this.state.class_name}
-          onChange={(e) => {
-            this.setState({
-              class_name: e.target.value,
-            });
-          }}
-          tabIndex={this.nextTabIndex++}
-        >
-          <option value={"---"}>---</option>
-          {AllClassesArray.map(({ name }) => {
-            return (
-              <option value={name} key={`class${name}`}>
-                {name}
-              </option>
-            );
-          })}
-        </select>
-      </div>
+      <>
+        <div className={styles.row}>
+          <div className={styles.firstLabel}>{"Class"}</div>
+          <select
+            className={styles.classSelector}
+            value={this.state.class_name}
+            onChange={(e) => {
+              this.setState({
+                class_name: e.target.value,
+              });
+            }}
+            tabIndex={this.nextTabIndex++}
+          >
+            <option value={"---"}>---</option>
+            {AllClassesArray.map(({ name }) => {
+              return (
+                <option value={name} key={`class${name}`}>
+                  {name}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.firstLabel}>{"Class v2"}</div>
+          <select
+            className={styles.classSelector}
+            value={this.state.class_id}
+            onChange={(e) => {
+              this.setState({
+                class_id: +e.target.value,
+              });
+            }}
+            tabIndex={this.nextTabIndex++}
+          >
+            <option value={0}>---</option>
+            {this.getSortedClasses().map(({ id, name }) => {
+              return (
+                <option value={id} key={`class${name}`}>
+                  {name}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+      </>
     );
   }
 
@@ -326,6 +353,7 @@ class ADatabaseEquipmentSetsDialog extends React.Component<Props, State> {
       id: this.state.selectedSetId,
       name: this.state.name,
       class_name: this.state.class_name,
+      class_id: this.state.class_id,
     };
 
     if (this.state.selectedSetId === -1) {
@@ -444,17 +472,27 @@ class ADatabaseEquipmentSetsDialog extends React.Component<Props, State> {
       })
     );
   }
+
+  private getSortedClasses(): CharacterClassv2[] {
+    const res: CharacterClassv2[] = Object.values(this.props.allCharacterClasses).sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+
+    return res;
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const allEquipmentSets = state.gameDefs.equipmentSets;
   const allItemDefs = state.gameDefs.items;
   const allEquipmentSetItems = state.gameDefs.equipmentSetItemsBySet;
+  const { characterClasses: allCharacterClasses } = state.gameDefs;
   return {
     ...props,
     allEquipmentSets,
     allItemDefs,
     allEquipmentSetItems,
+    allCharacterClasses,
   };
 }
 

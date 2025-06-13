@@ -12,7 +12,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     // Create the new character.
     queries.push({
-      query: `INSERT INTO characters (user_id,name,gender,portrait_url,class_name,class_id,subclass_id,level,strength,intelligence,wisdom,dexterity,constitution,charisma,xp,hp,hit_dice,location_id,maintenance_date,maintenance_paid,proficiencies,languages) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      query: `INSERT INTO characters (user_id,name,gender,portrait_url,class_name,class_id,subclass_id,level,strength,intelligence,will,dexterity,constitution,charisma,xp,hp,hit_dice,location_id,maintenance_date,maintenance_paid,proficiencies,languages) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       values: [
         b.user_id,
         b.name,
@@ -24,7 +24,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         b.level,
         b.strength,
         b.intelligence,
-        b.wisdom,
+        b.will,
         b.dexterity,
         b.constitution,
         b.charisma,

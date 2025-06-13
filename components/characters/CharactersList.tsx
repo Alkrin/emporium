@@ -21,6 +21,9 @@ import {
   isFilterMetOwner,
   isFilterMetProficiency,
 } from "../FilterDropdowns";
+import { showModal } from "../../redux/modalsSlice";
+import { CreateCharacterDialog } from "./CreateCharacterDialog";
+import { getCharacterSupportsV2 } from "../../lib/characterUtils";
 
 interface State {
   filters: FilterValues;
@@ -58,8 +61,13 @@ class ACharactersList extends React.Component<Props, State> {
     return (
       <div className={styles.root}>
         <div className={styles.headerContainer}>
-          <div className={styles.newCharacterButton} onClick={this.onCreateNewClicked.bind(this)}>
-            {"Add New Character"}
+          <div className={styles.newCharacterRow}>
+            <div className={styles.newCharacterButton} onClick={this.onCreateNewClicked.bind(this)}>
+              {"Add New Character"}
+            </div>
+            <div className={styles.newCharacterButtonv2} onClick={this.onCreateNewClickedv2.bind(this)}>
+              {"Add v2"}
+            </div>
           </div>
           {"Filters"}
           <div className={styles.filtersContainer}>
@@ -116,14 +124,25 @@ class ACharactersList extends React.Component<Props, State> {
     // Editing also selects the character.
     this.onCharacterRowClick(characterId);
     // Open the characterCreator in edit mode.
-    this.props.dispatch?.(
-      showSubPanel({
-        id: "EditCharacter",
-        content: () => {
-          return <CreateCharacterSubPanel isEditMode />;
-        },
-      })
-    );
+    if (getCharacterSupportsV2(this.props.characters[characterId])) {
+      this.props.dispatch?.(
+        showModal({
+          id: "EditCharacterv2",
+          content: () => {
+            return <CreateCharacterDialog isEditMode />;
+          },
+        })
+      );
+    } else {
+      this.props.dispatch?.(
+        showSubPanel({
+          id: "EditCharacter",
+          content: () => {
+            return <CreateCharacterSubPanel isEditMode />;
+          },
+        })
+      );
+    }
   }
 
   private sortPermittedCharacters(): CharacterData[] {
@@ -168,6 +187,17 @@ class ACharactersList extends React.Component<Props, State> {
         id: "CreateNewCharacter",
         content: () => {
           return <CreateCharacterSubPanel />;
+        },
+      })
+    );
+  }
+
+  private onCreateNewClickedv2(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "CreateNewCharacterv2",
+        content: () => {
+          return <CreateCharacterDialog />;
         },
       })
     );

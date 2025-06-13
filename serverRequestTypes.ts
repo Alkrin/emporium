@@ -77,7 +77,7 @@ export interface RequestBody_CreateOrEditCharacter {
   level: number;
   strength: number;
   intelligence: number;
-  wisdom: number;
+  will: number;
   dexterity: number;
   constitution: number;
   charisma: number;
