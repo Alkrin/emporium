@@ -17,7 +17,7 @@ import { SelectAdventurersDialog } from "../../dialogs/SelectAdventurersDialog";
 import { SelectSpellsDialog } from "../../dialogs/SelectSpellsDialog";
 import { ResizeDetector } from "../../ResizeDetector";
 import { getItemNameText } from "../../../lib/itemUtils";
-import { DBButton } from "../../DBButton";
+import { DatabaseButton } from "../../DatabaseButton";
 import { DatabaseItemsDialog } from "../../database/DatabaseItemsDialog";
 
 interface State {
@@ -85,7 +85,7 @@ class ACreateItemDialog extends React.Component<Props, State> {
                 return <ItemTooltip itemDefId={def.id} />;
               }}
             />
-            <DBButton className={styles.dbButton} onClick={this.onCreateItemDefClicked.bind(this)} />
+            <DatabaseButton className={styles.databaseButton} onClick={this.onCreateItemDefClicked.bind(this)} />
           </div>
           <div className={styles.instancePanel}>
             <ResizeDetector

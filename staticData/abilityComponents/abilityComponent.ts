@@ -7,7 +7,6 @@ import { AbilityComponentRangedDamageByLevel } from "./AbilityComponentRangedDam
 import { AbilityComponentResearchCapability } from "./AbilityComponentResearchCapability";
 import { AbilityComponentResearchBonusesOrEffectiveLevel } from "./AbilityComponentResearchBonusesOrEffectiveLevel";
 import { AbilityComponentHarvestingCapability } from "./AbilityComponentHarvestingCapability";
-import { AbilityComponentAvailableJob } from "./AbilityComponentAvailableJob";
 import { AbilityComponentReactionRollBonusConditional } from "./AbilityComponentReactionRollBonusConditional";
 import { AbilityComponentReactionRollBonusStatic } from "./AbilityComponentReactionRollBonusStatic";
 import { AbilityComponentInitiativeBonusConditional } from "./AbilityComponentInitiativeBonusConditional";
@@ -39,7 +38,6 @@ export interface AbilityComponent {
 
 export const AllAbilityComponents: Dictionary<AbilityComponent> = {
   [AbilityComponentArmorStatic.id]: AbilityComponentArmorStatic,
-  [AbilityComponentAvailableJob.id]: AbilityComponentAvailableJob,
   [AbilityComponentCharacterStatBonus.id]: AbilityComponentCharacterStatBonus,
   [AbilityComponentCharacterStatOverride.id]: AbilityComponentCharacterStatOverride,
   [AbilityComponentDomainMoraleBonusStatic.id]: AbilityComponentDomainMoraleBonusStatic,

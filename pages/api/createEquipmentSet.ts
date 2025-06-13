@@ -10,8 +10,8 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     // The set itself.
     queries.push({
-      query: `INSERT INTO equipment_sets (name,class_name) VALUES (?,?)`,
-      values: [b.setData.name, b.setData.class_name],
+      query: `INSERT INTO equipment_sets (name,class_name,class_id) VALUES (?,?,?)`,
+      values: [b.setData.name, b.setData.class_name, b.setData.class_id],
     });
 
     queries.push({

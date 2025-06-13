@@ -8,9 +8,9 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../redux/store";
-import styles from "./DBButton.module.scss";
+import styles from "./DatabaseButton.module.scss";
 
-interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface ReactProps extends React.HTMLAttributes<HTMLButtonElement> {}
 
 interface InjectedProps {
   dispatch?: Dispatch<any>;
@@ -18,10 +18,10 @@ interface InjectedProps {
 
 type Props = ReactProps & InjectedProps;
 
-class ADBButton extends React.Component<Props> {
+class ADatabaseButton extends React.Component<Props> {
   public render(): React.ReactNode {
     const { dispatch, className, ...otherProps } = this.props;
-    return <div className={`${styles.root} ${className}`} {...otherProps}></div>;
+    return <button className={`${styles.root} ${className}`} {...otherProps}></button>;
   }
 }
 
@@ -31,4 +31,4 @@ function mapStateToProps(state: RootState, ownProps: ReactProps): Props {
   };
 }
 
-export const DBButton = connect(mapStateToProps)(ADBButton);
+export const DatabaseButton = connect(mapStateToProps)(ADatabaseButton);

@@ -10,7 +10,7 @@ import { connect } from "react-redux";
 import { RootState } from "../redux/store";
 import styles from "./EditButton.module.scss";
 
-interface ReactProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface ReactProps extends React.HTMLAttributes<HTMLButtonElement> {}
 
 interface InjectedProps {
   dispatch?: Dispatch<any>;
@@ -21,7 +21,7 @@ type Props = ReactProps & InjectedProps;
 class AEditButton extends React.Component<Props> {
   public render(): React.ReactNode {
     const { dispatch, className, ...otherProps } = this.props;
-    return <div className={`${styles.root} ${className}`} {...otherProps}></div>;
+    return <button className={`${styles.root} ${className}`} {...otherProps}></button>;
   }
 }
 

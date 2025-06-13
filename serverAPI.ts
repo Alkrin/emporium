@@ -361,7 +361,7 @@ export interface CharacterData extends CharacterEquipmentData {
   level: number;
   strength: number;
   intelligence: number;
-  wisdom: number;
+  will: number;
   dexterity: number;
   constitution: number;
   charisma: number;
@@ -451,6 +451,7 @@ export interface EquipmentSetData {
   id: number;
   name: string;
   class_name: string;
+  class_id: number;
 }
 
 export interface EquipmentSetItemData {

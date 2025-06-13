@@ -6,7 +6,9 @@ import { hideModal, showModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import { hideSubPanel } from "../../redux/subPanelsSlice";
 import ServerAPI, {
+  AbilityDefData,
   CharacterAlignment,
+  CharacterClassv2,
   CharacterData,
   EquipmentSetData,
   EquipmentSetItemData,
@@ -16,18 +18,22 @@ import ServerAPI, {
   ProficiencyData,
   emptyEquipmentData,
 } from "../../serverAPI";
-import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
 import { CharacterStat } from "../../staticData/types/characterClasses";
-import styles from "./CreateCharacterSubPanel.module.scss";
-import { getAllCharacterAssociatedItemIds, getCharacterMaxHP, randomInt, rollDice } from "../../lib/characterUtils";
+import styles from "./CreateCharacterDialog.module.scss";
+import {
+  getActiveAbilityComponentsForCharacter,
+  getAllCharacterAssociatedItemIds,
+  getCharacterMaxHP,
+  getCharacterMaxHPv2,
+  randomInt,
+  rollDice,
+} from "../../lib/characterUtils";
 import { deleteCharacter, setActiveCharacterId, unsetAllHenchmenForCharacter } from "../../redux/charactersSlice";
 import { deleteItem } from "../../redux/itemsSlice";
 import { deleteProficienciesForCharacter } from "../../redux/proficienciesSlice";
 import { deleteSpellbook } from "../../redux/spellbooksSlice";
 import { deleteRepertoireForCharacter } from "../../redux/repertoiresSlice";
 import { refetchProficiencies } from "../../dataSources/ProficienciesDataSource";
-import { AbilityFilter } from "../../staticData/types/abilitiesAndProficiencies";
-import { SubPanelCloseButton } from "../SubPanelCloseButton";
 import { Dictionary } from "../../lib/dictionary";
 import { RequestField_StartingEquipmentData } from "../../serverRequestTypes";
 import { refetchItems } from "../../dataSources/ItemsDataSource";
@@ -37,6 +43,9 @@ import { getFirstOfThisMonthDateString } from "../../lib/stringUtils";
 import { refetchContracts } from "../../dataSources/ContractsDataSource";
 import { refetchStorages } from "../../dataSources/StoragesDataSource";
 import { BasicDialog } from "../dialogs/BasicDialog";
+import { ModalCloseButton } from "../ModalCloseButton";
+import { DatabaseButton } from "../DatabaseButton";
+import { DatabaseEquipmentSetsDialog } from "../database/DatabaseEquipmentSetsDialog";
 
 interface State {
   nameText: string;
@@ -44,7 +53,6 @@ interface State {
   alignment: CharacterAlignment;
   level: number;
   xp: number;
-  class: string;
   class_id: number;
   subclass_id: string;
   equipmentSetId: number;
@@ -70,15 +78,18 @@ interface InjectedProps {
   selectedCharacter?: CharacterData;
   selectedCharacterProficiencies?: ProficiencyData[];
   equipmentSetsByClass: Dictionary<EquipmentSetData[]>;
+  equipmentSetsByClassv2: Record<number, EquipmentSetData[]>;
   equipmentSetItemsBySet: Dictionary<EquipmentSetItemData[]>;
   allItemDefs: Dictionary<ItemDefData>;
   allLocations: Dictionary<LocationData>;
+  allAbilityDefs: Record<number, AbilityDefData>;
+  allCharacterClasses: Record<number, CharacterClassv2>;
   dispatch?: Dispatch;
 }
 
 type Props = ReactProps & InjectedProps;
 
-class ACreateCharacterSubPanel extends React.Component<Props, State> {
+class ACreateCharacterDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
@@ -106,7 +117,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           alignment: props.selectedCharacter.alignment,
           level: props.selectedCharacter.level,
           xp: props.selectedCharacter.xp,
-          class: props.selectedCharacter.class_name,
           class_id: props.selectedCharacter.class_id,
           subclass_id: props.selectedCharacter.subclass_id,
           equipmentSetId: 0,
@@ -130,7 +140,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
         alignment: CharacterAlignment.Lawful,
         level: 1,
         xp: 0,
-        class: "---",
         class_id: 0,
         subclass_id: "",
         equipmentSetId: 0,
@@ -154,20 +163,20 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
   }
 
   render(): React.ReactNode {
-    const selectedClass = AllClasses[this.state.class];
+    const selectedClass = this.props.allCharacterClasses[this.state.class_id];
 
-    const maxLevel = selectedClass?.xpToLevel.length ?? 1;
+    const maxLevel = selectedClass?.max_level ?? 1;
     if (this.state.level > maxLevel) {
       requestAnimationFrame(() => {
         this.setState({
           level: maxLevel,
-          hitDice: this.state.hitDice.slice(0, maxLevel - 1),
+          hitDice: this.state.hitDice.slice(0, Math.min(maxLevel - 1, 8)),
         });
       });
     }
 
-    const minXP = selectedClass?.xpToLevel[this.state.level - 1] ?? 0;
-    const maxXP = selectedClass?.xpToLevel[this.state.level] ?? "???";
+    const minXP = selectedClass?.xp_to_level[this.state.level - 1] ?? 0;
+    const maxXP = selectedClass?.xp_to_level[this.state.level] ?? "???";
 
     if (this.state.xp < minXP) {
       requestAnimationFrame(() => {
@@ -175,58 +184,56 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       });
     }
 
-    const minStrength = selectedClass?.statRequirements[CharacterStat.Strength] ?? 3;
+    const minStrength = selectedClass?.stat_requirements[CharacterStat.Strength] ?? 3;
     if (this.state.strength < minStrength) {
       requestAnimationFrame(() => {
         this.setState({ strength: minStrength });
       });
     }
-    const minIntelligence = selectedClass?.statRequirements[CharacterStat.Intelligence] ?? 3;
+    const minIntelligence = selectedClass?.stat_requirements[CharacterStat.Intelligence] ?? 3;
     if (this.state.intelligence < minIntelligence) {
       requestAnimationFrame(() => {
         this.setState({ intelligence: minIntelligence });
       });
     }
-    const minWill = selectedClass?.statRequirements[CharacterStat.Will] ?? 3;
+    const minWill = selectedClass?.stat_requirements[CharacterStat.Will] ?? 3;
     if (this.state.will < minWill) {
       requestAnimationFrame(() => {
         this.setState({ will: minWill });
       });
     }
-    const minDexterity = selectedClass?.statRequirements[CharacterStat.Dexterity] ?? 3;
+    const minDexterity = selectedClass?.stat_requirements[CharacterStat.Dexterity] ?? 3;
     if (this.state.dexterity < minDexterity) {
       requestAnimationFrame(() => {
         this.setState({ dexterity: minDexterity });
       });
     }
-    const minConstitution = selectedClass?.statRequirements[CharacterStat.Constitution] ?? 3;
+    const minConstitution = selectedClass?.stat_requirements[CharacterStat.Constitution] ?? 3;
     if (this.state.constitution < minConstitution) {
       requestAnimationFrame(() => {
         this.setState({ constitution: minConstitution });
       });
     }
-    const minCharisma = selectedClass?.statRequirements[CharacterStat.Charisma] ?? 3;
+    const minCharisma = selectedClass?.stat_requirements[CharacterStat.Charisma] ?? 3;
     if (this.state.charisma < minCharisma) {
       requestAnimationFrame(() => {
         this.setState({ charisma: minCharisma });
       });
     }
 
-    const primeRequisites = selectedClass?.primeRequisites ?? [];
+    const primeRequisites = selectedClass?.prime_requisites ?? [];
 
-    const hitDieSize = selectedClass?.hitDieSize ?? 4;
-
-    let nextTabIndex: number = 1;
+    const hitDieSize = selectedClass?.hit_die_size ?? 4;
 
     return (
       <div className={styles.root}>
         <div className={styles.titleLabel}>
           {this.props.isEditMode
-            ? `Editing Character #${this.props.selectedCharacter?.id} (${this.props.selectedCharacter?.name})`
-            : "Create New Character"}
+            ? `Editing Character v2 #${this.props.selectedCharacter?.id} (${this.props.selectedCharacter?.name})`
+            : "Create New Character v2"}
         </div>
         <div className={styles.contentRow}>
-          <div className={styles.nameLabel}>Name</div>
+          <div className={styles.nameLabel}>{"Name"}</div>
           <input
             className={styles.nameTextField}
             type={"text"}
@@ -234,7 +241,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             onChange={(e) => {
               this.setState({ nameText: e.target.value });
             }}
-            tabIndex={nextTabIndex++}
             spellCheck={false}
             autoFocus={true}
           />
@@ -253,7 +259,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
               onChange={(e) => {
                 this.setState({ gender: e.target.value as Gender });
               }}
-              tabIndex={nextTabIndex++}
             />
             <span className={styles.radioLabel}>{"Male"}</span>
             <input
@@ -293,7 +298,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
               onChange={(e) => {
                 this.setState({ alignment: e.target.value as CharacterAlignment });
               }}
-              tabIndex={nextTabIndex++}
             />
             <span className={styles.radioLabel}>{CharacterAlignment.Lawful}</span>
             <input
@@ -305,7 +309,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
               onChange={(e) => {
                 this.setState({ alignment: e.target.value as CharacterAlignment });
               }}
-              tabIndex={nextTabIndex++}
             />
             <span className={styles.radioLabel}>{CharacterAlignment.Neutral}</span>
             <input
@@ -317,20 +320,19 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
               onChange={(e) => {
                 this.setState({ alignment: e.target.value as CharacterAlignment });
               }}
-              tabIndex={nextTabIndex++}
             />
             <span className={styles.radioLabel}>{CharacterAlignment.Chaotic}</span>
           </div>
         </div>
 
         <div className={styles.contentRow}>
-          <div className={styles.classLabel}>Class</div>
+          <div className={styles.classLabel}>{"Class"}</div>
           <select
             className={styles.classSelector}
-            value={this.state.class}
+            value={this.state.class_id}
             onChange={(e) => {
               this.setState({
-                class: e.target.value,
+                class_id: +e.target.value,
                 selectableValues: [
                   ["---", "", 0],
                   ["---", "", 0],
@@ -340,19 +342,18 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 equipmentSetId: 0,
               });
             }}
-            tabIndex={nextTabIndex++}
           >
-            <option value={"---"}>---</option>
-            {AllClassesArray.map(({ name }) => {
+            <option value={0}>{"---"}</option>
+            {this.getSortedClasses().map(({ id, name }) => {
               return (
-                <option value={name} key={`class${name}`}>
+                <option value={id} key={`class${id}`}>
                   {name}
                 </option>
               );
             })}
           </select>
 
-          <div className={styles.levelLabel}>Level</div>
+          <div className={styles.levelLabel}>{"Level"}</div>
           <input
             className={styles.levelTextField}
             type={"number"}
@@ -361,19 +362,20 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             max={maxLevel}
             onChange={(e) => {
               const level = +e.target.value;
-              const hitDice: number[] = this.state.hitDice.slice(0, level);
-              while (hitDice.length < level) {
+              // We only roll hit dice up to L9.  Levels at 10+ grant a flat hp bonus.
+              const numHitDice = Math.min(level, 9);
+              const hitDice: number[] = this.state.hitDice.slice(0, numHitDice - 1);
+              while (hitDice.length < numHitDice) {
                 hitDice.push(rollDice(1, hitDieSize));
               }
               this.setState({ level, hitDice });
             }}
-            tabIndex={nextTabIndex++}
           />
         </div>
 
         {!this.props.isEditMode && (
           <div className={styles.contentRow}>
-            <div className={styles.classLabel}>Equipment</div>
+            <div className={styles.classLabel}>{"Equipment"}</div>
             <select
               className={styles.classSelector}
               value={this.state.equipmentSetId}
@@ -382,11 +384,10 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                   equipmentSetId: +e.target.value,
                 });
               }}
-              disabled={this.state.class === "---"}
-              tabIndex={nextTabIndex++}
+              disabled={this.state.class_id === 0}
             >
               <option value={0}>---</option>
-              {this.props.equipmentSetsByClass[this.state.class]?.map(({ name, id }) => {
+              {this.props.equipmentSetsByClassv2[this.state.class_id]?.map(({ name, id }) => {
                 return (
                   <option value={id} key={`equipmentSet${name}`}>
                     {name}
@@ -394,11 +395,12 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 );
               })}
             </select>
+            <DatabaseButton className={styles.databaseButton} onClick={this.onEquipmentSetDatabaseClicked.bind(this)} />
           </div>
         )}
 
         <div className={styles.contentRow}>
-          <div className={styles.xpLabel}>XP</div>
+          <div className={styles.xpLabel}>{"XP"}</div>
           <input
             className={styles.xpTextField}
             type={"number"}
@@ -407,7 +409,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             onChange={(e) => {
               this.setState({ xp: +e.target.value });
             }}
-            tabIndex={nextTabIndex++}
             spellCheck={false}
           />
           <div className={styles.xpRangeLabel}>{`${minXP} - ${maxXP}`}</div>
@@ -418,9 +419,9 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             <div className={styles.row}>
               <div className={styles.strengthLabel}>
                 {primeRequisites.includes(CharacterStat.Strength) && (
-                  <span className={styles.primeRequisiteLabel}>*</span>
+                  <span className={styles.primeRequisiteLabel}>{"*"}</span>
                 )}
-                STR
+                {"STR"}
               </div>
               <input
                 className={styles.strengthTextField}
@@ -431,16 +432,15 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 onChange={(e) => {
                   this.setState({ strength: +e.target.value });
                 }}
-                tabIndex={nextTabIndex++}
               />
             </div>
 
             <div className={styles.row}>
               <div className={styles.intelligenceLabel}>
                 {primeRequisites.includes(CharacterStat.Intelligence) && (
-                  <span className={styles.primeRequisiteLabel}>*</span>
+                  <span className={styles.primeRequisiteLabel}>{"*"}</span>
                 )}
-                INT
+                {"INT"}
               </div>
               <input
                 className={styles.intelligenceTextField}
@@ -451,14 +451,15 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 onChange={(e) => {
                   this.setState({ intelligence: +e.target.value });
                 }}
-                tabIndex={nextTabIndex++}
               />
             </div>
 
             <div className={styles.row}>
               <div className={styles.willLabel}>
-                {primeRequisites.includes(CharacterStat.Will) && <span className={styles.primeRequisiteLabel}>*</span>}
-                WIS
+                {primeRequisites.includes(CharacterStat.Will) && (
+                  <span className={styles.primeRequisiteLabel}>{"*"}</span>
+                )}
+                {"WILL"}
               </div>
               <input
                 className={styles.willTextField}
@@ -469,7 +470,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 onChange={(e) => {
                   this.setState({ will: +e.target.value });
                 }}
-                tabIndex={nextTabIndex++}
               />
             </div>
           </div>
@@ -478,9 +478,9 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             <div className={styles.row}>
               <div className={styles.dexterityLabel}>
                 {primeRequisites.includes(CharacterStat.Dexterity) && (
-                  <span className={styles.primeRequisiteLabel}>*</span>
+                  <span className={styles.primeRequisiteLabel}>{"*"}</span>
                 )}
-                DEX
+                {"DEX"}
               </div>
               <input
                 className={styles.dexterityTextField}
@@ -491,16 +491,15 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 onChange={(e) => {
                   this.setState({ dexterity: +e.target.value });
                 }}
-                tabIndex={nextTabIndex++}
               />
             </div>
 
             <div className={styles.row}>
               <div className={styles.constitutionLabel}>
                 {primeRequisites.includes(CharacterStat.Constitution) && (
-                  <span className={styles.primeRequisiteLabel}>*</span>
+                  <span className={styles.primeRequisiteLabel}>{"*"}</span>
                 )}
-                CON
+                {"CON"}
               </div>
               <input
                 className={styles.constitutionTextField}
@@ -511,16 +510,15 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 onChange={(e) => {
                   this.setState({ constitution: +e.target.value });
                 }}
-                tabIndex={nextTabIndex++}
               />
             </div>
 
             <div className={styles.row}>
               <div className={styles.charismaLabel}>
                 {primeRequisites.includes(CharacterStat.Charisma) && (
-                  <span className={styles.primeRequisiteLabel}>*</span>
+                  <span className={styles.primeRequisiteLabel}>{"*"}</span>
                 )}
-                CHA
+                {"CHA"}
               </div>
               <input
                 className={styles.charismaTextField}
@@ -531,7 +529,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                 onChange={(e) => {
                   this.setState({ charisma: +e.target.value });
                 }}
-                tabIndex={nextTabIndex++}
               />
             </div>
           </div>
@@ -560,7 +557,6 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                       hitDice[index] = +e.target.value;
                       this.setState({ hitDice });
                     }}
-                    tabIndex={nextTabIndex++}
                   />
                 </div>
               );
@@ -572,29 +568,11 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
           </div>
         </div>
 
-        {selectedClass?.selectableClassFeatures.length > 0 ? (
+        {selectedClass?.selectable_class_features.length > 0 ? (
           <div className={styles.contentRow}>
             <div className={styles.column}>
               <div className={styles.selectablesTitle}>{"Selectable Features"}</div>
-              {selectedClass.selectableClassFeatures.map((feature, featureIndex) => {
-                let featureOptions: AbilityFilter[] = [];
-                if (Array.isArray(feature.selections)) {
-                  featureOptions = feature.selections;
-                } else {
-                  const filter = feature.selections;
-                  if (filter.subtypes) {
-                    filter.subtypes?.forEach((subtype) => {
-                      // Turn each option into its own full entry.
-                      featureOptions.push({ ...filter, subtypes: [subtype] });
-                    });
-                  } else {
-                    filter.def.subTypes?.forEach((subtype) => {
-                      // Turn each option into its own full entry.
-                      featureOptions.push({ ...filter, subtypes: [subtype] });
-                    });
-                  }
-                }
-
+              {selectedClass.selectable_class_features.map((feature, featureIndex) => {
                 return (
                   <div className={styles.row} key={`${feature.title}${featureIndex}`}>
                     <div className={styles.selectableName}>{feature.title}</div>
@@ -613,22 +591,20 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
                         }
                         this.setState({ selectableValues });
                       }}
-                      tabIndex={nextTabIndex++}
                     >
                       <option value={"---"}>---</option>
-                      {featureOptions.map((filter) => {
-                        let id = filter.def.id;
-                        let name = filter.def.name;
+                      {feature.selections.map((filter) => {
+                        const def = this.props.allAbilityDefs[filter.abilityDefId];
                         let subtype = filter.subtypes?.[0] ?? "";
                         let rank = filter.rank ?? 1;
 
-                        let displayName = name;
+                        let displayName = def.name;
                         if (subtype.length > 0) {
                           displayName = `${displayName} (${subtype})`;
                         }
 
                         return (
-                          <option value={`${id},${subtype},${rank}`} key={`selectable${name}${subtype}`}>
+                          <option value={`${def.id},${subtype},${rank}`} key={`selectable${def.name}${subtype}`}>
                             {displayName}
                           </option>
                         );
@@ -671,7 +647,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
             <div className={styles.savingLabel}>Saving...</div>
           </div>
         )}
-        <SubPanelCloseButton />
+        <ModalCloseButton />
       </div>
     );
   }
@@ -723,7 +699,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
     }
 
     // Valid class?
-    if (this.state.class === "---") {
+    if (this.state.class_id === 0) {
       this.props.dispatch?.(
         showModal({
           id: "NoClassError",
@@ -736,8 +712,8 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
 
     // Valid selectables?
     let hasValidSelectables: boolean = true;
-    const selectedClass = AllClasses[this.state.class];
-    selectedClass.selectableClassFeatures?.forEach((_, featureIndex) => {
+    const selectedClass = this.props.allCharacterClasses[this.state.class_id];
+    selectedClass.selectable_class_features?.forEach((_, featureIndex) => {
       if (this.state.selectableValues[featureIndex][0] === "---") {
         hasValidSelectables = false;
       }
@@ -763,7 +739,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       gender: this.state.gender,
       alignment: this.state.alignment,
       portrait_url: "",
-      class_name: this.state.class,
+      class_name: "",
       class_id: this.state.class_id,
       subclass_id: this.state.subclass_id,
       level: this.state.level,
@@ -792,7 +768,10 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       ...emptyEquipmentData,
     };
     // Have to calculate this separately so it can account for class and Constitution bonus.
-    character.hp = getCharacterMaxHP(character);
+
+    // TODO: Note that this does not currently account for components from starter gear.
+    // TODO: If we are creating a new character, then we need to add components from any selected equipment set.
+    character.hp = getCharacterMaxHPv2(character, getActiveAbilityComponentsForCharacter(character));
 
     if (this.props.isEditMode) {
       // Edit the character.
@@ -953,20 +932,29 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
   }
 
   private onRerollClicked(): void {
-    const reqs = this.state.class === "---" ? {} : AllClasses[this.state.class].statRequirements;
+    const characterClass = this.props.allCharacterClasses[this.state.class_id];
+    const reqs: Record<CharacterStat, number> = characterClass?.stat_requirements ?? {
+      [CharacterStat.Strength]: 0,
+      [CharacterStat.Intelligence]: 0,
+      [CharacterStat.Will]: 0,
+      [CharacterStat.Dexterity]: 0,
+      [CharacterStat.Constitution]: 0,
+      [CharacterStat.Charisma]: 0,
+    };
 
     this.setState({
-      strength: this.rollStat(reqs[CharacterStat.Strength] ?? 0),
-      intelligence: this.rollStat(reqs[CharacterStat.Intelligence] ?? 0),
-      will: this.rollStat(reqs[CharacterStat.Will] ?? 0),
-      dexterity: this.rollStat(reqs[CharacterStat.Dexterity] ?? 0),
-      constitution: this.rollStat(reqs[CharacterStat.Constitution] ?? 0),
-      charisma: this.rollStat(reqs[CharacterStat.Charisma] ?? 0),
+      strength: this.rollStat(reqs[CharacterStat.Strength]),
+      intelligence: this.rollStat(reqs[CharacterStat.Intelligence]),
+      will: this.rollStat(reqs[CharacterStat.Will]),
+      dexterity: this.rollStat(reqs[CharacterStat.Dexterity]),
+      constitution: this.rollStat(reqs[CharacterStat.Constitution]),
+      charisma: this.rollStat(reqs[CharacterStat.Charisma]),
     });
   }
 
   private onRerollHitpointsClicked(): void {
-    const hitDieSize = AllClasses[this.state.class]?.hitDieSize ?? 4;
+    const characterClass = this.props.allCharacterClasses[this.state.class_id];
+    const hitDieSize = characterClass?.hit_die_size ?? 4;
     const hitDice: number[] = [...this.state.hitDice];
     for (let i = 0; i < hitDice.length; ++i) {
       hitDice[i] = rollDice(1, hitDieSize);
@@ -999,12 +987,38 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       })
     );
   }
+
+  private getSortedClasses(): CharacterClassv2[] {
+    const res: CharacterClassv2[] = Object.values(this.props.allCharacterClasses).sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+
+    return res;
+  }
+
+  private onEquipmentSetDatabaseClicked(): void {
+    this.props.dispatch?.(
+      showModal({
+        id: "DatabaseEquipmentSets",
+        content: () => {
+          return <DatabaseEquipmentSetsDialog />;
+        },
+      })
+    );
+  }
 }
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const selectedCharacter = state.characters.characters[state.characters.activeCharacterId];
   const selectedCharacterProficiencies = state.proficiencies.proficienciesByCharacterId[selectedCharacter?.id];
-  const { equipmentSetsByClass, equipmentSetItemsBySet, items: allItemDefs } = state.gameDefs;
+  const {
+    equipmentSetsByClass,
+    equipmentSetsByClassv2,
+    equipmentSetItemsBySet,
+    items: allItemDefs,
+    characterClasses: allCharacterClasses,
+    abilities: allAbilityDefs,
+  } = state.gameDefs;
   const allLocations = state.locations.locations;
   return {
     ...props,
@@ -1012,10 +1026,13 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     selectedCharacter,
     selectedCharacterProficiencies,
     equipmentSetsByClass,
+    equipmentSetsByClassv2,
     equipmentSetItemsBySet,
     allItemDefs,
     allLocations,
+    allAbilityDefs,
+    allCharacterClasses,
   };
 }
 
-export const CreateCharacterSubPanel = connect(mapStateToProps)(ACreateCharacterSubPanel);
+export const CreateCharacterDialog = connect(mapStateToProps)(ACreateCharacterDialog);

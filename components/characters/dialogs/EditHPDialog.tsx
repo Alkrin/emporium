@@ -6,7 +6,7 @@ import { hideModal, showModal } from "../../../redux/modalsSlice";
 import { RootState } from "../../../redux/store";
 import ServerAPI, { CharacterData } from "../../../serverAPI";
 import styles from "./EditHPDialog.module.scss";
-import { getCharacterMaxHP } from "../../../lib/characterUtils";
+import { AbilityComponentInstance, getCharacterMaxHP, getCharacterMaxHPv2 } from "../../../lib/characterUtils";
 import { BasicDialog } from "../../dialogs/BasicDialog";
 
 interface State {
@@ -15,7 +15,9 @@ interface State {
   saving: boolean;
 }
 
-interface ReactProps {}
+interface ReactProps {
+  activeComponents?: Record<string, AbilityComponentInstance[]>;
+}
 
 interface InjectedProps {
   character: CharacterData;
@@ -36,15 +38,22 @@ class AEditHPDialog extends React.Component<Props, State> {
   }
 
   render(): React.ReactNode {
+    let maxHP: number = 0;
+    // If activeComponents is available, then the getCharacterSupportsv2() check was done before instantiating this dialog.
+    if (this.props.activeComponents) {
+      maxHP = getCharacterMaxHPv2(this.props.character, this.props.activeComponents);
+    } else {
+      maxHP = getCharacterMaxHP(this.props.character);
+    }
     return (
       <div className={styles.root}>
         <div className={styles.row}>
-          <div className={styles.rowText}>Set Exact HP Value</div>
+          <div className={styles.rowText}>{"Set Exact HP Value"}</div>
           <input
             className={styles.hpTextField}
             type={"number"}
             value={this.state.hpTotal}
-            max={getCharacterMaxHP(this.props.character)}
+            max={maxHP}
             onChange={(e) => {
               this.setState({ hpTotal: +e.target.value });
             }}
