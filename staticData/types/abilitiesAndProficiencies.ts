@@ -4,15 +4,6 @@ export interface AbilityOrProficiency {
   description: string[]; // One entry per rank, in order.
   /** If present, lists approved subtypes.  Each subtype acquired costs one proficiency slot. */
   subTypes?: string[];
-  // TODO: toHitEffect?: (characterData) => number; // Function that alters toHit chance based on the character's data.  i.e. elven ranger precision bonus.
-  // TODO: damageEffect?: (characterData) => number; // Function that alters damage based on the character's data.  i.e. fighter damage bonus.
-  // TODO: armorEffect?: (characterData) => number // Function that alters armor based on the character's data.  i.e. dwarven fury AC bonus.
-  // TODO: How to handle effects with charges, like Mystic's Battle Trance?
-  // TODO: Should I separate into passive and triggered and charge-based effects instead?
-  // TODO: Should I define "functional components" that describe which equations this ability/proficiency alters and how?
-
-  // TODO: There are a lot of abilities and proficiencies that grant a button that lets you do something for a proficiency roll.  Some of those
-  //       are usable in combat (Combat Maneuvers?).  Some are largely out of combat (Perform, Craft, etc.).
 }
 
 /** If no subType is specified, then ALL subTypes are included. */
@@ -40,6 +31,12 @@ export interface AbilityInstancev2 {
   subtype?: string;
   minLevel: number;
 }
+export const emptyAbilityInstancev2: AbilityInstancev2 = {
+  abilityDefId: 0,
+  rank: 1,
+  subtype: "",
+  minLevel: 1,
+};
 
 export enum ProficiencySource {
   Class1 = "Class1",

@@ -49,6 +49,8 @@ import {
   getProficiencyRankForCharacter,
   getRangedAttackDataForCharacter,
   getSavingThrowBonusForCharacter,
+  getCharacterSupportsV2,
+  getCombinedCharacterClass,
 } from "../../lib/characterUtils";
 import { RepertoireDialog } from "./dialogs/RepertoireDialog";
 import { SpellTooltip } from "../database/tooltips/SpellTooltip";
@@ -85,6 +87,7 @@ import { CharacterContractsSection } from "./sections/CharacterContractsSection"
 import { CharacterDomainSection } from "./sections/CharacterDomainSection";
 import { CharacterTroopLeadershipSection } from "./sections/CharacterTroopLeadershipSection";
 import { CharacterHPSection } from "./sections/CharacterHPSection";
+import { CharacterAbilitiesSection } from "./sections/CharacterAbilitiesSection";
 
 interface ReactProps {
   characterId: number;
@@ -97,7 +100,6 @@ interface InjectedProps {
   allItemDefs: Record<number, ItemDefData>;
   allSpells: Record<number, SpellDefData>;
   character: CharacterData;
-  characterClass: CharacterClassv2;
   repertoire: RepertoireEntryData[];
   allLocations: Record<number, LocationData>;
   storages: StorageData[];
@@ -111,18 +113,16 @@ class ACharacterSheet extends React.Component<Props> {
     const animationClass = this.props.exiting ? styles.exit : styles.enter;
 
     const characterExists = this.props.characterId > 0 && !!this.props.character;
-
+    const isV2 = characterExists && getCharacterSupportsV2(this.props.character);
     // Getting this once up front and passing it along because the calculation is expensive.
-    const activeComponents = this.props.characterClass
-      ? getActiveAbilityComponentsForCharacter(this.props.character)
-      : {};
+    const activeComponents = isV2 ? getActiveAbilityComponentsForCharacter(this.props.character) : {};
 
     return (
       <SheetRoot className={`${styles.root} ${animationClass}`}>
         {characterExists ? (
           <>
-            {this.props.characterClass ? this.renderV2TopPanel(activeComponents) : this.renderV1TopPanel()}
-            {this.props.characterClass ? this.renderV2BottomPanel(activeComponents) : this.renderV1BottomPanel()}
+            {isV2 ? this.renderV2TopPanel(activeComponents) : this.renderV1TopPanel()}
+            {isV2 ? this.renderV2BottomPanel(activeComponents) : this.renderV1BottomPanel()}
           </>
         ) : (
           <div className={styles.placeholder} />
@@ -152,7 +152,7 @@ class ACharacterSheet extends React.Component<Props> {
       <div className={styles.row}>
         <div className={styles.leftPanel}>
           <CharacterLanguagesSection characterId={this.props.characterId} activeComponents={activeComponents} />
-          {this.renderAbilitiesPanel()}
+          <CharacterAbilitiesSection characterId={this.props.characterId} activeComponents={activeComponents} />
           <CharacterProficiencyRollsSection characterId={this.props.characterId} activeComponents={activeComponents} />
           {this.renderLevelBasedSkillsPanel()}
           {this.renderInjuriesPanel()}
@@ -220,11 +220,12 @@ class ACharacterSheet extends React.Component<Props> {
   }
 
   private renderV2TopPanel(activeComponents: Record<string, AbilityComponentInstance[]>): React.ReactNode {
+    const characterClass = getCombinedCharacterClass(this.props.characterId);
     return (
       <div className={styles.topPanel}>
         <FittingView className={styles.nameContainer}>
           <div className={styles.nameLabel}>{`${this.props.character.name}, L${this.props.character.level} ${
-            this.props.characterClass.name + "(v2)"
+            characterClass.name + "(v2)"
           }`}</div>
         </FittingView>
         <div className={styles.topPanelGrid}>
@@ -1406,7 +1407,6 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const storages = state.storages.storagesByCharacterId[props.characterId] ?? [];
   const allLocations = state.locations.locations;
   const character = state.characters.characters[props.characterId ?? 1] ?? null;
-  const characterClass = state.gameDefs.characterClasses[character?.class_id] ?? null;
   return {
     ...props,
     allAbilities,
@@ -1414,7 +1414,6 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
     allItemDefs,
     allSpells,
     character,
-    characterClass,
     repertoire,
     allLocations,
     storages,

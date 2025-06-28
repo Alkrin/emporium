@@ -3,6 +3,7 @@ import {
   CharacterData,
   CharacterEquipmentData,
   CharacterEquipmentSlots,
+  CombinedCharacterClass,
   ItemData,
   ItemDefData,
   SpellDefData,
@@ -54,7 +55,7 @@ import { ProficiencySeduction } from "../staticData/proficiencies/ProficiencySed
 import { ProficiencyLayOnHands } from "../staticData/proficiencies/ProficiencyLayOnHands";
 import { ProficiencyFamiliar } from "../staticData/proficiencies/ProficiencyFamiliar";
 import { InjuryBlind } from "../staticData/injuries/InjuryBlind";
-import { buildAbilityName, getFirstOfThisMonthDateString } from "./stringUtils";
+import { buildAbilityName, getFirstOfThisMonthDateString, getRomanNumerals } from "./stringUtils";
 import { getAllStorageAssociatedItemIds } from "./storageUtils";
 import { SharedNaturalAttackPower } from "../staticData/classFeatures/SharedNaturalAttackPower";
 import { SharedChitinousCarapace } from "../staticData/classFeatures/SharedChitinousCarapace";
@@ -101,6 +102,13 @@ export function getAbilityComponentInstanceSourceName(instance: AbilityComponent
     // TODO: How to handle non-ability sources?
     return `Unknown`;
   }
+}
+
+export function getAbilityInstanceDisplayName(instance: AbilityInstancev2): string {
+  const redux = store.getState();
+  const ability = redux.gameDefs.abilities[instance.abilityDefId];
+
+  return buildAbilityName(ability.name, instance.subtype ?? "", instance.rank, ability.max_ranks);
 }
 
 export type StatBonus = 3 | 2 | 1 | 0 | -1 | -2 | -3;
@@ -1725,8 +1733,7 @@ export function getActiveAbilityRanksForCharacter(character: CharacterData): Rec
   const abilityRanks: Record<number, Record<string, number>> = {};
 
   // Abilities from class and subclass.
-  const characterClass = redux.gameDefs.characterClasses[character.class_id];
-  const characterSubclass = characterClass?.subclasses?.find((sc) => sc.name === character.subclass_id);
+  const characterClass = getCombinedCharacterClass(character.id);
 
   function adjustRanksForAbilityInstance(instance: AbilityInstancev2): void {
     // Abilities are activated at specific levels, so make sure we qualify.
@@ -1746,12 +1753,16 @@ export function getActiveAbilityRanksForCharacter(character: CharacterData): Rec
     abilityRanks[instance.abilityDefId][subtype] = Math.min(totalRank, abilityDef.max_ranks);
   }
 
+  // Class features.
   characterClass.class_features.forEach(adjustRanksForAbilityInstance);
-  characterSubclass?.class_features.forEach(adjustRanksForAbilityInstance);
-
-  // TODO: Abilities from assigned proficiencies.  Note that at least in v1, "selectable class features" fall in this category.
-  // TODO: I think that I need to rewrite how assigned proficiencies are tracked.  Not sure they deserve their own table in the DB.
-  // TODO: Might be better to have them as a Record field on the character instance, stored as JSON.
+  character.abilities.selectableClassFeatures.forEach(adjustRanksForAbilityInstance);
+  // Chosen proficiencies.
+  character.abilities.classProficiencies.forEach(adjustRanksForAbilityInstance);
+  character.abilities.generalProficiencies.forEach(adjustRanksForAbilityInstance);
+  character.abilities.intBonusProficiencies.forEach(adjustRanksForAbilityInstance);
+  character.abilities.extraProficiencies.forEach(adjustRanksForAbilityInstance);
+  // Injuries are technically also "abilities".
+  character.abilities.injuries.forEach(adjustRanksForAbilityInstance);
 
   return abilityRanks;
 }
@@ -1789,12 +1800,6 @@ export function getActiveAbilityComponentsForCharacter(
 
   // TODO: Components from equipped / carried gear.
   // TODO: Note that those won't necessarily use character.level.  They might have an explicit level.
-
-  // TODO: Here's where we should filter the list of allComponents.
-  // TODO: For instance, some component types might not stack, or we might need to combine some?  I'm thinking of the weird
-  //       ranger proficiency that combines with Friend of Birds and Beasts.  Both proficiencies can only be had at one rank,
-  //       but they need to combine to have two component ranks...  They're extra weird for sure.
-  // TODO: In the meantime, though, I'm not sure if that would happen here or at point of use.
 
   return allComponents;
 }
@@ -1879,4 +1884,57 @@ export function rollFactorialDie(max: number): number {
   }
 
   return result;
+}
+
+export function getCombinedCharacterClass(characterId: number): CombinedCharacterClass {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+  const baseClass = redux.gameDefs.characterClasses[character.class_id];
+  const subclass = baseClass.subclasses.find((sub) => sub.name === character.subclass_id);
+
+  let finalClass: CombinedCharacterClass = { ...baseClass };
+
+  if (subclass) {
+    finalClass.name += ` (${subclass.name})`;
+    finalClass.description += `\n${subclass.description}`;
+    finalClass.weapon_styles = [...baseClass.weapon_styles, ...subclass.weapon_styles];
+    finalClass.weapon_category_permissions = [
+      ...baseClass.weapon_category_permissions,
+      ...subclass.weapon_category_permissions,
+    ];
+    finalClass.weapon_type_permissions = [...baseClass.weapon_type_permissions, ...subclass.weapon_type_permissions];
+    finalClass.max_base_armor = subclass.max_base_armor;
+    finalClass.class_features = [...baseClass.class_features, ...subclass.class_features];
+    finalClass.selectable_class_features = [
+      ...baseClass.selectable_class_features,
+      ...subclass.selectable_class_features,
+    ];
+    finalClass.class_proficiencies = [...baseClass.class_proficiencies, ...subclass.class_proficiencies];
+  }
+
+  return finalClass;
+}
+
+export function getCharacterXPBonus(characterId: number): number {
+  const redux = store.getState();
+  const character = redux.characters.characters[characterId];
+
+  let lowestPrimeReq: number = 18;
+  let primeRequisites = getCharacterSupportsV2(character)
+    ? redux.gameDefs.characterClasses[character.class_id].prime_requisites
+    : AllClasses[character.class_name].primeRequisites;
+
+  primeRequisites.forEach((stat) => {
+    // Ugly type-casts so we can access stats by name.
+    const statValue = character[stat.toLocaleLowerCase() as keyof CharacterData] as number;
+    lowestPrimeReq = Math.min(lowestPrimeReq, statValue);
+  });
+
+  if (lowestPrimeReq >= 16) {
+    return 0.1;
+  } else if (lowestPrimeReq >= 13) {
+    return 0.05;
+  } else {
+    return 0;
+  }
 }

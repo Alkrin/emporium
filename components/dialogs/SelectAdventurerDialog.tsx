@@ -5,7 +5,7 @@ import { hideModal } from "../../redux/modalsSlice";
 import { RootState } from "../../redux/store";
 import styles from "./SelectAdventurerDialog.module.scss";
 import { Dictionary } from "../../lib/dictionary";
-import { CharacterAlignment, CharacterData, emptyEquipmentData } from "../../serverAPI";
+import { CharacterAlignment, CharacterData, emptyCharacterAbilitySet, emptyEquipmentData } from "../../serverAPI";
 import { UserRole } from "../../redux/userSlice";
 
 interface State {
@@ -72,7 +72,7 @@ class ASelectAdventurerDialog extends React.Component<Props, State> {
                   maintenance_paid: 0,
                   maintenance_date: "",
                   xp_reserve: 0,
-                  proficiencies: [],
+                  abilities: emptyCharacterAbilitySet,
                   languages: [],
                   ...emptyEquipmentData,
                 },

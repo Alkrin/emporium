@@ -183,6 +183,8 @@ export type CharacterSubclass = Pick<
   | "class_proficiencies"
 >;
 
+export type CombinedCharacterClass = Omit<CharacterClassv2, "subclasses">;
+
 export interface ItemDefData {
   id: number;
   name: string;
@@ -348,6 +350,23 @@ export const emptyEquipmentData: CharacterEquipmentData = {
 };
 export const CharacterEquipmentSlots = Object.keys(emptyEquipmentData) as (keyof CharacterEquipmentData)[];
 
+export interface CharacterAbilitySet {
+  classProficiencies: AbilityInstancev2[];
+  generalProficiencies: AbilityInstancev2[];
+  intBonusProficiencies: AbilityInstancev2[];
+  extraProficiencies: AbilityInstancev2[];
+  selectableClassFeatures: AbilityInstancev2[];
+  injuries: AbilityInstancev2[];
+}
+export const emptyCharacterAbilitySet: CharacterAbilitySet = {
+  classProficiencies: [],
+  generalProficiencies: [],
+  intBonusProficiencies: [],
+  extraProficiencies: [],
+  selectableClassFeatures: [],
+  injuries: [],
+};
+
 export interface CharacterData extends CharacterEquipmentData {
   id: number;
   user_id: number;
@@ -376,22 +395,15 @@ export interface CharacterData extends CharacterEquipmentData {
   location_id: number;
   maintenance_date: string;
   maintenance_paid: number;
-  proficiencies: ProficiencyDatav2[];
+  abilities: CharacterAbilitySet;
   languages: string[];
 }
 
-export type ServerCharacterData = Omit<CharacterData, "hit_dice" | "proficiencies" | "languages"> & {
+export type ServerCharacterData = Omit<CharacterData, "hit_dice" | "abilities" | "languages"> & {
   hit_dice: string;
-  proficiencies: string;
+  abilities: string;
   languages: string;
 };
-
-export interface ProficiencyDatav2 {
-  ability_id: number;
-  subtype: string;
-  rank: number;
-  source: ProficiencySource;
-}
 
 export interface ProficiencyData {
   character_id: number;
@@ -421,6 +433,7 @@ export enum AbilityType {
   Ailment = "Ailment",
   ClassProficiency = "ClassProficiency",
   GeneralProficiency = "GeneralProficiency",
+  Hidden = "Hidden",
   Other = "Other",
 }
 export interface AbilityComponentData {
@@ -1188,7 +1201,7 @@ class AServerAPI {
           hit_dice: sCharData.hit_dice.split(",").map((stringHP) => {
             return +stringHP;
           }),
-          proficiencies: JSON.parse(sCharData.proficiencies),
+          abilities: JSON.parse(sCharData.abilities),
           languages: JSON.parse(sCharData.languages),
         });
       });
@@ -1436,7 +1449,7 @@ class AServerAPI {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
-      proficiencies: JSON.stringify(character.proficiencies),
+      abilities: JSON.stringify(character.abilities),
       languages: JSON.stringify(character.languages),
       selected_class_features,
       equipment,
@@ -1459,7 +1472,7 @@ class AServerAPI {
       ...character,
       // Stored on the server as a comma separated string.
       hit_dice: character.hit_dice.join(","),
-      proficiencies: JSON.stringify(character.proficiencies),
+      abilities: JSON.stringify(character.abilities),
       languages: JSON.stringify(character.languages),
       selected_class_features,
     };

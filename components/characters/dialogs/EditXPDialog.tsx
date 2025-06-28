@@ -5,9 +5,9 @@ import { setCharacterXP } from "../../../redux/charactersSlice";
 import { hideModal, showModal } from "../../../redux/modalsSlice";
 import { RootState } from "../../../redux/store";
 import ServerAPI, { CharacterData } from "../../../serverAPI";
-import { AllClasses } from "../../../staticData/characterClasses/AllClasses";
 import styles from "./EditXPDialog.module.scss";
 import { BasicDialog } from "../../dialogs/BasicDialog";
+import { getCharacterXPBonus } from "../../../lib/characterUtils";
 
 interface State {
   xpTotalString: string;
@@ -36,7 +36,8 @@ class AEditXPDialog extends React.Component<Props, State> {
   }
 
   render(): React.ReactNode {
-    const xpBonus = this.getXPBonus();
+    const xpBonus = getCharacterXPBonus(this.props.character.id);
+
     return (
       <div className={styles.root}>
         <div className={styles.row}>
@@ -84,24 +85,6 @@ class AEditXPDialog extends React.Component<Props, State> {
         </div>
       </div>
     );
-  }
-
-  private getXPBonus(): number {
-    const characterClass = AllClasses[this.props.character.class_name];
-    let lowestPrimeReq: number = 18;
-    characterClass.primeRequisites.forEach((stat) => {
-      // Ugly type-casts so we can access stats by name.
-      const statValue = this.props.character[stat.toLocaleLowerCase() as keyof CharacterData] as number;
-      lowestPrimeReq = Math.min(lowestPrimeReq, statValue);
-    });
-
-    if (lowestPrimeReq >= 16) {
-      return 0.1;
-    } else if (lowestPrimeReq >= 13) {
-      return 0.05;
-    } else {
-      return 0;
-    }
   }
 
   private async onSetXPTotalClicked(): Promise<void> {

@@ -10,8 +10,6 @@ import {
   getStatBonusForValue,
   getBonusString,
   getCharacterStatv2,
-  ValueSource,
-  getAbilityComponentInstanceSourceName,
   CharacterStatData,
 } from "../../../lib/characterUtils";
 import { CharacterStat } from "../../../staticData/types/characterClasses";

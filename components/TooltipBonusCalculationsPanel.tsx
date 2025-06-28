@@ -30,9 +30,9 @@ class ATooltipBonusCalculationsPanel extends React.Component<Props> {
           <>
             <div className={styles.tooltipConditionalHeader}>{"Bonuses"}</div>
             <div className={styles.tooltipDivider} />
-            {calc.sources.map(({ name, value }) => {
+            {calc.sources.map(({ name, value }, index) => {
               return (
-                <div className={styles.tooltipSourceRow} key={name}>
+                <div className={styles.tooltipSourceRow} key={`B${index}`}>
                   <div className={styles.tooltipSource}>{name}</div>
                   <div className={styles.tooltipSourceValue}>{getBonusString(value)}</div>
                 </div>
@@ -44,9 +44,9 @@ class ATooltipBonusCalculationsPanel extends React.Component<Props> {
           <>
             <div className={styles.tooltipConditionalHeader}>{"Conditional Bonuses"}</div>
             <div className={styles.tooltipDivider} />
-            {calc.conditionalSources.map(({ name, value, condition }) => {
+            {calc.conditionalSources.map(({ name, value, condition }, index) => {
               return (
-                <div className={styles.tooltipSourceRow} key={name}>
+                <div className={styles.tooltipSourceRow} key={`CB${index}`}>
                   <div className={styles.growingColumn}>
                     <div className={styles.tooltipSource}>{name}</div>
                     <div className={styles.tooltipCondition}>{condition}</div>
