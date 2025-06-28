@@ -85,7 +85,7 @@ export interface RequestBody_CreateOrEditCharacter {
   hp: number;
   hit_dice: string;
   location_id: number;
-  proficiencies: string;
+  abilities: string;
   languages: string;
   /** Feature id, subtype, rank. */
   selected_class_features: [string, string, number][];

@@ -10,6 +10,8 @@ import ServerAPI, {
   CharacterAlignment,
   CharacterClassv2,
   CharacterData,
+  CharacterSubclass,
+  emptyCharacterAbilitySet,
   EquipmentSetData,
   EquipmentSetItemData,
   Gender,
@@ -17,13 +19,13 @@ import ServerAPI, {
   LocationData,
   ProficiencyData,
   emptyEquipmentData,
+  CharacterAbilitySet,
 } from "../../serverAPI";
 import { CharacterStat } from "../../staticData/types/characterClasses";
 import styles from "./CreateCharacterDialog.module.scss";
 import {
   getActiveAbilityComponentsForCharacter,
   getAllCharacterAssociatedItemIds,
-  getCharacterMaxHP,
   getCharacterMaxHPv2,
   randomInt,
   rollDice,
@@ -46,6 +48,12 @@ import { BasicDialog } from "../dialogs/BasicDialog";
 import { ModalCloseButton } from "../ModalCloseButton";
 import { DatabaseButton } from "../DatabaseButton";
 import { DatabaseEquipmentSetsDialog } from "../database/DatabaseEquipmentSetsDialog";
+import {
+  AbilityFilterv2,
+  AbilityInstancev2,
+  emptyAbilityInstancev2,
+} from "../../staticData/types/abilitiesAndProficiencies";
+import { SavingVeil } from "../SavingVeil";
 
 interface State {
   nameText: string;
@@ -64,8 +72,7 @@ interface State {
   charisma: number;
   hitDice: number[];
   locationId: number;
-  /** Feature id, subtype, rank. */
-  selectableValues: [string, string, number][];
+  abilities: CharacterAbilitySet;
   isSaving: boolean;
 }
 
@@ -96,21 +103,6 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
     if (props.isEditMode) {
       if (props.selectedCharacter) {
         // Load the selected character.
-        const selectableValues: [string, string, number][] = [
-          ["---", "", 0],
-          ["---", "", 0],
-          ["---", "", 0],
-          ["---", "", 0],
-        ];
-        this.props.selectedCharacterProficiencies?.forEach((p) => {
-          if (p.source.startsWith("Selectable")) {
-            const pIndex = +p.source.slice(10) - 1;
-            selectableValues[pIndex][0] = p.feature_id;
-            selectableValues[pIndex][1] = p.subtype;
-            selectableValues[pIndex][2] += 1;
-          }
-        });
-
         this.state = {
           nameText: props.selectedCharacter.name,
           gender: props.selectedCharacter.gender,
@@ -128,7 +120,7 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
           charisma: props.selectedCharacter.charisma,
           hitDice: props.selectedCharacter.hit_dice,
           locationId: props.selectedCharacter.location_id,
-          selectableValues,
+          abilities: { ...props.selectedCharacter.abilities },
           isSaving: false,
         };
       }
@@ -151,12 +143,7 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
         charisma: 9,
         hitDice: [4],
         locationId: 0,
-        selectableValues: [
-          ["---", "", 0],
-          ["---", "", 0],
-          ["---", "", 0],
-          ["---", "", 0],
-        ],
+        abilities: emptyCharacterAbilitySet,
         isSaving: false,
       };
     }
@@ -333,12 +320,8 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
             onChange={(e) => {
               this.setState({
                 class_id: +e.target.value,
-                selectableValues: [
-                  ["---", "", 0],
-                  ["---", "", 0],
-                  ["---", "", 0],
-                  ["---", "", 0],
-                ],
+                subclass_id: "",
+                abilities: emptyCharacterAbilitySet,
                 equipmentSetId: 0,
               });
             }}
@@ -371,6 +354,29 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
               this.setState({ level, hitDice });
             }}
           />
+        </div>
+
+        <div className={styles.contentRow}>
+          <div className={styles.classLabel}>{"Subclass"}</div>
+          <select
+            className={styles.classSelector}
+            value={this.state.subclass_id}
+            onChange={(e) => {
+              this.setState({
+                subclass_id: e.target.value,
+              });
+            }}
+            disabled={!selectedClass || selectedClass.subclasses.length === 0}
+          >
+            <option value={""}>{"---"}</option>
+            {this.getSortedSubclasses().map(({ name }) => {
+              return (
+                <option value={name} key={`subclass${name}`}>
+                  {name}
+                </option>
+              );
+            })}
+          </select>
         </div>
 
         {!this.props.isEditMode && (
@@ -573,27 +579,62 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
             <div className={styles.column}>
               <div className={styles.selectablesTitle}>{"Selectable Features"}</div>
               {selectedClass.selectable_class_features.map((feature, featureIndex) => {
+                const selection: AbilityInstancev2 =
+                  this.state.abilities.selectableClassFeatures[featureIndex] ?? emptyAbilityInstancev2;
+
+                let featureOptions: AbilityFilterv2[] = [];
+
+                feature.selections.forEach((filter: AbilityFilterv2) => {
+                  const def = this.props.allAbilityDefs[filter.abilityDefId];
+                  if (def.subtypes.length > 0) {
+                    // The filter is for an ability that requires you to pick a subtype.
+                    if (filter.subtypes && filter.subtypes.length > 0) {
+                      // The filter specifies a restricted subset of all subtypes.
+                      filter.subtypes.forEach((subtype) => {
+                        // Turn each option into its own full entry.
+                        featureOptions.push({ ...filter, subtypes: [subtype] });
+                      });
+                    } else {
+                      // The filter doesn't specify a restriction, so offer ALL subtypes.
+                      def.subtypes.forEach((subtype) => {
+                        // Turn each option into its own full entry.
+                        featureOptions.push({ ...filter, subtypes: [subtype] });
+                      });
+                    }
+                  } else {
+                    // The filter is for an ability that doesn't require a subtype, so we can keep it as an explicit option.
+                    featureOptions.push(filter);
+                  }
+                });
+
                 return (
                   <div className={styles.row} key={`${feature.title}${featureIndex}`}>
                     <div className={styles.selectableName}>{feature.title}</div>
                     <select
                       className={styles.selectableSelector}
-                      value={this.state.selectableValues[featureIndex].join(",")}
+                      value={`${selection.abilityDefId},${selection.subtype},${selection.rank}`}
                       onChange={(e) => {
-                        const selectableValues: [string, string, number][] = [...this.state.selectableValues];
-                        if (e.target.value === "---") {
-                          selectableValues[featureIndex] = ["---", "", 0];
-                        } else {
-                          const [featureId, subtype, rank] = e.target.value.split(",");
-                          selectableValues[featureIndex][0] = featureId;
-                          selectableValues[featureIndex][1] = subtype;
-                          selectableValues[featureIndex][2] = +rank;
-                        }
-                        this.setState({ selectableValues });
+                        const abilities: CharacterAbilitySet = {
+                          ...this.state.abilities,
+                          selectableClassFeatures: [...this.state.abilities.selectableClassFeatures],
+                        };
+                        const [stringAbilityDefId, subtype, stringRank] = e.target.value.split(",");
+                        abilities.selectableClassFeatures[featureIndex] = {
+                          abilityDefId: +stringAbilityDefId,
+                          subtype: subtype,
+                          rank: +stringRank,
+                          // For now, all selectables are presumed to be granted at level one.
+                          minLevel: 1,
+                        };
+                        this.setState({ abilities });
                       }}
                     >
-                      <option value={"---"}>---</option>
-                      {feature.selections.map((filter) => {
+                      <option
+                        value={`${emptyAbilityInstancev2.abilityDefId},${emptyAbilityInstancev2.subtype},${emptyAbilityInstancev2.rank}`}
+                      >
+                        {"---"}
+                      </option>
+                      {featureOptions.map((filter) => {
                         const def = this.props.allAbilityDefs[filter.abilityDefId];
                         let subtype = filter.subtypes?.[0] ?? "";
                         let rank = filter.rank ?? 1;
@@ -637,16 +678,12 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
 
           {this.props.isEditMode && (
             <div className={styles.deleteButton} onClick={this.onDeleteClicked.bind(this)}>
-              Delete
+              {"Delete"}
             </div>
           )}
         </div>
 
-        {this.state.isSaving && (
-          <div className={styles.savingVeil}>
-            <div className={styles.savingLabel}>Saving...</div>
-          </div>
-        )}
+        <SavingVeil show={this.state.isSaving} />
         <ModalCloseButton />
       </div>
     );
@@ -710,11 +747,26 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
       return;
     }
 
+    // Valid subclass?
+    const selectedClass = this.props.allCharacterClasses[this.state.class_id];
+    if (selectedClass.subclasses.length > 0 && this.state.subclass_id === "") {
+      this.props.dispatch?.(
+        showModal({
+          id: "NoSubclassError",
+          content: () => <BasicDialog title={"Error!"} prompt={"Please select a Subclass for this character!"} />,
+        })
+      );
+      this.setState({ isSaving: false });
+      return;
+    }
+
     // Valid selectables?
     let hasValidSelectables: boolean = true;
-    const selectedClass = this.props.allCharacterClasses[this.state.class_id];
     selectedClass.selectable_class_features?.forEach((_, featureIndex) => {
-      if (this.state.selectableValues[featureIndex][0] === "---") {
+      if (
+        !this.state.abilities.selectableClassFeatures[featureIndex] ||
+        this.state.abilities.selectableClassFeatures[featureIndex].abilityDefId === 0
+      ) {
         hasValidSelectables = false;
       }
     });
@@ -739,7 +791,7 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
       gender: this.state.gender,
       alignment: this.state.alignment,
       portrait_url: "",
-      class_name: "",
+      class_name: this.props.allCharacterClasses[this.state.class_id].name, // TODO: Remove this once v2 is universal.
       class_id: this.state.class_id,
       subclass_id: this.state.subclass_id,
       level: this.state.level,
@@ -761,7 +813,7 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
       maintenance_paid: 0,
       maintenance_date: getFirstOfThisMonthDateString(),
       xp_reserve: 0,
-      proficiencies: [],
+      abilities: this.state.abilities,
       languages: [],
 
       // EquipmentData values are ignored when editing a character.
@@ -775,14 +827,10 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
 
     if (this.props.isEditMode) {
       // Edit the character.
-      const res = await ServerAPI.editCharacter(character, this.state.selectableValues);
+      const res = await ServerAPI.editCharacter(character, []);
     } else {
       // Send it to the server!
-      const res = await ServerAPI.createCharacter(
-        character,
-        this.state.selectableValues,
-        this.generateStartingEquipmentData()
-      );
+      const res = await ServerAPI.createCharacter(character, [], this.generateStartingEquipmentData());
       if ("error" in res) {
         console.log("Failed to create character.");
       } else {
@@ -994,6 +1042,21 @@ class ACreateCharacterDialog extends React.Component<Props, State> {
     });
 
     return res;
+  }
+
+  private getSortedSubclasses(): CharacterSubclass[] {
+    const selectedClass = this.props.allCharacterClasses[this.state.class_id];
+
+    if (selectedClass) {
+      const res: CharacterSubclass[] = selectedClass.subclasses.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
+
+      return res;
+    }
+
+    // If no class is selected, then there are no subclasses to select either.
+    return [];
   }
 
   private onEquipmentSetDatabaseClicked(): void {

@@ -44,6 +44,8 @@ import {
   canCharacterDualWield,
   canCharacterEquipShields,
   canCharacterEquipWeapon,
+  getCharacterSupportsV2,
+  getCombinedCharacterClass,
   getMaxBaseArmorForCharacter,
   getPersonalPile,
   isCharacterDualWielding,
@@ -83,8 +85,11 @@ type Props = ReactProps & InjectedProps;
 class AEditEquipmentSubPanel extends React.Component<Props> {
   render(): React.ReactNode {
     const personalPile = getPersonalPile(this.props.character.id);
-    const characterClass = AllClasses[this.props.character.class_name];
-    const canUseShield = characterClass.weaponStyles.includes(WeaponStyle.OneHandAndShield);
+
+    const weaponStyles = getCharacterSupportsV2(this.props.character)
+      ? getCombinedCharacterClass(this.props.character.id).weapon_styles
+      : AllClasses[this.props.character.class_name].weaponStyles;
+    const canUseShield = weaponStyles.includes(WeaponStyle.OneHandAndShield);
 
     return (
       <div className={styles.root}>

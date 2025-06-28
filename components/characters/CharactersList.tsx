@@ -23,7 +23,7 @@ import {
 } from "../FilterDropdowns";
 import { showModal } from "../../redux/modalsSlice";
 import { CreateCharacterDialog } from "./CreateCharacterDialog";
-import { getCharacterSupportsV2 } from "../../lib/characterUtils";
+import { getCharacterSupportsV2, getCombinedCharacterClass } from "../../lib/characterUtils";
 
 interface State {
   filters: FilterValues;
@@ -95,8 +95,11 @@ class ACharactersList extends React.Component<Props, State> {
   private renderCharacterRow(character: CharacterData, index: number): React.ReactNode {
     const selectedClass = character.id === this.props.activeCharacterId ? styles.selected : "";
 
-    const characterClass = AllClasses[character.class_name];
-    const xpCap = characterClass.xpToLevel[character.level] ?? "∞";
+    let xpToLevel = getCharacterSupportsV2(character)
+      ? getCombinedCharacterClass(character.id).xp_to_level
+      : AllClasses[character.class_name].xpToLevel;
+
+    const xpCap = xpToLevel[character.level] ?? "∞";
     const needsLevelUp = character.xp >= xpCap;
     const levelUpClass = needsLevelUp ? styles.levelUp : "";
 

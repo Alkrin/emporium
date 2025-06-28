@@ -3,7 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
 import styles from "./CharacterEquipmentSection.module.scss";
-import { AbilityDefData, CharacterClassv2, CharacterData, ItemData, ItemDefData } from "../../../serverAPI";
+import { AbilityDefData, CharacterData, ItemData, ItemDefData } from "../../../serverAPI";
 import {
   AbilityComponentInstance,
   BonusCalculations,
@@ -29,7 +29,6 @@ interface ReactProps {
 
 interface InjectedProps {
   character: CharacterData;
-  characterClass: CharacterClassv2;
   itemDefs: Record<number, ItemDefData>;
   allItems: Record<number, ItemData>;
   abilityDefs: Record<number, AbilityDefData>;
@@ -121,11 +120,9 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { items: itemDefs, abilities: abilityDefs } = state.gameDefs;
   const { allItems } = state.items;
   const character = state.characters.characters[props.characterId ?? 1] ?? null;
-  const characterClass = state.gameDefs.characterClasses[character?.class_id] ?? null;
   return {
     ...props,
     character,
-    characterClass,
     itemDefs,
     allItems,
     abilityDefs,

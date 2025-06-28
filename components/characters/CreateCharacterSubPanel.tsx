@@ -14,6 +14,7 @@ import ServerAPI, {
   ItemDefData,
   LocationData,
   ProficiencyData,
+  emptyCharacterAbilitySet,
   emptyEquipmentData,
 } from "../../serverAPI";
 import { AllClasses, AllClassesArray } from "../../staticData/characterClasses/AllClasses";
@@ -785,7 +786,7 @@ class ACreateCharacterSubPanel extends React.Component<Props, State> {
       maintenance_paid: 0,
       maintenance_date: getFirstOfThisMonthDateString(),
       xp_reserve: 0,
-      proficiencies: [],
+      abilities: emptyCharacterAbilitySet,
       languages: [],
 
       // EquipmentData values are ignored when editing a character.

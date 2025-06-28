@@ -17,7 +17,6 @@ import {
   AbilityComponentTroopLeadershipBonusStatic,
   AbilityComponentTroopLeadershipBonusStaticData,
 } from "../../../staticData/abilityComponents/AbilityComponentTroopLeadershipBonusStatic";
-import BonusTooltip from "../../BonusTooltip";
 import { TooltipBonusCalculationsPanel } from "../../TooltipBonusCalculationsPanel";
 import {
   AbilityComponentTroopStrategyBonus,

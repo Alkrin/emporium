@@ -2,7 +2,7 @@ import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
 import { connect } from "react-redux";
 import { RootState } from "../../../redux/store";
-import { CharacterClassv2, CharacterData, ItemData, ItemDefData } from "../../../serverAPI";
+import { CharacterData, ItemData, ItemDefData } from "../../../serverAPI";
 import TooltipSource from "../../TooltipSource";
 import styles from "./CharacterCombatSection.module.scss";
 import {
@@ -11,6 +11,7 @@ import {
   getAbilityComponentInstanceSourceName,
   getBonusString,
   getCharacterStatv2,
+  getCombinedCharacterClass,
   getStatBonusForValue,
 } from "../../../lib/characterUtils";
 import { CharacterStat, NaturalWeapon } from "../../../staticData/types/characterClasses";
@@ -32,7 +33,6 @@ interface InjectedProps {
   allItems: Record<number, ItemData>;
   allItemDefs: Record<number, ItemDefData>;
   character: CharacterData;
-  characterClass: CharacterClassv2;
   dispatch?: Dispatch;
 }
 
@@ -174,7 +174,8 @@ class ACharacterCombatSection extends React.Component<Props> {
   }
 
   private getMeleeAttackData(): AttackData[] {
-    const { character, characterClass, allItems } = this.props;
+    const { character, allItems } = this.props;
+    const characterClass = getCombinedCharacterClass(this.props.characterId);
 
     // What is equipped?
     const weapon1 = allItems[character.slot_melee1];
@@ -214,7 +215,8 @@ class ACharacterCombatSection extends React.Component<Props> {
   }
 
   private getRangedAttackData(): AttackData[] {
-    const { character, characterClass, allItems } = this.props;
+    const { character, allItems } = this.props;
+    const characterClass = getCombinedCharacterClass(this.props.characterId);
 
     const attacks: AttackData[] = [];
 
@@ -241,7 +243,8 @@ class ACharacterCombatSection extends React.Component<Props> {
   }
 
   private generateMeleeAttack(weapons: ItemData[], naturalWeapon?: NaturalWeapon): AttackData {
-    const { character, characterClass, allItemDefs, activeComponents } = this.props;
+    const { character, allItemDefs, activeComponents } = this.props;
+    const characterClass = getCombinedCharacterClass(this.props.characterId);
 
     const weapon1 = weapons.length > 0 ? weapons[0] : null;
     const weapon2 = weapons.length > 1 ? weapons[1] : null;
@@ -399,7 +402,8 @@ class ACharacterCombatSection extends React.Component<Props> {
   }
 
   private generateRangedAttack(weapon?: ItemData | NaturalWeapon): AttackData {
-    const { character, characterClass, allItemDefs, activeComponents } = this.props;
+    const { character, allItemDefs, activeComponents } = this.props;
+    const characterClass = getCombinedCharacterClass(this.props.characterId);
 
     function isItem(weapon: ItemData | NaturalWeapon): weapon is ItemData {
       return "def_id" in weapon;
@@ -498,13 +502,11 @@ function mapStateToProps(state: RootState, props: ReactProps): Props {
   const { allItems } = state.items;
   const { items: allItemDefs } = state.gameDefs;
   const character = state.characters.characters[props.characterId ?? 1] ?? null;
-  const characterClass = state.gameDefs.characterClasses[character?.class_id] ?? null;
   return {
     ...props,
     allItems,
     allItemDefs,
     character,
-    characterClass,
   };
 }
 

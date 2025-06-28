@@ -9,6 +9,7 @@ import {
   AbilityComponentInstance,
   BonusCalculations,
   getAbilityComponentInstanceSourceName,
+  getCombinedCharacterClass,
 } from "../../../lib/characterUtils";
 import { SavingThrowType, sortedSavingThrowTypes } from "../../../staticData/types/characterClasses";
 import { TooltipBonusCalculationsPanel } from "../../TooltipBonusCalculationsPanel";
@@ -28,7 +29,6 @@ interface ReactProps {
 
 interface InjectedProps {
   character: CharacterData;
-  characterClass: CharacterClassv2;
   dispatch?: Dispatch;
 }
 
@@ -47,7 +47,9 @@ class ACharacterSavingThrowsSection extends React.Component<Props> {
 
   private renderThrowRow(throwType: SavingThrowType, index: number): React.ReactNode {
     const calc: BonusCalculations = this.getBonusCalculations(throwType);
-    const baseThrow = this.props.characterClass.saving_throws[throwType][this.props.character.level - 1];
+    const characterClass = getCombinedCharacterClass(this.props.characterId);
+
+    const baseThrow = characterClass.saving_throws[throwType][this.props.character.level - 1];
     // Bonuses effectively reduce the target value, so we subtract instead of adding.
     const finalThrow = baseThrow - calc.bonus;
 
@@ -124,12 +126,10 @@ class ACharacterSavingThrowsSection extends React.Component<Props> {
 
 function mapStateToProps(state: RootState, props: ReactProps): Props {
   const character = state.characters.characters[props.characterId ?? 1] ?? null;
-  const characterClass = state.gameDefs.characterClasses[character?.class_id ?? 0] ?? null;
 
   return {
     ...props,
     character,
-    characterClass,
   };
 }
 

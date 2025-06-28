@@ -1,0 +1,167 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-top: 1vmin;
+  padding: 0.5vmin 0.5vmin 0;
+  background-color: #222;
+  border-radius: 0.5vmin;
+}
+
+.normalText {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.subText {
+  font-size: 1rem;
+  color: white;
+}
+
+.valueText {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.growingColumn {
+  @extend .column;
+  flex-grow: 1;
+}
+
+.centeredRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.title {
+  @extend .normalText;
+  flex-grow: 1;
+}
+
+.editButton {
+  margin-left: 0.5vmin;
+}
+
+.infoAsterisk {
+  font-size: 0.8rem;
+  color: lime;
+  flex-shrink: 0;
+}
+
+.horizontalLine {
+  background-color: yellow;
+  height: 1px;
+  margin-bottom: 0.5vmin;
+}
+
+.listRow {
+  margin-bottom: 0.5vmin;
+  padding: 0vmin 0.5vmin;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+
+  &:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.3);
+  }
+}
+
+.listRowMulti {
+  @extend .listRow;
+  margin-left: 1vmin;
+  background-color: rgba(150, 150, 255, 0.1);
+}
+
+.listName {
+  flex-grow: 1;
+  font-size: 1rem;
+  color: white;
+  text-align: left;
+  text-overflow: ellipsis;
+  width: 15vmin;
+}
+
+.tooltipRoot {
+  max-width: 45vmin;
+}
+
+.tooltipHeader {
+  @extend .row;
+  justify-content: space-between;
+}
+
+.tooltipTitle {
+  font-size: 1rem;
+  color: wheat;
+}
+
+.tooltipValue {
+  font-size: 1rem;
+  color: yellow;
+}
+
+.tooltipText {
+  font-size: 0.8rem;
+  color: white;
+  margin-top: 0.5vmin;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.tooltipSubtext {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: gray;
+  margin-top: 0.5vmin;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.tooltipDivider {
+  background-color: wheat;
+  height: 1px;
+  width: 100%;
+}
+
+.tooltipSourceRow {
+  @extend .row;
+  margin-top: 0.5vmin;
+}
+
+.tooltipSource {
+  flex-grow: 1;
+  font-size: 0.8rem;
+  color: gray;
+  white-space: pre-wrap;
+}
+
+.tooltipCondition {
+  margin-left: 1vmin;
+  font-size: 0.8rem;
+  color: #448888;
+  white-space: pre-wrap;
+}
+
+.tooltipSourceValue {
+  margin-left: 0.5vmin;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 0, 0.5);
+}
+
+.tooltipConditionalHeader {
+  margin-top: 1vmin;
+  font-size: 0.8rem;
+  color: wheat;
+}
